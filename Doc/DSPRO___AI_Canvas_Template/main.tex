@@ -1,0 +1,79 @@
+\documentclass[11pt, a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{margin=0.8in, top=0.5in}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage{graphicx} % Required for the logo
+
+% --- Custom Definitions ---
+\titleformat{\section}{\large\bfseries\color{blue}}{}{0em}{}
+\renewcommand{\arraystretch}{1.8} 
+
+\begin{document}
+
+% --- Header with Logo and Title ---
+\begin{minipage}{0.7\textwidth}
+    {\huge \bfseries DSPRO1/2 AI Project Canvas} \\[0.2cm]
+    {\large Spring 2026}
+\end{minipage}
+\begin{minipage}{0.25\textwidth}
+    \raggedleft
+    % Ensure your logo file is named 'hslu-logo' or change the name below
+    \includegraphics[width=5cm]{hslu_logo.png} 
+\end{minipage}
+
+\vspace{0.5cm}
+\rule{\textwidth}{1pt}
+\vspace{0.5cm}
+
+\section*{Project Information}
+\begin{tabularx}{\textwidth}{l X}
+    \textbf{Project Name:} & \textcolor{gray}{[Insert your project title here]} \\
+    \textbf{Team Members:} & \textcolor{gray}{[Insert names here]} \\
+\end{tabularx}
+
+\section*{Strategic Planning Tool}
+\begin{table}[h!]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|X|X|}
+        \hline
+        \textbf{Box 1: Problem \& Stakeholders} \newline 
+        \textcolor{red}{\scriptsize Identify the specific user and the decision this AI informs. Define one main outcome rather than vague aspirations[cite: 2360].} & 
+        \textbf{Box 2: Context \& Project Type} \newline 
+        \textcolor{red}{\scriptsize Classify as Research (truth-seeking), Tech Development (usable prototype), or Product work (user value).} \\ \hline
+        
+        \textbf{Box 3: Describe the Data} \newline 
+        \textcolor{red}{\scriptsize Specify source (internal/external), formats (structured/unstructured), and quality dimensions (completeness, accuracy, timeliness).} & 
+        \textbf{Box 4: ML Approach} \newline 
+        \textcolor{red}{\scriptsize Select method family: Supervised (Classification/Regression), Unsupervised (Clustering), RL, or GenAI. Justify why it fits the data[cite: 507].} \\ \hline
+        
+        \textbf{Box 5: ML Pipeline (DSPRO2)} \newline 
+        \textcolor{red}{\scriptsize Map the end-to-end flow: Collection $\rightarrow$ Preparation $\rightarrow$ Model Training $\rightarrow$ Evaluation $\rightarrow$ Deployment.} & 
+        \textbf{Box 6: Success Definition} \newline 
+        \textcolor{red}{\scriptsize Pick one technical task metric (e.g., F1-score, MAE) and one stakeholder KPI (e.g., time saved, revenue).} \\ \hline
+        
+        \textbf{Box 7: Risks \& Guardrails} \newline 
+        \textcolor{red}{\scriptsize Assess risk level (EU AI Act). Address potential bias or privacy issues and define human-in-the-loop oversight.} & 
+        \textbf{Box 8: Infrastructure (DSPRO2)} \newline 
+        \textcolor{red}{\scriptsize Strategy: Cloud (scalability/speed) vs. On-Premises (control/governance). Justify based on workload.} \\ \hline
+        
+        \textbf{Box 9: Costs \& Timeline (DSPRO2)} \newline 
+        \textcolor{red}{\scriptsize Estimate GPU compute, storage, and data labeling costs[cite: 2506]. Provide a rough timeline (e.g., 6--12 months).} & 
+        \textbf{Box 10: Team \& Next Steps (DSPRO2)} \newline 
+        \textcolor{red}{\scriptsize Assign roles (Project Owner, Domain Expert, ML Engineer)[cite: 2395]. Define the first concrete action to begin execution.} \\ \hline
+    \end{tabularx}
+\end{table}
+
+\section*{Submission Checklist}
+\begin{itemize}
+    \item \textbf{DSPRO1 Submission:} Requires Boxes 1--4, 6, and 7 completed. Focus on project scoping and data provenance.
+    \item \textbf{DSPRO2 Submission:} Full 10-box completion required. Focus on implementation strategy and technical pipeline.
+\end{itemize}
+
+\end{document}

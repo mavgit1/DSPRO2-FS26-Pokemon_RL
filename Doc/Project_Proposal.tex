@@ -1,0 +1,152 @@
+\documentclass[11pt,a4paper]{article}
+
+% -------------------------------------------------
+% HSLU-like Proposal Template (DSPRO2 FS25)
+% -------------------------------------------------
+
+% ---------- Encoding & Typography ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% ---------- Page Layout ----------
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{setspace}
+\setstretch{1.15}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+
+% ---------- Colors ----------
+\usepackage{xcolor}
+\definecolor{hsluRed}{HTML}{E30613}
+\definecolor{hsluDark}{HTML}{222222}
+\definecolor{hsluGray}{HTML}{666666}
+\definecolor{lineGray}{HTML}{D9D9D9}
+\definecolor{boxGray}{HTML}{F5F5F5}
+
+% ---------- Graphics & Tables ----------
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+
+% ---------- Headers/Footers ----------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Hochschule Luzern \textbar\ Informatik}
+\rhead{\small DSPRO2 FS25 Proposal}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{lineGray}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\footrulewidth}{0pt}
+
+% ---------- Section Style ----------
+\usepackage{titlesec}
+\titleformat{\section}
+  {\Large\bfseries\color{hsluDark}}
+  {\thesection}{0.6em}{}
+\titleformat{\subsection}
+  {\normalsize\bfseries\color{hsluDark}}
+  {\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.4em}
+\titlespacing*{\subsection}{0pt}{0.8em}{0.2em}
+
+% ---------- Hyperlinks ----------
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Utility ----------
+\newcommand{\blankline}{\vspace{0.2em}{\color{lineGray}\hrule}\vspace{0.55em}}
+\newcommand{\fieldlabel}[1]{\textbf{#1}\vspace{0.15em}}
+\newcommand{\hsluwordmark}{%
+  {\fontsize{22}{24}\selectfont\bfseries\textcolor{black}{HSLU}}%
+}
+\newcommand{\proposaltype}{%
+  {\fontsize{13}{15}\selectfont\bfseries Project Proposal}
+}
+\newcommand{\moduleline}{%
+  {\fontsize{11}{13}\selectfont DSPRO1/2}
+}
+
+\begin{document}
+
+% =========================
+% Cover / Title Area
+% =========================
+\begin{minipage}[t]{0.62\textwidth}
+    \hsluwordmark\\[-1mm]
+    {\small\color{hsluGray}Hochschule Luzern}\\[-0.5mm]
+    {\small\color{hsluGray}Departement Informatik}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.35\textwidth}
+    \raggedleft
+    \proposaltype\\[1mm]
+    \moduleline
+\end{minipage}
+
+\vspace{8mm}
+{\color{hsluGray}\rule{\textwidth}{1.2pt}}
+
+\vspace{8mm}
+
+\begin{center}
+    {\LARGE\bfseries\color{hsluDark}Proposal for Data Science Project}\\[1mm]
+    {\large\color{hsluGray}Semester: FS26}
+\end{center}
+
+\vspace{8mm}
+
+% =========================
+% Metadata Box
+% =========================
+\colorbox{boxGray}{%
+\parbox{\dimexpr\linewidth-2\fboxsep\relax}{
+\vspace{1mm}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\linewidth}{>{\bfseries}p{0.26\linewidth} X}
+Project Title & \\
+Course / Module & DSPRO1/2 FS26 \\
+Team Members & \\
+Supervisor / Coach & \\
+Date of Submission & \\
+\end{tabularx}
+\vspace{1mm}
+}
+}
+
+\vspace{1em}
+
+% =========================
+% Main Sections
+% =========================
+\section{Short Project Description}
+Summarize the problem, motivation, project objective, and expected impact.
+
+<ADD YOUR TEXT>
+
+\section{Data Description}
+Describe the data source(s), volume, feature types, target variable(s), preprocessing needs, and quality constraints.
+
+<ADD YOUR TEXT>
+
+\section{Cloud Service Integration}
+Specify the planned cloud components (e.g., storage, compute, API services, deployment) and the rationale for each (if relevant).
+
+<ADD YOUR TEXT>
+
+\section{Kanban Tool}
+State which tool will be used (e.g., Jira, Trello, GitHub Projects), board structure, and your team workflow.
+
+<ADD YOUR TEXT>
+
+\section{Experiment Tracking Tool}
+Indicate the tracking solution (e.g., MLflow, Weights \& Biases) and list what will be tracked (params, metrics, artifacts, models).
+
+<ADD YOUR TEXT>
+
+
+\end{document}
