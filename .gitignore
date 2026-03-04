@@ -1,0 +1,5 @@
+src/examples/__pycache__/*
+
+
+.venv/*
+
