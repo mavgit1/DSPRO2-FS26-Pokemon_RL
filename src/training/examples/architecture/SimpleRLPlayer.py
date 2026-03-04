@@ -5,6 +5,8 @@ from poke_env.battle import AbstractBattle
 from poke_env.environment.env import ObsType
 from poke_env.data import GenData
 
+# Poke-env example player from their docs
+
 class SimpleRLPlayer(SinglesEnv):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
