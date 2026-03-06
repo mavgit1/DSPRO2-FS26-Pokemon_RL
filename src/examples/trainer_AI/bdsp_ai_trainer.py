@@ -1,0 +1,1 @@
+# For a custom trainer AI further down the line. (Heuristics)
