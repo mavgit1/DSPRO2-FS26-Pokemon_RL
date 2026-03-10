@@ -5,3 +5,6 @@ src/examples/__pycache__/*
 src/training/utilities/__pycache__/ray_embedding.cpython-313.pyc
 src/training/architecture/__pycache__/ray_transformer1.cpython-313.pyc
 pokemon-showdown/*
+showdown_server_*.log
+*.log
+*.pyc
