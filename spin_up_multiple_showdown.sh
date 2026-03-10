@@ -31,8 +31,9 @@ for ((i=0; i<N_SERVERS; i++)); do
     
     echo "   Starting server on port $port..."
     
-    # Start in background, logging to file
-    (cd "$SHOWDOWN_DIR" && node pokemon-showdown $port > "../showdown_server_$port.log" 2>&1) &
+    # Start in background, logging to file.
+    # Use the same startup mode documented in README plus per-process port override.
+    (cd "$SHOWDOWN_DIR" && node pokemon-showdown start --no-security --port "$port" > "../showdown_server_$port.log" 2>&1) &
     pids+=($!)
 done
 

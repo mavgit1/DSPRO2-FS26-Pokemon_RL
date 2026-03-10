@@ -135,8 +135,9 @@ class PokemonTransformerModel(nn.Module):
             nn.Linear(256, 1),
         )
         
-        # Store value for value_function()
-        self._value_out = None
+        # Store value for value_function().
+        # RLlib can call value_function() before forward() in some code paths.
+        self._value_out: Optional[TensorType] = None
     
     def get_initial_state(self) -> Dict[str, TensorType]:
         """Get initial LSTM hidden state."""
@@ -149,6 +150,9 @@ class PokemonTransformerModel(nn.Module):
     
     def value_function(self) -> TensorType:
         """Return value function output."""
+        if self._value_out is None:
+            # Safe fallback for early/atypical call order in RLlib.
+            return torch.zeros(1, device=self.input_proj.weight.device)
         return self._value_out.flatten()
     
     def _embed_obs(self, obs_dict: Dict[str, TensorType]) -> TensorType:

@@ -125,6 +125,46 @@ class PokemonBattleEnv(SinglesEnv):
             victory_value=self.reward_config.victory_reward,
         )
 
+    @staticmethod
+    def order_to_action(order, battle, fake: bool = False, strict: bool = True):
+        """
+        Convert a BattleOrder to action index with bounded fallbacks.
+
+        poke-env's default strict=False path can recurse indefinitely if random
+        fallback orders keep failing conversion. We cap retries and then choose a
+        guaranteed legal action id by probing action_to_order.
+        """
+        try:
+            return SinglesEnv.order_to_action(order, battle, fake=fake, strict=True)
+        except ValueError:
+            if strict:
+                raise
+
+        # Retry with random legal-looking orders a fixed number of times.
+        max_retries = 5
+        for _ in range(max_retries):
+            random_order = RandomPlayer.choose_random_singles_move(battle)
+            try:
+                return SinglesEnv.order_to_action(
+                    random_order, battle, fake=fake, strict=True
+                )
+            except ValueError:
+                continue
+
+        # Hard fallback: pick the first action that converts legally.
+        # 26 covers up to gen9 singles action size; gen8 uses 22.
+        for action in range(26):
+            try:
+                SinglesEnv.action_to_order(
+                    np.int64(action), battle, fake=fake, strict=True
+                )
+                return np.int64(action)
+            except ValueError:
+                continue
+
+        # If no legal action could be verified, return default action.
+        return np.int64(-2)
+
 
 # =============================================================================
 # REWARD FUNCTION
