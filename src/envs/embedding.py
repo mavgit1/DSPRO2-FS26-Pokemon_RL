@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Any
 # Poke-env imports (only for type hints and enums)
 from poke_env.battle.abstract_battle import AbstractBattle
 from poke_env.battle.pokemon import Pokemon
+from poke_env.environment.singles_env import SinglesEnv
 from poke_env.battle.weather import Weather
 from poke_env.battle.field import Field
 from poke_env.battle.side_condition import SideCondition
@@ -380,47 +381,28 @@ def get_action_mask(battle: AbstractBattle) -> np.ndarray:
     Returns:
         np.ndarray of shape (22,) with 1.0 for valid actions, 0.0 for invalid
     """
-    mask = np.zeros(22, dtype=np.float32)
-    
-    # Valid switches (slots 0-5)
-    available_switches = battle.available_switches if battle.available_switches else []
-    for i in range(min(len(available_switches), 6)): 
-        pass
-    
-    if battle.available_switches:
-        for switch_mon in battle.available_switches:
-            try:
-                idx = list(battle.team.values()).index(switch_mon)
-                mask[idx] = 1.0
-            except ValueError:
-                pass
-    
-    # Valid moves (slots 6-9)
-    available_moves = battle.available_moves if battle.available_moves else []
-    for i in range(min(len(available_moves), 4)):
-        mask[6 + i] = 1.0
+    # For gen8 singles the action space is 22:
+    # 0-5 switches, 6-9 moves, 10-13 mega, 14-17 z-move, 18-21 dynamax.
+    # Use poke-env's own converter so mask indices exactly match env semantics.
+    action_space_n = 22
+    mask = np.zeros(action_space_n, dtype=np.float32)
 
-    # If no moves available and no switches (shouldn't happen normally), enable struggle at slot 6
-    if len(available_moves) == 0 and len(available_switches) == 0:
+    for action in range(action_space_n):
+        try:
+            SinglesEnv.action_to_order(
+                np.int64(action),
+                battle,
+                fake=False,
+                strict=True,
+            )
+            mask[action] = 1.0
+        except ValueError:
+            continue
+
+    # Safety fallback for rare edge cases (prevents all-zero mask instability).
+    if not mask.any():
         mask[6] = 1.0
-    
-    # Mega/Dynamax/Z-move (slots 10-21)
-    can_mega = battle.can_mega_evolve if hasattr(battle, 'can_mega_evolve') else False
-    can_dynamax = battle.can_dynamax if hasattr(battle, 'can_dynamax') else False
-    can_zmove = battle.can_z_move if hasattr(battle, 'can_z_move') else False
-    
-    if can_mega:
-        for i in range(min(len(available_moves), 4)):
-            mask[10 + i] = 1.0
-            
-    if can_zmove:
-        for i in range(min(len(available_moves), 4)):
-            mask[14 + i] = 1.0
-            
-    if can_dynamax:
-        for i in range(min(len(available_moves), 4)):
-            mask[18 + i] = 1.0
-    
+
     return mask
 
 
