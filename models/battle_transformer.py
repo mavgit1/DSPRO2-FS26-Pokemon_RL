@@ -103,7 +103,9 @@ class PokemonTransformerModel(nn.Module):
         )
         
         # -----------------------------------------------------------------
-        # LSTM for Memory (Optional)
+        # LSTM for Memory (Optional) currently doesnt work, issue with rllib
+        # Later a form of memory should be implemented because pokemon
+        # battles have multi turn moves.
         # -----------------------------------------------------------------
         if self.use_lstm:
             self.lstm = nn.LSTM(
