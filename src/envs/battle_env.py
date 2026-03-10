@@ -31,7 +31,7 @@ def get_observation_space() -> gym.spaces.Dict:
     return gym.spaces.Dict({
         "obs": gym.spaces.Box(
             low=-1.0,
-            high=3.0,
+            high=10.0,
             shape=(NUM_TOKENS, TOKEN_DIM),
             dtype=np.float32,
         ),

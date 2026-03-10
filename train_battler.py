@@ -9,6 +9,7 @@ Quick start:
     python train.py --preset quick            # Quick test run
     python train.py --timesteps 1000000       # Override timesteps
     python train.py --num-servers 4           # Use 4 Showdown servers
+    python train.py --use-lstm                # Enable recurrent model
 
 Requirements:
     - Pokemon Showdown server(s) running
@@ -70,6 +71,16 @@ def main():
         action="store_true",
         help="Enable debug logging"
     )
+
+    # Recurrent model
+    parser.add_argument(
+        "--use-lstm",
+        action="store_true",
+        help=(
+            "Enable recurrent LSTM state path. Disabled by default because "
+            "the current RLlib connector setup is non-recurrent."
+        ),
+    )
     
     args = parser.parse_args()
     
@@ -78,7 +89,8 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
     
     # Import and run
-    from src.training import train
+    from src.config.TM_optimal_config import get_config
+    from src.training import PokemonTrainer
     
     logger.info("=" * 60)
     logger.info("Pokemon RL Training")
@@ -86,16 +98,24 @@ def main():
     logger.info(f"Preset: {args.preset}")
     logger.info(f"Num servers: {args.num_servers}")
     logger.info(f"Start port: {args.start_port}")
+    logger.info(f"Use LSTM: {args.use_lstm}")
     if args.timesteps:
         logger.info(f"Override timesteps: {args.timesteps:,}")
     logger.info("=" * 60)
-    
-    train(
-        preset=args.preset,
+
+    config = get_config(args.preset)
+    if args.timesteps:
+        config.total_timesteps = args.timesteps
+
+    # Keep feed-forward by default to avoid RLlib recurrent connector errors.
+    config.model.use_lstm = args.use_lstm
+
+    trainer = PokemonTrainer(
+        config=config,
         num_servers=args.num_servers,
         start_port=args.start_port,
-        total_timesteps=args.timesteps,
     )
+    trainer.train()
 
 
 if __name__ == "__main__":

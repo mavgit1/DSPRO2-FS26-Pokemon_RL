@@ -56,7 +56,8 @@ class PokemonTransformerModel(nn.Module):
         # Dimensions
         self.num_tokens = cfg["num_tokens"]
         self.token_dim = cfg["token_dim"]
-        self.max_id_val = cfg["max_id_val"]
+        # +1 because hashed IDs are in [1, max_id_val] and 0 is padding.
+        self.max_id_val = cfg["max_id_val"] + 1
         self.embedding_dim = cfg["embedding_dim"]
         self.hidden_dim = cfg["hidden_dim"]
         self.num_heads = cfg["num_heads"]
@@ -243,6 +244,25 @@ class PokemonTransformerModel(nn.Module):
         """
         obs_dict = input_dict["obs"]
         action_mask = obs_dict.get("action_mask", None)
+        base_obs = obs_dict["obs"]
+        has_time_dim = base_obs.dim() == 4
+        batch_size = None
+        time_size = None
+
+        # RLlib can provide recurrent batches as [B, T, ...]. The transformer
+        # expects [batch_like, tokens, feat], so flatten B*T before encoding.
+        if has_time_dim:
+            batch_size, time_size = base_obs.shape[:2]
+            flat_obs_dict = {}
+            for key, value in obs_dict.items():
+                if torch.is_tensor(value) and value.dim() >= 3 and value.shape[:2] == (batch_size, time_size):
+                    flat_obs_dict[key] = value.reshape(batch_size * time_size, *value.shape[2:])
+                else:
+                    flat_obs_dict[key] = value
+            obs_dict = flat_obs_dict
+
+            if action_mask is not None and torch.is_tensor(action_mask) and action_mask.dim() == 3:
+                action_mask = action_mask.reshape(batch_size * time_size, action_mask.shape[-1])
         
         # Embed observations
         x = self._embed_obs(obs_dict)
@@ -255,7 +275,28 @@ class PokemonTransformerModel(nn.Module):
         
         # LSTM (if enabled)
         if self.use_lstm and state and "h" in state and "c" in state:
-            cls_token, new_state = self._apply_lstm(cls_token, state)
+            if has_time_dim and batch_size is not None and time_size is not None:
+                cls_token_seq = cls_token.reshape(batch_size, time_size, cls_token.shape[-1])
+                h, c = state["h"], state["c"]
+                if h.dim() == 2:
+                    h = h.unsqueeze(0)
+                if c.dim() == 2:
+                    c = c.unsqueeze(0)
+                # RLlib may provide [B, 1, H]; PyTorch LSTM expects [1, B, H].
+                if h.dim() == 3 and h.shape[0] != 1 and h.shape[1] == 1:
+                    h = h.transpose(0, 1)
+                if c.dim() == 3 and c.shape[0] != 1 and c.shape[1] == 1:
+                    c = c.transpose(0, 1)
+                # Last-resort alignment against the current batch dimension.
+                if h.dim() == 3 and h.shape[1] != cls_token_seq.shape[0] and h.shape[0] == cls_token_seq.shape[0]:
+                    h = h.transpose(0, 1)
+                if c.dim() == 3 and c.shape[1] != cls_token_seq.shape[0] and c.shape[0] == cls_token_seq.shape[0]:
+                    c = c.transpose(0, 1)
+                lstm_out, (new_h, new_c) = self.lstm(cls_token_seq, (h, c))
+                cls_token = lstm_out.reshape(batch_size * time_size, lstm_out.shape[-1])
+                new_state = {"h": new_h.squeeze(0), "c": new_c.squeeze(0)}
+            else:
+                cls_token, new_state = self._apply_lstm(cls_token, state)
         else:
             new_state = state if state else self.get_initial_state()
         
@@ -361,6 +402,16 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
     def compute_values(self, batch, embeddings=None):
         """Compute value function for GAE."""
         obs_dict = batch[Columns.OBS]
+        base_obs = obs_dict["obs"]
+        if base_obs.dim() == 4:
+            b, t = base_obs.shape[:2]
+            flat_obs_dict = {}
+            for key, value in obs_dict.items():
+                if torch.is_tensor(value) and value.dim() >= 3 and value.shape[:2] == (b, t):
+                    flat_obs_dict[key] = value.reshape(b * t, *value.shape[2:])
+                else:
+                    flat_obs_dict[key] = value
+            obs_dict = flat_obs_dict
         
         x = self.model._embed_obs(obs_dict)
         x = self.model._transformer_forward(x)

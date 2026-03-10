@@ -9,3 +9,4 @@ showdown_server_*.log
 *.log
 *.pyc
 checkpoints/*
+logs/*
