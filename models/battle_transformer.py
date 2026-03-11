@@ -22,7 +22,7 @@ DEFAULT_MODEL_CONFIG = {
     "num_transformer_layers": 2,
     "dropout": 0.1,
     "lstm_hidden": 256,
-    "use_lstm": True,
+    "use_lstm": False,
 }
 
 
@@ -41,8 +41,6 @@ class PokemonTransformerModel(nn.Module):
     
     def __init__(
         self,
-        obs_space,
-        action_space,
         num_outputs: int,
         model_config: ModelConfigDict,
         name: str,

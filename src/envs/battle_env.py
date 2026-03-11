@@ -167,7 +167,7 @@ class PokemonBattleEnv(SinglesEnv):
 
 
 # =============================================================================
-# REWARD FUNCTION
+# REWARD FUNCTION todo: create more for different curriculum stages
 # =============================================================================
 
 def compute_reward(battle: AbstractBattle, config: RewardConfig) -> float:
