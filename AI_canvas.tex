@@ -1,0 +1,80 @@
+\documentclass[11pt, a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{margin=0.8in, top=0.5in}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage{graphicx} % Required for the logo
+
+% --- Custom Definitions ---
+\titleformat{\section}{\large\bfseries\color{blue}}{}{0em}{}
+\renewcommand{\arraystretch}{1.8} 
+
+\begin{document}
+
+% --- Header with Logo and Title ---
+\begin{minipage}{0.7\textwidth}
+    {\huge \bfseries DSPRO1/2 AI Project Canvas} \\[0.2cm]
+    {\large Spring 2026}
+\end{minipage}
+
+\begin{minipage}{0.25\textwidth}
+    \raggedleft
+    % Ensure your logo file is named 'hslu-logo' or change the name below
+    \includegraphics[width=5cm]{hslu_logo.png} 
+\end{minipage}
+
+\vspace{0.5cm}
+\rule{\textwidth}{1pt}
+\vspace{0.5cm}
+
+\section*{Project Information}
+\begin{tabularx}{\textwidth}{l X}
+    \textbf{Project Name:} & Reproducible RL Benchmark based on Pokémon Nuzlocke \\
+    \textbf{Team Members:} & Tristan Muri, Marvin Hueber, Viacheslav Godovskii, Alex Liubov \\
+\end{tabularx}
+
+\section*{Strategic Planning Tool}
+\begin{table}[h!]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|X|X|}
+        \hline
+        \textbf{Box 1: Problem \& Stakeholders} \newline 
+        Stakeholders: Researchers and educators. Decision informed: Generalize sequential decision-making under uncertainty, permanent consequences, and constraints. Main outcome: A reusable experimental benchmark environment for evaluating RL algorithms. & 
+        \textbf{Box 2: Context \& Project Type} \newline 
+        Research and Tech Development. Developing a reusable experimental framework to study generalization, robustness, and risk-aware decision making in RL. \\ \hline
+        
+        \textbf{Box 3: Describe the Data} \newline 
+        Source: Pokémon Showdown engine accessed via \texttt{poke-env}. Formats: Battle state vectors, configuration files (gauntlet specifications), and wikis. Translated into fixed-size numeric embedding vectors. Quality: High precision simulation data from Showdown engine. & 
+        \textbf{Box 4: ML Approach} \newline 
+        Reinforcement Learning (e.g., Curriculum Learning) using Transformers or MLPs. Justification: Sequential decision-making problem with substantial stochasticity where deterministic solutions cannot be simply memorized, due to state space.\\ \hline
+        
+        \textbf{Box 5: ML Pipeline (DSPRO2)} \newline 
+        Collection (Showdown engine logs via \texttt{poke-env}) $\rightarrow$ Preparation (Vector embeddings creation) $\rightarrow$ Model Training (\texttt{Ray RLlib}) $\rightarrow$ Evaluation (Consistent evaluation protocols/metrics) $\rightarrow$ Iterate. & 
+        \textbf{Box 6: Success Definition} \newline 
+        Technical metric: Mean episode reward, policy/value losses, entropy. \newline Stakeholder KPI: Gauntlet completion rate, survival rate, wipe probability, average number of Pokémon lost. \\ \hline
+        
+        \textbf{Box 7: Risks \& Guardrails} \newline 
+        Minimal risk regarding EU AI Act rules. No privacy data or biased decisions affecting humans (game simulation only). Guardrails involve robust curriculum stages to ensure gradual, verifiable learning rather than overfitting. & 
+        \textbf{Box 8: Infrastructure (DSPRO2)} \newline 
+        Primary development locally, scaling training locally or HSLU GPUhub computing resources. Employs memory optimization techniques (Ray Plasma). MLFlow for experiment tracking. \\ \hline
+        
+        \textbf{Box 9: Costs \& Timeline (DSPRO2)} \newline 
+        Costs: Electricity and working hours. \newline Timeline: DSPRO2 FS26 (approx. 10--12 weeks). & 
+        \textbf{Box 10: Team \& Next Steps (DSPRO2)} \newline 
+        Team setup via GitHub Projects (Backlog, To Do, In Progress, Review, Done). Next Step: Start team building agent architecture, \texttt{poke-env} bridging, setting up curriculum and basic Transformer policy training loops. \\ \hline
+    \end{tabularx}
+\end{table}
+
+\section*{Submission Checklist}
+\begin{itemize}
+    \item \textbf{DSPRO1 Submission:} Requires Boxes 1--4, 6, and 7 completed. Focus on project scoping and data provenance.
+    \item \textbf{DSPRO2 Submission:} Full 10-box completion required. Focus on implementation strategy and technical pipeline.
+\end{itemize}
+
+\end{document}

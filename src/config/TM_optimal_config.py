@@ -1,0 +1,243 @@
+from dataclasses import dataclass, field
+from typing import List, Optional, Dict, Any
+from pathlib import Path
+
+
+@dataclass
+class ModelConfig:
+    """Model architecture configuration."""
+    
+    # Embedding dimensions
+    num_tokens: int = 13
+    token_dim: int = 164
+    max_id_val: int = 20000
+    embedding_dim: int = 16  # For categorical embeddings
+    
+    # Transformer
+    hidden_dim: int = 256
+    num_heads: int = 4
+    num_transformer_layers: int = 2
+    dropout: float = 0.1
+    
+    # LSTM (for memory across turns)
+    lstm_hidden: int = 256
+    use_lstm: bool = True
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "num_tokens": self.num_tokens,
+            "token_dim": self.token_dim,
+            "max_id_val": self.max_id_val,
+            "embedding_dim": self.embedding_dim,
+            "hidden_dim": self.hidden_dim,
+            "num_heads": self.num_heads,
+            "num_transformer_layers": self.num_transformer_layers,
+            "dropout": self.dropout,
+            "lstm_hidden": self.lstm_hidden,
+            "use_lstm": self.use_lstm,
+        }
+
+
+@dataclass
+class PPOConfig:
+    """Standard PPO hyperparameters."""
+    
+    # Learning
+    lr: float = 2.5e-4              
+    
+    # Discount and GAE
+    gamma: float = 0.99             
+    lambda_: float = 0.95           
+    
+    # PPO clipping
+    clip_param: float = 0.2         
+    
+    # Entropy bonus (exploration)
+    entropy_coeff: float = 0.01     
+    
+    # Value function
+    vf_loss_coeff: float = 0.5      
+    vf_clip_param: float = 10.0     
+    
+    # Gradient clipping
+    grad_clip: float = 0.5          
+    
+    # Batch sizes
+    train_batch_size: int = 4096    
+    sgd_minibatch_size: int = 128   
+    num_sgd_iter: int = 10          
+
+
+@dataclass
+class EnvironmentConfig:
+    """Environment configuration."""
+    
+    # Battle settings
+    battle_format: str = "gen8randombattle"
+    
+    # Server settings
+    showdown_host: str = "localhost"
+    start_port: int = 8000
+    
+    # Parallelism
+    num_workers: int = 8
+    num_envs_per_worker: int = 4
+
+
+@dataclass
+class RewardConfig:
+    """Reward function configuration."""
+    
+    # Major events
+    victory_reward: float = 100.0
+    defeat_penalty: float = -100.0
+    
+    # HP-based rewards
+    hp_value_weight: float = 1.0
+    
+    # Fainting rewards
+    fainted_value: float = 2.0      # Reward for knocking out opponent
+    fainted_penalty: float = 2.0    # Penalty for own Pokemon fainting
+    
+    # Progress rewards
+    step_penalty: float = 0.0       # Small penalty per step to encourage efficiency
+
+
+@dataclass
+class TrainingConfig:
+    """Main training configuration."""
+    
+    # Duration
+    total_timesteps: int = 50_000_000
+    
+    # Checkpointing
+    checkpoint_dir: str = "checkpoints"
+    checkpoint_freq: int = 500_000      # Save every N timesteps
+    keep_checkpoints_num: int = 5
+    
+    # Logging
+    log_dir: str = "logs"
+    print_freq: int = 100_000           # Print every N timesteps
+    
+    # Hardware
+    num_gpus: float = 1.0
+    num_gpus_per_worker: float = 0.0
+    
+    # Curriculum
+    use_curriculum: bool = True
+    curriculum_stages: List[str] = field(
+        default_factory=lambda: ["easy", "medium", "hard"]
+    )
+    curriculum_interval: int = 1_000_000   # Advance stage every N steps
+    
+    # Evaluation
+    evaluation_interval: int = 100_000
+    evaluation_duration: int = 100
+    
+    # Sub-configs
+    model: ModelConfig = field(default_factory=ModelConfig)
+    ppo: PPOConfig = field(default_factory=PPOConfig)
+    env: EnvironmentConfig = field(default_factory=EnvironmentConfig)
+    reward: RewardConfig = field(default_factory=RewardConfig)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "total_timesteps": self.total_timesteps,
+            "checkpoint_dir": self.checkpoint_dir,
+            "checkpoint_freq": self.checkpoint_freq,
+            "num_gpus": self.num_gpus,
+            "use_curriculum": self.use_curriculum,
+            "curriculum_stages": self.curriculum_stages,
+            "model": self.model.to_dict(),
+            "ppo": {
+                "lr": self.ppo.lr,
+                "gamma": self.ppo.gamma,
+                "lambda_": self.ppo.lambda_,
+                "clip_param": self.ppo.clip_param,
+                "entropy_coeff": self.ppo.entropy_coeff,
+                "vf_loss_coeff": self.ppo.vf_loss_coeff,
+                "train_batch_size": self.ppo.train_batch_size,
+                "sgd_minibatch_size": self.ppo.sgd_minibatch_size,
+                "num_sgd_iter": self.ppo.num_sgd_iter,
+            },
+            "env": {
+                "battle_format": self.env.battle_format,
+                "num_workers": self.env.num_workers,
+                "num_envs_per_worker": self.env.num_envs_per_worker,
+            },
+            "reward": {
+                "victory_reward": self.reward.victory_reward,
+                "defeat_penalty": self.reward.defeat_penalty,
+                "hp_value_weight": self.reward.hp_value_weight,
+            },
+        }
+
+
+# =============================================================================
+# PRESETS
+# =============================================================================
+
+def get_config(preset: str = "standard") -> TrainingConfig:
+    """Get a configuration preset."""
+    
+    presets = {
+        "quick": TrainingConfig(
+            total_timesteps=1_000_000,
+            env=EnvironmentConfig(
+                num_workers=0,
+                num_envs_per_worker=1,
+            ),
+            model=ModelConfig(
+                hidden_dim=128,
+                num_transformer_layers=1,
+                use_lstm=False,
+            ),
+            ppo=PPOConfig(
+                train_batch_size=2048,
+            ),
+        ),
+        
+        "standard": TrainingConfig(
+            # Uses all defaults
+        ),
+        
+        "optimal": TrainingConfig(
+            # Optimized for 32GB VRAM + 64GB RAM
+            env=EnvironmentConfig(
+                num_workers=8,
+                num_envs_per_worker=4,
+            ),
+            model=ModelConfig(
+                hidden_dim=512,
+                num_heads=8,
+                num_transformer_layers=4,
+                lstm_hidden=512,
+            ),
+            ppo=PPOConfig(
+                train_batch_size=8192,
+                sgd_minibatch_size=256,
+            ),
+        ),
+        
+        "large": TrainingConfig(
+            env=EnvironmentConfig(
+                num_workers=12,
+                num_envs_per_worker=4,
+            ),
+            model=ModelConfig(
+                hidden_dim=768,
+                num_heads=12,
+                num_transformer_layers=6,
+                lstm_hidden=768,
+            ),
+            ppo=PPOConfig(
+                train_batch_size=16384,
+                sgd_minibatch_size=512,
+            ),
+        ),
+    }
+    
+    if preset not in presets:
+        raise ValueError(f"Unknown preset: {preset}. Available: {list(presets.keys())}")
+    
+    return presets[preset]
