@@ -1,13 +1,38 @@
 # DSPRO2
 
+## Python Setup (uv)
+
+This project is managed by [uv](https://docs.astral.sh/uv/). It handles Python 3.13 and all dependencies automatically.
+
+### Installation
+From the root directory, run:
+```bash
+uv sync
+```
+This creates a local .venv and installs the exact versions from uv.lock.
+
+### Running Scripts
+Avoid manual venv activation. Use uv run to execute scripts within the correct environment:
+```bash
+uv run train_battler.py
+```
+### Dependency Management
+
+To add or remove libraries for the team:
+```bash
+uv add <package>
+uv remove <package>
+```
+Note: Always commit uv.lock after making changes to dependencies.
+
 ## Setting up the environment
 
-### Required tools
+### Required additional tools
 
-- Python 3.13 (use uv for local virtual environment with `uv venv .venv --python 3.13` and `source .venv/bin/activate`)
 - Node.js (use nvm for local version management with `nvm install 22.12.0` and `nvm use 22.12.0`)
 - npm
 - git
+
 
 ### Setting up the server
 
