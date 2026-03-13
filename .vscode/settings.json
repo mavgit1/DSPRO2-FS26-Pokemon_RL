@@ -1,0 +1,8 @@
+{
+  "files.exclude": {
+    "pokemon-showdown/**": true
+  },
+  "search.exclude": {
+    "pokemon-showdown/**": true
+  }
+}
