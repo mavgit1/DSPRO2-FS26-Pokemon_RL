@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Pokemon RL Training Entry Point
 ===============================
@@ -17,17 +16,12 @@ Requirements:
 """
 
 import argparse
-import logging
-
-# Configure logging todo: replace with mlflow logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
+import mlflow
+from dotenv import load_dotenv, find_dotenv
 
 def main():
+    load_dotenv(find_dotenv())
+    
     parser = argparse.ArgumentParser(
         description="Train Pokemon RL agent",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -69,7 +63,7 @@ def main():
     parser.add_argument(
         "--debug",
         action="store_true",
-        help="Enable debug logging"
+        help="Enable debug logging (Note: standard logging replaced by MLflow/prints)"
     )
 
     # Recurrent model
@@ -84,24 +78,28 @@ def main():
     
     args = parser.parse_args()
     
-    # Set log level
+    # Set log level / notify about debug
     if args.debug:
-        logging.getLogger().setLevel(logging.DEBUG)
+        print("[DEBUG] Debug flag passed. (Note: Standard python logging is disabled in favor of MLflow).")
+    
+    # Initialize MLflow experiment
+    mlflow.set_experiment("Pokemon_RL_Battler")
     
     # Import and run
     from src.config.TM_optimal_config import get_config
-    from src.training import PokemonTrainer
+    # Make sure this points to your refactored trainer file!
+    from src.training.trainer import PokemonTrainer
     
-    logger.info("=" * 60)
-    logger.info("Pokemon RL Training")
-    logger.info("=" * 60)
-    logger.info(f"Preset: {args.preset}")
-    logger.info(f"Num servers: {args.num_servers}")
-    logger.info(f"Start port: {args.start_port}")
-    logger.info(f"Use LSTM: {args.use_lstm}")
+    print("=" * 60)
+    print("Pokemon RL Training")
+    print("=" * 60)
+    print(f"Preset: {args.preset}")
+    print(f"Num servers: {args.num_servers}")
+    print(f"Start port: {args.start_port}")
+    print(f"Use LSTM: {args.use_lstm}")
     if args.timesteps:
-        logger.info(f"Override timesteps: {args.timesteps:,}")
-    logger.info("=" * 60)
+        print(f"Override timesteps: {args.timesteps:,}")
+    print("=" * 60)
 
     config = get_config(args.preset)
     if args.timesteps:

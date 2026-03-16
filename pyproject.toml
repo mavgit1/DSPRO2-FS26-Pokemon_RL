@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "gymnasium<1.2.3",
+    "mlflow>=3.10.1",
     "numpy>=2.4.3",
     "poke-env>=0.12.0",
     "python-dotenv>=1.2.2",

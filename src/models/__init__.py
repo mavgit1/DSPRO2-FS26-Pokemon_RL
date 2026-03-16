@@ -1,4 +1,4 @@
-from models.battle_transformer import (
+from src.models.battle_transformer import (
     PokemonTransformerModel,
     PokemonRLModule,
     DEFAULT_MODEL_CONFIG,
