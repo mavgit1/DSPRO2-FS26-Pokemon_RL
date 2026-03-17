@@ -1,6 +1,6 @@
 import os
 import time
-from pathlib import Path
+import json
 from typing import Optional, Dict, Any
 
 from dotenv import load_dotenv
@@ -14,7 +14,11 @@ from ray.rllib.core.rl_module.rl_module import RLModuleSpec
 from ray.rllib.algorithms.ppo import PPOConfig
 
 # Local imports
-from src.config.TM_optimal_config import TrainingConfig, get_config
+from src.config.TM_optimal_config import (
+    TrainingConfig,
+    CurriculumStageConfig,
+    get_config,
+)
 from src.envs.battle_env import create_env_creator, get_observation_space
 from src.training.callbacks import CurriculumManager, CheckpointManager
 
@@ -55,9 +59,10 @@ class PokemonTrainer:
         self.start_port = start_port
         
         # Initialize components
-        self.curriculum = CurriculumManager(
-            stages=self.config.curriculum_stages
-        ) if self.config.use_curriculum else None
+        self.curriculum = None
+        if self.config.curriculum.enabled and self.config.curriculum.stages:
+            self.curriculum = CurriculumManager(self.config.curriculum)
+            self._validate_curriculum_config()
         
         self.checkpoint_mgr = CheckpointManager(
             self.config.checkpoint_dir,
@@ -69,9 +74,117 @@ class PokemonTrainer:
         self.total_steps = 0
         self.iteration = 0
         self.best_reward = float('-inf')
+
+    def _validate_curriculum_config(self) -> None:
+        if not self.curriculum:
+            return
+
+        stages = self.config.curriculum.stages
+        names = [s.name for s in stages]
+        if len(set(names)) != len(names):
+            raise ValueError(f"Curriculum stage names must be unique. Got: {names}")
+
+        for stage in stages:
+            if not (0.0 <= stage.promote_at_win_rate <= 1.0 or stage.promote_at_win_rate > 1.0):
+                raise ValueError(
+                    f"Invalid threshold for stage '{stage.name}': {stage.promote_at_win_rate}"
+                )
+            if stage.min_samples_for_promotion <= 0:
+                raise ValueError(
+                    f"min_samples_for_promotion must be > 0 for stage '{stage.name}'"
+                )
+            if not stage.opponent_mix:
+                raise ValueError(f"opponent_mix cannot be empty for stage '{stage.name}'")
+            if sum(v for v in stage.opponent_mix.values() if float(v) > 0) <= 0:
+                raise ValueError(
+                    f"opponent_mix must contain at least one positive weight for stage '{stage.name}'"
+                )
+
+    def _foreach_env(self, fn):
+        """Run a function on every remote env instance."""
+        def _call_on_worker(worker):
+            if hasattr(worker, "foreach_env"):
+                return worker.foreach_env(fn)
+            if hasattr(worker, "env"):
+                env_obj = worker.env
+                return [fn(env_obj)] if env_obj is not None else []
+            return []
+
+        # Newer RLlib API: prefer env_runner_group. Some versions hard-error
+        # if `workers` is touched at all.
+        runner_attr = getattr(self.algo, "env_runner_group", None)
+        try:
+            runner_group = runner_attr() if callable(runner_attr) else runner_attr
+        except (TypeError, ValueError):
+            runner_group = None
+        if runner_group is not None and hasattr(runner_group, "foreach_worker"):
+            return runner_group.foreach_worker(_call_on_worker)
+
+        # Backward compatibility for older RLlib only.
+        workers_attr = getattr(self.algo, "workers", None)
+        try:
+            workers_group = workers_attr() if callable(workers_attr) else workers_attr
+        except (TypeError, ValueError):
+            workers_group = None
+        if workers_group is not None and hasattr(workers_group, "foreach_worker"):
+            return workers_group.foreach_worker(_call_on_worker)
+
+        return []
+
+    @staticmethod
+    def _flatten_for_mlflow(prefix: str, value: Any, out: Dict[str, Any]) -> None:
+        if isinstance(value, dict):
+            for k, v in value.items():
+                key = f"{prefix}.{k}" if prefix else str(k)
+                PokemonTrainer._flatten_for_mlflow(key, v, out)
+            return
+        if isinstance(value, list):
+            for idx, item in enumerate(value):
+                key = f"{prefix}.{idx}" if prefix else str(idx)
+                PokemonTrainer._flatten_for_mlflow(key, item, out)
+            return
+
+        if isinstance(value, (str, int, float, bool)):
+            out[prefix] = value
+        else:
+            out[prefix] = json.dumps(value, default=str)
+
+    def _collect_recent_outcomes(self) -> list[int]:
+        """Collect terminal outcomes (1 win / 0 loss) from all envs."""
+        nested = self._foreach_env(
+            lambda e: e.pop_recent_outcomes() if hasattr(e, "pop_recent_outcomes") else []
+        )
+        outcomes: list[int] = []
+        if not nested:
+            return outcomes
+
+        for worker_item in nested:
+            if not isinstance(worker_item, list):
+                continue
+            for env_item in worker_item:
+                if isinstance(env_item, list):
+                    outcomes.extend(int(v) for v in env_item if v in {0, 1})
+        return outcomes
+
+    def _apply_curriculum_stage(self, stage: CurriculumStageConfig) -> None:
+        """Push stage payload to all running env wrappers."""
+        payload = stage.to_dict()
+        self._foreach_env(
+            lambda e: e.apply_curriculum_stage(payload)
+            if hasattr(e, "apply_curriculum_stage")
+            else None
+        )
+        print(
+            f"Applied stage '{stage.name}' | threshold={stage.promote_at_win_rate:.2f} "
+            f"| mix={stage.opponent_mix}"
+        )
     
     def _register_environments(self) -> None:
         """Register environments with Ray."""
+        initial_stage = None
+        if self.curriculum:
+            initial_stage = self.curriculum.current_stage
+
         for i in range(self.num_servers):
             port = self.start_port + i
             env_name = f"pokemon_battle_{port}"
@@ -80,8 +193,10 @@ class PokemonTrainer:
                 battle_format=self.config.env.battle_format,
                 server_host=self.config.env.showdown_host,
                 server_port=port,
-                reward_config=self.config.reward,
-                #opponent_difficulty="heuristic",
+                reward_config=(
+                    initial_stage.reward_config if initial_stage else self.config.reward
+                ),
+                opponent_mix=(initial_stage.opponent_mix if initial_stage else None),
             )
             
             register_env(env_name, env_creator)
@@ -100,7 +215,7 @@ class PokemonTrainer:
             PPOConfig()
             .environment(
                 env=env_name,
-                env_config={"difficulty": "easy"},
+                env_config={},
             )
             .framework("torch")
             # -----------------------------------------------------------------
@@ -206,16 +321,14 @@ class PokemonTrainer:
         # Start MLflow run
         with mlflow.start_run():
             # Log config parameters to MLflow
-            mlflow.log_params({
-                "preset": self.config.env.battle_format,
-                "total_timesteps": self.config.total_timesteps,
-                "train_batch_size": self.config.ppo.train_batch_size,
-                "hidden_dim": self.config.model.hidden_dim,
-                "learning_rate": self.config.ppo.lr,
-                "num_workers": self.config.env.num_workers,
-            })
+            flat_params: Dict[str, Any] = {}
+            self._flatten_for_mlflow("", self.config.to_dict(), flat_params)
+            mlflow.log_params(flat_params)
             
             try:
+                if self.curriculum:
+                    self._apply_curriculum_stage(self.curriculum.current_stage)
+
                 while self.total_steps < self.config.total_timesteps:
                     # Train
                     result = self.train_step()
@@ -236,6 +349,36 @@ class PokemonTrainer:
                         "episode_len_mean": len_mean,
                         "iteration": self.iteration,
                     }
+
+                    # Curriculum updates (training-only, binary outcomes).
+                    if self.curriculum:
+                        outcomes = self._collect_recent_outcomes()
+                        stage_changed = self.curriculum.update(outcomes)
+                        curriculum_metrics = self.curriculum.metrics()
+
+                        rolling_win = curriculum_metrics.get("curriculum_rolling_win_rate")
+                        if rolling_win is not None:
+                            metrics["curriculum_rolling_win_rate"] = float(rolling_win)
+                        metrics["curriculum_stage_idx"] = float(
+                            curriculum_metrics["curriculum_stage_idx"]
+                        )
+                        metrics["curriculum_valid_window_samples"] = float(
+                            curriculum_metrics["curriculum_valid_window_samples"]
+                        )
+                        metrics["curriculum_episodes_in_stage"] = float(
+                            curriculum_metrics["curriculum_episodes_in_stage"]
+                        )
+                        metrics["curriculum_total_episodes"] = float(
+                            curriculum_metrics["curriculum_total_episodes"]
+                        )
+
+                        if stage_changed:
+                            self._apply_curriculum_stage(self.curriculum.current_stage)
+                            mlflow.set_tag(
+                                "last_curriculum_transition",
+                                f"iter_{self.iteration}_{self.curriculum.current_stage.name}",
+                            )
+
                     mlflow.log_metrics(metrics, step=self.total_steps)
                     
                     # Print progress
@@ -250,20 +393,6 @@ class PokemonTrainer:
                         )
                         print(f"Checkpoint saved: {ckpt_path}")
                     
-                    # Curriculum
-                    if self.curriculum:
-                        if self.curriculum.update(self.total_steps):
-                            # Update environment difficulty
-                            self.algo.workers.foreach_worker(
-                                lambda w: w.foreach_env(
-                                    lambda e: setattr(
-                                        e, 
-                                        "difficulty", 
-                                        self.curriculum.current_stage
-                                    ) if hasattr(e, "difficulty") else None
-                                )
-                            )
-            
             except KeyboardInterrupt:
                 print("Training interrupted by user")
             
