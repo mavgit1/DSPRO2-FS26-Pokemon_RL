@@ -96,7 +96,10 @@ class PokemonBattleEnv(SinglesEnv):
         """
         self.reward_config = reward_config or RewardConfig()
         self._recent_outcomes: List[int] = []
+        self._recent_episode_stats: List[Dict[str, float]] = []
         self._recorded_battle_tags = set()
+        self._battle_step_stats: Dict[str, Dict[str, float]] = {}
+        self._fallback_events_current_episode = 0
         
         super().__init__(**kwargs)
         
@@ -122,13 +125,30 @@ class PokemonBattleEnv(SinglesEnv):
     def calc_reward(self, battle: AbstractBattle) -> float:
         """Calculate reward based on battle state."""
         battle_tag = getattr(battle, "battle_tag", None)
+        battle_key = str(battle_tag or "unknown")
+        step_stats = self._battle_step_stats.setdefault(
+            battle_key,
+            {"action_mask_valid_sum": 0.0, "action_mask_count": 0.0},
+        )
+
+        # Track valid-action density during the episode.
+        action_mask = embed_battle(battle)["action_mask"]
+        step_stats["action_mask_valid_sum"] += float(np.sum(action_mask))
+        step_stats["action_mask_count"] += 1.0
+
         if battle_tag not in self._recorded_battle_tags:
             if battle.won:
                 self._recent_outcomes.append(1)
                 self._recorded_battle_tags.add(battle_tag)
+                self._recent_episode_stats.append(
+                    self._build_terminal_episode_stats(battle, battle_key, outcome=1)
+                )
             elif battle.lost:
                 self._recent_outcomes.append(0)
                 self._recorded_battle_tags.add(battle_tag)
+                self._recent_episode_stats.append(
+                    self._build_terminal_episode_stats(battle, battle_key, outcome=0)
+                )
 
         return self.reward_computing_helper(
             battle,
@@ -147,8 +167,59 @@ class PokemonBattleEnv(SinglesEnv):
         self._recent_outcomes.clear()
         return outcomes
 
-    @staticmethod
-    def order_to_action(order, battle, fake: bool = False, strict: bool = True):
+    def pop_recent_episode_stats(self) -> List[Dict[str, float]]:
+        """Return and clear per-episode summary stats."""
+        stats = self._recent_episode_stats[:]
+        self._recent_episode_stats.clear()
+        return stats
+
+    def consume_fallback_events(self) -> int:
+        """Return and reset conversion fallback events for current episode."""
+        events = int(self._fallback_events_current_episode)
+        self._fallback_events_current_episode = 0
+        return events
+
+    def _build_terminal_episode_stats(
+        self, battle: AbstractBattle, battle_key: str, outcome: int
+    ) -> Dict[str, float]:
+        our_hp = _get_team_hp_fraction(battle.team)
+        opp_hp = _get_team_hp_fraction(battle.opponent_team)
+        our_fainted = sum(1 for m in battle.team.values() if m.fainted)
+        opp_fainted = sum(1 for m in battle.opponent_team.values() if m.fainted)
+        hp_diff = our_hp - opp_hp
+
+        reward_victory = (
+            self.reward_config.victory_reward if outcome == 1 else self.reward_config.defeat_penalty
+        )
+        reward_hp_diff = hp_diff * self.reward_config.hp_value_weight
+        reward_faint = (
+            opp_fainted * self.reward_config.fainted_value
+            - our_fainted * self.reward_config.fainted_penalty
+        )
+        battle_turns = float(max(0, int(getattr(battle, "turn", 0))))
+        reward_step = battle_turns * self.reward_config.step_penalty
+
+        step_stats = self._battle_step_stats.pop(
+            battle_key,
+            {"action_mask_valid_sum": 0.0, "action_mask_count": 0.0},
+        )
+        mask_count = max(step_stats["action_mask_count"], 1.0)
+        mask_valid_mean = step_stats["action_mask_valid_sum"] / mask_count
+
+        return {
+            "outcome": float(outcome),
+            "terminal_our_hp_remaining": float(our_hp),
+            "terminal_opp_hp_remaining": float(opp_hp),
+            "terminal_faint_diff": float(opp_fainted - our_fainted),
+            "battle_turns": battle_turns,
+            "reward_victory_component": float(reward_victory),
+            "reward_hp_diff_component": float(reward_hp_diff),
+            "reward_faint_component": float(reward_faint),
+            "reward_step_penalty_component": float(reward_step),
+            "action_mask_valid_count_mean": float(mask_valid_mean),
+        }
+
+    def order_to_action(self, order, battle, fake: bool = False, strict: bool = True):
         """
         Convert a BattleOrder to action index with bounded fallbacks.
 
@@ -167,6 +238,7 @@ class PokemonBattleEnv(SinglesEnv):
         for _ in range(max_retries):
             random_order = RandomPlayer.choose_random_singles_move(battle)
             try:
+                self._fallback_events_current_episode += 1
                 return SinglesEnv.order_to_action(
                     random_order, battle, fake=fake, strict=True
                 )
@@ -177,6 +249,7 @@ class PokemonBattleEnv(SinglesEnv):
         # 26 covers up to gen9 singles action size; gen8 uses 22.
         for action in range(26):
             try:
+                self._fallback_events_current_episode += 1
                 SinglesEnv.action_to_order(
                     np.int64(action), battle, fake=fake, strict=True
                 )
@@ -185,6 +258,7 @@ class PokemonBattleEnv(SinglesEnv):
                 continue
 
         # If no legal action could be verified, return default action.
+        self._fallback_events_current_episode += 1
         return np.int64(-2)
 
 
@@ -203,6 +277,10 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         self._battle_format = battle_format
         self._server_configuration = server_configuration
         self._opponent_mix = self._normalize_opponent_mix(opponent_mix)
+        self._episode_total_actions = 0
+        self._episode_switch_actions = 0
+        self._episode_attack_actions = 0
+        self._recent_action_stats: List[Dict[str, float]] = []
 
     @staticmethod
     def _normalize_opponent_mix(opponent_mix: Optional[Dict[str, float]]) -> Dict[str, float]:
@@ -243,7 +321,46 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
     def reset(self, *args, **kwargs):
         # Sample an opponent per episode according to configured mix.
         self.opponent = self._build_opponent()
+        self._episode_total_actions = 0
+        self._episode_switch_actions = 0
+        self._episode_attack_actions = 0
+        if hasattr(self.env, "consume_fallback_events"):
+            self.env.consume_fallback_events()
         return super().reset(*args, **kwargs)
+
+    def step(self, action):
+        if action is not None:
+            action_int = int(action)
+            self._episode_total_actions += 1
+            # In poke-env singles indexing, switches are in upper action ids.
+            if action_int >= 16:
+                self._episode_switch_actions += 1
+            else:
+                self._episode_attack_actions += 1
+
+        result = super().step(action)
+        terminated = False
+        truncated = False
+        if isinstance(result, tuple):
+            if len(result) == 5:
+                terminated = bool(result[2])
+                truncated = bool(result[3])
+            elif len(result) == 4:
+                terminated = bool(result[2])
+
+        if terminated or truncated:
+            fallback_events = 0
+            if hasattr(self.env, "consume_fallback_events"):
+                fallback_events = int(self.env.consume_fallback_events())
+            self._recent_action_stats.append(
+                {
+                    "episode_total_actions": float(self._episode_total_actions),
+                    "episode_switch_actions": float(self._episode_switch_actions),
+                    "episode_attack_actions": float(self._episode_attack_actions),
+                    "episode_fallback_events": float(fallback_events),
+                }
+            )
+        return result
 
     def set_opponent_mix(self, opponent_mix: Dict[str, float]) -> None:
         self._opponent_mix = self._normalize_opponent_mix(opponent_mix)
@@ -262,6 +379,22 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         if hasattr(self.env, "pop_recent_outcomes"):
             return self.env.pop_recent_outcomes()
         return []
+
+    def pop_recent_episode_stats(self) -> List[Dict[str, float]]:
+        env_stats = []
+        if hasattr(self.env, "pop_recent_episode_stats"):
+            env_stats = self.env.pop_recent_episode_stats()
+
+        action_stats = self._recent_action_stats[:]
+        self._recent_action_stats.clear()
+
+        count = min(len(env_stats), len(action_stats))
+        merged = []
+        for idx in range(count):
+            item = dict(env_stats[idx])
+            item.update(action_stats[idx])
+            merged.append(item)
+        return merged
 
 # =============================================================================
 # REWARD FUNCTION todo: create more for different curriculum stages
