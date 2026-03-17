@@ -120,7 +120,14 @@ Notes:
   * **`envs/`**: Custom Gymnasium environments mapping RL to Pokémon Showdown (`battle_env.py`).
   * **`models/`**: Custom neural network architectures (e.g., `battle_transformer.py`).
   * **`teams/`**: AI-generated and static Pokémon teams for training.
-  * **`training/`**: Ray RLlib setup, custom callbacks, and curriculum managers.
+  * **`training/`**: Training orchestration and helper modules.
+    * **`trainer.py`**: Orchestration entrypoint (`PokemonTrainer`) that wires the training lifecycle.
+    * **`rllib_config_builder.py`**: RLlib PPO and environment registration builders.
+    * **`env_bridge.py`**: Worker/env bridge for curriculum payloads and env-emitted metrics.
+    * **`callbacks.py`**: Curriculum stage progression and checkpoint management helpers.
+    * **`resume.py`**: Checkpoint resume path resolution and step extraction.
+    * **`metrics/`**: Metric extraction/aggregation helpers (`ppo`, `episode`, `runtime`, flattening).
+    * **`monitoring/`**: Runtime system telemetry collectors (CPU/RAM/GPU).
 * **`scripts/`**: Executable bash scripts (server management, etc.).
 * **`examples/`**: Sandboxed scripts, notebooks, and reference players (e.g., `MaxDamagePlayer.py`).
 * **`data/`**: Datasets (e.g., BDSP Trainer Data CSVs).
