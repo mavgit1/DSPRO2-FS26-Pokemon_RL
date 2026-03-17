@@ -227,7 +227,7 @@ def create_env_creator(
     server_host: str = "localhost",
     server_port: int = 8000,
     reward_config: Optional[RewardConfig] = None,
-    opponent_difficulty: str = "random",
+    opponent_difficulty: str = "heuristic",
 ):
     """
     Create an environment creator function for Ray RLlib.
@@ -237,7 +237,7 @@ def create_env_creator(
         server_host: Showdown server host
         server_port: Showdown server port
         reward_config: Reward configuration
-        opponent_difficulty: "random" or "heuristic"
+        opponent_difficulty: "heuristic"/"heuristics" or "random"
     
     Returns:
         Callable that creates environments
@@ -262,7 +262,7 @@ def create_env_creator(
         opponent_id = f"Opp_{uuid.uuid4().hex[:6]}"
         opponent_config = AccountConfiguration(opponent_id, None)
         
-        if difficulty == "heuristic":
+        if difficulty in {"heuristic", "heuristics"}:
             opponent_class = SimpleHeuristicsPlayer
         else:
             opponent_class = RandomPlayer

@@ -6,6 +6,7 @@ from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 import mlflow
 import torch
+import gymnasium as gym
 
 import ray
 from ray.tune.registry import register_env
@@ -14,7 +15,7 @@ from ray.rllib.algorithms.ppo import PPOConfig
 
 # Local imports
 from src.config.TM_optimal_config import TrainingConfig, get_config
-from src.envs.battle_env import create_env_creator
+from src.envs.battle_env import create_env_creator, get_observation_space
 from src.training.callbacks import CurriculumManager, CheckpointManager
 
 
@@ -80,6 +81,7 @@ class PokemonTrainer:
                 server_host=self.config.env.showdown_host,
                 server_port=port,
                 reward_config=self.config.reward,
+                #opponent_difficulty="heuristic",
             )
             
             register_env(env_name, env_creator)
@@ -130,6 +132,8 @@ class PokemonTrainer:
             .rl_module(
                 rl_module_spec=RLModuleSpec(
                     module_class=PokemonRLModule,
+                    observation_space=get_observation_space(),
+                    action_space=gym.spaces.Discrete(22),
                     model_config={
                         "custom_model_config": self.config.model.to_dict(),
                     },
