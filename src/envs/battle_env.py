@@ -13,7 +13,7 @@ from poke_env.player import RandomPlayer, SimpleHeuristicsPlayer
 from poke_env.environment.single_agent_wrapper import SingleAgentWrapper
 from poke_env.ps_client.account_configuration import AccountConfiguration
 
-from src.envs.embedding import (
+from src.models.embedding import (
     embed_battle,
     NUM_TOKENS,
     TOKEN_DIM,
