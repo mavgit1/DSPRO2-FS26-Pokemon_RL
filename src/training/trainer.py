@@ -1,6 +1,8 @@
 import os
 import time
 import json
+import re
+from pathlib import Path
 from typing import Optional, Dict, Any
 
 from dotenv import load_dotenv
@@ -41,6 +43,8 @@ class PokemonTrainer:
         preset: str = "standard",
         num_servers: int = 1,
         start_port: int = 8000,
+        resume_checkpoint: Optional[str] = None,
+        mlflow_run_id: Optional[str] = None,
     ):
         """
         Initialize trainer.
@@ -50,6 +54,8 @@ class PokemonTrainer:
             preset: Config preset name ("quick", "standard", "optimal", "large")
             num_servers: Number of Showdown servers
             start_port: Starting port for servers
+            resume_checkpoint: Optional RLlib checkpoint path to restore from
+            mlflow_run_id: Optional MLflow run ID to continue logging in the same run
         """
         # Load config
         self.config = config or get_config(preset)
@@ -57,6 +63,8 @@ class PokemonTrainer:
         # Server settings
         self.num_servers = num_servers
         self.start_port = start_port
+        self.resume_checkpoint = resume_checkpoint
+        self.mlflow_run_id = mlflow_run_id
         
         # Initialize components
         self.curriculum = None
@@ -74,6 +82,36 @@ class PokemonTrainer:
         self.total_steps = 0
         self.iteration = 0
         self.best_reward = float('-inf')
+
+    @staticmethod
+    def _extract_step_from_checkpoint_path(checkpoint_path: str) -> Optional[int]:
+        """Best-effort parse of sampled steps from checkpoint path."""
+        match = re.search(r"step_(\d+)", checkpoint_path)
+        if match:
+            return int(match.group(1))
+        return None
+
+    def _resolve_resume_checkpoint(self) -> Optional[str]:
+        """Resolve checkpoint path for resume, including 'latest' alias."""
+        if not self.resume_checkpoint:
+            return None
+
+        if self.resume_checkpoint != "latest":
+            return self.resume_checkpoint
+
+        ckpt_root = Path(self.config.checkpoint_dir).resolve()
+        if not ckpt_root.exists():
+            return None
+
+        candidates = [
+            p for p in ckpt_root.rglob("*")
+            if p.is_dir() and p.name.startswith("checkpoint_")
+        ]
+        if not candidates:
+            return None
+
+        latest = max(candidates, key=lambda p: p.stat().st_mtime)
+        return str(latest)
 
     def _validate_curriculum_config(self) -> None:
         if not self.curriculum:
@@ -306,6 +344,18 @@ class PokemonTrainer:
         ppo_config = self._build_config()
         self.algo = ppo_config.build_algo()
         
+        resume_path = self._resolve_resume_checkpoint()
+        if resume_path:
+            self.algo.restore(resume_path)
+            parsed_steps = self._extract_step_from_checkpoint_path(resume_path)
+            if parsed_steps is not None:
+                self.total_steps = parsed_steps
+            print(f"Restored checkpoint: {resume_path}")
+            if parsed_steps is not None:
+                print(f"Resuming from approx. steps: {parsed_steps:,}")
+            else:
+                print("Resuming from checkpoint (step count will refresh after next iteration).")
+        
         print("=" * 60)
         print("Starting Training")
         print("=" * 60)
@@ -319,11 +369,20 @@ class PokemonTrainer:
         start_time = time.time()
 
         # Start MLflow run
-        with mlflow.start_run():
-            # Log config parameters to MLflow
-            flat_params: Dict[str, Any] = {}
-            self._flatten_for_mlflow("", self.config.to_dict(), flat_params)
-            mlflow.log_params(flat_params)
+        with mlflow.start_run(run_id=self.mlflow_run_id):
+            current_run = mlflow.active_run()
+            if current_run is not None:
+                print(f"MLflow run id: {current_run.info.run_id}")
+
+            # For resumed MLflow runs, avoid re-logging params that may already exist.
+            if not self.mlflow_run_id:
+                flat_params: Dict[str, Any] = {}
+                self._flatten_for_mlflow("", self.config.to_dict(), flat_params)
+                mlflow.log_params(flat_params)
+            else:
+                mlflow.set_tag("resumed", "true")
+                if resume_path:
+                    mlflow.set_tag("resumed_from_checkpoint", resume_path)
             
             try:
                 if self.curriculum:
@@ -430,6 +489,8 @@ def train(
     num_servers: int = 1,
     start_port: int = 8000,
     total_timesteps: Optional[int] = None,
+    resume_checkpoint: Optional[str] = None,
+    mlflow_run_id: Optional[str] = None,
 ) -> None:
     """
     Quick training function.
@@ -439,6 +500,8 @@ def train(
         num_servers: Number of Showdown servers
         start_port: Starting port for servers
         total_timesteps: Override total timesteps
+        resume_checkpoint: Optional RLlib checkpoint path ("latest" supported)
+        mlflow_run_id: Optional MLflow run ID to resume logging
     """
     config = get_config(preset)
     
@@ -449,6 +512,8 @@ def train(
         config=config,
         num_servers=num_servers,
         start_port=start_port,
+        resume_checkpoint=resume_checkpoint,
+        mlflow_run_id=mlflow_run_id,
     )
     
     trainer.train()

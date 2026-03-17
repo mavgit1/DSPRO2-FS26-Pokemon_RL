@@ -75,6 +75,23 @@ def main():
             "the current RLlib connector setup is non-recurrent."
         ),
     )
+
+    parser.add_argument(
+        "--resume-checkpoint",
+        type=str,
+        default=None,
+        help=(
+            "Path to RLlib checkpoint directory to restore from. "
+            "Use 'latest' to auto-pick the most recent checkpoint in checkpoint_dir."
+        ),
+    )
+
+    parser.add_argument(
+        "--mlflow-run-id",
+        type=str,
+        default=None,
+        help="MLflow run ID to continue logging into the same run.",
+    )
     
     args = parser.parse_args()
     
@@ -97,6 +114,10 @@ def main():
     print(f"Num servers: {args.num_servers}")
     print(f"Start port: {args.start_port}")
     print(f"Use LSTM: {args.use_lstm}")
+    if args.resume_checkpoint:
+        print(f"Resume checkpoint: {args.resume_checkpoint}")
+    if args.mlflow_run_id:
+        print(f"MLflow run id: {args.mlflow_run_id}")
     if args.timesteps:
         print(f"Override timesteps: {args.timesteps:,}")
     print("=" * 60)
@@ -112,6 +133,8 @@ def main():
         config=config,
         num_servers=args.num_servers,
         start_port=args.start_port,
+        resume_checkpoint=args.resume_checkpoint,
+        mlflow_run_id=args.mlflow_run_id,
     )
     trainer.train()
 

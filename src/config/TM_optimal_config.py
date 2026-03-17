@@ -296,7 +296,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
         "optimal": TrainingConfig(
             # Optimized for 32GB VRAM + 64GB RAM
             env=EnvironmentConfig(
-                num_workers=8,
+                num_workers=14,
                 num_envs_per_worker=4,
             ),
             model=ModelConfig(

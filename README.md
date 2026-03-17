@@ -85,6 +85,31 @@ uv run train_battler.py --preset quick
 ```
 *You can pass different presets (e.g., `standard`, `optimal`, `large`) defined in `src/config/TM_optimal_config.py` depending on your hardware capabilities.*
 
+### 3. Resume Interrupted Training
+If training is interrupted, you can continue from a saved RLlib checkpoint and keep logging into the same MLflow run.
+
+1. Find the MLflow run ID you want to continue (from your MLflow UI).
+2. Restart training with:
+   ```bash
+   uv run train_battler.py \
+     --preset optimal \
+     --resume-checkpoint latest \
+     --mlflow-run-id <MLFLOW_RUN_ID>
+   ```
+
+Notes:
+- `--resume-checkpoint latest` picks the newest checkpoint under `checkpoint_dir` (default: `checkpoints`).
+- You can also pass a specific checkpoint path:
+  ```bash
+  uv run train_battler.py \
+    --preset optimal \
+    --resume-checkpoint "/absolute/path/to/checkpoints/step_1500000/checkpoint_000000" \
+    --mlflow-run-id <MLFLOW_RUN_ID>
+  ```
+- Resume both model + logs by using both flags together.
+- If you provide only `--resume-checkpoint`, model state resumes but MLflow creates a new run.
+- If you provide only `--mlflow-run-id`, logging continues in that run but training starts from a fresh model.
+
 ---
 
 ##  Project Structure
