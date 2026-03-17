@@ -125,7 +125,7 @@ class PokemonBattleEnv(SinglesEnv):
     def calc_reward(self, battle: AbstractBattle) -> float:
         """Calculate reward based on battle state."""
         battle_tag = getattr(battle, "battle_tag", None)
-        battle_key = str(battle_tag or "unknown")
+        battle_key = str(battle_tag) if battle_tag else f"battle_{id(battle)}"
         step_stats = self._battle_step_stats.setdefault(
             battle_key,
             {"action_mask_valid_sum": 0.0, "action_mask_count": 0.0},
@@ -136,16 +136,16 @@ class PokemonBattleEnv(SinglesEnv):
         step_stats["action_mask_valid_sum"] += float(np.sum(action_mask))
         step_stats["action_mask_count"] += 1.0
 
-        if battle_tag not in self._recorded_battle_tags:
+        if battle_key not in self._recorded_battle_tags:
             if battle.won:
                 self._recent_outcomes.append(1)
-                self._recorded_battle_tags.add(battle_tag)
+                self._recorded_battle_tags.add(battle_key)
                 self._recent_episode_stats.append(
                     self._build_terminal_episode_stats(battle, battle_key, outcome=1)
                 )
             elif battle.lost:
                 self._recent_outcomes.append(0)
-                self._recorded_battle_tags.add(battle_tag)
+                self._recorded_battle_tags.add(battle_key)
                 self._recent_episode_stats.append(
                     self._build_terminal_episode_stats(battle, battle_key, outcome=0)
                 )

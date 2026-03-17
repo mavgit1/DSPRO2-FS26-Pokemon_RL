@@ -246,29 +246,55 @@ class PokemonTrainer:
                     if found is not None:
                         return found
                 return None
-            if isinstance(obj, (int, float)):
-                if target in prefix.lower():
-                    return float(obj)
+            if isinstance(obj, (int, float)) and target in prefix.lower():
+                return float(obj)
             return None
 
         return _walk(container)
 
+    @staticmethod
+    def _collect_numeric_values_for_exact_keys(
+        container: Any,
+        keys: List[str],
+    ) -> List[float]:
+        """Collect numeric values for exact key matches anywhere in nested payload."""
+        keys_set = {k.lower() for k in keys}
+        out: List[float] = []
+
+        def _walk(obj: Any) -> None:
+            if isinstance(obj, dict):
+                for key, val in obj.items():
+                    if key.lower() in keys_set and isinstance(val, (int, float)):
+                        out.append(float(val))
+                    _walk(val)
+            elif isinstance(obj, list):
+                for item in obj:
+                    _walk(item)
+
+        _walk(container)
+        return out
+
     def _collect_ppo_metrics(self, result: Dict[str, Any]) -> Dict[str, float]:
+        # Restrict to learner-specific payloads first to avoid matching static config keys.
+        learner_payload = result.get("learners")
+        if learner_payload is None:
+            learner_payload = result.get("info", {}).get("learner")
+        if learner_payload is None:
+            learner_payload = result
+
         alias_map = {
-            "ppo/policy_loss": ["policy_loss", "mean_policy_loss"],
-            "ppo/value_loss": ["vf_loss", "value_loss", "mean_vf_loss"],
-            "ppo/entropy": ["entropy", "entropy_loss"],
-            "ppo/kl": ["kl", "mean_kl_loss"],
+            "ppo/policy_loss": ["policy_loss", "pi_loss", "mean_policy_loss"],
+            "ppo/value_loss": ["vf_loss", "value_loss", "mean_vf_loss", "critic_loss"],
+            "ppo/entropy": ["entropy", "entropy_loss", "mean_entropy"],
+            "ppo/kl": ["kl", "mean_kl_loss", "kl_loss"],
             "ppo/explained_variance": ["explained_variance", "vf_explained_var"],
             "ppo/clip_fraction": ["clip_frac", "clipped", "clip_fraction"],
         }
         out: Dict[str, float] = {}
         for metric_name, aliases in alias_map.items():
-            for alias in aliases:
-                value = self._find_numeric_by_substring(result, alias)
-                if value is not None:
-                    out[metric_name] = value
-                    break
+            values = self._collect_numeric_values_for_exact_keys(learner_payload, aliases)
+            if values:
+                out[metric_name] = float(sum(values) / len(values))
         return out
 
     @staticmethod
