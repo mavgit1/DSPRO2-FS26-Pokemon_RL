@@ -1,4 +1,4 @@
-from src.envs.embedding import (
+from src.models.embedding import (
     embed_battle,
     embed_pokemon,
     get_action_mask,
