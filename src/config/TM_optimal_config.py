@@ -80,7 +80,7 @@ class EnvironmentConfig:
     start_port: int = 8000
     
     # Parallelism
-    num_workers: int = 8
+    num_workers: int = 14
     num_envs_per_worker: int = 4
 
 
@@ -291,6 +291,25 @@ def get_config(preset: str = "standard") -> TrainingConfig:
         
         "standard": TrainingConfig(
             # Uses all defaults
+        ),
+
+        "memory_safe": TrainingConfig(
+            # Conservative parallelism/batch sizing for long CPU-RAM stable runs.
+            env=EnvironmentConfig(
+                num_workers=4,
+                num_envs_per_worker=2,
+            ),
+            model=ModelConfig(
+                hidden_dim=256,
+                num_heads=4,
+                num_transformer_layers=2,
+                lstm_hidden=256,
+                use_lstm=False,
+            ),
+            ppo=PPOConfig(
+                train_batch_size=2048,
+                sgd_minibatch_size=128,
+            ),
         ),
         
         "optimal": TrainingConfig(

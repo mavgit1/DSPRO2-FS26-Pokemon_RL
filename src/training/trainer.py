@@ -52,7 +52,7 @@ class PokemonTrainer:
         
         Args:
             config: Training configuration (overrides preset)
-            preset: Config preset name ("quick", "standard", "optimal", "large")
+            preset: Config preset name ("quick", "standard", "memory_safe", "optimal", "large")
             num_servers: Number of Showdown servers
             start_port: Starting port for servers
             resume_checkpoint: Optional RLlib checkpoint path to restore from
@@ -225,6 +225,36 @@ class PokemonTrainer:
                         if isinstance(item, dict):
                             stats.append(item)
         return stats
+
+    def _collect_env_memory_sentinels(self) -> Dict[str, float]:
+        """Aggregate lightweight env-side counters to spot retention growth."""
+        nested = self._foreach_env(
+            lambda e: e.get_memory_counters() if hasattr(e, "get_memory_counters") else {}
+        )
+        if not nested:
+            return {}
+
+        values_by_key: Dict[str, List[float]] = {}
+        for worker_item in nested:
+            if not isinstance(worker_item, list):
+                continue
+            for env_item in worker_item:
+                if not isinstance(env_item, dict):
+                    continue
+                for key, value in env_item.items():
+                    if not isinstance(value, (int, float)):
+                        continue
+                    values_by_key.setdefault(str(key), []).append(float(value))
+
+        metrics: Dict[str, float] = {}
+        for key, values in values_by_key.items():
+            if not values:
+                continue
+            metric_key = key.replace("/", "_")
+            metrics[f"leak/{metric_key}_sum"] = float(sum(values))
+            metrics[f"leak/{metric_key}_mean"] = float(sum(values) / len(values))
+            metrics[f"leak/{metric_key}_max"] = float(max(values))
+        return metrics
 
     @staticmethod
     def _find_numeric_by_substring(container: Any, key_substring: str) -> Optional[float]:
@@ -750,6 +780,7 @@ class PokemonTrainer:
                     prev_steps = self.total_steps
                     prev_wall_time = now
                     metrics.update(self._collect_system_metrics())
+                    metrics.update(self._collect_env_memory_sentinels())
 
                     mlflow.log_metrics(metrics, step=self.total_steps)
                     
@@ -809,7 +840,7 @@ def train(
     Quick training function.
     
     Args:
-        preset: Config preset ("quick", "standard", "optimal", "large")
+        preset: Config preset ("quick", "standard", "memory_safe", "optimal", "large")
         num_servers: Number of Showdown servers
         start_port: Starting port for servers
         total_timesteps: Override total timesteps

@@ -5,6 +5,7 @@ Pokemon RL Training Entry Point
 Quick start:
     python train.py                           # Use standard config
     python train.py --preset optimal          # Use optimal config for RTX 5090
+    python train.py --preset memory_safe      # Lower RAM pressure setup
     python train.py --preset quick            # Quick test run
     python train.py --timesteps 1000000       # Override timesteps
     python train.py --num-servers 4           # Use 4 Showdown servers
@@ -32,7 +33,7 @@ def main():
         "--preset",
         type=str,
         default="standard",
-        choices=["quick", "standard", "optimal", "large"],
+        choices=["quick", "standard", "memory_safe", "optimal", "large"],
         help="Configuration preset (default: standard)"
     )
     
