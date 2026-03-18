@@ -83,6 +83,12 @@ Use `uv run` to execute scripts within the correct environment. The main entry p
 ```bash
 uv run train_battler.py --preset quick
 ```
+
+Also run from time to time
+```bash
+uv cache clean
+```
+
 *You can pass different presets (e.g., `standard`, `optimal`, `large`) defined in `src/config/TM_optimal_config.py` depending on your hardware capabilities.*
 
 ### 3. Resume Interrupted Training
