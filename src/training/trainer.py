@@ -7,7 +7,8 @@ import ray
 import torch
 
 from src.config.TM_optimal_config import CurriculumStageConfig, TrainingConfig, get_config
-from src.training.callbacks import CheckpointManager, CurriculumManager
+from src.training.checkpointing import CheckpointManager
+from src.training.curriculum import CurriculumManager
 from src.training.env_bridge import (
     apply_curriculum_stage,
     collect_env_memory_sentinels,
