@@ -1,8 +1,11 @@
 import os
+import random
 import time
+from collections import deque
 from typing import Any, Dict, Optional
 
 import mlflow
+import numpy as np
 import ray
 import torch
 
@@ -72,7 +75,11 @@ class PokemonTrainer:
         if self.config.curriculum.enabled and self.config.curriculum.stages:
             self.curriculum = CurriculumManager(self.config.curriculum)
             self._validate_curriculum_config()
-        
+
+        self._win_rate_window: deque[int] = deque(
+            maxlen=self.config.curriculum.rolling_window_episodes
+        )
+
         self.checkpoint_mgr = CheckpointManager(
             self.config.checkpoint_dir,
             self.config.keep_checkpoints_num
@@ -154,7 +161,13 @@ class PokemonTrainer:
     
     def train(self) -> None:
         """Run the training loop."""
-        # Initialize Ray
+        seed = 42
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+
         ray.init(
             ignore_reinit_error=True,
             num_gpus=torch.cuda.device_count() if torch.cuda.is_available() else 0,
@@ -252,7 +265,12 @@ class PokemonTrainer:
 
                         rolling_win = curriculum_metrics.get("curriculum_rolling_win_rate")
                         if rolling_win is not None:
-                            metrics["curriculum_rolling_win_rate"] = float(rolling_win)
+                            w = float(rolling_win)
+                            metrics["curriculum_rolling_win_rate"] = w
+                            metrics["win_rate"] = w
+                        elif outcomes:
+                            wins = sum(1 for o in outcomes if o == 1)
+                            metrics["win_rate"] = float(wins / len(outcomes))
                         metrics["curriculum_stage_idx"] = float(
                             curriculum_metrics["curriculum_stage_idx"]
                         )
@@ -271,6 +289,14 @@ class PokemonTrainer:
                             mlflow.set_tag(
                                 "last_curriculum_transition",
                                 f"iter_{self.iteration}_{self.curriculum.current_stage.name}",
+                            )
+                    else:
+                        for outcome in outcomes:
+                            if outcome in {0, 1}:
+                                self._win_rate_window.append(int(outcome))
+                        if self._win_rate_window:
+                            metrics["win_rate"] = float(
+                                sum(self._win_rate_window) / len(self._win_rate_window)
                             )
 
                     now = time.time()
