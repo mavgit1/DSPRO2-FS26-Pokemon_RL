@@ -5,6 +5,7 @@ Pokemon RL Training Entry Point
 Quick start:
     python train.py                           # Use standard config
     python train.py --preset optimal          # Use optimal config for RTX 5090
+    python train.py --preset memory_safe      # Lower RAM pressure setup
     python train.py --preset quick            # Quick test run
     python train.py --timesteps 1000000       # Override timesteps
     python train.py --num-servers 4           # Use 4 Showdown servers
@@ -32,7 +33,7 @@ def main():
         "--preset",
         type=str,
         default="standard",
-        choices=["quick", "standard", "optimal", "large"],
+        choices=["quick", "standard", "memory_safe", "optimal", "large"],
         help="Configuration preset (default: standard)"
     )
     
@@ -48,8 +49,8 @@ def main():
     parser.add_argument(
         "--num-servers",
         type=int,
-        default=1,
-        help="Number of Showdown servers (default: 1)"
+        default=8,
+        help="Number of Showdown servers (default: 8, must match running servers)"
     )
     
     parser.add_argument(
@@ -75,6 +76,23 @@ def main():
             "the current RLlib connector setup is non-recurrent."
         ),
     )
+
+    parser.add_argument(
+        "--resume-checkpoint",
+        type=str,
+        default=None,
+        help=(
+            "Path to RLlib checkpoint directory to restore from. "
+            "Use 'latest' to auto-pick the most recent checkpoint in checkpoint_dir."
+        ),
+    )
+
+    parser.add_argument(
+        "--mlflow-run-id",
+        type=str,
+        default=None,
+        help="MLflow run ID to continue logging into the same run.",
+    )
     
     args = parser.parse_args()
     
@@ -97,6 +115,10 @@ def main():
     print(f"Num servers: {args.num_servers}")
     print(f"Start port: {args.start_port}")
     print(f"Use LSTM: {args.use_lstm}")
+    if args.resume_checkpoint:
+        print(f"Resume checkpoint: {args.resume_checkpoint}")
+    if args.mlflow_run_id:
+        print(f"MLflow run id: {args.mlflow_run_id}")
     if args.timesteps:
         print(f"Override timesteps: {args.timesteps:,}")
     print("=" * 60)
@@ -112,6 +134,8 @@ def main():
         config=config,
         num_servers=args.num_servers,
         start_port=args.start_port,
+        resume_checkpoint=args.resume_checkpoint,
+        mlflow_run_id=args.mlflow_run_id,
     )
     trainer.train()
 

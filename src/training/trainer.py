@@ -1,21 +1,32 @@
 import os
+import random
 import time
-from pathlib import Path
-from typing import Optional, Dict, Any
+from collections import deque
+from typing import Any, Dict, Optional
 
-from dotenv import load_dotenv
 import mlflow
+import numpy as np
+import ray
 import torch
 
-import ray
-from ray.tune.registry import register_env
-from ray.rllib.core.rl_module.rl_module import RLModuleSpec
-from ray.rllib.algorithms.ppo import PPOConfig
-
-# Local imports
-from src.config.TM_optimal_config import TrainingConfig, get_config
-from src.envs.battle_env import create_env_creator
-from src.training.callbacks import CurriculumManager, CheckpointManager
+from src.config.TM_optimal_config import CurriculumStageConfig, TrainingConfig, get_config
+from src.training.checkpointing import CheckpointManager
+from src.training.curriculum import CurriculumManager
+from src.training.env_bridge import (
+    apply_curriculum_stage,
+    collect_env_memory_sentinels,
+    collect_recent_episode_stats,
+    collect_recent_outcomes,
+)
+from src.training.metrics import (
+    aggregate_episode_metrics,
+    collect_ppo_metrics,
+    collect_runtime_metrics,
+    flatten_for_mlflow,
+)
+from src.training.monitoring import SystemMetricsCollector
+from src.training.resume import extract_step_from_checkpoint_path, resolve_resume_checkpoint
+from src.training.rllib_config_builder import build_ppo_config, register_environments
 
 
 class PokemonTrainer:
@@ -36,15 +47,19 @@ class PokemonTrainer:
         preset: str = "standard",
         num_servers: int = 1,
         start_port: int = 8000,
+        resume_checkpoint: Optional[str] = None,
+        mlflow_run_id: Optional[str] = None,
     ):
         """
         Initialize trainer.
         
         Args:
             config: Training configuration (overrides preset)
-            preset: Config preset name ("quick", "standard", "optimal", "large")
+            preset: Config preset name ("quick", "standard", "memory_safe", "optimal", "large")
             num_servers: Number of Showdown servers
             start_port: Starting port for servers
+            resume_checkpoint: Optional RLlib checkpoint path to restore from
+            mlflow_run_id: Optional MLflow run ID to continue logging in the same run
         """
         # Load config
         self.config = config or get_config(preset)
@@ -52,12 +67,19 @@ class PokemonTrainer:
         # Server settings
         self.num_servers = num_servers
         self.start_port = start_port
+        self.resume_checkpoint = resume_checkpoint
+        self.mlflow_run_id = mlflow_run_id
         
         # Initialize components
-        self.curriculum = CurriculumManager(
-            stages=self.config.curriculum_stages
-        ) if self.config.use_curriculum else None
-        
+        self.curriculum = None
+        if self.config.curriculum.enabled and self.config.curriculum.stages:
+            self.curriculum = CurriculumManager(self.config.curriculum)
+            self._validate_curriculum_config()
+
+        self._win_rate_window: deque[int] = deque(
+            maxlen=self.config.curriculum.rolling_window_episodes
+        )
+
         self.checkpoint_mgr = CheckpointManager(
             self.config.checkpoint_dir,
             self.config.keep_checkpoints_num
@@ -68,94 +90,67 @@ class PokemonTrainer:
         self.total_steps = 0
         self.iteration = 0
         self.best_reward = float('-inf')
+        self.system_metrics = SystemMetricsCollector()
+
+    def _validate_curriculum_config(self) -> None:
+        if not self.curriculum:
+            return
+
+        stages = self.config.curriculum.stages
+        names = [s.name for s in stages]
+        if len(set(names)) != len(names):
+            raise ValueError(f"Curriculum stage names must be unique. Got: {names}")
+
+        for stage in stages:
+            if not (0.0 <= stage.promote_at_win_rate <= 1.0 or stage.promote_at_win_rate > 1.0):
+                raise ValueError(
+                    f"Invalid threshold for stage '{stage.name}': {stage.promote_at_win_rate}"
+                )
+            if stage.min_samples_for_promotion <= 0:
+                raise ValueError(
+                    f"min_samples_for_promotion must be > 0 for stage '{stage.name}'"
+                )
+            if not stage.opponent_mix:
+                raise ValueError(f"opponent_mix cannot be empty for stage '{stage.name}'")
+            if sum(v for v in stage.opponent_mix.values() if float(v) > 0) <= 0:
+                raise ValueError(
+                    f"opponent_mix must contain at least one positive weight for stage '{stage.name}'"
+                )
+
+    def _apply_curriculum_stage(self, stage: CurriculumStageConfig) -> None:
+        """Push stage payload to all running env wrappers."""
+        if self.algo is None:
+            return
+        apply_curriculum_stage(self.algo, stage)
+        print(
+            f"Applied stage '{stage.name}' | threshold={stage.promote_at_win_rate:.2f} "
+            f"| mix={stage.opponent_mix}"
+        )
     
     def _register_environments(self) -> None:
         """Register environments with Ray."""
-        for i in range(self.num_servers):
-            port = self.start_port + i
-            env_name = f"pokemon_battle_{port}"
-            
-            env_creator = create_env_creator(
-                battle_format=self.config.env.battle_format,
-                server_host=self.config.env.showdown_host,
-                server_port=port,
-                reward_config=self.config.reward,
-            )
-            
-            register_env(env_name, env_creator)
-        
-        print(f"Registered {self.num_servers} environments")
-    
-    def _build_config(self) -> PPOConfig:
-        """Build PPO configuration."""
-        # Import model here to avoid circular imports
-        from src.models.battle_transformer import PokemonRLModule
-        
-        # Primary environment
-        env_name = f"pokemon_battle_{self.start_port}"
-        
-        config = (
-            PPOConfig()
-            .environment(
-                env=env_name,
-                env_config={"difficulty": "easy"},
-            )
-            .framework("torch")
-            # -----------------------------------------------------------------
-            # ENFORCE NEW API STACK (Block the old way)
-            # -----------------------------------------------------------------
-            .api_stack(
-                enable_rl_module_and_learner=True,
-                enable_env_runner_and_connector_v2=True,
-            )
-            # -----------------------------------------------------------------
-            # PPO HYPERPARAMETERS (Standard)
-            # -----------------------------------------------------------------
-            .training(
-                lr=self.config.ppo.lr,
-                gamma=self.config.ppo.gamma,
-                lambda_=self.config.ppo.lambda_,
-                clip_param=self.config.ppo.clip_param,
-                entropy_coeff=self.config.ppo.entropy_coeff,
-                vf_loss_coeff=self.config.ppo.vf_loss_coeff,
-                vf_clip_param=self.config.ppo.vf_clip_param,
-                grad_clip=self.config.ppo.grad_clip,
-                train_batch_size=self.config.ppo.train_batch_size,
-                minibatch_size=self.config.ppo.sgd_minibatch_size,
-                num_epochs=self.config.ppo.num_sgd_iter,
-            )
-            # -----------------------------------------------------------------
-            # MODEL
-            # -----------------------------------------------------------------
-            .rl_module(
-                rl_module_spec=RLModuleSpec(
-                    module_class=PokemonRLModule,
-                    model_config={
-                        "custom_model_config": self.config.model.to_dict(),
-                    },
-                )
-            )
-            # -----------------------------------------------------------------
-            # PARALLELISM
-            # -----------------------------------------------------------------
-            .env_runners(
-                num_env_runners=self.config.env.num_workers,
-                num_envs_per_env_runner=self.config.env.num_envs_per_worker,
-            )
-            # -----------------------------------------------------------------
-            # HARDWARE
-            # -----------------------------------------------------------------
-            .learners(
-                num_learners=torch.cuda.device_count() if torch.cuda.is_available() and torch.cuda.device_count() > 1 else 0,
-                num_gpus_per_learner=1 if torch.cuda.is_available() else 0,
-            )
-            # -----------------------------------------------------------------
-            # DEBUGGING
-            # -----------------------------------------------------------------
-            .debugging(log_level="WARNING")
+        initial_stage = None
+        if self.curriculum:
+            initial_stage = self.curriculum.current_stage
+
+        register_environments(
+            config=self.config,
+            num_servers=self.num_servers,
+            start_port=self.start_port,
+            initial_stage=initial_stage,
         )
-        
-        return config
+        print(
+            f"Env maps to Showdown ports {self.start_port}–{self.start_port + self.num_servers - 1} "
+            "(deterministic: RLlib worker_index × envs_per_runner + sub-env index, mod num_servers)"
+        )
+    
+    def _build_config(self):
+        """Build PPO configuration."""
+        return build_ppo_config(
+            config=self.config,
+            start_port=self.start_port,
+            num_servers=self.num_servers,
+        )
     
     def train_step(self) -> Dict[str, Any]:
         result = self.algo.train()
@@ -173,11 +168,24 @@ class PokemonTrainer:
     
     def train(self) -> None:
         """Run the training loop."""
-        # Initialize Ray
-        ray.init(
-            ignore_reinit_error=True,
-            num_gpus=torch.cuda.device_count() if torch.cuda.is_available() else 0,
-        )
+        seed = 42
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+
+        ray_tmp = os.environ.get("RAY_TMPDIR", "").strip()
+        ray_kwargs: Dict[str, Any] = {
+            "ignore_reinit_error": True,
+            "num_gpus": torch.cuda.device_count() if torch.cuda.is_available() else 0,
+        }
+        if ray_tmp:
+            ray_tmp_abs = os.path.abspath(os.path.expanduser(ray_tmp))
+            os.makedirs(ray_tmp_abs, exist_ok=True)
+            ray_kwargs["_temp_dir"] = ray_tmp_abs
+
+        ray.init(**ray_kwargs)
         
         # Register environments
         self._register_environments()
@@ -186,6 +194,21 @@ class PokemonTrainer:
         print("Building algorithm...")
         ppo_config = self._build_config()
         self.algo = ppo_config.build_algo()
+        
+        resume_path = resolve_resume_checkpoint(
+            resume_checkpoint=self.resume_checkpoint,
+            checkpoint_dir=self.config.checkpoint_dir,
+        )
+        if resume_path:
+            self.algo.restore(resume_path)
+            parsed_steps = extract_step_from_checkpoint_path(resume_path)
+            if parsed_steps is not None:
+                self.total_steps = parsed_steps
+            print(f"Restored checkpoint: {resume_path}")
+            if parsed_steps is not None:
+                print(f"Resuming from approx. steps: {parsed_steps:,}")
+            else:
+                print("Resuming from checkpoint (step count will refresh after next iteration).")
         
         print("=" * 60)
         print("Starting Training")
@@ -200,19 +223,30 @@ class PokemonTrainer:
         start_time = time.time()
 
         # Start MLflow run
-        with mlflow.start_run():
-            # Log config parameters to MLflow
-            mlflow.log_params({
-                "preset": self.config.env.battle_format,
-                "total_timesteps": self.config.total_timesteps,
-                "train_batch_size": self.config.ppo.train_batch_size,
-                "hidden_dim": self.config.model.hidden_dim,
-                "learning_rate": self.config.ppo.lr,
-                "num_workers": self.config.env.num_workers,
-            })
+        with mlflow.start_run(run_id=self.mlflow_run_id):
+            current_run = mlflow.active_run()
+            if current_run is not None:
+                print(f"MLflow run id: {current_run.info.run_id}")
+
+            # For resumed MLflow runs, avoid re-logging params that may already exist.
+            if not self.mlflow_run_id:
+                flat_params: Dict[str, Any] = {}
+                flatten_for_mlflow("", self.config.to_dict(), flat_params)
+                mlflow.log_params(flat_params)
+            else:
+                mlflow.set_tag("resumed", "true")
+                if resume_path:
+                    mlflow.set_tag("resumed_from_checkpoint", resume_path)
             
             try:
+                if self.curriculum:
+                    self._apply_curriculum_stage(self.curriculum.current_stage)
+
+                prev_steps = self.total_steps
+                prev_wall_time = time.time()
+
                 while self.total_steps < self.config.total_timesteps:
+                    iter_start = time.time()
                     # Train
                     result = self.train_step()
                     
@@ -232,6 +266,67 @@ class PokemonTrainer:
                         "episode_len_mean": len_mean,
                         "iteration": self.iteration,
                     }
+                    metrics.update(collect_ppo_metrics(result))
+
+                    outcomes = collect_recent_outcomes(self.algo)
+                    episode_stats = collect_recent_episode_stats(self.algo)
+                    metrics.update(aggregate_episode_metrics(outcomes, episode_stats))
+
+                    # Curriculum updates (training-only, binary outcomes).
+                    if self.curriculum:
+                        stage_changed = self.curriculum.update(outcomes)
+                        curriculum_metrics = self.curriculum.metrics()
+
+                        rolling_win = curriculum_metrics.get("curriculum_rolling_win_rate")
+                        if rolling_win is not None:
+                            w = float(rolling_win)
+                            metrics["curriculum_rolling_win_rate"] = w
+                            metrics["win_rate"] = w
+                        elif outcomes:
+                            wins = sum(1 for o in outcomes if o == 1)
+                            metrics["win_rate"] = float(wins / len(outcomes))
+                        metrics["curriculum_stage_idx"] = float(
+                            curriculum_metrics["curriculum_stage_idx"]
+                        )
+                        metrics["curriculum_valid_window_samples"] = float(
+                            curriculum_metrics["curriculum_valid_window_samples"]
+                        )
+                        metrics["curriculum_episodes_in_stage"] = float(
+                            curriculum_metrics["curriculum_episodes_in_stage"]
+                        )
+                        metrics["curriculum_total_episodes"] = float(
+                            curriculum_metrics["curriculum_total_episodes"]
+                        )
+
+                        if stage_changed:
+                            self._apply_curriculum_stage(self.curriculum.current_stage)
+                            mlflow.set_tag(
+                                "last_curriculum_transition",
+                                f"iter_{self.iteration}_{self.curriculum.current_stage.name}",
+                            )
+                    else:
+                        for outcome in outcomes:
+                            if outcome in {0, 1}:
+                                self._win_rate_window.append(int(outcome))
+                        if self._win_rate_window:
+                            metrics["win_rate"] = float(
+                                sum(self._win_rate_window) / len(self._win_rate_window)
+                            )
+
+                    now = time.time()
+                    metrics.update(
+                        collect_runtime_metrics(
+                            result=result,
+                            train_time_ms=(now - iter_start) * 1000.0,
+                            steps_delta=(self.total_steps - prev_steps),
+                            wall_delta_s=max(now - prev_wall_time, 1e-6),
+                        )
+                    )
+                    prev_steps = self.total_steps
+                    prev_wall_time = now
+                    metrics.update(self.system_metrics.collect())
+                    metrics.update(collect_env_memory_sentinels(self.algo))
+
                     mlflow.log_metrics(metrics, step=self.total_steps)
                     
                     # Print progress
@@ -246,33 +341,18 @@ class PokemonTrainer:
                         )
                         print(f"Checkpoint saved: {ckpt_path}")
                     
-                    # Curriculum
-                    if self.curriculum:
-                        if self.curriculum.update(self.total_steps):
-                            # Update environment difficulty
-                            self.algo.workers.foreach_worker(
-                                lambda w: w.foreach_env(
-                                    lambda e: setattr(
-                                        e, 
-                                        "difficulty", 
-                                        self.curriculum.current_stage
-                                    ) if hasattr(e, "difficulty") else None
-                                )
-                            )
-            
             except KeyboardInterrupt:
                 print("Training interrupted by user")
             
             finally:
                 # Final checkpoint
-                save_dir = os.path.abspath(f"{self.config.checkpoint_dir}/final")
-                save_result = self.algo.save(save_dir)
-                
-                final_path = save_result.checkpoint.path
-                
-                mlflow.log_artifacts(local_dir=final_path, artifact_path="final_model")
-                
-                # Summary
+                final_path = None
+                if self.algo is not None:
+                    save_dir = os.path.abspath(f"{self.config.checkpoint_dir}/final")
+                    save_result = self.algo.save(save_dir)
+                    final_path = save_result.checkpoint.path
+                    mlflow.log_artifacts(local_dir=final_path, artifact_path="final_model")
+
                 elapsed = time.time() - start_time
                 print("=" * 60)
                 print("Training Complete")
@@ -280,11 +360,12 @@ class PokemonTrainer:
                 print(f"Total Steps: {self.total_steps:,}")
                 print(f"Total Time: {elapsed/3600:.1f} hours")
                 print(f"Best Reward: {self.best_reward:.2f}")
-                print(f"Final Model: {final_path}")
+                if final_path:
+                    print(f"Final Model: {final_path}")
                 print("=" * 60)
-                
-                # Cleanup
-                self.algo.stop()
+
+                if self.algo is not None:
+                    self.algo.stop()
                 ray.shutdown()
 
 
@@ -297,15 +378,19 @@ def train(
     num_servers: int = 1,
     start_port: int = 8000,
     total_timesteps: Optional[int] = None,
+    resume_checkpoint: Optional[str] = None,
+    mlflow_run_id: Optional[str] = None,
 ) -> None:
     """
     Quick training function.
     
     Args:
-        preset: Config preset ("quick", "standard", "optimal", "large")
+        preset: Config preset ("quick", "standard", "memory_safe", "optimal", "large")
         num_servers: Number of Showdown servers
         start_port: Starting port for servers
         total_timesteps: Override total timesteps
+        resume_checkpoint: Optional RLlib checkpoint path ("latest" supported)
+        mlflow_run_id: Optional MLflow run ID to resume logging
     """
     config = get_config(preset)
     
@@ -316,6 +401,8 @@ def train(
         config=config,
         num_servers=num_servers,
         start_port=start_port,
+        resume_checkpoint=resume_checkpoint,
+        mlflow_run_id=mlflow_run_id,
     )
     
     trainer.train()

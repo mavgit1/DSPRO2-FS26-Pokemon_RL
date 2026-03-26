@@ -83,7 +83,38 @@ Use `uv run` to execute scripts within the correct environment. The main entry p
 ```bash
 uv run train_battler.py --preset quick
 ```
+
+Also run from time to time
+```bash
+uv cache clean
+```
+
 *You can pass different presets (e.g., `standard`, `optimal`, `large`) defined in `src/config/TM_optimal_config.py` depending on your hardware capabilities.*
+
+### 3. Resume Interrupted Training
+If training is interrupted, you can continue from a saved RLlib checkpoint and keep logging into the same MLflow run.
+
+1. Find the MLflow run ID you want to continue (from your MLflow UI).
+2. Restart training with:
+   ```bash
+   uv run train_battler.py \
+     --preset optimal \
+     --resume-checkpoint latest \
+     --mlflow-run-id <MLFLOW_RUN_ID>
+   ```
+
+Notes:
+- `--resume-checkpoint latest` picks the newest checkpoint under `checkpoint_dir` (default: `checkpoints`).
+- You can also pass a specific checkpoint path:
+  ```bash
+  uv run train_battler.py \
+    --preset optimal \
+    --resume-checkpoint "/absolute/path/to/checkpoints/step_1500000/checkpoint_000000" \
+    --mlflow-run-id <MLFLOW_RUN_ID>
+  ```
+- Resume both model + logs by using both flags together.
+- If you provide only `--resume-checkpoint`, model state resumes but MLflow creates a new run.
+- If you provide only `--mlflow-run-id`, logging continues in that run but training starts from a fresh model.
 
 ---
 
@@ -95,7 +126,14 @@ uv run train_battler.py --preset quick
   * **`envs/`**: Custom Gymnasium environments mapping RL to Pokémon Showdown (`battle_env.py`).
   * **`models/`**: Custom neural network architectures (e.g., `battle_transformer.py`).
   * **`teams/`**: AI-generated and static Pokémon teams for training.
-  * **`training/`**: Ray RLlib setup, custom callbacks, and curriculum managers.
+  * **`training/`**: Training orchestration and helper modules.
+    * **`trainer.py`**: Orchestration entrypoint (`PokemonTrainer`) that wires the training lifecycle.
+    * **`rllib_config_builder.py`**: RLlib PPO and environment registration builders.
+    * **`env_bridge.py`**: Worker/env bridge for curriculum payloads and env-emitted metrics.
+    * **`callbacks.py`**: Curriculum stage progression and checkpoint management helpers.
+    * **`resume.py`**: Checkpoint resume path resolution and step extraction.
+    * **`metrics/`**: Metric extraction/aggregation helpers (`ppo`, `episode`, `runtime`, flattening).
+    * **`monitoring/`**: Runtime system telemetry collectors (CPU/RAM/GPU).
 * **`scripts/`**: Executable bash scripts (server management, etc.).
 * **`examples/`**: Sandboxed scripts, notebooks, and reference players (e.g., `MaxDamagePlayer.py`).
 * **`data/`**: Datasets (e.g., BDSP Trainer Data CSVs).

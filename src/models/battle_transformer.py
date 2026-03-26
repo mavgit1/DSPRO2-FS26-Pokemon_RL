@@ -333,10 +333,40 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
     Wraps PokemonTransformerModel for compatibility.
     """
     
+    def __init__(
+        self,
+        observation_space=None,
+        action_space=None,
+        inference_only: bool = False,
+        model_config: Optional[Dict[str, Any]] = None,
+        catalog_class=None,
+        **kwargs,
+    ):
+        """
+        Initialize RLModule with the modern constructor API.
+        Keeping this explicit avoids RLlib falling back to the deprecated
+        RLModule(config=RLModuleConfig(...)) initialization path.
+        """
+        super().__init__(
+            observation_space=observation_space,
+            action_space=action_space,
+            inference_only=inference_only,
+            model_config=model_config,
+            catalog_class=catalog_class,
+            **kwargs,
+        )
+
     def setup(self):
         """Initialize the model."""
-        obs_space = self.config.observation_space
-        action_space = self.config.action_space
+        obs_space = getattr(self, "observation_space", None)
+        action_space = getattr(self, "action_space", None)
+        model_cfg = getattr(self, "model_config", None)
+
+        # Backward-compat fallback for older RLlib internals.
+        if (obs_space is None or action_space is None or model_cfg is None) and hasattr(self, "config"):
+            obs_space = obs_space or self.config.observation_space
+            action_space = action_space or self.config.action_space
+            model_cfg = model_cfg or self.config.model_config_dict
         
         num_outputs = action_space.n if hasattr(action_space, 'n') else action_space.shape[0]
         
@@ -344,7 +374,7 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
             obs_space=obs_space,
             action_space=action_space,
             num_outputs=num_outputs,
-            model_config=self.config.model_config_dict,
+            model_config=model_cfg or {},
             name="pokemon_transformer",
         )
     

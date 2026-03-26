@@ -2,7 +2,7 @@
 
 # Configuration
 START_PORT=8000
-N_SERVERS=4
+N_SERVERS=8
 SHOWDOWN_DIR="./pokemon-showdown"
 
 # Check for node
@@ -21,6 +21,7 @@ echo "Starting $N_SERVERS Pokemon Showdown servers (Ports $START_PORT-$((START_P
 pids=()
 
 for ((i=0; i<N_SERVERS; i++)); do
+    sleep 0.5
     port=$((START_PORT + i))
     
     # Check if port is open (simple check using timeout + bash tcp)
