@@ -6,7 +6,7 @@ import random
 from pathlib import Path
 from typing import Any
 
-from validate_bdsp_trainers import validate_dataset
+from scripts.validate_bdsp_trainers import validate_dataset
 
 def load_trainers(json_path: str | Path, strict: bool = False, allow_known_source_errors: bool = True) -> dict[str, Any]:
     path = Path(json_path)
