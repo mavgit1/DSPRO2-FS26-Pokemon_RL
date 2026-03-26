@@ -5,14 +5,17 @@ __pycache__/
 # Environment & Dependencies
 .venv/
 .env
+temp/*
 
 # Project specific
 checkpoints/
 logs/
 *.log
+.ray_tmp/
 
 # Submodules / External Source
 pokemon-showdown/
 
 # OS specific
 .DS_Store
+scripts/clean_ray_training_cache.sh

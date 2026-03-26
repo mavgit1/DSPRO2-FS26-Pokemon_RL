@@ -148,8 +148,7 @@ class PokemonTrainer:
         """Build PPO configuration."""
         return build_ppo_config(
             config=self.config,
-            start_port=self.start_port,
-            num_servers=self.num_servers,
+            start_port=self.start_port
         )
     
     def train_step(self) -> Dict[str, Any]:
@@ -175,10 +174,17 @@ class PokemonTrainer:
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
 
-        ray.init(
-            ignore_reinit_error=True,
-            num_gpus=torch.cuda.device_count() if torch.cuda.is_available() else 0,
-        )
+        ray_tmp = os.environ.get("RAY_TMPDIR", "").strip()
+        ray_kwargs: Dict[str, Any] = {
+            "ignore_reinit_error": True,
+            "num_gpus": torch.cuda.device_count() if torch.cuda.is_available() else 0,
+        }
+        if ray_tmp:
+            ray_tmp_abs = os.path.abspath(os.path.expanduser(ray_tmp))
+            os.makedirs(ray_tmp_abs, exist_ok=True)
+            ray_kwargs["_temp_dir"] = ray_tmp_abs
+
+        ray.init(**ray_kwargs)
         
         # Register environments
         self._register_environments()
