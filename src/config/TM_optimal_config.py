@@ -11,17 +11,17 @@ class ModelConfig:
     num_tokens: int = 13
     token_dim: int = 164
     max_id_val: int = 20000
-    embedding_dim: int = 16  # For categorical embeddings
-    
+    embedding_dim: int = 32
+
     # Transformer
-    hidden_dim: int = 256
-    num_heads: int = 4
-    num_transformer_layers: int = 2
+    hidden_dim: int = 512
+    num_heads: int = 8
+    num_transformer_layers: int = 4
     dropout: float = 0.1
-    
+
     # LSTM (for memory across turns)
-    lstm_hidden: int = 256
-    use_lstm: bool = True
+    lstm_hidden: int = 512
+    use_lstm: bool = False
     
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -41,66 +41,67 @@ class ModelConfig:
 @dataclass
 class PPOConfig:
     """Standard PPO hyperparameters."""
-    
+
     # Learning
-    lr: float = 2.5e-4              
-    
+    lr: float = 3.0e-4
+
     # Discount and GAE
-    gamma: float = 0.99             
-    lambda_: float = 0.95           
-    
+    gamma: float = 0.99
+    lambda_: float = 0.95
+
     # PPO clipping
-    clip_param: float = 0.2         
-    
+    clip_param: float = 0.2
+
     # Entropy bonus (exploration)
-    entropy_coeff: float = 0.01     
-    
+    entropy_coeff: float = 0.02
+
     # Value function
-    vf_loss_coeff: float = 0.5      
-    vf_clip_param: float = 10.0     
-    
+    vf_loss_coeff: float = 0.5
+    vf_clip_param: float = 5.0
+
     # Gradient clipping
-    grad_clip: float = 0.5          
-    
+    grad_clip: float = 0.5
+
     # Batch sizes
-    train_batch_size: int = 4096    
-    sgd_minibatch_size: int = 128   
+    train_batch_size: int = 6144
+    sgd_minibatch_size: int = 256
     num_sgd_iter: int = 10          
 
 
 @dataclass
 class EnvironmentConfig:
     """Environment configuration."""
-    
+
     # Battle settings
     battle_format: str = "gen8randombattle"
-    
+
     # Server settings
     showdown_host: str = "localhost"
     start_port: int = 8000
-    
+    num_servers: int = 8
+
     # Parallelism
-    num_workers: int = 14
+    num_workers: int = 12
     num_envs_per_worker: int = 4
 
 
 @dataclass
 class RewardConfig:
     """Reward function configuration."""
-    
+
     # Major events
     victory_reward: float = 100.0
     defeat_penalty: float = -100.0
-    
+
     # HP-based rewards
     hp_value_weight: float = 1.0
-    
+
     # Fainting rewards
-    fainted_value: float = 2.0      # Reward for knocking out opponent
-    fainted_penalty: float = 2.0    # Penalty for own Pokemon fainting
-    
+    fainted_value: float = 3.0
+    fainted_penalty: float = 3.0
+
     # Progress rewards
-    step_penalty: float = 0.0       # Small penalty per step to encourage efficiency
+    step_penalty: float = -0.02
 
 
 @dataclass
@@ -143,44 +144,44 @@ class CurriculumConfig:
         default_factory=lambda: [
             CurriculumStageConfig(
                 name="easy",
-                promote_at_win_rate=0.75,
+                promote_at_win_rate=0.85,
                 min_samples_for_promotion=50,
                 opponent_mix={"random": 1.0},
                 reward_config=RewardConfig(
                     victory_reward=80.0,
                     defeat_penalty=-80.0,
                     hp_value_weight=1.2,
-                    fainted_value=2.0,
-                    fainted_penalty=1.5,
+                    fainted_value=3.0,
+                    fainted_penalty=2.0,
                     step_penalty=0.0,
                 ),
             ),
             CurriculumStageConfig(
                 name="medium",
-                promote_at_win_rate=0.70,
+                promote_at_win_rate=0.75,
                 min_samples_for_promotion=50,
                 opponent_mix={"random": 0.5, "heuristic": 0.5},
                 reward_config=RewardConfig(
                     victory_reward=100.0,
                     defeat_penalty=-100.0,
                     hp_value_weight=1.0,
-                    fainted_value=2.0,
-                    fainted_penalty=2.0,
-                    step_penalty=0.0,
+                    fainted_value=3.0,
+                    fainted_penalty=3.0,
+                    step_penalty=-0.01,
                 ),
             ),
             CurriculumStageConfig(
                 name="hard",
-                promote_at_win_rate=1.01,  # terminal stage by default
+                promote_at_win_rate=1.01,
                 min_samples_for_promotion=50,
                 opponent_mix={"heuristic": 1.0},
                 reward_config=RewardConfig(
                     victory_reward=120.0,
                     defeat_penalty=-120.0,
                     hp_value_weight=0.8,
-                    fainted_value=2.5,
-                    fainted_penalty=2.0,
-                    step_penalty=-0.01,
+                    fainted_value=4.0,
+                    fainted_penalty=3.0,
+                    step_penalty=-0.02,
                 ),
             ),
         ]
@@ -202,7 +203,7 @@ class TrainingConfig:
     """Main training configuration."""
     
     # Duration
-    total_timesteps: int = 50_000_000
+    total_timesteps: int = 10_000_000
     
     # Checkpointing
     checkpoint_dir: str = "checkpoints"
@@ -294,7 +295,6 @@ def get_config(preset: str = "standard") -> TrainingConfig:
         ),
 
         "memory_safe": TrainingConfig(
-            # Conservative parallelism/batch sizing for long CPU-RAM stable runs.
             env=EnvironmentConfig(
                 num_workers=4,
                 num_envs_per_worker=2,
@@ -309,24 +309,6 @@ def get_config(preset: str = "standard") -> TrainingConfig:
             ppo=PPOConfig(
                 train_batch_size=2048,
                 sgd_minibatch_size=128,
-            ),
-        ),
-        
-        "optimal": TrainingConfig(
-            # Optimized for 32GB VRAM + 64GB RAM
-            env=EnvironmentConfig(
-                num_workers=14,
-                num_envs_per_worker=4,
-            ),
-            model=ModelConfig(
-                hidden_dim=512,
-                num_heads=8,
-                num_transformer_layers=4,
-                lstm_hidden=512,
-            ),
-            ppo=PPOConfig(
-                train_batch_size=8192,
-                sgd_minibatch_size=256,
             ),
         ),
         

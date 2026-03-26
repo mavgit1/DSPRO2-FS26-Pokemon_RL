@@ -49,8 +49,8 @@ def main():
     parser.add_argument(
         "--num-servers",
         type=int,
-        default=1,
-        help="Number of Showdown servers (default: 1)"
+        default=8,
+        help="Number of Showdown servers (default: 8, must match running servers)"
     )
     
     parser.add_argument(

@@ -139,11 +139,18 @@ class PokemonTrainer:
             start_port=self.start_port,
             initial_stage=initial_stage,
         )
-        print(f"Registered {self.num_servers} environments")
+        print(
+            f"Env maps to Showdown ports {self.start_port}–{self.start_port + self.num_servers - 1} "
+            "(deterministic: RLlib worker_index × envs_per_runner + sub-env index, mod num_servers)"
+        )
     
     def _build_config(self):
         """Build PPO configuration."""
-        return build_ppo_config(config=self.config, start_port=self.start_port)
+        return build_ppo_config(
+            config=self.config,
+            start_port=self.start_port,
+            num_servers=self.num_servers,
+        )
     
     def train_step(self) -> Dict[str, Any]:
         result = self.algo.train()
