@@ -578,10 +578,24 @@ def create_env_creator(
         # Resolve settings
         fmt = env_config.get("battle_format", battle_format)
         host = env_config.get("server_host", server_host)
-        port = env_config.get("server_port", server_port)
         rc = env_config.get("reward_config", reward_config or RewardConfig())
         difficulty = env_config.get("opponent_difficulty", opponent_difficulty)
         mix = env_config.get("opponent_mix", opponent_mix)
+
+        if env_config.get("server_port") is not None:
+            port = int(env_config["server_port"])
+        else:
+            num_srv = int(env_config.get("num_servers", 1))
+            start_p = int(env_config.get("start_port", server_port))
+            if num_srv <= 1:
+                port = start_p
+            else:
+                wi = int(getattr(env_config, "worker_index", 0) or 0)
+                nepw = int(env_config.get("num_envs_per_worker", 1))
+                sub_i = int(env_config.get("_pokemon_sub_env_index", 0))
+                env_config["_pokemon_sub_env_index"] = sub_i + 1
+                slot = wi * nepw + sub_i
+                port = start_p + (slot % num_srv)
         
         # Build proper websocket ServerConfiguration
         server_config = ServerConfiguration(

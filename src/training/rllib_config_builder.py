@@ -8,6 +8,7 @@ from ray.tune.registry import register_env
 from src.config.TM_optimal_config import CurriculumStageConfig, TrainingConfig
 from src.envs.battle_env import create_env_creator, get_observation_space
 
+POKEMON_BATTLE_ENV_NAME = "pokemon_battle"
 
 def register_environments(
     config: TrainingConfig,
@@ -15,30 +16,30 @@ def register_environments(
     start_port: int,
     initial_stage: Optional[CurriculumStageConfig],
 ) -> None:
-    for i in range(num_servers):
-        port = start_port + i
-        env_name = f"pokemon_battle_{port}"
-
-        env_creator = create_env_creator(
-            battle_format=config.env.battle_format,
-            server_host=config.env.showdown_host,
-            server_port=port,
-            reward_config=(initial_stage.reward_config if initial_stage else config.reward),
-            opponent_mix=(initial_stage.opponent_mix if initial_stage else None),
-        )
-
-        register_env(env_name, env_creator)
+    env_creator = create_env_creator(
+        battle_format=config.env.battle_format,
+        server_host=config.env.showdown_host,
+        server_port=start_port,
+        reward_config=(initial_stage.reward_config if initial_stage else config.reward),
+        opponent_mix=(initial_stage.opponent_mix if initial_stage else None),
+    )
+    register_env(POKEMON_BATTLE_ENV_NAME, env_creator)
 
 
-def build_ppo_config(config: TrainingConfig, start_port: int) -> PPOConfig:
+def build_ppo_config(
+    config: TrainingConfig, start_port: int, num_servers: int
+) -> PPOConfig:
     from src.models.battle_transformer import PokemonRLModule
 
-    env_name = f"pokemon_battle_{start_port}"
     return (
         PPOConfig()
         .environment(
-            env=env_name,
-            env_config={},
+            env=POKEMON_BATTLE_ENV_NAME,
+            env_config={
+                "num_servers": num_servers,
+                "start_port": start_port,
+                "num_envs_per_worker": config.env.num_envs_per_worker,
+            },
         )
         .framework("torch")
         .api_stack(

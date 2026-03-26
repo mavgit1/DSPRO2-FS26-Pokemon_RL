@@ -148,7 +148,8 @@ class PokemonTrainer:
         """Build PPO configuration."""
         return build_ppo_config(
             config=self.config,
-            start_port=self.start_port
+            start_port=self.start_port,
+            num_servers=self.num_servers,
         )
     
     def train_step(self) -> Dict[str, Any]:
