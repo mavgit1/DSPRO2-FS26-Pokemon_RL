@@ -2,7 +2,7 @@
 
 # Configuration
 START_PORT=8000
-N_SERVERS=8  # Increased from 4 to reduce Showdown contention
+N_SERVERS=8
 SHOWDOWN_DIR="./pokemon-showdown"
 
 # Check for node
