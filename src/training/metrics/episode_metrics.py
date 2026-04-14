@@ -1,4 +1,5 @@
-from typing import Dict, List
+from collections import defaultdict
+from typing import Dict, List, Optional
 
 from src.training.metrics.common import mean
 
@@ -6,6 +7,7 @@ from src.training.metrics.common import mean
 def aggregate_episode_metrics(
     outcomes: List[int],
     episode_stats: List[Dict[str, float]],
+    stage_name: Optional[str] = None,
 ) -> Dict[str, float]:
     metrics: Dict[str, float] = {}
 
@@ -20,6 +22,22 @@ def aggregate_episode_metrics(
 
     if not episode_stats:
         return metrics
+
+    # Per-opponent win rates
+    by_opponent: Dict[str, List[int]] = defaultdict(list)
+    for stat in episode_stats:
+        opp_type = stat.get("opponent_type", "unknown")
+        outcome = stat.get("outcome")
+        if outcome is not None:
+            by_opponent[opp_type].append(int(outcome))
+
+    for opp_type, opp_outcomes in by_opponent.items():
+        opp_wins = sum(opp_outcomes)
+        opp_total = len(opp_outcomes)
+        if opp_total > 0:
+            metrics[f"outcome/win_rate_vs_{opp_type}"] = float(opp_wins / opp_total)
+            metrics[f"outcome/wins_vs_{opp_type}"] = float(opp_wins)
+            metrics[f"outcome/total_vs_{opp_type}"] = float(opp_total)
 
     reward_victory = [float(s["reward_victory_component"]) for s in episode_stats if "reward_victory_component" in s]
     reward_hp = [float(s["reward_hp_diff_component"]) for s in episode_stats if "reward_hp_diff_component" in s]
@@ -56,6 +74,18 @@ def aggregate_episode_metrics(
         mean_val = mean(vals)
         if mean_val is not None:
             metrics[metric_name] = mean_val
+
+    # Stage-scoped reward tagging
+    if stage_name:
+        total_reward = [
+            float(s["reward_victory_component"]) + float(s.get("reward_hp_diff_component", 0.0))
+            + float(s.get("reward_faint_component", 0.0)) + float(s.get("reward_step_penalty_component", 0.0))
+            for s in episode_stats
+            if "reward_victory_component" in s
+        ]
+        stage_reward_mean = mean(total_reward)
+        if stage_reward_mean is not None:
+            metrics[f"episode_reward_stage/{stage_name}"] = stage_reward_mean
 
     total_action_sum = float(sum(total_actions))
     if total_action_sum > 0.0:
