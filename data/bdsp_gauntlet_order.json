@@ -1,0 +1,6366 @@
+{
+  "metadata": {
+    "created_at_utc": "2026-04-14T18:26:36.138793+00:00",
+    "input_path": "data/bdsp_trainers.json",
+    "trainer_count": 706,
+    "strict_breakpoints": true,
+    "is_valid": true,
+    "problems": []
+  },
+  "entries": [
+    {
+      "trainer_id": 3,
+      "trainer_name": "Lass Natalie",
+      "max_level": 3,
+      "avg_level": 3.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 0
+    },
+    {
+      "trainer_id": 247,
+      "trainer_name": "Lass Kaitlin",
+      "max_level": 4,
+      "avg_level": 4.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 1
+    },
+    {
+      "trainer_id": 1,
+      "trainer_name": "Youngster Tristan",
+      "max_level": 5,
+      "avg_level": 5.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 2
+    },
+    {
+      "trainer_id": 2,
+      "trainer_name": "Youngster Logan",
+      "max_level": 5,
+      "avg_level": 5.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 3
+    },
+    {
+      "trainer_id": 4,
+      "trainer_name": "Youngster Michael",
+      "max_level": 5,
+      "avg_level": 5.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 4
+    },
+    {
+      "trainer_id": 5,
+      "trainer_name": "Youngster Tyler",
+      "max_level": 5,
+      "avg_level": 5.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 5
+    },
+    {
+      "trainer_id": 246,
+      "trainer_name": "Lass Madeline",
+      "max_level": 5,
+      "avg_level": 5.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 6
+    },
+    {
+      "trainer_id": 253,
+      "trainer_name": "Picnicker Diana",
+      "max_level": 5,
+      "avg_level": 5.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 7
+    },
+    {
+      "trainer_id": 652,
+      "trainer_name": "Tower Tycoon Palmer",
+      "max_level": 5,
+      "avg_level": 5.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 8
+    },
+    {
+      "trainer_id": 264,
+      "trainer_name": "School Kid Harrison",
+      "max_level": 6,
+      "avg_level": 6.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 9
+    },
+    {
+      "trainer_id": 267,
+      "trainer_name": "School Kid Christine",
+      "max_level": 6,
+      "avg_level": 6.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 10
+    },
+    {
+      "trainer_id": 6,
+      "trainer_name": "Lass Samantha",
+      "max_level": 7,
+      "avg_level": 7.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 11
+    },
+    {
+      "trainer_id": 7,
+      "trainer_name": "Lass Sarah",
+      "max_level": 7,
+      "avg_level": 7.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 12
+    },
+    {
+      "trainer_id": 8,
+      "trainer_name": "Bug Catcher Brandon",
+      "max_level": 7,
+      "avg_level": 7.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 13
+    },
+    {
+      "trainer_id": 9,
+      "trainer_name": "Aroma Lady Teighler",
+      "max_level": 7,
+      "avg_level": 7.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 14
+    },
+    {
+      "trainer_id": 148,
+      "trainer_name": "Worker Colin",
+      "max_level": 7,
+      "avg_level": 7.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 15
+    },
+    {
+      "trainer_id": 189,
+      "trainer_name": "Camper Curtis",
+      "max_level": 7,
+      "avg_level": 7.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 16
+    },
+    {
+      "trainer_id": 270,
+      "trainer_name": "Youngster Dallas",
+      "max_level": 7,
+      "avg_level": 7.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 17
+    },
+    {
+      "trainer_id": 271,
+      "trainer_name": "Youngster Sebastian",
+      "max_level": 7,
+      "avg_level": 7.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 18
+    },
+    {
+      "trainer_id": 174,
+      "trainer_name": "Youngster Darius",
+      "max_level": 8,
+      "avg_level": 8.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 19
+    },
+    {
+      "trainer_id": 176,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 9,
+      "avg_level": 8.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 20
+    },
+    {
+      "trainer_id": 177,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 9,
+      "avg_level": 8.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 21
+    },
+    {
+      "trainer_id": 178,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 9,
+      "avg_level": 8.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 22
+    },
+    {
+      "trainer_id": 10,
+      "trainer_name": "Twins Liv",
+      "max_level": 9,
+      "avg_level": 9.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 23
+    },
+    {
+      "trainer_id": 11,
+      "trainer_name": "Twins Liz",
+      "max_level": 9,
+      "avg_level": 9.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 24
+    },
+    {
+      "trainer_id": 149,
+      "trainer_name": "Worker Mason",
+      "max_level": 9,
+      "avg_level": 9.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 25
+    },
+    {
+      "trainer_id": 221,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 9,
+      "avg_level": 9.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 26
+    },
+    {
+      "trainer_id": 317,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 9,
+      "avg_level": 9.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 27
+    },
+    {
+      "trainer_id": 318,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 9,
+      "avg_level": 9.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 28
+    },
+    {
+      "trainer_id": 18,
+      "trainer_name": "Fisher Andrew",
+      "max_level": 10,
+      "avg_level": 10.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 29
+    },
+    {
+      "trainer_id": 173,
+      "trainer_name": "Youngster Jonathon",
+      "max_level": 10,
+      "avg_level": 10.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 30
+    },
+    {
+      "trainer_id": 224,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 10,
+      "avg_level": 10.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 31
+    },
+    {
+      "trainer_id": 14,
+      "trainer_name": "Hiker Daniel",
+      "max_level": 11,
+      "avg_level": 11.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 32
+    },
+    {
+      "trainer_id": 222,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 11,
+      "avg_level": 11.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 33
+    },
+    {
+      "trainer_id": 223,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 11,
+      "avg_level": 11.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 34
+    },
+    {
+      "trainer_id": 669,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 11,
+      "avg_level": 11.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 35
+    },
+    {
+      "trainer_id": 13,
+      "trainer_name": "Picnicker Siena",
+      "max_level": 12,
+      "avg_level": 12.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 36
+    },
+    {
+      "trainer_id": 152,
+      "trainer_name": "Bug Catcher Donald",
+      "max_level": 12,
+      "avg_level": 12.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 37
+    },
+    {
+      "trainer_id": 326,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 12,
+      "avg_level": 12.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 38
+    },
+    {
+      "trainer_id": 20,
+      "trainer_name": "Fisher Zachary",
+      "max_level": 13,
+      "avg_level": 11.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 39
+    },
+    {
+      "trainer_id": 150,
+      "trainer_name": "Bug Catcher Jack",
+      "max_level": 13,
+      "avg_level": 11.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 40
+    },
+    {
+      "trainer_id": 151,
+      "trainer_name": "Bug Catcher Phillip",
+      "max_level": 13,
+      "avg_level": 11.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 41
+    },
+    {
+      "trainer_id": 315,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 13,
+      "avg_level": 13.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 42
+    },
+    {
+      "trainer_id": 316,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 13,
+      "avg_level": 13.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 43
+    },
+    {
+      "trainer_id": 487,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 13,
+      "avg_level": 13.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 44
+    },
+    {
+      "trainer_id": 488,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 13,
+      "avg_level": 13.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 45
+    },
+    {
+      "trainer_id": 489,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 13,
+      "avg_level": 13.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 46
+    },
+    {
+      "trainer_id": 490,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 13,
+      "avg_level": 13.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 47
+    },
+    {
+      "trainer_id": 491,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 13,
+      "avg_level": 13.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 48
+    },
+    {
+      "trainer_id": 492,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 13,
+      "avg_level": 13.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 49
+    },
+    {
+      "trainer_id": 175,
+      "trainer_name": "Gym Leader Roark",
+      "max_level": 14,
+      "avg_level": 12.666666666666666,
+      "team_size": 3,
+      "breakpoint": "gym_leader",
+      "order_index": 50
+    },
+    {
+      "trainer_id": 12,
+      "trainer_name": "Camper Jacob",
+      "max_level": 14,
+      "avg_level": 14.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 51
+    },
+    {
+      "trainer_id": 15,
+      "trainer_name": "Hiker Nicholas",
+      "max_level": 14,
+      "avg_level": 14.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 52
+    },
+    {
+      "trainer_id": 17,
+      "trainer_name": "Aroma Lady Elizabeth",
+      "max_level": 14,
+      "avg_level": 14.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 53
+    },
+    {
+      "trainer_id": 19,
+      "trainer_name": "Fisher Joseph",
+      "max_level": 14,
+      "avg_level": 14.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 54
+    },
+    {
+      "trainer_id": 153,
+      "trainer_name": "Lass Briana",
+      "max_level": 14,
+      "avg_level": 14.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 55
+    },
+    {
+      "trainer_id": 287,
+      "trainer_name": "Camper Zackary",
+      "max_level": 14,
+      "avg_level": 14.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 56
+    },
+    {
+      "trainer_id": 324,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 14,
+      "avg_level": 14.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 57
+    },
+    {
+      "trainer_id": 345,
+      "trainer_name": "Picnicker Karina",
+      "max_level": 14,
+      "avg_level": 14.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 58
+    },
+    {
+      "trainer_id": 65,
+      "trainer_name": "Ninja Boy Zach",
+      "max_level": 15,
+      "avg_level": 14.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 59
+    },
+    {
+      "trainer_id": 183,
+      "trainer_name": "Aroma Lady Jenna",
+      "max_level": 15,
+      "avg_level": 14.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 60
+    },
+    {
+      "trainer_id": 372,
+      "trainer_name": "Youngster Wayne",
+      "max_level": 15,
+      "avg_level": 14.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 61
+    },
+    {
+      "trainer_id": 16,
+      "trainer_name": "Battle Girl Kelsey",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 62
+    },
+    {
+      "trainer_id": 23,
+      "trainer_name": "Cyclist John",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 63
+    },
+    {
+      "trainer_id": 26,
+      "trainer_name": "Cyclist Nicole",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 64
+    },
+    {
+      "trainer_id": 28,
+      "trainer_name": "Cyclist Rachel",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 65
+    },
+    {
+      "trainer_id": 154,
+      "trainer_name": "Psychic Elijah",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 66
+    },
+    {
+      "trainer_id": 155,
+      "trainer_name": "Psychic Lindsey",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 67
+    },
+    {
+      "trainer_id": 248,
+      "trainer_name": "Lass Caroline",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 68
+    },
+    {
+      "trainer_id": 250,
+      "trainer_name": "Hiker Louis",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 69
+    },
+    {
+      "trainer_id": 284,
+      "trainer_name": "Idol Grace",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 70
+    },
+    {
+      "trainer_id": 290,
+      "trainer_name": "Camper Parker",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 71
+    },
+    {
+      "trainer_id": 301,
+      "trainer_name": "Psychic Kody",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 72
+    },
+    {
+      "trainer_id": 304,
+      "trainer_name": "Psychic Rachael",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 73
+    },
+    {
+      "trainer_id": 325,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 74
+    },
+    {
+      "trainer_id": 340,
+      "trainer_name": "Hiker Theodore",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 75
+    },
+    {
+      "trainer_id": 343,
+      "trainer_name": "Hiker Reginald",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 76
+    },
+    {
+      "trainer_id": 347,
+      "trainer_name": "Picnicker Tori",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 77
+    },
+    {
+      "trainer_id": 350,
+      "trainer_name": "Pok\u00e9 Kid Ariel",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 78
+    },
+    {
+      "trainer_id": 482,
+      "trainer_name": "Pok\u00e9mon Trainer Cheryl",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 79
+    },
+    {
+      "trainer_id": 657,
+      "trainer_name": "Scientist Travon",
+      "max_level": 15,
+      "avg_level": 15.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 80
+    },
+    {
+      "trainer_id": 44,
+      "trainer_name": "Cowgirl Shelley",
+      "max_level": 16,
+      "avg_level": 15.0,
+      "team_size": 5,
+      "breakpoint": "none",
+      "order_index": 81
+    },
+    {
+      "trainer_id": 220,
+      "trainer_name": "Commander Mars",
+      "max_level": 16,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 82
+    },
+    {
+      "trainer_id": 332,
+      "trainer_name": "Guitarist Arturo",
+      "max_level": 16,
+      "avg_level": 16.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 83
+    },
+    {
+      "trainer_id": 405,
+      "trainer_name": "Youngster Oliver",
+      "max_level": 16,
+      "avg_level": 16.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 84
+    },
+    {
+      "trainer_id": 293,
+      "trainer_name": "Collector Terry",
+      "max_level": 17,
+      "avg_level": 14.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 85
+    },
+    {
+      "trainer_id": 289,
+      "trainer_name": "Camper Diego",
+      "max_level": 17,
+      "avg_level": 15.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 86
+    },
+    {
+      "trainer_id": 32,
+      "trainer_name": "Hiker Kevyn",
+      "max_level": 17,
+      "avg_level": 16.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 87
+    },
+    {
+      "trainer_id": 42,
+      "trainer_name": "Pok\u00e9mon Breeder Albert",
+      "max_level": 17,
+      "avg_level": 16.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 88
+    },
+    {
+      "trainer_id": 43,
+      "trainer_name": "Pok\u00e9mon Breeder Jennifer",
+      "max_level": 17,
+      "avg_level": 16.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 89
+    },
+    {
+      "trainer_id": 334,
+      "trainer_name": "Ruin Maniac Gerald",
+      "max_level": 17,
+      "avg_level": 16.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 90
+    },
+    {
+      "trainer_id": 21,
+      "trainer_name": "Cyclist Axel",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 91
+    },
+    {
+      "trainer_id": 22,
+      "trainer_name": "Cyclist James",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 92
+    },
+    {
+      "trainer_id": 24,
+      "trainer_name": "Cyclist Ryan",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 93
+    },
+    {
+      "trainer_id": 25,
+      "trainer_name": "Cyclist Megan",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 94
+    },
+    {
+      "trainer_id": 27,
+      "trainer_name": "Cyclist Kayla",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 95
+    },
+    {
+      "trainer_id": 35,
+      "trainer_name": "Hiker Robert",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 96
+    },
+    {
+      "trainer_id": 41,
+      "trainer_name": "Artist William",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 97
+    },
+    {
+      "trainer_id": 184,
+      "trainer_name": "Aroma Lady Angela",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 98
+    },
+    {
+      "trainer_id": 269,
+      "trainer_name": "Beauty Lindsay",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 99
+    },
+    {
+      "trainer_id": 280,
+      "trainer_name": "Interviewers Roxy",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 100
+    },
+    {
+      "trainer_id": 281,
+      "trainer_name": "Interviewers Oli",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 101
+    },
+    {
+      "trainer_id": 282,
+      "trainer_name": "Cameraman Tevin",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 102
+    },
+    {
+      "trainer_id": 283,
+      "trainer_name": "Reporter Kinsey",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 103
+    },
+    {
+      "trainer_id": 339,
+      "trainer_name": "Lass Cassidy",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 104
+    },
+    {
+      "trainer_id": 344,
+      "trainer_name": "Hiker Lorenzo",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 105
+    },
+    {
+      "trainer_id": 348,
+      "trainer_name": "Picnicker Ana",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 106
+    },
+    {
+      "trainer_id": 349,
+      "trainer_name": "Clown Lee",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 107
+    },
+    {
+      "trainer_id": 580,
+      "trainer_name": "Lass Madeline",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 108
+    },
+    {
+      "trainer_id": 586,
+      "trainer_name": "Bug Catcher Brandon",
+      "max_level": 17,
+      "avg_level": 17.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 109
+    },
+    {
+      "trainer_id": 29,
+      "trainer_name": "Youngster Austin",
+      "max_level": 18,
+      "avg_level": 16.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 110
+    },
+    {
+      "trainer_id": 403,
+      "trainer_name": "Pok\u00e9 Fan Leonard",
+      "max_level": 18,
+      "avg_level": 16.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 111
+    },
+    {
+      "trainer_id": 33,
+      "trainer_name": "Hiker Justin",
+      "max_level": 18,
+      "avg_level": 17.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 112
+    },
+    {
+      "trainer_id": 40,
+      "trainer_name": "Aroma Lady Hannah",
+      "max_level": 18,
+      "avg_level": 17.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 113
+    },
+    {
+      "trainer_id": 428,
+      "trainer_name": "Ruin Maniac Karl",
+      "max_level": 18,
+      "avg_level": 17.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 114
+    },
+    {
+      "trainer_id": 34,
+      "trainer_name": "Battle Girl Helen",
+      "max_level": 18,
+      "avg_level": 18.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 115
+    },
+    {
+      "trainer_id": 73,
+      "trainer_name": "Police Officer Bobby",
+      "max_level": 18,
+      "avg_level": 18.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 116
+    },
+    {
+      "trainer_id": 74,
+      "trainer_name": "Police Officer Alex",
+      "max_level": 18,
+      "avg_level": 18.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 117
+    },
+    {
+      "trainer_id": 75,
+      "trainer_name": "Police Officer Dylan",
+      "max_level": 18,
+      "avg_level": 18.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 118
+    },
+    {
+      "trainer_id": 486,
+      "trainer_name": "Pok\u00e9mon Trainer Mira",
+      "max_level": 18,
+      "avg_level": 18.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 119
+    },
+    {
+      "trainer_id": 49,
+      "trainer_name": "Pok\u00e9mon Breeder Kahlil",
+      "max_level": 19,
+      "avg_level": 18.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 120
+    },
+    {
+      "trainer_id": 50,
+      "trainer_name": "Pok\u00e9mon Breeder Amber",
+      "max_level": 19,
+      "avg_level": 18.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 121
+    },
+    {
+      "trainer_id": 83,
+      "trainer_name": "Police Officer Caleb",
+      "max_level": 19,
+      "avg_level": 18.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 122
+    },
+    {
+      "trainer_id": 216,
+      "trainer_name": "Rancher Marco",
+      "max_level": 19,
+      "avg_level": 18.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 123
+    },
+    {
+      "trainer_id": 291,
+      "trainer_name": "Collector Dominique",
+      "max_level": 19,
+      "avg_level": 18.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 124
+    },
+    {
+      "trainer_id": 30,
+      "trainer_name": "Camper Anthony",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 125
+    },
+    {
+      "trainer_id": 31,
+      "trainer_name": "Picnicker Lauren",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 126
+    },
+    {
+      "trainer_id": 37,
+      "trainer_name": "Hiker Jonathan",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 127
+    },
+    {
+      "trainer_id": 38,
+      "trainer_name": "Black Belt Kyle",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 128
+    },
+    {
+      "trainer_id": 45,
+      "trainer_name": "Jogger Richard",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 129
+    },
+    {
+      "trainer_id": 46,
+      "trainer_name": "Pok\u00e9 Kid Danielle",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 130
+    },
+    {
+      "trainer_id": 47,
+      "trainer_name": "Young Couple Ty",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 131
+    },
+    {
+      "trainer_id": 48,
+      "trainer_name": "Young Couple Sue",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 132
+    },
+    {
+      "trainer_id": 64,
+      "trainer_name": "Bird Keeper Alexandra",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 133
+    },
+    {
+      "trainer_id": 69,
+      "trainer_name": "Rich Boy Jason",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 134
+    },
+    {
+      "trainer_id": 70,
+      "trainer_name": "Lady Melissa",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 135
+    },
+    {
+      "trainer_id": 71,
+      "trainer_name": "Gentleman Jeremy",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 136
+    },
+    {
+      "trainer_id": 72,
+      "trainer_name": "Madame Reina",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 137
+    },
+    {
+      "trainer_id": 77,
+      "trainer_name": "Fisher Cameron",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 138
+    },
+    {
+      "trainer_id": 200,
+      "trainer_name": "Collector Edwin",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 139
+    },
+    {
+      "trainer_id": 218,
+      "trainer_name": "Twins Emma",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 140
+    },
+    {
+      "trainer_id": 219,
+      "trainer_name": "Twins Lil",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 141
+    },
+    {
+      "trainer_id": 233,
+      "trainer_name": "Jogger Raul",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 142
+    },
+    {
+      "trainer_id": 251,
+      "trainer_name": "Parasol Lady Alexa",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 143
+    },
+    {
+      "trainer_id": 365,
+      "trainer_name": "Scientist Shaun",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 144
+    },
+    {
+      "trainer_id": 402,
+      "trainer_name": "Roughneck Kirby",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 145
+    },
+    {
+      "trainer_id": 404,
+      "trainer_name": "Pok\u00e9 Fan Rebekah",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 146
+    },
+    {
+      "trainer_id": 406,
+      "trainer_name": "Ranchers Beth",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 147
+    },
+    {
+      "trainer_id": 407,
+      "trainer_name": "Ranchers Bob",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 148
+    },
+    {
+      "trainer_id": 408,
+      "trainer_name": "Young Couple Mike",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 149
+    },
+    {
+      "trainer_id": 409,
+      "trainer_name": "Young Couple Nat",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 150
+    },
+    {
+      "trainer_id": 501,
+      "trainer_name": "Aroma Lady Elizabeth",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 151
+    },
+    {
+      "trainer_id": 519,
+      "trainer_name": "Camper Zackary",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 152
+    },
+    {
+      "trainer_id": 577,
+      "trainer_name": "Lass Samantha",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 153
+    },
+    {
+      "trainer_id": 592,
+      "trainer_name": "Picnicker Karina",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 154
+    },
+    {
+      "trainer_id": 639,
+      "trainer_name": "Youngster Tristan",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 155
+    },
+    {
+      "trainer_id": 642,
+      "trainer_name": "Youngster Dallas",
+      "max_level": 19,
+      "avg_level": 19.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 156
+    },
+    {
+      "trainer_id": 78,
+      "trainer_name": "Fisher Travis",
+      "max_level": 20,
+      "avg_level": 18.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 157
+    },
+    {
+      "trainer_id": 199,
+      "trainer_name": "Collector Fernando",
+      "max_level": 20,
+      "avg_level": 19.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 158
+    },
+    {
+      "trainer_id": 311,
+      "trainer_name": "Commander Jupiter",
+      "max_level": 20,
+      "avg_level": 19.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 159
+    },
+    {
+      "trainer_id": 256,
+      "trainer_name": "Police Officer Danny",
+      "max_level": 20,
+      "avg_level": 20.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 160
+    },
+    {
+      "trainer_id": 414,
+      "trainer_name": "Collector Eugene",
+      "max_level": 20,
+      "avg_level": 20.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 161
+    },
+    {
+      "trainer_id": 88,
+      "trainer_name": "Tuber Jared",
+      "max_level": 21,
+      "avg_level": 20.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 162
+    },
+    {
+      "trainer_id": 232,
+      "trainer_name": "Jogger Craig",
+      "max_level": 21,
+      "avg_level": 20.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 163
+    },
+    {
+      "trainer_id": 351,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 21,
+      "avg_level": 20.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 164
+    },
+    {
+      "trainer_id": 352,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 21,
+      "avg_level": 20.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 165
+    },
+    {
+      "trainer_id": 353,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 21,
+      "avg_level": 20.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 166
+    },
+    {
+      "trainer_id": 51,
+      "trainer_name": "Twins Teri",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 167
+    },
+    {
+      "trainer_id": 52,
+      "trainer_name": "Twins Tia",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 168
+    },
+    {
+      "trainer_id": 76,
+      "trainer_name": "Fisher Juan",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 169
+    },
+    {
+      "trainer_id": 79,
+      "trainer_name": "Pok\u00e9mon Ranger Taylor",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 170
+    },
+    {
+      "trainer_id": 80,
+      "trainer_name": "Pok\u00e9mon Ranger Jeffrey",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 171
+    },
+    {
+      "trainer_id": 81,
+      "trainer_name": "Pok\u00e9mon Ranger Allison",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 172
+    },
+    {
+      "trainer_id": 82,
+      "trainer_name": "Scientist Stefano",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 173
+    },
+    {
+      "trainer_id": 214,
+      "trainer_name": "Ranchers Ava",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 174
+    },
+    {
+      "trainer_id": 215,
+      "trainer_name": "Ranchers Matt",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 175
+    },
+    {
+      "trainer_id": 231,
+      "trainer_name": "Jogger Wyatt",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 176
+    },
+    {
+      "trainer_id": 252,
+      "trainer_name": "Parasol Lady Sabrina",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 177
+    },
+    {
+      "trainer_id": 412,
+      "trainer_name": "Pok\u00e9mon Breeder Kaylee",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 178
+    },
+    {
+      "trainer_id": 413,
+      "trainer_name": "Cameraman Darryl",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 179
+    },
+    {
+      "trainer_id": 415,
+      "trainer_name": "Pok\u00e9 Fan Meredith",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 180
+    },
+    {
+      "trainer_id": 417,
+      "trainer_name": "Gentleman Leonardo",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 181
+    },
+    {
+      "trainer_id": 419,
+      "trainer_name": "Lass Blythe",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 182
+    },
+    {
+      "trainer_id": 421,
+      "trainer_name": "Lady Kylie",
+      "max_level": 21,
+      "avg_level": 21.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 183
+    },
+    {
+      "trainer_id": 91,
+      "trainer_name": "Fisher Kenneth",
+      "max_level": 22,
+      "avg_level": 20.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 184
+    },
+    {
+      "trainer_id": 240,
+      "trainer_name": "Gym Leader Gardenia",
+      "max_level": 22,
+      "avg_level": 20.0,
+      "team_size": 3,
+      "breakpoint": "gym_leader",
+      "order_index": 185
+    },
+    {
+      "trainer_id": 418,
+      "trainer_name": "Madame Rebecca",
+      "max_level": 22,
+      "avg_level": 21.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 186
+    },
+    {
+      "trainer_id": 278,
+      "trainer_name": "Waitress Kati",
+      "max_level": 22,
+      "avg_level": 22.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 187
+    },
+    {
+      "trainer_id": 416,
+      "trainer_name": "PI Kendrick",
+      "max_level": 22,
+      "avg_level": 22.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 188
+    },
+    {
+      "trainer_id": 97,
+      "trainer_name": "Black Belt Gregory",
+      "max_level": 23,
+      "avg_level": 22.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 189
+    },
+    {
+      "trainer_id": 99,
+      "trainer_name": "Black Belt Nathaniel",
+      "max_level": 23,
+      "avg_level": 22.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 190
+    },
+    {
+      "trainer_id": 229,
+      "trainer_name": "Ruin Maniac Calvin",
+      "max_level": 23,
+      "avg_level": 22.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 191
+    },
+    {
+      "trainer_id": 89,
+      "trainer_name": "Tuber Chelsea",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 192
+    },
+    {
+      "trainer_id": 94,
+      "trainer_name": "Psychic Mitchell",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 193
+    },
+    {
+      "trainer_id": 96,
+      "trainer_name": "PI Carlos",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 194
+    },
+    {
+      "trainer_id": 100,
+      "trainer_name": "Jogger Scott",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 195
+    },
+    {
+      "trainer_id": 202,
+      "trainer_name": "Ace Trainer Dennis",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 196
+    },
+    {
+      "trainer_id": 211,
+      "trainer_name": "Ace Trainer Maya",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 197
+    },
+    {
+      "trainer_id": 268,
+      "trainer_name": "Beauty Cyndy",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 198
+    },
+    {
+      "trainer_id": 410,
+      "trainer_name": "Aroma Lady Alison",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 199
+    },
+    {
+      "trainer_id": 411,
+      "trainer_name": "Artist Ismael",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 200
+    },
+    {
+      "trainer_id": 420,
+      "trainer_name": "Rich Boy Roman",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 201
+    },
+    {
+      "trainer_id": 422,
+      "trainer_name": "Reporter Valerie",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 202
+    },
+    {
+      "trainer_id": 423,
+      "trainer_name": "School Kid Esteban",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 203
+    },
+    {
+      "trainer_id": 424,
+      "trainer_name": "Scientist Emilio",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 204
+    },
+    {
+      "trainer_id": 425,
+      "trainer_name": "Beauty Gabriella",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 205
+    },
+    {
+      "trainer_id": 426,
+      "trainer_name": "Beauty Harley",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 206
+    },
+    {
+      "trainer_id": 427,
+      "trainer_name": "Veteran Emanuel",
+      "max_level": 23,
+      "avg_level": 23.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 207
+    },
+    {
+      "trainer_id": 196,
+      "trainer_name": "Collector Douglas",
+      "max_level": 24,
+      "avg_level": 22.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 208
+    },
+    {
+      "trainer_id": 197,
+      "trainer_name": "Collector Brady",
+      "max_level": 24,
+      "avg_level": 22.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 209
+    },
+    {
+      "trainer_id": 292,
+      "trainer_name": "Collector Jamal",
+      "max_level": 24,
+      "avg_level": 22.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 210
+    },
+    {
+      "trainer_id": 92,
+      "trainer_name": "Ruin Maniac Bryan",
+      "max_level": 24,
+      "avg_level": 23.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 211
+    },
+    {
+      "trainer_id": 95,
+      "trainer_name": "Psychic Abigail",
+      "max_level": 24,
+      "avg_level": 23.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 212
+    },
+    {
+      "trainer_id": 217,
+      "trainer_name": "Fisher Erick",
+      "max_level": 24,
+      "avg_level": 23.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 213
+    },
+    {
+      "trainer_id": 261,
+      "trainer_name": "Sailor Damian",
+      "max_level": 24,
+      "avg_level": 24.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 214
+    },
+    {
+      "trainer_id": 364,
+      "trainer_name": "Sailor Samson",
+      "max_level": 24,
+      "avg_level": 24.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 215
+    },
+    {
+      "trainer_id": 374,
+      "trainer_name": "Tuber Caitlyn",
+      "max_level": 24,
+      "avg_level": 24.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 216
+    },
+    {
+      "trainer_id": 57,
+      "trainer_name": "Ninja Boy Joel",
+      "max_level": 25,
+      "avg_level": 24.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 217
+    },
+    {
+      "trainer_id": 58,
+      "trainer_name": "Ninja Boy Nathan",
+      "max_level": 25,
+      "avg_level": 25.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 218
+    },
+    {
+      "trainer_id": 98,
+      "trainer_name": "Black Belt Derek",
+      "max_level": 25,
+      "avg_level": 25.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 219
+    },
+    {
+      "trainer_id": 234,
+      "trainer_name": "Black Belt Colby",
+      "max_level": 25,
+      "avg_level": 25.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 220
+    },
+    {
+      "trainer_id": 235,
+      "trainer_name": "Black Belt Darren",
+      "max_level": 25,
+      "avg_level": 25.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 221
+    },
+    {
+      "trainer_id": 367,
+      "trainer_name": "Ninja Boy Brennan",
+      "max_level": 25,
+      "avg_level": 25.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 222
+    },
+    {
+      "trainer_id": 369,
+      "trainer_name": "Beauty Devon",
+      "max_level": 25,
+      "avg_level": 25.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 223
+    },
+    {
+      "trainer_id": 673,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 25,
+      "avg_level": 25.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 224
+    },
+    {
+      "trainer_id": 674,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 25,
+      "avg_level": 25.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 225
+    },
+    {
+      "trainer_id": 675,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 25,
+      "avg_level": 25.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 226
+    },
+    {
+      "trainer_id": 366,
+      "trainer_name": "Ninja Boy Fabian",
+      "max_level": 26,
+      "avg_level": 24.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 227
+    },
+    {
+      "trainer_id": 55,
+      "trainer_name": "Veteran Brian",
+      "max_level": 26,
+      "avg_level": 26.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 228
+    },
+    {
+      "trainer_id": 93,
+      "trainer_name": "Ruin Maniac Hunter",
+      "max_level": 26,
+      "avg_level": 26.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 229
+    },
+    {
+      "trainer_id": 237,
+      "trainer_name": "Black Belt Jeffery",
+      "max_level": 26,
+      "avg_level": 26.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 230
+    },
+    {
+      "trainer_id": 307,
+      "trainer_name": "Fisher Walter",
+      "max_level": 26,
+      "avg_level": 26.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 231
+    },
+    {
+      "trainer_id": 373,
+      "trainer_name": "Tuber Jacky",
+      "max_level": 26,
+      "avg_level": 26.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 232
+    },
+    {
+      "trainer_id": 53,
+      "trainer_name": "Ace Trainer Ernest",
+      "max_level": 27,
+      "avg_level": 26.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 233
+    },
+    {
+      "trainer_id": 319,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 27,
+      "avg_level": 26.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 234
+    },
+    {
+      "trainer_id": 54,
+      "trainer_name": "Ace Trainer Alyssa",
+      "max_level": 27,
+      "avg_level": 27.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 235
+    },
+    {
+      "trainer_id": 59,
+      "trainer_name": "Ninja Boy Davey",
+      "max_level": 27,
+      "avg_level": 27.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 236
+    },
+    {
+      "trainer_id": 61,
+      "trainer_name": "Bird Keeper Brianna",
+      "max_level": 27,
+      "avg_level": 27.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 237
+    },
+    {
+      "trainer_id": 62,
+      "trainer_name": "Double Team Zac",
+      "max_level": 27,
+      "avg_level": 27.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 238
+    },
+    {
+      "trainer_id": 63,
+      "trainer_name": "Double Team Jen",
+      "max_level": 27,
+      "avg_level": 27.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 239
+    },
+    {
+      "trainer_id": 67,
+      "trainer_name": "Ninja Boy Nick",
+      "max_level": 27,
+      "avg_level": 27.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 240
+    },
+    {
+      "trainer_id": 190,
+      "trainer_name": "Camper Drew",
+      "max_level": 27,
+      "avg_level": 27.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 241
+    },
+    {
+      "trainer_id": 368,
+      "trainer_name": "Ninja Boy Bruce",
+      "max_level": 27,
+      "avg_level": 27.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 242
+    },
+    {
+      "trainer_id": 495,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 28,
+      "avg_level": 26.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 243
+    },
+    {
+      "trainer_id": 496,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 28,
+      "avg_level": 26.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 244
+    },
+    {
+      "trainer_id": 497,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 28,
+      "avg_level": 26.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 245
+    },
+    {
+      "trainer_id": 498,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 28,
+      "avg_level": 26.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 246
+    },
+    {
+      "trainer_id": 499,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 28,
+      "avg_level": 26.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 247
+    },
+    {
+      "trainer_id": 500,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 28,
+      "avg_level": 26.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 248
+    },
+    {
+      "trainer_id": 123,
+      "trainer_name": "Swimmer Jessica",
+      "max_level": 28,
+      "avg_level": 28.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 249
+    },
+    {
+      "trainer_id": 125,
+      "trainer_name": "Swimmer Katelyn",
+      "max_level": 28,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 250
+    },
+    {
+      "trainer_id": 180,
+      "trainer_name": "Worker Jackson",
+      "max_level": 28,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 251
+    },
+    {
+      "trainer_id": 236,
+      "trainer_name": "Black Belt Rafael",
+      "max_level": 28,
+      "avg_level": 28.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 252
+    },
+    {
+      "trainer_id": 254,
+      "trainer_name": "Picnicker Cheyenne",
+      "max_level": 28,
+      "avg_level": 28.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 253
+    },
+    {
+      "trainer_id": 265,
+      "trainer_name": "School Kid Mackenzie",
+      "max_level": 28,
+      "avg_level": 28.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 254
+    },
+    {
+      "trainer_id": 659,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 28,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 255
+    },
+    {
+      "trainer_id": 660,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 28,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 256
+    },
+    {
+      "trainer_id": 66,
+      "trainer_name": "Black Belt Sean",
+      "max_level": 29,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 257
+    },
+    {
+      "trainer_id": 120,
+      "trainer_name": "Swimmer Adrian",
+      "max_level": 29,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 258
+    },
+    {
+      "trainer_id": 272,
+      "trainer_name": "Youngster Donny",
+      "max_level": 29,
+      "avg_level": 28.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 259
+    },
+    {
+      "trainer_id": 513,
+      "trainer_name": "Pok\u00e9mon Breeder Albert",
+      "max_level": 29,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 260
+    },
+    {
+      "trainer_id": 516,
+      "trainer_name": "Pok\u00e9mon Breeder Jennifer",
+      "max_level": 29,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 261
+    },
+    {
+      "trainer_id": 620,
+      "trainer_name": "Ninja Boy Zach",
+      "max_level": 29,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 262
+    },
+    {
+      "trainer_id": 645,
+      "trainer_name": "Tuber Jared",
+      "max_level": 29,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 263
+    },
+    {
+      "trainer_id": 56,
+      "trainer_name": "Black Belt Adam",
+      "max_level": 29,
+      "avg_level": 29.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 264
+    },
+    {
+      "trainer_id": 118,
+      "trainer_name": "Fisher Miguel",
+      "max_level": 29,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 265
+    },
+    {
+      "trainer_id": 122,
+      "trainer_name": "Swimmer Vincent",
+      "max_level": 29,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 266
+    },
+    {
+      "trainer_id": 124,
+      "trainer_name": "Swimmer Erica",
+      "max_level": 29,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 267
+    },
+    {
+      "trainer_id": 273,
+      "trainer_name": "Tuber Trenton",
+      "max_level": 29,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 268
+    },
+    {
+      "trainer_id": 275,
+      "trainer_name": "Tuber Mariel",
+      "max_level": 29,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 269
+    },
+    {
+      "trainer_id": 279,
+      "trainer_name": "Worker Gerardo",
+      "max_level": 29,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 270
+    },
+    {
+      "trainer_id": 504,
+      "trainer_name": "Artist Kevin",
+      "max_level": 29,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 271
+    },
+    {
+      "trainer_id": 581,
+      "trainer_name": "Lass Madeline",
+      "max_level": 29,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 272
+    },
+    {
+      "trainer_id": 583,
+      "trainer_name": "Hiker Theodore",
+      "max_level": 29,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 273
+    },
+    {
+      "trainer_id": 587,
+      "trainer_name": "Bug Catcher Brandon",
+      "max_level": 29,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 274
+    },
+    {
+      "trainer_id": 204,
+      "trainer_name": "Ace Trainer Allen",
+      "max_level": 30,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 275
+    },
+    {
+      "trainer_id": 241,
+      "trainer_name": "Gym Leader Wake",
+      "max_level": 30,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 276
+    },
+    {
+      "trainer_id": 242,
+      "trainer_name": "Gym Leader Maylene",
+      "max_level": 30,
+      "avg_level": 28.0,
+      "team_size": 3,
+      "breakpoint": "gym_leader",
+      "order_index": 277
+    },
+    {
+      "trainer_id": 525,
+      "trainer_name": "Cyclist John",
+      "max_level": 30,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 278
+    },
+    {
+      "trainer_id": 589,
+      "trainer_name": "Parasol Lady Alexa",
+      "max_level": 30,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 279
+    },
+    {
+      "trainer_id": 598,
+      "trainer_name": "Police Officer Danny",
+      "max_level": 30,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 280
+    },
+    {
+      "trainer_id": 617,
+      "trainer_name": "Scientist Shaun",
+      "max_level": 30,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 281
+    },
+    {
+      "trainer_id": 208,
+      "trainer_name": "Ace Trainer Catherine",
+      "max_level": 30,
+      "avg_level": 30.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 282
+    },
+    {
+      "trainer_id": 249,
+      "trainer_name": "Lass Molly",
+      "max_level": 30,
+      "avg_level": 30.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 283
+    },
+    {
+      "trainer_id": 262,
+      "trainer_name": "School Kid Chance",
+      "max_level": 30,
+      "avg_level": 30.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 284
+    },
+    {
+      "trainer_id": 333,
+      "trainer_name": "Ruin Maniac Harry",
+      "max_level": 30,
+      "avg_level": 30.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 285
+    },
+    {
+      "trainer_id": 119,
+      "trainer_name": "Fisher Luc",
+      "max_level": 31,
+      "avg_level": 27.0,
+      "team_size": 5,
+      "breakpoint": "none",
+      "order_index": 286
+    },
+    {
+      "trainer_id": 354,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 31,
+      "avg_level": 27.5,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 287
+    },
+    {
+      "trainer_id": 355,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 31,
+      "avg_level": 27.5,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 288
+    },
+    {
+      "trainer_id": 356,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 31,
+      "avg_level": 27.5,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 289
+    },
+    {
+      "trainer_id": 260,
+      "trainer_name": "Sailor Skyler",
+      "max_level": 31,
+      "avg_level": 29.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 290
+    },
+    {
+      "trainer_id": 380,
+      "trainer_name": "Worker Quentin",
+      "max_level": 31,
+      "avg_level": 29.666666666666668,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 291
+    },
+    {
+      "trainer_id": 84,
+      "trainer_name": "Swimmer Shelton",
+      "max_level": 31,
+      "avg_level": 30.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 292
+    },
+    {
+      "trainer_id": 341,
+      "trainer_name": "Hiker Damon",
+      "max_level": 31,
+      "avg_level": 30.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 293
+    },
+    {
+      "trainer_id": 39,
+      "trainer_name": "Fisher Cody",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 294
+    },
+    {
+      "trainer_id": 68,
+      "trainer_name": "Bird Keeper Katherine",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 295
+    },
+    {
+      "trainer_id": 86,
+      "trainer_name": "Swimmer Haley",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 296
+    },
+    {
+      "trainer_id": 90,
+      "trainer_name": "Sailor Paul",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 297
+    },
+    {
+      "trainer_id": 121,
+      "trainer_name": "Swimmer Erik",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 298
+    },
+    {
+      "trainer_id": 181,
+      "trainer_name": "Worker Gary",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 299
+    },
+    {
+      "trainer_id": 225,
+      "trainer_name": "Guitarist Tony",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 300
+    },
+    {
+      "trainer_id": 288,
+      "trainer_name": "Camper Lawrence",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 301
+    },
+    {
+      "trainer_id": 346,
+      "trainer_name": "Picnicker Summer",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 302
+    },
+    {
+      "trainer_id": 371,
+      "trainer_name": "Swimmer Claire",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 303
+    },
+    {
+      "trainer_id": 377,
+      "trainer_name": "Worker Willy",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 304
+    },
+    {
+      "trainer_id": 502,
+      "trainer_name": "Aroma Lady Elizabeth",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 305
+    },
+    {
+      "trainer_id": 520,
+      "trainer_name": "Camper Zackary",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 306
+    },
+    {
+      "trainer_id": 528,
+      "trainer_name": "Cyclist Kayla",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 307
+    },
+    {
+      "trainer_id": 555,
+      "trainer_name": "Fisher Joseph",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 308
+    },
+    {
+      "trainer_id": 565,
+      "trainer_name": "Gentleman Jeremy",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 309
+    },
+    {
+      "trainer_id": 578,
+      "trainer_name": "Lass Samantha",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 310
+    },
+    {
+      "trainer_id": 593,
+      "trainer_name": "Picnicker Karina",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 311
+    },
+    {
+      "trainer_id": 595,
+      "trainer_name": "Pok\u00e9 Kid Danielle",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 312
+    },
+    {
+      "trainer_id": 603,
+      "trainer_name": "Lady Melissa",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 313
+    },
+    {
+      "trainer_id": 606,
+      "trainer_name": "Pok\u00e9mon Ranger Taylor",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 314
+    },
+    {
+      "trainer_id": 640,
+      "trainer_name": "Youngster Tristan",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 315
+    },
+    {
+      "trainer_id": 643,
+      "trainer_name": "Youngster Dallas",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 316
+    },
+    {
+      "trainer_id": 670,
+      "trainer_name": "Worker Dillan",
+      "max_level": 31,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 317
+    },
+    {
+      "trainer_id": 128,
+      "trainer_name": "Fisher Cory",
+      "max_level": 32,
+      "avg_level": 30.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 318
+    },
+    {
+      "trainer_id": 85,
+      "trainer_name": "Swimmer Evan",
+      "max_level": 32,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 319
+    },
+    {
+      "trainer_id": 87,
+      "trainer_name": "Swimmer Mary",
+      "max_level": 32,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 320
+    },
+    {
+      "trainer_id": 126,
+      "trainer_name": "Swimmer Dillon",
+      "max_level": 32,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 321
+    },
+    {
+      "trainer_id": 164,
+      "trainer_name": "Black Belt David",
+      "max_level": 32,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 322
+    },
+    {
+      "trainer_id": 203,
+      "trainer_name": "Ace Trainer Cesar",
+      "max_level": 32,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 323
+    },
+    {
+      "trainer_id": 342,
+      "trainer_name": "Hiker Maurice",
+      "max_level": 32,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 324
+    },
+    {
+      "trainer_id": 610,
+      "trainer_name": "Pok\u00e9mon Ranger Allison",
+      "max_level": 32,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 325
+    },
+    {
+      "trainer_id": 323,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 32,
+      "avg_level": 32.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 326
+    },
+    {
+      "trainer_id": 328,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 32,
+      "avg_level": 32.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 327
+    },
+    {
+      "trainer_id": 662,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 32,
+      "avg_level": 32.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 328
+    },
+    {
+      "trainer_id": 379,
+      "trainer_name": "Worker Brendon",
+      "max_level": 33,
+      "avg_level": 31.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 329
+    },
+    {
+      "trainer_id": 329,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 33,
+      "avg_level": 32.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 330
+    },
+    {
+      "trainer_id": 507,
+      "trainer_name": "Battle Girl Helen",
+      "max_level": 33,
+      "avg_level": 32.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 331
+    },
+    {
+      "trainer_id": 322,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 33,
+      "avg_level": 32.333333333333336,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 332
+    },
+    {
+      "trainer_id": 127,
+      "trainer_name": "Swimmer Vanessa",
+      "max_level": 33,
+      "avg_level": 33.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 333
+    },
+    {
+      "trainer_id": 129,
+      "trainer_name": "Ace Trainer Jake",
+      "max_level": 33,
+      "avg_level": 33.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 334
+    },
+    {
+      "trainer_id": 207,
+      "trainer_name": "Ace Trainer Breanna",
+      "max_level": 33,
+      "avg_level": 33.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 335
+    },
+    {
+      "trainer_id": 239,
+      "trainer_name": "Black Belt Ricky",
+      "max_level": 33,
+      "avg_level": 33.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 336
+    },
+    {
+      "trainer_id": 298,
+      "trainer_name": "Ace Trainer Brenda",
+      "max_level": 33,
+      "avg_level": 33.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 337
+    },
+    {
+      "trainer_id": 327,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 33,
+      "avg_level": 33.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 338
+    },
+    {
+      "trainer_id": 378,
+      "trainer_name": "Worker Braden",
+      "max_level": 33,
+      "avg_level": 33.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 339
+    },
+    {
+      "trainer_id": 671,
+      "trainer_name": "Worker Holden",
+      "max_level": 33,
+      "avg_level": 33.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 340
+    },
+    {
+      "trainer_id": 672,
+      "trainer_name": "Worker Conrad",
+      "max_level": 33,
+      "avg_level": 33.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 341
+    },
+    {
+      "trainer_id": 198,
+      "trainer_name": "Collector Ivan",
+      "max_level": 34,
+      "avg_level": 30.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 342
+    },
+    {
+      "trainer_id": 130,
+      "trainer_name": "Ace Trainer Shannon",
+      "max_level": 34,
+      "avg_level": 32.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 343
+    },
+    {
+      "trainer_id": 295,
+      "trainer_name": "Ace Trainer Jonah",
+      "max_level": 34,
+      "avg_level": 32.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 344
+    },
+    {
+      "trainer_id": 321,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 34,
+      "avg_level": 32.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 345
+    },
+    {
+      "trainer_id": 661,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 34,
+      "avg_level": 32.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 346
+    },
+    {
+      "trainer_id": 285,
+      "trainer_name": "Battle Girl Tylor",
+      "max_level": 34,
+      "avg_level": 34.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 347
+    },
+    {
+      "trainer_id": 483,
+      "trainer_name": "Pok\u00e9mon Trainer Riley",
+      "max_level": 34,
+      "avg_level": 34.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 348
+    },
+    {
+      "trainer_id": 102,
+      "trainer_name": "Ace Trainer Garrett",
+      "max_level": 35,
+      "avg_level": 34.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 349
+    },
+    {
+      "trainer_id": 104,
+      "trainer_name": "Ace Trainer Maria",
+      "max_level": 35,
+      "avg_level": 34.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 350
+    },
+    {
+      "trainer_id": 111,
+      "trainer_name": "Skier Shawn",
+      "max_level": 35,
+      "avg_level": 34.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 351
+    },
+    {
+      "trainer_id": 172,
+      "trainer_name": "Veteran Grant",
+      "max_level": 35,
+      "avg_level": 34.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 352
+    },
+    {
+      "trainer_id": 36,
+      "trainer_name": "Hiker Alexander",
+      "max_level": 35,
+      "avg_level": 35.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 353
+    },
+    {
+      "trainer_id": 101,
+      "trainer_name": "Ace Trainer Blake",
+      "max_level": 35,
+      "avg_level": 35.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 354
+    },
+    {
+      "trainer_id": 105,
+      "trainer_name": "Skier Bradley",
+      "max_level": 35,
+      "avg_level": 35.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 355
+    },
+    {
+      "trainer_id": 106,
+      "trainer_name": "Skier Edward",
+      "max_level": 35,
+      "avg_level": 35.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 356
+    },
+    {
+      "trainer_id": 113,
+      "trainer_name": "Skier Lexie",
+      "max_level": 35,
+      "avg_level": 35.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 357
+    },
+    {
+      "trainer_id": 116,
+      "trainer_name": "Ninja Boy Ethan",
+      "max_level": 35,
+      "avg_level": 35.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 358
+    },
+    {
+      "trainer_id": 336,
+      "trainer_name": "Black Belt Kendal",
+      "max_level": 35,
+      "avg_level": 35.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 359
+    },
+    {
+      "trainer_id": 382,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 35,
+      "avg_level": 35.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 360
+    },
+    {
+      "trainer_id": 395,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 35,
+      "avg_level": 35.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 361
+    },
+    {
+      "trainer_id": 656,
+      "trainer_name": "Scientist Fredrick",
+      "max_level": 35,
+      "avg_level": 35.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 362
+    },
+    {
+      "trainer_id": 115,
+      "trainer_name": "Ninja Boy Antonio",
+      "max_level": 36,
+      "avg_level": 34.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 363
+    },
+    {
+      "trainer_id": 243,
+      "trainer_name": "Gym Leader Fantina",
+      "max_level": 36,
+      "avg_level": 34.0,
+      "team_size": 3,
+      "breakpoint": "gym_leader",
+      "order_index": 364
+    },
+    {
+      "trainer_id": 320,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 36,
+      "avg_level": 34.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 365
+    },
+    {
+      "trainer_id": 384,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 36,
+      "avg_level": 34.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 366
+    },
+    {
+      "trainer_id": 331,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 36,
+      "avg_level": 35.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 367
+    },
+    {
+      "trainer_id": 107,
+      "trainer_name": "Skier Kaitlyn",
+      "max_level": 36,
+      "avg_level": 36.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 368
+    },
+    {
+      "trainer_id": 385,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 36,
+      "avg_level": 36.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 369
+    },
+    {
+      "trainer_id": 386,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 36,
+      "avg_level": 36.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 370
+    },
+    {
+      "trainer_id": 387,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 36,
+      "avg_level": 36.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 371
+    },
+    {
+      "trainer_id": 357,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 37,
+      "avg_level": 33.6,
+      "team_size": 5,
+      "breakpoint": "none",
+      "order_index": 372
+    },
+    {
+      "trainer_id": 358,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 37,
+      "avg_level": 33.6,
+      "team_size": 5,
+      "breakpoint": "none",
+      "order_index": 373
+    },
+    {
+      "trainer_id": 359,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 37,
+      "avg_level": 33.6,
+      "team_size": 5,
+      "breakpoint": "none",
+      "order_index": 374
+    },
+    {
+      "trainer_id": 313,
+      "trainer_name": "Commander Saturn",
+      "max_level": 37,
+      "avg_level": 35.666666666666664,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 375
+    },
+    {
+      "trainer_id": 117,
+      "trainer_name": "Black Belt Luke",
+      "max_level": 37,
+      "avg_level": 36.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 376
+    },
+    {
+      "trainer_id": 194,
+      "trainer_name": "Ace Trainer Savannah",
+      "max_level": 37,
+      "avg_level": 36.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 377
+    },
+    {
+      "trainer_id": 103,
+      "trainer_name": "Ace Trainer Laura",
+      "max_level": 37,
+      "avg_level": 37.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 378
+    },
+    {
+      "trainer_id": 110,
+      "trainer_name": "Ace Trainer Olivia",
+      "max_level": 37,
+      "avg_level": 37.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 379
+    },
+    {
+      "trainer_id": 114,
+      "trainer_name": "Skier Madison",
+      "max_level": 37,
+      "avg_level": 37.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 380
+    },
+    {
+      "trainer_id": 192,
+      "trainer_name": "Ace Trainer Sergio",
+      "max_level": 37,
+      "avg_level": 37.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 381
+    },
+    {
+      "trainer_id": 195,
+      "trainer_name": "Ace Trainer Alicia",
+      "max_level": 37,
+      "avg_level": 37.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 382
+    },
+    {
+      "trainer_id": 330,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 37,
+      "avg_level": 37.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 383
+    },
+    {
+      "trainer_id": 381,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 37,
+      "avg_level": 37.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 384
+    },
+    {
+      "trainer_id": 383,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 37,
+      "avg_level": 37.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 385
+    },
+    {
+      "trainer_id": 393,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 37,
+      "avg_level": 37.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 386
+    },
+    {
+      "trainer_id": 399,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 37,
+      "avg_level": 37.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 387
+    },
+    {
+      "trainer_id": 655,
+      "trainer_name": "Scientist Darrius",
+      "max_level": 37,
+      "avg_level": 37.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 388
+    },
+    {
+      "trainer_id": 109,
+      "trainer_name": "Ace Trainer Dalton",
+      "max_level": 38,
+      "avg_level": 36.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 389
+    },
+    {
+      "trainer_id": 389,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 38,
+      "avg_level": 36.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 390
+    },
+    {
+      "trainer_id": 397,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 38,
+      "avg_level": 36.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 391
+    },
+    {
+      "trainer_id": 112,
+      "trainer_name": "Skier Bjorn",
+      "max_level": 38,
+      "avg_level": 37.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 392
+    },
+    {
+      "trainer_id": 391,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 38,
+      "avg_level": 37.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 393
+    },
+    {
+      "trainer_id": 514,
+      "trainer_name": "Pok\u00e9mon Breeder Albert",
+      "max_level": 38,
+      "avg_level": 37.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 394
+    },
+    {
+      "trainer_id": 517,
+      "trainer_name": "Pok\u00e9mon Breeder Jennifer",
+      "max_level": 38,
+      "avg_level": 37.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 395
+    },
+    {
+      "trainer_id": 553,
+      "trainer_name": "Rancher Marco",
+      "max_level": 38,
+      "avg_level": 37.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 396
+    },
+    {
+      "trainer_id": 563,
+      "trainer_name": "PI Carlos",
+      "max_level": 38,
+      "avg_level": 37.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 397
+    },
+    {
+      "trainer_id": 621,
+      "trainer_name": "Ninja Boy Zach",
+      "max_level": 38,
+      "avg_level": 37.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 398
+    },
+    {
+      "trainer_id": 108,
+      "trainer_name": "Skier Andrea",
+      "max_level": 38,
+      "avg_level": 38.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 399
+    },
+    {
+      "trainer_id": 390,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 38,
+      "avg_level": 38.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 400
+    },
+    {
+      "trainer_id": 394,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 38,
+      "avg_level": 38.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 401
+    },
+    {
+      "trainer_id": 398,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 38,
+      "avg_level": 38.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 402
+    },
+    {
+      "trainer_id": 400,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 38,
+      "avg_level": 38.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 403
+    },
+    {
+      "trainer_id": 582,
+      "trainer_name": "Lass Madeline",
+      "max_level": 38,
+      "avg_level": 38.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 404
+    },
+    {
+      "trainer_id": 590,
+      "trainer_name": "Parasol Lady Alexa",
+      "max_level": 38,
+      "avg_level": 38.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 405
+    },
+    {
+      "trainer_id": 179,
+      "trainer_name": "Gym Leader Byron",
+      "max_level": 39,
+      "avg_level": 37.0,
+      "team_size": 3,
+      "breakpoint": "gym_leader",
+      "order_index": 406
+    },
+    {
+      "trainer_id": 571,
+      "trainer_name": "Jogger Craig",
+      "max_level": 39,
+      "avg_level": 37.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 407
+    },
+    {
+      "trainer_id": 310,
+      "trainer_name": "Commander Mars",
+      "max_level": 39,
+      "avg_level": 37.666666666666664,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 408
+    },
+    {
+      "trainer_id": 505,
+      "trainer_name": "Artist Kevin",
+      "max_level": 39,
+      "avg_level": 38.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 409
+    },
+    {
+      "trainer_id": 526,
+      "trainer_name": "Cyclist John",
+      "max_level": 39,
+      "avg_level": 38.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 410
+    },
+    {
+      "trainer_id": 549,
+      "trainer_name": "Psychic Abigail",
+      "max_level": 39,
+      "avg_level": 38.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 411
+    },
+    {
+      "trainer_id": 584,
+      "trainer_name": "Hiker Theodore",
+      "max_level": 39,
+      "avg_level": 38.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 412
+    },
+    {
+      "trainer_id": 627,
+      "trainer_name": "Skier Bjorn",
+      "max_level": 39,
+      "avg_level": 38.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 413
+    },
+    {
+      "trainer_id": 60,
+      "trainer_name": "Dragon Tamer Patrick",
+      "max_level": 39,
+      "avg_level": 39.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 414
+    },
+    {
+      "trainer_id": 193,
+      "trainer_name": "Ace Trainer Isaiah",
+      "max_level": 39,
+      "avg_level": 39.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 415
+    },
+    {
+      "trainer_id": 388,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 39,
+      "avg_level": 39.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 416
+    },
+    {
+      "trainer_id": 536,
+      "trainer_name": "Ace Trainer Dennis",
+      "max_level": 39,
+      "avg_level": 39.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 417
+    },
+    {
+      "trainer_id": 653,
+      "trainer_name": "Ace Trainer Anton",
+      "max_level": 39,
+      "avg_level": 39.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 418
+    },
+    {
+      "trainer_id": 654,
+      "trainer_name": "Ace Trainer Brenna",
+      "max_level": 39,
+      "avg_level": 39.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 419
+    },
+    {
+      "trainer_id": 618,
+      "trainer_name": "Scientist Shaun",
+      "max_level": 40,
+      "avg_level": 38.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 420
+    },
+    {
+      "trainer_id": 314,
+      "trainer_name": "Commander Saturn",
+      "max_level": 40,
+      "avg_level": 38.666666666666664,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 421
+    },
+    {
+      "trainer_id": 508,
+      "trainer_name": "Battle Girl Helen",
+      "max_level": 40,
+      "avg_level": 39.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 422
+    },
+    {
+      "trainer_id": 599,
+      "trainer_name": "Police Officer Danny",
+      "max_level": 40,
+      "avg_level": 39.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 423
+    },
+    {
+      "trainer_id": 648,
+      "trainer_name": "Veteran Brian",
+      "max_level": 40,
+      "avg_level": 39.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 424
+    },
+    {
+      "trainer_id": 182,
+      "trainer_name": "Black Belt Philip",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 425
+    },
+    {
+      "trainer_id": 392,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 426
+    },
+    {
+      "trainer_id": 396,
+      "trainer_name": "Team Galactic Grunt",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 427
+    },
+    {
+      "trainer_id": 529,
+      "trainer_name": "Cyclist Kayla",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 428
+    },
+    {
+      "trainer_id": 541,
+      "trainer_name": "Ace Trainer Maya",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 429
+    },
+    {
+      "trainer_id": 559,
+      "trainer_name": "Twins Teri",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 430
+    },
+    {
+      "trainer_id": 560,
+      "trainer_name": "Twins Tia",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 431
+    },
+    {
+      "trainer_id": 566,
+      "trainer_name": "Gentleman Jeremy",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 432
+    },
+    {
+      "trainer_id": 575,
+      "trainer_name": "Madame Reina",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 433
+    },
+    {
+      "trainer_id": 596,
+      "trainer_name": "Pok\u00e9 Kid Danielle",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 434
+    },
+    {
+      "trainer_id": 604,
+      "trainer_name": "Lady Melissa",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 435
+    },
+    {
+      "trainer_id": 607,
+      "trainer_name": "Pok\u00e9mon Ranger Taylor",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 436
+    },
+    {
+      "trainer_id": 623,
+      "trainer_name": "Beauty Cyndy",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 437
+    },
+    {
+      "trainer_id": 625,
+      "trainer_name": "Skier Edward",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 438
+    },
+    {
+      "trainer_id": 629,
+      "trainer_name": "Skier Andrea",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 439
+    },
+    {
+      "trainer_id": 631,
+      "trainer_name": "Skier Madison",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 440
+    },
+    {
+      "trainer_id": 641,
+      "trainer_name": "Youngster Tristan",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 441
+    },
+    {
+      "trainer_id": 647,
+      "trainer_name": "Tuber Chelsea",
+      "max_level": 40,
+      "avg_level": 40.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 442
+    },
+    {
+      "trainer_id": 134,
+      "trainer_name": "Fisher Cole",
+      "max_level": 41,
+      "avg_level": 40.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 443
+    },
+    {
+      "trainer_id": 144,
+      "trainer_name": "Swimmer Paige",
+      "max_level": 41,
+      "avg_level": 40.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 444
+    },
+    {
+      "trainer_id": 611,
+      "trainer_name": "Pok\u00e9mon Ranger Allison",
+      "max_level": 41,
+      "avg_level": 40.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 445
+    },
+    {
+      "trainer_id": 136,
+      "trainer_name": "Swimmer Wesley",
+      "max_level": 41,
+      "avg_level": 41.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 446
+    },
+    {
+      "trainer_id": 143,
+      "trainer_name": "Swimmer Aubree",
+      "max_level": 41,
+      "avg_level": 41.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 447
+    },
+    {
+      "trainer_id": 145,
+      "trainer_name": "Swimmer Crystal",
+      "max_level": 41,
+      "avg_level": 41.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 448
+    },
+    {
+      "trainer_id": 146,
+      "trainer_name": "Swimmer Cassandra",
+      "max_level": 41,
+      "avg_level": 41.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 449
+    },
+    {
+      "trainer_id": 255,
+      "trainer_name": "Pok\u00e9 Kid Meghan",
+      "max_level": 41,
+      "avg_level": 41.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 450
+    },
+    {
+      "trainer_id": 569,
+      "trainer_name": "Ruin Maniac Harry",
+      "max_level": 41,
+      "avg_level": 41.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 451
+    },
+    {
+      "trainer_id": 658,
+      "trainer_name": "Pok\u00e9 Kid Janet",
+      "max_level": 41,
+      "avg_level": 41.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 452
+    },
+    {
+      "trainer_id": 244,
+      "trainer_name": "Gym Leader Candice",
+      "max_level": 42,
+      "avg_level": 39.5,
+      "team_size": 4,
+      "breakpoint": "gym_leader",
+      "order_index": 453
+    },
+    {
+      "trainer_id": 131,
+      "trainer_name": "Fisher Brett",
+      "max_level": 42,
+      "avg_level": 40.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 454
+    },
+    {
+      "trainer_id": 133,
+      "trainer_name": "Fisher George",
+      "max_level": 42,
+      "avg_level": 40.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 455
+    },
+    {
+      "trainer_id": 139,
+      "trainer_name": "Swimmer Colton",
+      "max_level": 42,
+      "avg_level": 40.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 456
+    },
+    {
+      "trainer_id": 141,
+      "trainer_name": "Swimmer Oscar",
+      "max_level": 42,
+      "avg_level": 40.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 457
+    },
+    {
+      "trainer_id": 510,
+      "trainer_name": "Bird Keeper Brianna",
+      "max_level": 42,
+      "avg_level": 40.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 458
+    },
+    {
+      "trainer_id": 545,
+      "trainer_name": "Psychic Mitchell",
+      "max_level": 42,
+      "avg_level": 40.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 459
+    },
+    {
+      "trainer_id": 132,
+      "trainer_name": "Fisher Alec",
+      "max_level": 42,
+      "avg_level": 41.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 460
+    },
+    {
+      "trainer_id": 138,
+      "trainer_name": "Swimmer Francisco",
+      "max_level": 42,
+      "avg_level": 41.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 461
+    },
+    {
+      "trainer_id": 227,
+      "trainer_name": "Guitarist Preston",
+      "max_level": 42,
+      "avg_level": 42.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 462
+    },
+    {
+      "trainer_id": 257,
+      "trainer_name": "Police Officer Thomas",
+      "max_level": 42,
+      "avg_level": 42.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 463
+    },
+    {
+      "trainer_id": 135,
+      "trainer_name": "Sailor Luther",
+      "max_level": 43,
+      "avg_level": 40.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 464
+    },
+    {
+      "trainer_id": 308,
+      "trainer_name": "Team Galactic Boss Cyrus",
+      "max_level": 43,
+      "avg_level": 41.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 465
+    },
+    {
+      "trainer_id": 137,
+      "trainer_name": "Swimmer Ricardo",
+      "max_level": 43,
+      "avg_level": 43.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 466
+    },
+    {
+      "trainer_id": 140,
+      "trainer_name": "Swimmer Troy",
+      "max_level": 43,
+      "avg_level": 43.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 467
+    },
+    {
+      "trainer_id": 142,
+      "trainer_name": "Swimmer Miranda",
+      "max_level": 43,
+      "avg_level": 43.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 468
+    },
+    {
+      "trainer_id": 147,
+      "trainer_name": "Swimmer Gabrielle",
+      "max_level": 43,
+      "avg_level": 43.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 469
+    },
+    {
+      "trainer_id": 258,
+      "trainer_name": "Rich Boy Trey",
+      "max_level": 43,
+      "avg_level": 43.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 470
+    },
+    {
+      "trainer_id": 259,
+      "trainer_name": "Sailor Marc",
+      "max_level": 43,
+      "avg_level": 43.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 471
+    },
+    {
+      "trainer_id": 274,
+      "trainer_name": "Tuber Conner",
+      "max_level": 43,
+      "avg_level": 43.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 472
+    },
+    {
+      "trainer_id": 276,
+      "trainer_name": "Tuber Holly",
+      "max_level": 43,
+      "avg_level": 43.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 473
+    },
+    {
+      "trainer_id": 370,
+      "trainer_name": "Beauty Nicola",
+      "max_level": 43,
+      "avg_level": 43.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 474
+    },
+    {
+      "trainer_id": 531,
+      "trainer_name": "Dragon Tamer Patrick",
+      "max_level": 43,
+      "avg_level": 43.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 475
+    },
+    {
+      "trainer_id": 363,
+      "trainer_name": "Sailor Zachariah",
+      "max_level": 44,
+      "avg_level": 40.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 476
+    },
+    {
+      "trainer_id": 205,
+      "trainer_name": "Ace Trainer Zachery",
+      "max_level": 44,
+      "avg_level": 44.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 477
+    },
+    {
+      "trainer_id": 209,
+      "trainer_name": "Ace Trainer Destiny",
+      "max_level": 44,
+      "avg_level": 44.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 478
+    },
+    {
+      "trainer_id": 226,
+      "trainer_name": "Guitarist Jerry",
+      "max_level": 44,
+      "avg_level": 44.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 479
+    },
+    {
+      "trainer_id": 228,
+      "trainer_name": "Guitarist Lonnie",
+      "max_level": 44,
+      "avg_level": 44.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 480
+    },
+    {
+      "trainer_id": 263,
+      "trainer_name": "School Kid Forrest",
+      "max_level": 44,
+      "avg_level": 44.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 481
+    },
+    {
+      "trainer_id": 266,
+      "trainer_name": "School Kid Tiera",
+      "max_level": 44,
+      "avg_level": 44.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 482
+    },
+    {
+      "trainer_id": 481,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 45,
+      "avg_level": 42.5,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 483
+    },
+    {
+      "trainer_id": 493,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 45,
+      "avg_level": 42.5,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 484
+    },
+    {
+      "trainer_id": 494,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 45,
+      "avg_level": 42.5,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 485
+    },
+    {
+      "trainer_id": 401,
+      "trainer_name": "Commander Mars",
+      "max_level": 45,
+      "avg_level": 42.666666666666664,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 486
+    },
+    {
+      "trainer_id": 312,
+      "trainer_name": "Commander Jupiter",
+      "max_level": 46,
+      "avg_level": 42.666666666666664,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 487
+    },
+    {
+      "trainer_id": 166,
+      "trainer_name": "Psychic Bryce",
+      "max_level": 46,
+      "avg_level": 45.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 488
+    },
+    {
+      "trainer_id": 161,
+      "trainer_name": "Veteran Clayton",
+      "max_level": 47,
+      "avg_level": 47.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 489
+    },
+    {
+      "trainer_id": 168,
+      "trainer_name": "Double Team Jo",
+      "max_level": 47,
+      "avg_level": 47.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 490
+    },
+    {
+      "trainer_id": 169,
+      "trainer_name": "Double Team Pat",
+      "max_level": 47,
+      "avg_level": 47.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 491
+    },
+    {
+      "trainer_id": 170,
+      "trainer_name": "Double Team Al",
+      "max_level": 47,
+      "avg_level": 47.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 492
+    },
+    {
+      "trainer_id": 171,
+      "trainer_name": "Double Team Kay",
+      "max_level": 47,
+      "avg_level": 47.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 493
+    },
+    {
+      "trainer_id": 156,
+      "trainer_name": "Ace Trainer Omar",
+      "max_level": 48,
+      "avg_level": 46.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 494
+    },
+    {
+      "trainer_id": 160,
+      "trainer_name": "Veteran Edgar",
+      "max_level": 48,
+      "avg_level": 46.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 495
+    },
+    {
+      "trainer_id": 167,
+      "trainer_name": "Psychic Valencia",
+      "max_level": 48,
+      "avg_level": 46.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 496
+    },
+    {
+      "trainer_id": 309,
+      "trainer_name": "Team Galactic Boss Cyrus",
+      "max_level": 48,
+      "avg_level": 46.0,
+      "team_size": 4,
+      "breakpoint": "none",
+      "order_index": 497
+    },
+    {
+      "trainer_id": 158,
+      "trainer_name": "Ace Trainer Mariah",
+      "max_level": 48,
+      "avg_level": 47.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 498
+    },
+    {
+      "trainer_id": 159,
+      "trainer_name": "Ace Trainer Sydney",
+      "max_level": 48,
+      "avg_level": 47.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 499
+    },
+    {
+      "trainer_id": 165,
+      "trainer_name": "Bird Keeper Hana",
+      "max_level": 48,
+      "avg_level": 47.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 500
+    },
+    {
+      "trainer_id": 163,
+      "trainer_name": "Dragon Tamer Clinton",
+      "max_level": 49,
+      "avg_level": 47.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 501
+    },
+    {
+      "trainer_id": 245,
+      "trainer_name": "Gym Leader Volkner",
+      "max_level": 49,
+      "avg_level": 47.25,
+      "team_size": 4,
+      "breakpoint": "gym_leader",
+      "order_index": 502
+    },
+    {
+      "trainer_id": 157,
+      "trainer_name": "Ace Trainer Henry",
+      "max_level": 49,
+      "avg_level": 49.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 503
+    },
+    {
+      "trainer_id": 162,
+      "trainer_name": "Dragon Tamer Andre",
+      "max_level": 49,
+      "avg_level": 49.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 504
+    },
+    {
+      "trainer_id": 335,
+      "trainer_name": "Black Belt Miles",
+      "max_level": 49,
+      "avg_level": 49.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 505
+    },
+    {
+      "trainer_id": 472,
+      "trainer_name": "Swimmer Glenn",
+      "max_level": 51,
+      "avg_level": 51.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 506
+    },
+    {
+      "trainer_id": 474,
+      "trainer_name": "Swimmer Sam",
+      "max_level": 51,
+      "avg_level": 51.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 507
+    },
+    {
+      "trainer_id": 477,
+      "trainer_name": "Swimmer Sophia",
+      "max_level": 52,
+      "avg_level": 51.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 508
+    },
+    {
+      "trainer_id": 479,
+      "trainer_name": "Swimmer Lydia",
+      "max_level": 52,
+      "avg_level": 52.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 509
+    },
+    {
+      "trainer_id": 515,
+      "trainer_name": "Pok\u00e9mon Breeder Albert",
+      "max_level": 53,
+      "avg_level": 52.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 510
+    },
+    {
+      "trainer_id": 518,
+      "trainer_name": "Pok\u00e9mon Breeder Jennifer",
+      "max_level": 53,
+      "avg_level": 52.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 511
+    },
+    {
+      "trainer_id": 524,
+      "trainer_name": "Collector Ivan",
+      "max_level": 53,
+      "avg_level": 52.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 512
+    },
+    {
+      "trainer_id": 622,
+      "trainer_name": "Ninja Boy Zach",
+      "max_level": 53,
+      "avg_level": 52.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 513
+    },
+    {
+      "trainer_id": 646,
+      "trainer_name": "Tuber Jared",
+      "max_level": 53,
+      "avg_level": 52.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 514
+    },
+    {
+      "trainer_id": 438,
+      "trainer_name": "Ace Trainer Rodolfo",
+      "max_level": 53,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 515
+    },
+    {
+      "trainer_id": 442,
+      "trainer_name": "Ace Trainer Quinn",
+      "max_level": 53,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 516
+    },
+    {
+      "trainer_id": 448,
+      "trainer_name": "Ace Trainer Deanna",
+      "max_level": 53,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 517
+    },
+    {
+      "trainer_id": 473,
+      "trainer_name": "Swimmer Kurt",
+      "max_level": 53,
+      "avg_level": 53.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 518
+    },
+    {
+      "trainer_id": 557,
+      "trainer_name": "Fisher Miguel",
+      "max_level": 53,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 519
+    },
+    {
+      "trainer_id": 558,
+      "trainer_name": "Fisher Alec",
+      "max_level": 53,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 520
+    },
+    {
+      "trainer_id": 588,
+      "trainer_name": "Bug Catcher Brandon",
+      "max_level": 53,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 521
+    },
+    {
+      "trainer_id": 591,
+      "trainer_name": "Parasol Lady Alexa",
+      "max_level": 53,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 522
+    },
+    {
+      "trainer_id": 619,
+      "trainer_name": "Scientist Shaun",
+      "max_level": 53,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 523
+    },
+    {
+      "trainer_id": 475,
+      "trainer_name": "Swimmer Wade",
+      "max_level": 54,
+      "avg_level": 52.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 524
+    },
+    {
+      "trainer_id": 476,
+      "trainer_name": "Swimmer Joanna",
+      "max_level": 54,
+      "avg_level": 52.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 525
+    },
+    {
+      "trainer_id": 478,
+      "trainer_name": "Swimmer Mallory",
+      "max_level": 54,
+      "avg_level": 52.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 526
+    },
+    {
+      "trainer_id": 212,
+      "trainer_name": "Psychic Maxwell",
+      "max_level": 54,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 527
+    },
+    {
+      "trainer_id": 213,
+      "trainer_name": "Psychic Brittney",
+      "max_level": 54,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 528
+    },
+    {
+      "trainer_id": 277,
+      "trainer_name": "Veteran Armando",
+      "max_level": 54,
+      "avg_level": 53.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 529
+    },
+    {
+      "trainer_id": 429,
+      "trainer_name": "Bird Keeper Audrey",
+      "max_level": 54,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 530
+    },
+    {
+      "trainer_id": 614,
+      "trainer_name": "Sailor Marc",
+      "max_level": 54,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 531
+    },
+    {
+      "trainer_id": 206,
+      "trainer_name": "Ace Trainer Ruben",
+      "max_level": 54,
+      "avg_level": 54.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 532
+    },
+    {
+      "trainer_id": 230,
+      "trainer_name": "Ruin Maniac Larry",
+      "max_level": 54,
+      "avg_level": 54.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 533
+    },
+    {
+      "trainer_id": 296,
+      "trainer_name": "Ace Trainer Micah",
+      "max_level": 54,
+      "avg_level": 54.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 534
+    },
+    {
+      "trainer_id": 299,
+      "trainer_name": "Ace Trainer Brandi",
+      "max_level": 54,
+      "avg_level": 54.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 535
+    },
+    {
+      "trainer_id": 300,
+      "trainer_name": "Ace Trainer Clarice",
+      "max_level": 54,
+      "avg_level": 54.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 536
+    },
+    {
+      "trainer_id": 305,
+      "trainer_name": "Psychic Desiree",
+      "max_level": 54,
+      "avg_level": 54.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 537
+    },
+    {
+      "trainer_id": 375,
+      "trainer_name": "Veteran Terrell",
+      "max_level": 54,
+      "avg_level": 54.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 538
+    },
+    {
+      "trainer_id": 376,
+      "trainer_name": "Veteran Brenden",
+      "max_level": 54,
+      "avg_level": 54.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 539
+    },
+    {
+      "trainer_id": 449,
+      "trainer_name": "Ace Trainer Ariana",
+      "max_level": 54,
+      "avg_level": 54.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 540
+    },
+    {
+      "trainer_id": 522,
+      "trainer_name": "Ace Trainer Dalton",
+      "max_level": 54,
+      "avg_level": 54.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 541
+    },
+    {
+      "trainer_id": 540,
+      "trainer_name": "Ace Trainer Shannon",
+      "max_level": 54,
+      "avg_level": 54.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 542
+    },
+    {
+      "trainer_id": 360,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 55,
+      "avg_level": 50.833333333333336,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 543
+    },
+    {
+      "trainer_id": 361,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 55,
+      "avg_level": 50.833333333333336,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 544
+    },
+    {
+      "trainer_id": 362,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 55,
+      "avg_level": 50.833333333333336,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 545
+    },
+    {
+      "trainer_id": 460,
+      "trainer_name": "Psychic Daisy",
+      "max_level": 55,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 546
+    },
+    {
+      "trainer_id": 306,
+      "trainer_name": "Psychic Kendra",
+      "max_level": 55,
+      "avg_level": 54.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 547
+    },
+    {
+      "trainer_id": 432,
+      "trainer_name": "Dragon Tamer Geoffrey",
+      "max_level": 55,
+      "avg_level": 54.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 548
+    },
+    {
+      "trainer_id": 458,
+      "trainer_name": "Psychic Corbin",
+      "max_level": 55,
+      "avg_level": 54.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 549
+    },
+    {
+      "trainer_id": 462,
+      "trainer_name": "Black Belt Davon",
+      "max_level": 55,
+      "avg_level": 54.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 550
+    },
+    {
+      "trainer_id": 600,
+      "trainer_name": "Police Officer Danny",
+      "max_level": 55,
+      "avg_level": 54.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 551
+    },
+    {
+      "trainer_id": 297,
+      "trainer_name": "Ace Trainer Arthur",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 552
+    },
+    {
+      "trainer_id": 431,
+      "trainer_name": "Bird Keeper Krystal",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 553
+    },
+    {
+      "trainer_id": 439,
+      "trainer_name": "Ace Trainer Saul",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 554
+    },
+    {
+      "trainer_id": 440,
+      "trainer_name": "Ace Trainer Jose",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 555
+    },
+    {
+      "trainer_id": 441,
+      "trainer_name": "Ace Trainer Felix",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 556
+    },
+    {
+      "trainer_id": 450,
+      "trainer_name": "Ace Trainer Dana",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 557
+    },
+    {
+      "trainer_id": 452,
+      "trainer_name": "Ace Trainer Meagan",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 558
+    },
+    {
+      "trainer_id": 467,
+      "trainer_name": "Pok\u00e9mon Ranger Deshawn",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 559
+    },
+    {
+      "trainer_id": 468,
+      "trainer_name": "Pok\u00e9mon Ranger Dwayne",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 560
+    },
+    {
+      "trainer_id": 503,
+      "trainer_name": "Aroma Lady Elizabeth",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 561
+    },
+    {
+      "trainer_id": 521,
+      "trainer_name": "Camper Zackary",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 562
+    },
+    {
+      "trainer_id": 523,
+      "trainer_name": "Ace Trainer Olivia",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 563
+    },
+    {
+      "trainer_id": 535,
+      "trainer_name": "Ace Trainer Jake",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 564
+    },
+    {
+      "trainer_id": 556,
+      "trainer_name": "Fisher Joseph",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 565
+    },
+    {
+      "trainer_id": 568,
+      "trainer_name": "Guitarist Tony",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 566
+    },
+    {
+      "trainer_id": 579,
+      "trainer_name": "Lass Samantha",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 567
+    },
+    {
+      "trainer_id": 594,
+      "trainer_name": "Picnicker Karina",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 568
+    },
+    {
+      "trainer_id": 597,
+      "trainer_name": "Pok\u00e9 Kid Danielle",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 569
+    },
+    {
+      "trainer_id": 601,
+      "trainer_name": "Rich Boy Trey",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 570
+    },
+    {
+      "trainer_id": 626,
+      "trainer_name": "Skier Edward",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 571
+    },
+    {
+      "trainer_id": 630,
+      "trainer_name": "Skier Andrea",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 572
+    },
+    {
+      "trainer_id": 632,
+      "trainer_name": "Skier Madison",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 573
+    },
+    {
+      "trainer_id": 644,
+      "trainer_name": "Youngster Dallas",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 574
+    },
+    {
+      "trainer_id": 649,
+      "trainer_name": "Tuber Chelsea",
+      "max_level": 55,
+      "avg_level": 55.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 575
+    },
+    {
+      "trainer_id": 469,
+      "trainer_name": "Pok\u00e9mon Ranger Ashlee",
+      "max_level": 56,
+      "avg_level": 53.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 576
+    },
+    {
+      "trainer_id": 238,
+      "trainer_name": "Black Belt Carl",
+      "max_level": 56,
+      "avg_level": 54.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 577
+    },
+    {
+      "trainer_id": 338,
+      "trainer_name": "Black Belt Willie",
+      "max_level": 56,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 578
+    },
+    {
+      "trainer_id": 471,
+      "trainer_name": "Pok\u00e9mon Ranger Krista",
+      "max_level": 56,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 579
+    },
+    {
+      "trainer_id": 210,
+      "trainer_name": "Ace Trainer Jamie",
+      "max_level": 56,
+      "avg_level": 56.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 580
+    },
+    {
+      "trainer_id": 294,
+      "trainer_name": "Dragon Tamer Joe",
+      "max_level": 56,
+      "avg_level": 56.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 581
+    },
+    {
+      "trainer_id": 302,
+      "trainer_name": "Psychic Landon",
+      "max_level": 56,
+      "avg_level": 56.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 582
+    },
+    {
+      "trainer_id": 303,
+      "trainer_name": "Psychic Deandre",
+      "max_level": 56,
+      "avg_level": 56.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 583
+    },
+    {
+      "trainer_id": 435,
+      "trainer_name": "Dragon Tamer Stanley",
+      "max_level": 56,
+      "avg_level": 56.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 584
+    },
+    {
+      "trainer_id": 443,
+      "trainer_name": "Ace Trainer Graham",
+      "max_level": 56,
+      "avg_level": 56.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 585
+    },
+    {
+      "trainer_id": 451,
+      "trainer_name": "Ace Trainer Mikayla",
+      "max_level": 56,
+      "avg_level": 56.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 586
+    },
+    {
+      "trainer_id": 456,
+      "trainer_name": "Ace Trainer Natasha",
+      "max_level": 56,
+      "avg_level": 56.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 587
+    },
+    {
+      "trainer_id": 480,
+      "trainer_name": "Veteran Harlan",
+      "max_level": 56,
+      "avg_level": 56.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 588
+    },
+    {
+      "trainer_id": 570,
+      "trainer_name": "Ruin Maniac Harry",
+      "max_level": 56,
+      "avg_level": 56.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 589
+    },
+    {
+      "trainer_id": 201,
+      "trainer_name": "Dragon Tamer Hayden",
+      "max_level": 57,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 590
+    },
+    {
+      "trainer_id": 286,
+      "trainer_name": "Bird Keeper Autumn",
+      "max_level": 57,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 591
+    },
+    {
+      "trainer_id": 430,
+      "trainer_name": "Bird Keeper Geneva",
+      "max_level": 57,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 592
+    },
+    {
+      "trainer_id": 436,
+      "trainer_name": "Dragon Tamer Drake",
+      "max_level": 57,
+      "avg_level": 57.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 593
+    },
+    {
+      "trainer_id": 444,
+      "trainer_name": "Ace Trainer Keenan",
+      "max_level": 57,
+      "avg_level": 57.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 594
+    },
+    {
+      "trainer_id": 445,
+      "trainer_name": "Ace Trainer Stefan",
+      "max_level": 57,
+      "avg_level": 57.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 595
+    },
+    {
+      "trainer_id": 446,
+      "trainer_name": "Ace Trainer Skyler",
+      "max_level": 57,
+      "avg_level": 57.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 596
+    },
+    {
+      "trainer_id": 453,
+      "trainer_name": "Ace Trainer Sandra",
+      "max_level": 57,
+      "avg_level": 57.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 597
+    },
+    {
+      "trainer_id": 457,
+      "trainer_name": "Ace Trainer Monique",
+      "max_level": 57,
+      "avg_level": 57.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 598
+    },
+    {
+      "trainer_id": 463,
+      "trainer_name": "Black Belt Griffin",
+      "max_level": 57,
+      "avg_level": 57.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 599
+    },
+    {
+      "trainer_id": 470,
+      "trainer_name": "Pok\u00e9mon Ranger Felicia",
+      "max_level": 57,
+      "avg_level": 57.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 600
+    },
+    {
+      "trainer_id": 484,
+      "trainer_name": "Pok\u00e9mon Trainer Marley",
+      "max_level": 57,
+      "avg_level": 57.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 601
+    },
+    {
+      "trainer_id": 573,
+      "trainer_name": "Black Belt Philip",
+      "max_level": 57,
+      "avg_level": 57.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 602
+    },
+    {
+      "trainer_id": 337,
+      "trainer_name": "Black Belt Eddie",
+      "max_level": 58,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 603
+    },
+    {
+      "trainer_id": 466,
+      "trainer_name": "Pok\u00e9mon Ranger Kyler",
+      "max_level": 58,
+      "avg_level": 55.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 604
+    },
+    {
+      "trainer_id": 459,
+      "trainer_name": "Psychic Sterling",
+      "max_level": 58,
+      "avg_level": 56.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 605
+    },
+    {
+      "trainer_id": 464,
+      "trainer_name": "Black Belt Ray",
+      "max_level": 58,
+      "avg_level": 56.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 606
+    },
+    {
+      "trainer_id": 461,
+      "trainer_name": "Psychic Chelsey",
+      "max_level": 58,
+      "avg_level": 57.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 607
+    },
+    {
+      "trainer_id": 547,
+      "trainer_name": "Psychic Maxwell",
+      "max_level": 58,
+      "avg_level": 57.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 608
+    },
+    {
+      "trainer_id": 554,
+      "trainer_name": "Rancher Marco",
+      "max_level": 58,
+      "avg_level": 57.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 609
+    },
+    {
+      "trainer_id": 564,
+      "trainer_name": "PI Carlos",
+      "max_level": 58,
+      "avg_level": 57.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 610
+    },
+    {
+      "trainer_id": 572,
+      "trainer_name": "Jogger Craig",
+      "max_level": 58,
+      "avg_level": 57.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 611
+    },
+    {
+      "trainer_id": 616,
+      "trainer_name": "Sailor Zachariah",
+      "max_level": 58,
+      "avg_level": 57.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 612
+    },
+    {
+      "trainer_id": 434,
+      "trainer_name": "Dragon Tamer Keegan",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 613
+    },
+    {
+      "trainer_id": 454,
+      "trainer_name": "Ace Trainer Kassandra",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 614
+    },
+    {
+      "trainer_id": 485,
+      "trainer_name": "Pok\u00e9mon Trainer Buck",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 615
+    },
+    {
+      "trainer_id": 527,
+      "trainer_name": "Cyclist John",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 616
+    },
+    {
+      "trainer_id": 546,
+      "trainer_name": "Psychic Mitchell",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 617
+    },
+    {
+      "trainer_id": 551,
+      "trainer_name": "Psychic Brittney",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 618
+    },
+    {
+      "trainer_id": 628,
+      "trainer_name": "Skier Bjorn",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 619
+    },
+    {
+      "trainer_id": 633,
+      "trainer_name": "Swimmer Wesley",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 620
+    },
+    {
+      "trainer_id": 634,
+      "trainer_name": "Swimmer Francisco",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 621
+    },
+    {
+      "trainer_id": 635,
+      "trainer_name": "Swimmer Glenn",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 622
+    },
+    {
+      "trainer_id": 637,
+      "trainer_name": "Swimmer Crystal",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 623
+    },
+    {
+      "trainer_id": 651,
+      "trainer_name": "Veteran Armando",
+      "max_level": 58,
+      "avg_level": 58.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 624
+    },
+    {
+      "trainer_id": 437,
+      "trainer_name": "Dragon Tamer Kenny",
+      "max_level": 59,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 625
+    },
+    {
+      "trainer_id": 506,
+      "trainer_name": "Artist Kevin",
+      "max_level": 59,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 626
+    },
+    {
+      "trainer_id": 550,
+      "trainer_name": "Psychic Abigail",
+      "max_level": 59,
+      "avg_level": 58.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 627
+    },
+    {
+      "trainer_id": 585,
+      "trainer_name": "Hiker Theodore",
+      "max_level": 59,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 628
+    },
+    {
+      "trainer_id": 615,
+      "trainer_name": "Sailor Marc",
+      "max_level": 59,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 629
+    },
+    {
+      "trainer_id": 447,
+      "trainer_name": "Ace Trainer Abel",
+      "max_level": 59,
+      "avg_level": 59.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 630
+    },
+    {
+      "trainer_id": 455,
+      "trainer_name": "Ace Trainer Jasmin",
+      "max_level": 59,
+      "avg_level": 59.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 631
+    },
+    {
+      "trainer_id": 465,
+      "trainer_name": "Black Belt Jarrett",
+      "max_level": 59,
+      "avg_level": 59.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 632
+    },
+    {
+      "trainer_id": 512,
+      "trainer_name": "Bird Keeper Audrey",
+      "max_level": 59,
+      "avg_level": 59.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 633
+    },
+    {
+      "trainer_id": 537,
+      "trainer_name": "Ace Trainer Dennis",
+      "max_level": 59,
+      "avg_level": 59.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 634
+    },
+    {
+      "trainer_id": 544,
+      "trainer_name": "Ace Trainer Ariana",
+      "max_level": 59,
+      "avg_level": 59.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 635
+    },
+    {
+      "trainer_id": 638,
+      "trainer_name": "Swimmer Joanna",
+      "max_level": 60,
+      "avg_level": 58.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 636
+    },
+    {
+      "trainer_id": 509,
+      "trainer_name": "Battle Girl Helen",
+      "max_level": 60,
+      "avg_level": 59.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 637
+    },
+    {
+      "trainer_id": 548,
+      "trainer_name": "Psychic Corbin",
+      "max_level": 60,
+      "avg_level": 59.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 638
+    },
+    {
+      "trainer_id": 552,
+      "trainer_name": "Psychic Daisy",
+      "max_level": 60,
+      "avg_level": 59.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 639
+    },
+    {
+      "trainer_id": 574,
+      "trainer_name": "Black Belt Davon",
+      "max_level": 60,
+      "avg_level": 59.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 640
+    },
+    {
+      "trainer_id": 650,
+      "trainer_name": "Veteran Brian",
+      "max_level": 60,
+      "avg_level": 59.0,
+      "team_size": 3,
+      "breakpoint": "none",
+      "order_index": 641
+    },
+    {
+      "trainer_id": 433,
+      "trainer_name": "Dragon Tamer Darien",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 642
+    },
+    {
+      "trainer_id": 511,
+      "trainer_name": "Bird Keeper Brianna",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 643
+    },
+    {
+      "trainer_id": 530,
+      "trainer_name": "Cyclist Kayla",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 644
+    },
+    {
+      "trainer_id": 533,
+      "trainer_name": "Dragon Tamer Hayden",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 645
+    },
+    {
+      "trainer_id": 538,
+      "trainer_name": "Ace Trainer Rodolfo",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 646
+    },
+    {
+      "trainer_id": 542,
+      "trainer_name": "Ace Trainer Maya",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 647
+    },
+    {
+      "trainer_id": 543,
+      "trainer_name": "Ace Trainer Deanna",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 648
+    },
+    {
+      "trainer_id": 561,
+      "trainer_name": "Twins Teri",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 649
+    },
+    {
+      "trainer_id": 562,
+      "trainer_name": "Twins Tia",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 650
+    },
+    {
+      "trainer_id": 567,
+      "trainer_name": "Gentleman Jeremy",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 651
+    },
+    {
+      "trainer_id": 576,
+      "trainer_name": "Madame Reina",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 652
+    },
+    {
+      "trainer_id": 602,
+      "trainer_name": "Rich Boy Trey",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 653
+    },
+    {
+      "trainer_id": 605,
+      "trainer_name": "Lady Melissa",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 654
+    },
+    {
+      "trainer_id": 608,
+      "trainer_name": "Pok\u00e9mon Ranger Taylor",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 655
+    },
+    {
+      "trainer_id": 609,
+      "trainer_name": "Pok\u00e9mon Ranger Kyler",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 656
+    },
+    {
+      "trainer_id": 613,
+      "trainer_name": "Pok\u00e9mon Ranger Ashlee",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 657
+    },
+    {
+      "trainer_id": 624,
+      "trainer_name": "Beauty Cyndy",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 658
+    },
+    {
+      "trainer_id": 636,
+      "trainer_name": "Swimmer Miranda",
+      "max_level": 60,
+      "avg_level": 60.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 659
+    },
+    {
+      "trainer_id": 612,
+      "trainer_name": "Pok\u00e9mon Ranger Allison",
+      "max_level": 61,
+      "avg_level": 60.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 660
+    },
+    {
+      "trainer_id": 534,
+      "trainer_name": "Dragon Tamer Geoffrey",
+      "max_level": 61,
+      "avg_level": 61.0,
+      "team_size": 2,
+      "breakpoint": "none",
+      "order_index": 661
+    },
+    {
+      "trainer_id": 539,
+      "trainer_name": "Ace Trainer Saul",
+      "max_level": 62,
+      "avg_level": 62.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 662
+    },
+    {
+      "trainer_id": 532,
+      "trainer_name": "Dragon Tamer Patrick",
+      "max_level": 63,
+      "avg_level": 63.0,
+      "team_size": 1,
+      "breakpoint": "none",
+      "order_index": 663
+    },
+    {
+      "trainer_id": 663,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 64,
+      "avg_level": 60.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 664
+    },
+    {
+      "trainer_id": 664,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 64,
+      "avg_level": 60.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 665
+    },
+    {
+      "trainer_id": 665,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 64,
+      "avg_level": 60.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 666
+    },
+    {
+      "trainer_id": 690,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 64,
+      "avg_level": 60.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 667
+    },
+    {
+      "trainer_id": 691,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 64,
+      "avg_level": 60.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 668
+    },
+    {
+      "trainer_id": 692,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 64,
+      "avg_level": 60.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 669
+    },
+    {
+      "trainer_id": 684,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 64,
+      "avg_level": 60.5,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 670
+    },
+    {
+      "trainer_id": 685,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 64,
+      "avg_level": 60.5,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 671
+    },
+    {
+      "trainer_id": 686,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 64,
+      "avg_level": 60.5,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 672
+    },
+    {
+      "trainer_id": 706,
+      "trainer_name": "GAME FREAK\u2019s Morimoto",
+      "max_level": 65,
+      "avg_level": 64.33333333333333,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 673
+    },
+    {
+      "trainer_id": 676,
+      "trainer_name": "Gym Leader Roark",
+      "max_level": 72,
+      "avg_level": 68.0,
+      "team_size": 6,
+      "breakpoint": "gym_leader",
+      "order_index": 674
+    },
+    {
+      "trainer_id": 677,
+      "trainer_name": "Gym Leader Gardenia",
+      "max_level": 72,
+      "avg_level": 68.83333333333333,
+      "team_size": 6,
+      "breakpoint": "gym_leader",
+      "order_index": 675
+    },
+    {
+      "trainer_id": 678,
+      "trainer_name": "Gym Leader Wake",
+      "max_level": 72,
+      "avg_level": 69.33333333333333,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 676
+    },
+    {
+      "trainer_id": 680,
+      "trainer_name": "Gym Leader Fantina",
+      "max_level": 72,
+      "avg_level": 69.5,
+      "team_size": 6,
+      "breakpoint": "gym_leader",
+      "order_index": 677
+    },
+    {
+      "trainer_id": 681,
+      "trainer_name": "Gym Leader Candice",
+      "max_level": 72,
+      "avg_level": 69.66666666666667,
+      "team_size": 6,
+      "breakpoint": "gym_leader",
+      "order_index": 678
+    },
+    {
+      "trainer_id": 682,
+      "trainer_name": "Gym Leader Byron",
+      "max_level": 72,
+      "avg_level": 70.16666666666667,
+      "team_size": 6,
+      "breakpoint": "gym_leader",
+      "order_index": 679
+    },
+    {
+      "trainer_id": 679,
+      "trainer_name": "Gym Leader Maylene",
+      "max_level": 74,
+      "avg_level": 69.0,
+      "team_size": 6,
+      "breakpoint": "gym_leader",
+      "order_index": 680
+    },
+    {
+      "trainer_id": 666,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 74,
+      "avg_level": 70.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 681
+    },
+    {
+      "trainer_id": 667,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 74,
+      "avg_level": 70.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 682
+    },
+    {
+      "trainer_id": 668,
+      "trainer_name": "Pok\u00e9mon Trainer Cedric",
+      "max_level": 74,
+      "avg_level": 70.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 683
+    },
+    {
+      "trainer_id": 687,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 74,
+      "avg_level": 70.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 684
+    },
+    {
+      "trainer_id": 688,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 74,
+      "avg_level": 70.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 685
+    },
+    {
+      "trainer_id": 689,
+      "trainer_name": "Pok\u00e9mon Trainer Lucas",
+      "max_level": 74,
+      "avg_level": 70.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 686
+    },
+    {
+      "trainer_id": 693,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 74,
+      "avg_level": 70.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 687
+    },
+    {
+      "trainer_id": 694,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 74,
+      "avg_level": 70.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 688
+    },
+    {
+      "trainer_id": 695,
+      "trainer_name": "Pok\u00e9mon Trainer Dawn",
+      "max_level": 74,
+      "avg_level": 70.0,
+      "team_size": 6,
+      "breakpoint": "none",
+      "order_index": 689
+    },
+    {
+      "trainer_id": 683,
+      "trainer_name": "Gym Leader Volkner",
+      "max_level": 75,
+      "avg_level": 69.83333333333333,
+      "team_size": 6,
+      "breakpoint": "gym_leader",
+      "order_index": 690
+    },
+    {
+      "trainer_id": 185,
+      "trainer_name": "Elite Four Aaron",
+      "max_level": 57,
+      "avg_level": 54.2,
+      "team_size": 5,
+      "breakpoint": "elite_four",
+      "order_index": 691
+    },
+    {
+      "trainer_id": 186,
+      "trainer_name": "Elite Four Bertha",
+      "max_level": 59,
+      "avg_level": 56.2,
+      "team_size": 5,
+      "breakpoint": "elite_four",
+      "order_index": 692
+    },
+    {
+      "trainer_id": 187,
+      "trainer_name": "Elite Four Flint",
+      "max_level": 61,
+      "avg_level": 58.2,
+      "team_size": 5,
+      "breakpoint": "elite_four",
+      "order_index": 693
+    },
+    {
+      "trainer_id": 188,
+      "trainer_name": "Elite Four Lucian",
+      "max_level": 63,
+      "avg_level": 60.2,
+      "team_size": 5,
+      "breakpoint": "elite_four",
+      "order_index": 694
+    },
+    {
+      "trainer_id": 696,
+      "trainer_name": "Elite Four Aaron",
+      "max_level": 69,
+      "avg_level": 66.4,
+      "team_size": 5,
+      "breakpoint": "elite_four",
+      "order_index": 695
+    },
+    {
+      "trainer_id": 697,
+      "trainer_name": "Elite Four Bertha",
+      "max_level": 71,
+      "avg_level": 68.4,
+      "team_size": 5,
+      "breakpoint": "elite_four",
+      "order_index": 696
+    },
+    {
+      "trainer_id": 698,
+      "trainer_name": "Elite Four Flint",
+      "max_level": 73,
+      "avg_level": 70.4,
+      "team_size": 5,
+      "breakpoint": "elite_four",
+      "order_index": 697
+    },
+    {
+      "trainer_id": 699,
+      "trainer_name": "Elite Four Lucian",
+      "max_level": 75,
+      "avg_level": 71.4,
+      "team_size": 5,
+      "breakpoint": "elite_four",
+      "order_index": 698
+    },
+    {
+      "trainer_id": 701,
+      "trainer_name": "Elite Four Aaron",
+      "max_level": 79,
+      "avg_level": 76.33333333333333,
+      "team_size": 6,
+      "breakpoint": "elite_four",
+      "order_index": 699
+    },
+    {
+      "trainer_id": 702,
+      "trainer_name": "Elite Four Bertha",
+      "max_level": 81,
+      "avg_level": 78.33333333333333,
+      "team_size": 6,
+      "breakpoint": "elite_four",
+      "order_index": 700
+    },
+    {
+      "trainer_id": 703,
+      "trainer_name": "Elite Four Flint",
+      "max_level": 83,
+      "avg_level": 80.0,
+      "team_size": 6,
+      "breakpoint": "elite_four",
+      "order_index": 701
+    },
+    {
+      "trainer_id": 704,
+      "trainer_name": "Elite Four Lucian",
+      "max_level": 85,
+      "avg_level": 81.5,
+      "team_size": 6,
+      "breakpoint": "elite_four",
+      "order_index": 702
+    },
+    {
+      "trainer_id": 191,
+      "trainer_name": "Champion Cynthia",
+      "max_level": 66,
+      "avg_level": 62.166666666666664,
+      "team_size": 6,
+      "breakpoint": "champion",
+      "order_index": 703
+    },
+    {
+      "trainer_id": 700,
+      "trainer_name": "Champion Cynthia",
+      "max_level": 78,
+      "avg_level": 75.33333333333333,
+      "team_size": 6,
+      "breakpoint": "champion",
+      "order_index": 704
+    },
+    {
+      "trainer_id": 705,
+      "trainer_name": "Champion Cynthia",
+      "max_level": 88,
+      "avg_level": 85.5,
+      "team_size": 6,
+      "breakpoint": "champion",
+      "order_index": 705
+    }
+  ]
+}
