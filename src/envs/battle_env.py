@@ -336,6 +336,8 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         self._episode_switch_actions = 0
         self._episode_attack_actions = 0
         self._recent_action_stats: List[Dict[str, float]] = []
+        self._recent_observation_samples: List[Dict[str, Any]] = []
+        self._recent_observation_cap = 64
 
         initial_key = self._opponent_key_from_instance(opponent)
         self._opponent_pool[initial_key] = opponent
@@ -405,7 +407,10 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             self.env.reset_tracking_state()
         if hasattr(self.env, "consume_fallback_events"):
             self.env.consume_fallback_events()
-        return super().reset(*args, **kwargs)
+        result = super().reset(*args, **kwargs)
+        obs = result[0] if isinstance(result, tuple) and len(result) > 0 else result
+        self._record_observation_sample(obs)
+        return result
 
     def step(self, action):
         if action is not None:
@@ -439,7 +444,29 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
                     "episode_fallback_events": float(fallback_events),
                 }
             )
+        obs = result[0] if isinstance(result, tuple) and len(result) > 0 else None
+        self._record_observation_sample(obs)
         return result
+
+    def _record_observation_sample(self, obs: Any) -> None:
+        if not isinstance(obs, dict):
+            return
+        required = {"obs", "species", "items", "abilities", "action_mask"}
+        if not required.issubset(set(obs.keys())):
+            return
+        try:
+            sample = {
+                "obs": np.asarray(obs["obs"]).astype(np.float32, copy=False),
+                "species": np.asarray(obs["species"]).astype(np.int64, copy=False),
+                "items": np.asarray(obs["items"]).astype(np.int64, copy=False),
+                "abilities": np.asarray(obs["abilities"]).astype(np.int64, copy=False),
+                "action_mask": np.asarray(obs["action_mask"]).astype(np.float32, copy=False),
+            }
+        except Exception:
+            return
+        self._recent_observation_samples.append(sample)
+        if len(self._recent_observation_samples) > self._recent_observation_cap:
+            self._recent_observation_samples = self._recent_observation_samples[-self._recent_observation_cap :]
 
     def set_opponent_mix(self, opponent_mix: Dict[str, float]) -> None:
         self._opponent_mix = self._normalize_opponent_mix(opponent_mix)
@@ -475,9 +502,18 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             merged.append(item)
         return merged
 
+    def pop_recent_observation_samples(self, max_samples: int = 3) -> List[Dict[str, Any]]:
+        max_samples = max(0, int(max_samples))
+        if max_samples == 0:
+            return []
+        samples = self._recent_observation_samples[:max_samples]
+        self._recent_observation_samples = self._recent_observation_samples[max_samples:]
+        return samples
+
     def get_memory_counters(self) -> Dict[str, float]:
         out = {
             "wrapper_recent_action_stats_len": float(len(self._recent_action_stats)),
+            "wrapper_recent_observation_samples_len": float(len(self._recent_observation_samples)),
             "wrapper_opponent_pool_len": float(len(self._opponent_pool)),
         }
         if hasattr(self.env, "get_memory_counters"):

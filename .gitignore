@@ -12,6 +12,8 @@ checkpoints/
 logs/
 *.log
 .ray_tmp/
+mlflow.db
+mlruns/
 
 # Submodules / External Source
 pokemon-showdown/

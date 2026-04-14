@@ -1,7 +1,9 @@
+import json
 import os
 import random
 import time
 from collections import deque
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 import mlflow
@@ -15,6 +17,7 @@ from src.training.curriculum import CurriculumManager
 from src.training.env_bridge import (
     apply_curriculum_stage,
     collect_env_memory_sentinels,
+    collect_recent_observation_samples,
     collect_recent_episode_stats,
     collect_recent_outcomes,
 )
@@ -91,6 +94,12 @@ class PokemonTrainer:
         self.iteration = 0
         self.best_reward = float('-inf')
         self.system_metrics = SystemMetricsCollector()
+        self.diag_samples_per_iteration = int(os.environ.get("DIAG_SAMPLES_PER_ITER", "3"))
+        self.diag_max_saved_samples = int(os.environ.get("DIAG_MAX_SAVED_SAMPLES", "300"))
+        self.diag_output_path = Path("logs/validation/decision_diagnostics_samples.json")
+        self._diag_samples_saved = 0
+        self._diag_pruned_total = 0
+        self._diag_records: list[Dict[str, Any]] = []
 
     def _validate_curriculum_config(self) -> None:
         if not self.curriculum:
@@ -157,6 +166,126 @@ class PokemonTrainer:
         self.total_steps = int(result.get("num_env_steps_sampled_lifetime", self.total_steps))
         self.iteration += 1
         return result
+
+    def _get_diagnostic_analyzer(self):
+        if self.algo is None:
+            return None
+        module = None
+        get_module = getattr(self.algo, "get_module", None)
+        if callable(get_module):
+            try:
+                module = get_module("default_policy")
+            except Exception:
+                try:
+                    module = get_module()
+                except Exception:
+                    module = None
+
+        if module is not None:
+            analyze_fn = getattr(module, "analyze_observation", None)
+            if callable(analyze_fn):
+                return analyze_fn
+
+        get_policy = getattr(self.algo, "get_policy", None)
+        if callable(get_policy):
+            try:
+                policy = get_policy()
+                model = getattr(policy, "model", None)
+                analyze_fn = getattr(model, "analyze_observation", None)
+                if callable(analyze_fn):
+                    return analyze_fn
+            except Exception:
+                return None
+        return None
+
+    @staticmethod
+    def _to_batched_obs(obs_sample: Dict[str, Any]) -> Dict[str, torch.Tensor]:
+        obs = torch.as_tensor(obs_sample["obs"], dtype=torch.float32)
+        species = torch.as_tensor(obs_sample["species"], dtype=torch.long)
+        items = torch.as_tensor(obs_sample["items"], dtype=torch.long)
+        abilities = torch.as_tensor(obs_sample["abilities"], dtype=torch.long)
+        action_mask = torch.as_tensor(obs_sample["action_mask"], dtype=torch.float32)
+
+        if obs.dim() == 2:
+            obs = obs.unsqueeze(0)
+        if species.dim() == 1:
+            species = species.unsqueeze(0)
+        if items.dim() == 1:
+            items = items.unsqueeze(0)
+        if abilities.dim() == 1:
+            abilities = abilities.unsqueeze(0)
+        if action_mask.dim() == 1:
+            action_mask = action_mask.unsqueeze(0)
+
+        return {
+            "obs": obs,
+            "species": species,
+            "items": items,
+            "abilities": abilities,
+            "action_mask": action_mask,
+        }
+
+    def _record_decision_diagnostics(self) -> Dict[str, float]:
+        metrics: Dict[str, float] = {
+            "diag/samples_collected_iteration": 0.0,
+            "diag/samples_saved_total": float(self._diag_samples_saved),
+            "diag/samples_pruned_total": float(self._diag_pruned_total),
+        }
+        analyze_fn = self._get_diagnostic_analyzer()
+        if analyze_fn is None:
+            return metrics
+
+        raw_samples = collect_recent_observation_samples(
+            self.algo, max_samples_per_env=self.diag_samples_per_iteration
+        )
+        if not raw_samples:
+            return metrics
+
+        selected = raw_samples[: self.diag_samples_per_iteration]
+        new_records: list[Dict[str, Any]] = []
+        for sample in selected:
+            try:
+                diag = analyze_fn(self._to_batched_obs(sample), top_k=3)
+            except Exception:
+                continue
+            new_records.append(
+                {
+                    "iteration": self.iteration,
+                    "total_steps": self.total_steps,
+                    "diagnostics": diag,
+                }
+            )
+
+        if not new_records:
+            return metrics
+
+        self._diag_records.extend(new_records)
+        if len(self._diag_records) > self.diag_max_saved_samples:
+            overflow = len(self._diag_records) - self.diag_max_saved_samples
+            self._diag_records = self._diag_records[overflow:]
+            self._diag_pruned_total += overflow
+
+        self._diag_samples_saved = len(self._diag_records)
+        self.diag_output_path.parent.mkdir(parents=True, exist_ok=True)
+        self.diag_output_path.write_text(
+            json.dumps(
+                {
+                    "meta": {
+                        "max_saved_samples": self.diag_max_saved_samples,
+                        "samples_per_iteration": self.diag_samples_per_iteration,
+                        "pruned_total": self._diag_pruned_total,
+                    },
+                    "samples": self._diag_records,
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+        metrics["diag/samples_collected_iteration"] = float(len(new_records))
+        metrics["diag/samples_saved_total"] = float(self._diag_samples_saved)
+        metrics["diag/samples_pruned_total"] = float(self._diag_pruned_total)
+        return metrics
     
     def should_checkpoint(self) -> bool:
         """Check if we should save a checkpoint."""
@@ -326,6 +455,7 @@ class PokemonTrainer:
                     prev_wall_time = now
                     metrics.update(self.system_metrics.collect())
                     metrics.update(collect_env_memory_sentinels(self.algo))
+                    metrics.update(self._record_decision_diagnostics())
 
                     mlflow.log_metrics(metrics, step=self.total_steps)
                     

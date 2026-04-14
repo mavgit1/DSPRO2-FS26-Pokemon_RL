@@ -184,6 +184,102 @@ class PokemonTransformerModel(nn.Module):
         x = self.input_norm(x)
         
         return x
+
+    def _embed_obs_parts(self, obs_dict: Dict[str, TensorType]) -> Dict[str, TensorType]:
+        """
+        Build per-component token features before concatenation.
+        """
+        base_obs = obs_dict["obs"].float()
+        species = obs_dict["species"].long()
+        items = obs_dict["items"].long()
+        abilities = obs_dict["abilities"].long()
+
+        return {
+            "base_obs": base_obs,
+            "species_emb": self.species_embed(species),
+            "item_emb": self.item_embed(items),
+            "ability_emb": self.ability_embed(abilities),
+        }
+
+    def analyze_observation(
+        self,
+        obs_dict: Dict[str, TensorType],
+        top_k: int = 3,
+    ) -> Dict[str, Any]:
+        """
+        Return actionable diagnostics:
+        - decision confidence (top prob, margin, entropy)
+        - per-token saliency for selected action
+        - component contribution strengths (base/species/item/ability)
+        """
+        action_mask = obs_dict.get("action_mask")
+        parts = self._embed_obs_parts(obs_dict)
+        x = torch.cat(
+            [
+                parts["base_obs"],
+                parts["species_emb"],
+                parts["item_emb"],
+                parts["ability_emb"],
+            ],
+            dim=-1,
+        )
+        x = self.input_norm(self.input_proj(x))
+        x.retain_grad()
+
+        encoded = self._transformer_forward(x)
+        cls_token = self._get_cls_token(encoded)
+        logits = self.policy_head(cls_token)
+        if action_mask is not None:
+            mask = action_mask.clamp(min=1e-8)
+            logits = logits - (1.0 - mask) * 1e8
+
+        probs = torch.softmax(logits, dim=-1)
+        top_vals, top_idxs = torch.topk(probs, k=min(top_k, probs.shape[-1]), dim=-1)
+        top_prob = top_vals[:, 0]
+        runner_up = top_vals[:, 1] if top_vals.shape[-1] > 1 else torch.zeros_like(top_prob)
+        margin = top_prob - runner_up
+        entropy = -(probs * torch.log(probs.clamp(min=1e-8))).sum(dim=-1)
+
+        selected_idx = top_idxs[:, 0]
+        selected_logit = logits.gather(1, selected_idx.unsqueeze(1)).mean()
+
+        self.zero_grad(set_to_none=True)
+        selected_logit.backward()
+        token_saliency = x.grad.norm(dim=-1)  # [batch, tokens]
+
+        weight = self.input_proj.weight
+        base_w = weight[:, : self.token_dim]
+        species_w = weight[:, self.token_dim : self.token_dim + self.embedding_dim]
+        item_w = weight[:, self.token_dim + self.embedding_dim : self.token_dim + 2 * self.embedding_dim]
+        ability_w = weight[:, self.token_dim + 2 * self.embedding_dim :]
+
+        base_proj = torch.einsum("btd,hd->bth", parts["base_obs"], base_w)
+        species_proj = torch.einsum("btd,hd->bth", parts["species_emb"], species_w)
+        item_proj = torch.einsum("btd,hd->bth", parts["item_emb"], item_w)
+        ability_proj = torch.einsum("btd,hd->bth", parts["ability_emb"], ability_w)
+
+        component_scores = {
+            "base_obs": float(base_proj.norm(dim=-1).mean().detach().cpu()),
+            "species": float(species_proj.norm(dim=-1).mean().detach().cpu()),
+            "item": float(item_proj.norm(dim=-1).mean().detach().cpu()),
+            "ability": float(ability_proj.norm(dim=-1).mean().detach().cpu()),
+        }
+
+        top_actions = [
+            {"action": int(a), "prob": float(p)}
+            for a, p in zip(top_idxs[0].detach().cpu().tolist(), top_vals[0].detach().cpu().tolist())
+        ]
+
+        return {
+            "decision_confidence": {
+                "top_prob_mean": float(top_prob.mean().detach().cpu()),
+                "margin_mean": float(margin.mean().detach().cpu()),
+                "entropy_mean": float(entropy.mean().detach().cpu()),
+                "top_actions_batch0": top_actions,
+            },
+            "token_importance": token_saliency.detach().cpu().tolist(),
+            "component_importance": component_scores,
+        }
     
     def _transformer_forward(self, x: TensorType) -> TensorType:
         """Apply transformer encoder."""
@@ -455,3 +551,6 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
     
     def get_initial_state(self):
         return self.model.get_initial_state()
+
+    def analyze_observation(self, obs_dict, top_k: int = 3):
+        return self.model.analyze_observation(obs_dict=obs_dict, top_k=top_k)
