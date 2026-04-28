@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import random
+import socket
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -13,7 +14,11 @@ from src.config.TM_optimal_config import TrainingConfig, get_config
 from src.envs.battle_env import create_env_creator
 from src.training.resume import resolve_resume_checkpoint
 from src.training.rllib_config_builder import build_ppo_config, register_environments
-from src.validation.metrics import BattleResult, aggregate_validation_metrics
+from src.validation.metrics import (
+    BattleResult,
+    aggregate_validation_metrics,
+    build_validation_diagnostics,
+)
 from src.validation.protocols import ValidationProtocol
 from src.validation.teams import fixed_pair_battle_specs, load_team_manifest
 
@@ -55,6 +60,7 @@ def run_validation(
             f"Could not resolve checkpoint '{checkpoint}' in {config.checkpoint_dir}"
         )
     checkpoint_path = str(Path(checkpoint_path).expanduser().resolve())
+    _ensure_showdown_server(config.env.showdown_host, start_port)
 
     ray.init(ignore_reinit_error=True, num_gpus=0)
     algo = None
@@ -120,6 +126,7 @@ def run_validation(
             "max_steps_per_battle": max_steps_per_battle,
         },
         "metrics": metrics,
+        "diagnostics": build_validation_diagnostics(results),
         "episodes": [result.to_dict() for result in results],
     }
 
@@ -128,6 +135,18 @@ def _seed_everything(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
+
+
+def _ensure_showdown_server(host: str, port: int) -> None:
+    """Fail fast if the expected Pokemon Showdown server is unavailable."""
+    try:
+        with socket.create_connection((host, port), timeout=2.0):
+            return
+    except OSError as exc:
+        raise ConnectionError(
+            f"Pokemon Showdown server is not reachable at {host}:{port}. "
+            "Start the server before running validation."
+        ) from exc
 
 
 def _build_validation_env(

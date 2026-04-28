@@ -124,7 +124,7 @@ def main() -> int:
             team_manifest=str(args.team_manifest) if args.team_manifest else None,
             battle_format=args.battle_format,
         )
-    except (FileNotFoundError, NotImplementedError, RuntimeError) as exc:
+    except (ConnectionError, FileNotFoundError, NotImplementedError, RuntimeError) as exc:
         print(f"Validation failed: {exc}", file=sys.stderr)
         return 1
     report_path = write_validation_report(report, args.output_json)
