@@ -6,16 +6,14 @@ import random
 
 from poke_env.battle.abstract_battle import AbstractBattle
 from poke_env.environment.singles_env import SinglesEnv
-from poke_env.ps_client.server_configuration import (
-    ServerConfiguration,
-    LocalhostServerConfiguration,
-)
+from poke_env.ps_client.server_configuration import ServerConfiguration
 from poke_env.player import RandomPlayer, SimpleHeuristicsPlayer
 from poke_env.environment.single_agent_wrapper import SingleAgentWrapper
 from poke_env.ps_client.account_configuration import AccountConfiguration
 
 from src.models.embedding import (
     embed_battle,
+    is_native_switch_action,
     NUM_TOKENS,
     TOKEN_DIM,
     MAX_ID_VAL,
@@ -416,8 +414,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         if action is not None:
             action_int = int(action)
             self._episode_total_actions += 1
-            # In poke-env singles indexing, switches are in upper action ids.
-            if action_int >= 16:
+            if is_native_switch_action(action_int):
                 self._episode_switch_actions += 1
             else:
                 self._episode_attack_actions += 1

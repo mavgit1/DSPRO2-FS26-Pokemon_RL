@@ -43,6 +43,8 @@ TRACKED_EFFECTS = [
 NUM_TOKENS = 13          # 1 global + 6 our team + 6 opponent team
 TOKEN_DIM = 164
 MAX_ID_VAL = 20000
+ACTION_SPACE_N = 22
+NATIVE_SWITCH_ACTIONS = range(0, 6)
 
 
 # =============================================================================
@@ -367,8 +369,7 @@ def get_action_mask(battle: AbstractBattle) -> np.ndarray:
     """
     Generate action mask for valid actions.
     
-    Action space layout (gen8randombattle - 22 actions):
-        - 0-3: Moves
+    Action space layout (gen8randombattle - 22 native poke-env actions):
         - 0-5: Switches
         - 6-9: Moves
         - 10-13: Mega Evolution
@@ -384,10 +385,9 @@ def get_action_mask(battle: AbstractBattle) -> np.ndarray:
     # For gen8 singles the action space is 22:
     # 0-5 switches, 6-9 moves, 10-13 mega, 14-17 z-move, 18-21 dynamax.
     # Use poke-env's own converter so mask indices exactly match env semantics.
-    action_space_n = 22
-    mask = np.zeros(action_space_n, dtype=np.float32)
+    mask = np.zeros(ACTION_SPACE_N, dtype=np.float32)
 
-    for action in range(action_space_n):
+    for action in range(ACTION_SPACE_N):
         try:
             SinglesEnv.action_to_order(
                 np.int64(action),
@@ -409,6 +409,11 @@ def get_action_mask(battle: AbstractBattle) -> np.ndarray:
 def get_valid_action_indices(battle: AbstractBattle) -> List[int]:
     """Get list of valid action indices."""
     return [i for i, valid in enumerate(get_action_mask(battle)) if valid]
+
+
+def is_native_switch_action(action: int) -> bool:
+    """Return whether a native gen8 singles poke-env action is a switch."""
+    return int(action) in NATIVE_SWITCH_ACTIONS
 
 
 # =============================================================================
