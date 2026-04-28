@@ -206,6 +206,36 @@ class CurriculumConfig:
 
 
 @dataclass
+class ValidationScheduleConfig:
+    """Scheduled checkpoint validation during training."""
+
+    enabled: bool = True
+    freq_steps: int = 100_000
+    protocols: List[str] = field(
+        default_factory=lambda: ["smoke", "fixed_paired", "mirror"]
+    )
+    fixed_pair_manifest: str = "data/validation/gen8_random_battle_team_pairs.json"
+    mirror_manifest: str = "data/validation/gen8_random_battle_mirror_teams.json"
+    max_steps_per_battle: int = 500
+    seed: int = 42
+    num_servers: int = 1
+    continue_on_failure: bool = True
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "enabled": self.enabled,
+            "freq_steps": self.freq_steps,
+            "protocols": list(self.protocols),
+            "fixed_pair_manifest": self.fixed_pair_manifest,
+            "mirror_manifest": self.mirror_manifest,
+            "max_steps_per_battle": self.max_steps_per_battle,
+            "seed": self.seed,
+            "num_servers": self.num_servers,
+            "continue_on_failure": self.continue_on_failure,
+        }
+
+
+@dataclass
 class TrainingConfig:
     """Main training configuration."""
     
@@ -231,6 +261,7 @@ class TrainingConfig:
     # Evaluation
     evaluation_interval: int = 100_000
     evaluation_duration: int = 100
+    validation: ValidationScheduleConfig = field(default_factory=ValidationScheduleConfig)
     
     # Sub-configs
     model: ModelConfig = field(default_factory=ModelConfig)
@@ -245,6 +276,7 @@ class TrainingConfig:
             "checkpoint_freq": self.checkpoint_freq,
             "num_gpus": self.num_gpus,
             "curriculum": self.curriculum.to_dict(),
+            "validation": self.validation.to_dict(),
             "model": self.model.to_dict(),
             "ppo": {
                 "lr": self.ppo.lr,

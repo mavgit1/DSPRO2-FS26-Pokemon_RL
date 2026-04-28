@@ -99,6 +99,22 @@ def main() -> int:
         help="Log validation metrics and report artifact to MLflow.",
     )
     parser.add_argument(
+        "--mlflow-run-id",
+        default=None,
+        help="Existing MLflow run ID to log validation metrics into.",
+    )
+    parser.add_argument(
+        "--mlflow-step",
+        type=int,
+        default=None,
+        help="MLflow step for validation metrics.",
+    )
+    parser.add_argument(
+        "--metric-prefix",
+        default=None,
+        help="Prefix applied to validation metric keys when logging to MLflow.",
+    )
+    parser.add_argument(
         "--experiment-name",
         default="Pokemon_RL_CheckpointValidation",
         help="MLflow experiment name for checkpoint validation.",
@@ -136,6 +152,9 @@ def main() -> int:
             metrics=report["metrics"],
             experiment_name=args.experiment_name,
             run_name=f"{protocol.name}_validation",
+            run_id=args.mlflow_run_id,
+            step=args.mlflow_step,
+            metric_prefix=args.metric_prefix,
         )
 
     print("=" * 60)

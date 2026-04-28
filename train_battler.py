@@ -93,6 +93,23 @@ def main():
         default=None,
         help="MLflow run ID to continue logging into the same run.",
     )
+    parser.add_argument(
+        "--disable-scheduled-validation",
+        action="store_true",
+        help="Disable automatic checkpoint validation during training.",
+    )
+    parser.add_argument(
+        "--validation-freq-steps",
+        type=int,
+        default=None,
+        help="Override scheduled validation frequency in environment steps.",
+    )
+    parser.add_argument(
+        "--validation-max-steps-per-battle",
+        type=int,
+        default=None,
+        help="Override scheduled validation battle truncation length.",
+    )
     
     args = parser.parse_args()
     
@@ -129,9 +146,16 @@ def main():
 
     # Keep feed-forward by default to avoid RLlib recurrent connector errors.
     config.model.use_lstm = args.use_lstm
+    if args.disable_scheduled_validation:
+        config.validation.enabled = False
+    if args.validation_freq_steps is not None:
+        config.validation.freq_steps = args.validation_freq_steps
+    if args.validation_max_steps_per_battle is not None:
+        config.validation.max_steps_per_battle = args.validation_max_steps_per_battle
 
     trainer = PokemonTrainer(
         config=config,
+        preset=args.preset,
         num_servers=args.num_servers,
         start_port=args.start_port,
         resume_checkpoint=args.resume_checkpoint,

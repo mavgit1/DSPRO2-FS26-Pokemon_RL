@@ -1,6 +1,8 @@
 import json
 import os
 import random
+import subprocess
+import sys
 import time
 from collections import deque
 from pathlib import Path
@@ -66,6 +68,7 @@ class PokemonTrainer:
         """
         # Load config
         self.config = config or get_config(preset)
+        self.preset = preset
         
         # Server settings
         self.num_servers = num_servers
@@ -92,6 +95,7 @@ class PokemonTrainer:
         self.algo = None
         self.total_steps = 0
         self._last_checkpoint_step = 0
+        self._last_validation_step = 0
         self.iteration = 0
         self.best_reward = float('-inf')
         self.system_metrics = SystemMetricsCollector()
@@ -294,6 +298,94 @@ class PokemonTrainer:
             self.config.checkpoint_freq > 0
             and self.total_steps - self._last_checkpoint_step >= self.config.checkpoint_freq
         )
+
+    def should_validate(self) -> bool:
+        """Check if scheduled checkpoint validation should run."""
+        validation = self.config.validation
+        return (
+            validation.enabled
+            and validation.freq_steps > 0
+            and bool(validation.protocols)
+            and self.total_steps - self._last_validation_step >= validation.freq_steps
+        )
+
+    def _save_checkpoint(self) -> Path:
+        ckpt_path = self.checkpoint_mgr.save_checkpoint(self.algo, self.total_steps)
+        self._last_checkpoint_step = self.total_steps
+        print(f"Checkpoint saved: {ckpt_path}")
+        return ckpt_path
+
+    def _manifest_for_validation_protocol(self, protocol: str) -> str | None:
+        if protocol == "fixed_paired":
+            return self.config.validation.fixed_pair_manifest
+        if protocol == "mirror":
+            return self.config.validation.mirror_manifest
+        return None
+
+    def _run_scheduled_validation(self, checkpoint_path: Path, mlflow_run_id: str | None) -> None:
+        """Run configured validation protocols against a saved checkpoint."""
+        validation = self.config.validation
+        output_dir = Path("logs/validation") / f"step_{self.total_steps}"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        for protocol in validation.protocols:
+            command = [
+                sys.executable,
+                "scripts/validate_checkpoint.py",
+                "--checkpoint",
+                str(checkpoint_path),
+                "--protocol",
+                protocol,
+                "--preset",
+                self.preset,
+                "--num-servers",
+                str(validation.num_servers),
+                "--start-port",
+                str(self.start_port),
+                "--max-steps-per-battle",
+                str(validation.max_steps_per_battle),
+                "--seed",
+                str(validation.seed),
+                "--output-json",
+                str(output_dir / f"{protocol}_validation_report.json"),
+            ]
+
+            team_manifest = self._manifest_for_validation_protocol(protocol)
+            if team_manifest:
+                command.extend(["--team-manifest", team_manifest])
+
+            if mlflow_run_id:
+                command.extend(
+                    [
+                        "--mlflow",
+                        "--mlflow-run-id",
+                        mlflow_run_id,
+                        "--mlflow-step",
+                        str(self.total_steps),
+                        "--metric-prefix",
+                        f"validation/{protocol}",
+                        "--experiment-name",
+                        "Pokemon_RL_Battler",
+                    ]
+                )
+
+            print(
+                f"Running scheduled validation '{protocol}' at step {self.total_steps:,}",
+                flush=True,
+            )
+            try:
+                subprocess.run(command, check=True)
+            except subprocess.CalledProcessError as exc:
+                message = (
+                    f"Scheduled validation '{protocol}' failed with exit code "
+                    f"{exc.returncode}."
+                )
+                if validation.continue_on_failure:
+                    print(f"{message} Continuing training.")
+                    continue
+                raise RuntimeError(message) from exc
+
+        self._last_validation_step = self.total_steps
     
     def should_print(self) -> bool:
         """Check if we should print progress."""
@@ -338,6 +430,7 @@ class PokemonTrainer:
             if parsed_steps is not None:
                 self.total_steps = parsed_steps
                 self._last_checkpoint_step = parsed_steps
+                self._last_validation_step = parsed_steps
             print(f"Restored checkpoint: {resume_path}")
             if parsed_steps is not None:
                 print(f"Resuming from approx. steps: {parsed_steps:,}")
@@ -469,13 +562,15 @@ class PokemonTrainer:
                         elapsed = (time.time() - start_time) / 3600
                         print(f"Iter {self.iteration} | Steps: {self.total_steps:,} | Reward: {reward_mean:.2f} | Time: {elapsed:.2f}h")
                     
-                    # Checkpoint
-                    if self.should_checkpoint():
-                        ckpt_path = self.checkpoint_mgr.save_checkpoint(
-                            self.algo, self.total_steps
+                    # Scheduled validation saves a checkpoint first, then evaluates it.
+                    if self.should_validate():
+                        ckpt_path = self._save_checkpoint()
+                        self._run_scheduled_validation(
+                            checkpoint_path=ckpt_path,
+                            mlflow_run_id=current_run.info.run_id if current_run else None,
                         )
-                        self._last_checkpoint_step = self.total_steps
-                        print(f"Checkpoint saved: {ckpt_path}")
+                    elif self.should_checkpoint():
+                        self._save_checkpoint()
                     
             except KeyboardInterrupt:
                 print("Training interrupted by user")
@@ -535,6 +630,7 @@ def train(
     
     trainer = PokemonTrainer(
         config=config,
+        preset=preset,
         num_servers=num_servers,
         start_port=start_port,
         resume_checkpoint=resume_checkpoint,

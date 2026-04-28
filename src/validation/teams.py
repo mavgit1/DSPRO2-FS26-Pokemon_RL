@@ -55,6 +55,30 @@ def validate_fixed_pair_manifest(manifest: Dict[str, Any]) -> None:
             raise ValueError(f"Pair {pair_id} must reference two different teams.")
 
 
+def validate_mirror_manifest(manifest: Dict[str, Any]) -> None:
+    """Validate the planned Tier 3 mirror team manifest shape."""
+    teams = manifest.get("teams")
+    if not isinstance(teams, list):
+        raise ValueError("Mirror team manifest must contain a list field: teams.")
+    if len(teams) != 20:
+        raise ValueError(f"Expected 20 mirror teams, got {len(teams)}.")
+
+    seen_team_ids = set()
+    for team in teams:
+        team_id = team.get("id")
+        showdown = team.get("showdown")
+        structured = team.get("pokemon")
+        if not isinstance(team_id, str) or not team_id:
+            raise ValueError("Each mirror team needs a non-empty string id.")
+        if team_id in seen_team_ids:
+            raise ValueError(f"Duplicate mirror team id: {team_id}")
+        seen_team_ids.add(team_id)
+        if not isinstance(showdown, str) or not showdown.strip():
+            raise ValueError(f"Mirror team {team_id} needs non-empty Showdown text.")
+        if not isinstance(structured, list) or len(structured) != 6:
+            raise ValueError(f"Mirror team {team_id} needs structured pokemon metadata.")
+
+
 def team_lookup(manifest: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     """Return validation teams keyed by team id."""
     return {team["id"]: team for team in manifest.get("teams", [])}
@@ -89,6 +113,27 @@ def fixed_pair_battle_specs(manifest: Dict[str, Any]) -> List[Dict[str, Any]]:
                     "opponent_team_id": team_a["id"],
                     "rl_team": team_b["showdown"],
                     "opponent_team": team_a["showdown"],
+                }
+            )
+
+    return specs
+
+
+def mirror_battle_specs(manifest: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Expand a mirror manifest into the 40 Tier 3 battle specs."""
+    validate_mirror_manifest(manifest)
+    specs: List[Dict[str, Any]] = []
+
+    for team in manifest["teams"]:
+        for opponent_type in ("random", "heuristic"):
+            specs.append(
+                {
+                    "pair_id": f"mirror_{team['id']}",
+                    "opponent_type": opponent_type,
+                    "rl_team_id": team["id"],
+                    "opponent_team_id": team["id"],
+                    "rl_team": team["showdown"],
+                    "opponent_team": team["showdown"],
                 }
             )
 

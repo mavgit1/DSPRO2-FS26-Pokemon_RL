@@ -20,7 +20,11 @@ from src.validation.metrics import (
     build_validation_diagnostics,
 )
 from src.validation.protocols import ValidationProtocol
-from src.validation.teams import fixed_pair_battle_specs, load_team_manifest
+from src.validation.teams import (
+    fixed_pair_battle_specs,
+    load_team_manifest,
+    mirror_battle_specs,
+)
 
 
 def build_validation_config(preset: str) -> TrainingConfig:
@@ -45,7 +49,7 @@ def run_validation(
     battle_format: str | None = None,
 ) -> Dict[str, Any]:
     """Restore a checkpoint and run a validation protocol."""
-    if protocol.name not in {"smoke", "fixed_paired"}:
+    if protocol.name not in {"smoke", "fixed_paired", "mirror"}:
         raise NotImplementedError(
             f"Protocol '{protocol.name}' is planned but not implemented yet."
         )
@@ -59,7 +63,10 @@ def run_validation(
         raise FileNotFoundError(
             f"Could not resolve checkpoint '{checkpoint}' in {config.checkpoint_dir}"
         )
-    checkpoint_path = str(Path(checkpoint_path).expanduser().resolve())
+    checkpoint_path_obj = Path(checkpoint_path).expanduser().resolve()
+    if not checkpoint_path_obj.exists():
+        raise FileNotFoundError(f"Checkpoint path does not exist: {checkpoint_path_obj}")
+    checkpoint_path = str(checkpoint_path_obj)
     _ensure_showdown_server(config.env.showdown_host, start_port)
 
     ray.init(ignore_reinit_error=True, num_gpus=0)
@@ -79,14 +86,17 @@ def run_validation(
         ).build_algo()
         algo.restore(checkpoint_path)
 
-        if protocol.name == "fixed_paired":
+        if protocol.name in {"fixed_paired", "mirror"}:
             if not team_manifest:
-                raise ValueError("--team-manifest is required for fixed_paired.")
+                raise ValueError(f"--team-manifest is required for {protocol.name}.")
             manifest = load_team_manifest(team_manifest)
             execution_format = manifest.get("metadata", {}).get("execution_format")
             if isinstance(execution_format, str) and execution_format:
                 config.env.battle_format = execution_format
-            battle_specs = fixed_pair_battle_specs(manifest)
+            if protocol.name == "fixed_paired":
+                battle_specs = fixed_pair_battle_specs(manifest)
+            else:
+                battle_specs = mirror_battle_specs(manifest)
             results = _run_battle_specs(
                 algo=algo,
                 config=config,
