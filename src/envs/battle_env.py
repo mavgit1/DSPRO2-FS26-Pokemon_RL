@@ -324,10 +324,12 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         battle_format: str,
         server_configuration: ServerConfiguration,
         opponent_mix: Optional[Dict[str, float]] = None,
+        opponent_team: Optional[str] = None,
     ):
         super().__init__(env, opponent)
         self._battle_format = battle_format
         self._server_configuration = server_configuration
+        self._opponent_team = opponent_team
         self._opponent_mix = self._normalize_opponent_mix(opponent_mix)
         self._opponent_pool: Dict[str, Any] = {}
         self._episode_total_actions = 0
@@ -374,6 +376,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             battle_format=self._battle_format,
             account_configuration=opponent_config,
             server_configuration=self._server_configuration,
+            team=self._opponent_team,
         )
 
     @staticmethod
@@ -590,6 +593,8 @@ def create_env_creator(
     reward_config: Optional[RewardConfig] = None,
     opponent_difficulty: str = "heuristic",
     opponent_mix: Optional[Dict[str, float]] = None,
+    player_team: Optional[str] = None,
+    opponent_team: Optional[str] = None,
 ):
     """
     Create an environment creator function for Ray RLlib.
@@ -601,6 +606,8 @@ def create_env_creator(
         reward_config: Reward configuration
         opponent_difficulty: "heuristic"/"heuristics" or "random"
         opponent_mix: Optional per-episode sampling mix, e.g. {"random": 0.7, "heuristic": 0.3}
+        player_team: Optional fixed Showdown team text for the learning agent
+        opponent_team: Optional fixed Showdown team text for the opponent
     
     Returns:
         Callable that creates environments
@@ -614,6 +621,8 @@ def create_env_creator(
         rc = env_config.get("reward_config", reward_config or RewardConfig())
         difficulty = env_config.get("opponent_difficulty", opponent_difficulty)
         mix = env_config.get("opponent_mix", opponent_mix)
+        p_team = env_config.get("player_team", player_team)
+        o_team = env_config.get("opponent_team", opponent_team)
 
         if env_config.get("server_port") is not None:
             port = int(env_config["server_port"])
@@ -648,6 +657,7 @@ def create_env_creator(
             battle_format=fmt,
             account_configuration=opponent_config,
             server_configuration=server_config,
+            team=o_team,
         )
         
         # Create the PettingZoo env
@@ -658,6 +668,7 @@ def create_env_creator(
             account_configuration1=AccountConfiguration(player_id, None),
             server_configuration=server_config,
             strict=False,
+            team=p_team,
         )
         
         # Wrap into single-agent gym env
@@ -667,6 +678,7 @@ def create_env_creator(
             battle_format=fmt,
             server_configuration=server_config,
             opponent_mix=mix,
+            opponent_team=o_team,
         )
     
     return env_creator

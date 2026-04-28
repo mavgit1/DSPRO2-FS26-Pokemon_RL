@@ -91,6 +91,7 @@ class PokemonTrainer:
         # Algorithm and tracking (set during training)
         self.algo = None
         self.total_steps = 0
+        self._last_checkpoint_step = 0
         self.iteration = 0
         self.best_reward = float('-inf')
         self.system_metrics = SystemMetricsCollector()
@@ -289,7 +290,10 @@ class PokemonTrainer:
     
     def should_checkpoint(self) -> bool:
         """Check if we should save a checkpoint."""
-        return self.total_steps >= (self.iteration * self.config.checkpoint_freq)
+        return (
+            self.config.checkpoint_freq > 0
+            and self.total_steps - self._last_checkpoint_step >= self.config.checkpoint_freq
+        )
     
     def should_print(self) -> bool:
         """Check if we should print progress."""
@@ -333,6 +337,7 @@ class PokemonTrainer:
             parsed_steps = extract_step_from_checkpoint_path(resume_path)
             if parsed_steps is not None:
                 self.total_steps = parsed_steps
+                self._last_checkpoint_step = parsed_steps
             print(f"Restored checkpoint: {resume_path}")
             if parsed_steps is not None:
                 print(f"Resuming from approx. steps: {parsed_steps:,}")
@@ -469,6 +474,7 @@ class PokemonTrainer:
                         ckpt_path = self.checkpoint_mgr.save_checkpoint(
                             self.algo, self.total_steps
                         )
+                        self._last_checkpoint_step = self.total_steps
                         print(f"Checkpoint saved: {ckpt_path}")
                     
             except KeyboardInterrupt:

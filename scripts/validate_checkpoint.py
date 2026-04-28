@@ -80,6 +80,20 @@ def main() -> int:
         help="Path for the local validation JSON report.",
     )
     parser.add_argument(
+        "--team-manifest",
+        type=Path,
+        default=None,
+        help="Validation team manifest for fixed-team protocols.",
+    )
+    parser.add_argument(
+        "--battle-format",
+        default=None,
+        help=(
+            "Override validation battle format. For fixed-paired manifests, "
+            "the manifest execution_format is used by default."
+        ),
+    )
+    parser.add_argument(
         "--mlflow",
         action="store_true",
         help="Log validation metrics and report artifact to MLflow.",
@@ -107,6 +121,8 @@ def main() -> int:
             start_port=args.start_port,
             max_steps_per_battle=args.max_steps_per_battle,
             seed=args.seed,
+            team_manifest=str(args.team_manifest) if args.team_manifest else None,
+            battle_format=args.battle_format,
         )
     except (FileNotFoundError, NotImplementedError, RuntimeError) as exc:
         print(f"Validation failed: {exc}", file=sys.stderr)

@@ -14,6 +14,9 @@ class BattleResult:
     fallback_events: int = 0
     attack_actions: int = 0
     switch_actions: int = 0
+    pair_id: str | None = None
+    rl_team_id: str | None = None
+    opponent_team_id: str | None = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
