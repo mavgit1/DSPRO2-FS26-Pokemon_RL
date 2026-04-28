@@ -16,7 +16,9 @@ from src.models.embedding import (
     is_native_switch_action,
     NUM_TOKENS,
     TOKEN_DIM,
-    MAX_ID_VAL,
+    SPECIES_VOCAB_SIZE,
+    ITEM_VOCAB_SIZE,
+    ABILITY_VOCAB_SIZE,
 )
 from src.config.TM_optimal_config import RewardConfig
 
@@ -36,19 +38,19 @@ def get_observation_space() -> gym.spaces.Dict:
         ),
         "species": gym.spaces.Box(
             low=0,
-            high=MAX_ID_VAL,
+            high=SPECIES_VOCAB_SIZE - 1,
             shape=(NUM_TOKENS,),
             dtype=np.int32,
         ),
         "items": gym.spaces.Box(
             low=0,
-            high=MAX_ID_VAL,
+            high=ITEM_VOCAB_SIZE - 1,
             shape=(NUM_TOKENS,),
             dtype=np.int32,
         ),
         "abilities": gym.spaces.Box(
             low=0,
-            high=MAX_ID_VAL,
+            high=ABILITY_VOCAB_SIZE - 1,
             shape=(NUM_TOKENS,),
             dtype=np.int32,
         ),

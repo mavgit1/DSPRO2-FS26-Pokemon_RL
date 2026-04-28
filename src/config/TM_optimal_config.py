@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any
-from pathlib import Path
+from typing import List, Dict, Any
+
+from src.models.vocab import vocab_sizes
+
+_VOCAB_SIZES = vocab_sizes()
 
 
 @dataclass
@@ -10,7 +13,9 @@ class ModelConfig:
     # Embedding dimensions
     num_tokens: int = 13
     token_dim: int = 164
-    max_id_val: int = 20000
+    species_vocab_size: int = _VOCAB_SIZES["species_vocab_size"]
+    item_vocab_size: int = _VOCAB_SIZES["item_vocab_size"]
+    ability_vocab_size: int = _VOCAB_SIZES["ability_vocab_size"]
     embedding_dim: int = 32
 
     # Transformer
@@ -27,7 +32,9 @@ class ModelConfig:
         return {
             "num_tokens": self.num_tokens,
             "token_dim": self.token_dim,
-            "max_id_val": self.max_id_val,
+            "species_vocab_size": self.species_vocab_size,
+            "item_vocab_size": self.item_vocab_size,
+            "ability_vocab_size": self.ability_vocab_size,
             "embedding_dim": self.embedding_dim,
             "hidden_dim": self.hidden_dim,
             "num_heads": self.num_heads,

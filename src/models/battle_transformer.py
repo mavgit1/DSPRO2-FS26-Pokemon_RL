@@ -7,6 +7,10 @@ from ray.rllib.core.rl_module.apis.value_function_api import ValueFunctionAPI
 from ray.rllib.core.columns import Columns
 from ray.rllib.utils.typing import ModelConfigDict, TensorType
 
+from src.models.vocab import vocab_sizes
+
+_VOCAB_SIZES = vocab_sizes()
+
 
 # =============================================================================
 # MODEL CONFIG
@@ -15,7 +19,9 @@ from ray.rllib.utils.typing import ModelConfigDict, TensorType
 DEFAULT_MODEL_CONFIG = {
     "num_tokens": 13,
     "token_dim": 164,
-    "max_id_val": 20001,
+    "species_vocab_size": _VOCAB_SIZES["species_vocab_size"],
+    "item_vocab_size": _VOCAB_SIZES["item_vocab_size"],
+    "ability_vocab_size": _VOCAB_SIZES["ability_vocab_size"],
     "embedding_dim": 16,
     "hidden_dim": 256,
     "num_heads": 4,
@@ -54,8 +60,9 @@ class PokemonTransformerModel(nn.Module):
         # Dimensions
         self.num_tokens = cfg["num_tokens"]
         self.token_dim = cfg["token_dim"]
-        # +1 because hashed IDs are in [1, max_id_val] and 0 is padding.
-        self.max_id_val = cfg["max_id_val"] + 1
+        self.species_vocab_size = cfg["species_vocab_size"]
+        self.item_vocab_size = cfg["item_vocab_size"]
+        self.ability_vocab_size = cfg["ability_vocab_size"]
         self.embedding_dim = cfg["embedding_dim"]
         self.hidden_dim = cfg["hidden_dim"]
         self.num_heads = cfg["num_heads"]
@@ -70,13 +77,13 @@ class PokemonTransformerModel(nn.Module):
         # Categorical Embeddings (Please feedback on this)
         # -----------------------------------------------------------------
         self.species_embed = nn.Embedding(
-            self.max_id_val, self.embedding_dim, padding_idx=0
+            self.species_vocab_size, self.embedding_dim, padding_idx=0
         )
         self.item_embed = nn.Embedding(
-            self.max_id_val, self.embedding_dim, padding_idx=0
+            self.item_vocab_size, self.embedding_dim, padding_idx=0
         )
         self.ability_embed = nn.Embedding(
-            self.max_id_val, self.embedding_dim, padding_idx=0
+            self.ability_vocab_size, self.embedding_dim, padding_idx=0
         )
         
         # -----------------------------------------------------------------

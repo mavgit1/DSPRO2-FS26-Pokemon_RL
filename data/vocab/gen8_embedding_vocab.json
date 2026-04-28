@@ -1,0 +1,9663 @@
+{
+  "species": [
+    {
+      "id": "ababo",
+      "name": "Ababo"
+    },
+    {
+      "id": "abomasnow",
+      "name": "Abomasnow"
+    },
+    {
+      "id": "abomasnowmega",
+      "name": "Abomasnow-Mega"
+    },
+    {
+      "id": "abra",
+      "name": "Abra"
+    },
+    {
+      "id": "absol",
+      "name": "Absol"
+    },
+    {
+      "id": "absolmega",
+      "name": "Absol-Mega"
+    },
+    {
+      "id": "absolmegaz",
+      "name": "Absol-Mega-Z"
+    },
+    {
+      "id": "accelgor",
+      "name": "Accelgor"
+    },
+    {
+      "id": "aegislash",
+      "name": "Aegislash"
+    },
+    {
+      "id": "aegislashblade",
+      "name": "Aegislash-Blade"
+    },
+    {
+      "id": "aerodactyl",
+      "name": "Aerodactyl"
+    },
+    {
+      "id": "aerodactylmega",
+      "name": "Aerodactyl-Mega"
+    },
+    {
+      "id": "aggron",
+      "name": "Aggron"
+    },
+    {
+      "id": "aggronmega",
+      "name": "Aggron-Mega"
+    },
+    {
+      "id": "aipom",
+      "name": "Aipom"
+    },
+    {
+      "id": "alakazam",
+      "name": "Alakazam"
+    },
+    {
+      "id": "alakazammega",
+      "name": "Alakazam-Mega"
+    },
+    {
+      "id": "alcremie",
+      "name": "Alcremie"
+    },
+    {
+      "id": "alcremiecaramelswirl",
+      "name": "Alcremie-Caramel-Swirl"
+    },
+    {
+      "id": "alcremiegmax",
+      "name": "Alcremie-Gmax"
+    },
+    {
+      "id": "alcremielemoncream",
+      "name": "Alcremie-Lemon-Cream"
+    },
+    {
+      "id": "alcremiematchacream",
+      "name": "Alcremie-Matcha-Cream"
+    },
+    {
+      "id": "alcremiemintcream",
+      "name": "Alcremie-Mint-Cream"
+    },
+    {
+      "id": "alcremierainbowswirl",
+      "name": "Alcremie-Rainbow-Swirl"
+    },
+    {
+      "id": "alcremierubycream",
+      "name": "Alcremie-Ruby-Cream"
+    },
+    {
+      "id": "alcremierubyswirl",
+      "name": "Alcremie-Ruby-Swirl"
+    },
+    {
+      "id": "alomomola",
+      "name": "Alomomola"
+    },
+    {
+      "id": "altaria",
+      "name": "Altaria"
+    },
+    {
+      "id": "altariamega",
+      "name": "Altaria-Mega"
+    },
+    {
+      "id": "amaura",
+      "name": "Amaura"
+    },
+    {
+      "id": "ambipom",
+      "name": "Ambipom"
+    },
+    {
+      "id": "amoonguss",
+      "name": "Amoonguss"
+    },
+    {
+      "id": "ampharos",
+      "name": "Ampharos"
+    },
+    {
+      "id": "ampharosmega",
+      "name": "Ampharos-Mega"
+    },
+    {
+      "id": "annihilape",
+      "name": "Annihilape"
+    },
+    {
+      "id": "anorith",
+      "name": "Anorith"
+    },
+    {
+      "id": "appletun",
+      "name": "Appletun"
+    },
+    {
+      "id": "appletungmax",
+      "name": "Appletun-Gmax"
+    },
+    {
+      "id": "applin",
+      "name": "Applin"
+    },
+    {
+      "id": "araquanid",
+      "name": "Araquanid"
+    },
+    {
+      "id": "araquanidtotem",
+      "name": "Araquanid-Totem"
+    },
+    {
+      "id": "arbok",
+      "name": "Arbok"
+    },
+    {
+      "id": "arboliva",
+      "name": "Arboliva"
+    },
+    {
+      "id": "arcanine",
+      "name": "Arcanine"
+    },
+    {
+      "id": "arcaninehisui",
+      "name": "Arcanine-Hisui"
+    },
+    {
+      "id": "arceus",
+      "name": "Arceus"
+    },
+    {
+      "id": "arceusbug",
+      "name": "Arceus-Bug"
+    },
+    {
+      "id": "arceusdark",
+      "name": "Arceus-Dark"
+    },
+    {
+      "id": "arceusdragon",
+      "name": "Arceus-Dragon"
+    },
+    {
+      "id": "arceuselectric",
+      "name": "Arceus-Electric"
+    },
+    {
+      "id": "arceusfairy",
+      "name": "Arceus-Fairy"
+    },
+    {
+      "id": "arceusfighting",
+      "name": "Arceus-Fighting"
+    },
+    {
+      "id": "arceusfire",
+      "name": "Arceus-Fire"
+    },
+    {
+      "id": "arceusflying",
+      "name": "Arceus-Flying"
+    },
+    {
+      "id": "arceusghost",
+      "name": "Arceus-Ghost"
+    },
+    {
+      "id": "arceusgrass",
+      "name": "Arceus-Grass"
+    },
+    {
+      "id": "arceusground",
+      "name": "Arceus-Ground"
+    },
+    {
+      "id": "arceusice",
+      "name": "Arceus-Ice"
+    },
+    {
+      "id": "arceuspoison",
+      "name": "Arceus-Poison"
+    },
+    {
+      "id": "arceuspsychic",
+      "name": "Arceus-Psychic"
+    },
+    {
+      "id": "arceusrock",
+      "name": "Arceus-Rock"
+    },
+    {
+      "id": "arceussteel",
+      "name": "Arceus-Steel"
+    },
+    {
+      "id": "arceuswater",
+      "name": "Arceus-Water"
+    },
+    {
+      "id": "archaludon",
+      "name": "Archaludon"
+    },
+    {
+      "id": "archen",
+      "name": "Archen"
+    },
+    {
+      "id": "archeops",
+      "name": "Archeops"
+    },
+    {
+      "id": "arctibax",
+      "name": "Arctibax"
+    },
+    {
+      "id": "arctovish",
+      "name": "Arctovish"
+    },
+    {
+      "id": "arctozolt",
+      "name": "Arctozolt"
+    },
+    {
+      "id": "argalis",
+      "name": "Argalis"
+    },
+    {
+      "id": "arghonaut",
+      "name": "Arghonaut"
+    },
+    {
+      "id": "ariados",
+      "name": "Ariados"
+    },
+    {
+      "id": "armaldo",
+      "name": "Armaldo"
+    },
+    {
+      "id": "armarouge",
+      "name": "Armarouge"
+    },
+    {
+      "id": "aromatisse",
+      "name": "Aromatisse"
+    },
+    {
+      "id": "aron",
+      "name": "Aron"
+    },
+    {
+      "id": "arrokuda",
+      "name": "Arrokuda"
+    },
+    {
+      "id": "articuno",
+      "name": "Articuno"
+    },
+    {
+      "id": "articunogalar",
+      "name": "Articuno-Galar"
+    },
+    {
+      "id": "astrolotl",
+      "name": "Astrolotl"
+    },
+    {
+      "id": "audino",
+      "name": "Audino"
+    },
+    {
+      "id": "audinomega",
+      "name": "Audino-Mega"
+    },
+    {
+      "id": "aurorus",
+      "name": "Aurorus"
+    },
+    {
+      "id": "aurumoth",
+      "name": "Aurumoth"
+    },
+    {
+      "id": "avalugg",
+      "name": "Avalugg"
+    },
+    {
+      "id": "avalugghisui",
+      "name": "Avalugg-Hisui"
+    },
+    {
+      "id": "axew",
+      "name": "Axew"
+    },
+    {
+      "id": "azelf",
+      "name": "Azelf"
+    },
+    {
+      "id": "azumarill",
+      "name": "Azumarill"
+    },
+    {
+      "id": "azurill",
+      "name": "Azurill"
+    },
+    {
+      "id": "bagon",
+      "name": "Bagon"
+    },
+    {
+      "id": "baltoy",
+      "name": "Baltoy"
+    },
+    {
+      "id": "banette",
+      "name": "Banette"
+    },
+    {
+      "id": "banettemega",
+      "name": "Banette-Mega"
+    },
+    {
+      "id": "barbaracle",
+      "name": "Barbaracle"
+    },
+    {
+      "id": "barbaraclemega",
+      "name": "Barbaracle-Mega"
+    },
+    {
+      "id": "barboach",
+      "name": "Barboach"
+    },
+    {
+      "id": "barraskewda",
+      "name": "Barraskewda"
+    },
+    {
+      "id": "basculegion",
+      "name": "Basculegion"
+    },
+    {
+      "id": "basculegionf",
+      "name": "Basculegion-F"
+    },
+    {
+      "id": "basculin",
+      "name": "Basculin"
+    },
+    {
+      "id": "basculinbluestriped",
+      "name": "Basculin-Blue-Striped"
+    },
+    {
+      "id": "basculinwhitestriped",
+      "name": "Basculin-White-Striped"
+    },
+    {
+      "id": "bastiodon",
+      "name": "Bastiodon"
+    },
+    {
+      "id": "baxcalibur",
+      "name": "Baxcalibur"
+    },
+    {
+      "id": "baxcaliburmega",
+      "name": "Baxcalibur-Mega"
+    },
+    {
+      "id": "bayleef",
+      "name": "Bayleef"
+    },
+    {
+      "id": "beartic",
+      "name": "Beartic"
+    },
+    {
+      "id": "beautifly",
+      "name": "Beautifly"
+    },
+    {
+      "id": "beedrill",
+      "name": "Beedrill"
+    },
+    {
+      "id": "beedrillmega",
+      "name": "Beedrill-Mega"
+    },
+    {
+      "id": "beheeyem",
+      "name": "Beheeyem"
+    },
+    {
+      "id": "beldum",
+      "name": "Beldum"
+    },
+    {
+      "id": "bellibolt",
+      "name": "Bellibolt"
+    },
+    {
+      "id": "bellossom",
+      "name": "Bellossom"
+    },
+    {
+      "id": "bellsprout",
+      "name": "Bellsprout"
+    },
+    {
+      "id": "bergmite",
+      "name": "Bergmite"
+    },
+    {
+      "id": "bewear",
+      "name": "Bewear"
+    },
+    {
+      "id": "bibarel",
+      "name": "Bibarel"
+    },
+    {
+      "id": "bidoof",
+      "name": "Bidoof"
+    },
+    {
+      "id": "binacle",
+      "name": "Binacle"
+    },
+    {
+      "id": "bisharp",
+      "name": "Bisharp"
+    },
+    {
+      "id": "blacephalon",
+      "name": "Blacephalon"
+    },
+    {
+      "id": "blastoise",
+      "name": "Blastoise"
+    },
+    {
+      "id": "blastoisegmax",
+      "name": "Blastoise-Gmax"
+    },
+    {
+      "id": "blastoisemega",
+      "name": "Blastoise-Mega"
+    },
+    {
+      "id": "blaziken",
+      "name": "Blaziken"
+    },
+    {
+      "id": "blazikenmega",
+      "name": "Blaziken-Mega"
+    },
+    {
+      "id": "blipbug",
+      "name": "Blipbug"
+    },
+    {
+      "id": "blissey",
+      "name": "Blissey"
+    },
+    {
+      "id": "blitzle",
+      "name": "Blitzle"
+    },
+    {
+      "id": "boldore",
+      "name": "Boldore"
+    },
+    {
+      "id": "boltund",
+      "name": "Boltund"
+    },
+    {
+      "id": "bombirdier",
+      "name": "Bombirdier"
+    },
+    {
+      "id": "bonsly",
+      "name": "Bonsly"
+    },
+    {
+      "id": "bouffalant",
+      "name": "Bouffalant"
+    },
+    {
+      "id": "bounsweet",
+      "name": "Bounsweet"
+    },
+    {
+      "id": "braixen",
+      "name": "Braixen"
+    },
+    {
+      "id": "brambleghast",
+      "name": "Brambleghast"
+    },
+    {
+      "id": "bramblin",
+      "name": "Bramblin"
+    },
+    {
+      "id": "brattler",
+      "name": "Brattler"
+    },
+    {
+      "id": "braviary",
+      "name": "Braviary"
+    },
+    {
+      "id": "braviaryhisui",
+      "name": "Braviary-Hisui"
+    },
+    {
+      "id": "breezi",
+      "name": "Breezi"
+    },
+    {
+      "id": "breloom",
+      "name": "Breloom"
+    },
+    {
+      "id": "brionne",
+      "name": "Brionne"
+    },
+    {
+      "id": "bronzong",
+      "name": "Bronzong"
+    },
+    {
+      "id": "bronzor",
+      "name": "Bronzor"
+    },
+    {
+      "id": "brutebonnet",
+      "name": "Brute Bonnet"
+    },
+    {
+      "id": "bruxish",
+      "name": "Bruxish"
+    },
+    {
+      "id": "budew",
+      "name": "Budew"
+    },
+    {
+      "id": "buizel",
+      "name": "Buizel"
+    },
+    {
+      "id": "bulbasaur",
+      "name": "Bulbasaur"
+    },
+    {
+      "id": "buneary",
+      "name": "Buneary"
+    },
+    {
+      "id": "bunnelby",
+      "name": "Bunnelby"
+    },
+    {
+      "id": "burmy",
+      "name": "Burmy"
+    },
+    {
+      "id": "burmysandy",
+      "name": "Burmy-Sandy"
+    },
+    {
+      "id": "burmytrash",
+      "name": "Burmy-Trash"
+    },
+    {
+      "id": "butterfree",
+      "name": "Butterfree"
+    },
+    {
+      "id": "butterfreegmax",
+      "name": "Butterfree-Gmax"
+    },
+    {
+      "id": "buzzwole",
+      "name": "Buzzwole"
+    },
+    {
+      "id": "cacnea",
+      "name": "Cacnea"
+    },
+    {
+      "id": "cacturne",
+      "name": "Cacturne"
+    },
+    {
+      "id": "caimanoe",
+      "name": "Caimanoe"
+    },
+    {
+      "id": "calyrex",
+      "name": "Calyrex"
+    },
+    {
+      "id": "calyrexice",
+      "name": "Calyrex-Ice"
+    },
+    {
+      "id": "calyrexshadow",
+      "name": "Calyrex-Shadow"
+    },
+    {
+      "id": "camerupt",
+      "name": "Camerupt"
+    },
+    {
+      "id": "cameruptmega",
+      "name": "Camerupt-Mega"
+    },
+    {
+      "id": "capsakid",
+      "name": "Capsakid"
+    },
+    {
+      "id": "carbink",
+      "name": "Carbink"
+    },
+    {
+      "id": "caribolt",
+      "name": "Caribolt"
+    },
+    {
+      "id": "carkol",
+      "name": "Carkol"
+    },
+    {
+      "id": "carnivine",
+      "name": "Carnivine"
+    },
+    {
+      "id": "carracosta",
+      "name": "Carracosta"
+    },
+    {
+      "id": "carvanha",
+      "name": "Carvanha"
+    },
+    {
+      "id": "cascoon",
+      "name": "Cascoon"
+    },
+    {
+      "id": "castform",
+      "name": "Castform"
+    },
+    {
+      "id": "castformrainy",
+      "name": "Castform-Rainy"
+    },
+    {
+      "id": "castformsnowy",
+      "name": "Castform-Snowy"
+    },
+    {
+      "id": "castformsunny",
+      "name": "Castform-Sunny"
+    },
+    {
+      "id": "caterpie",
+      "name": "Caterpie"
+    },
+    {
+      "id": "cawdet",
+      "name": "Cawdet"
+    },
+    {
+      "id": "cawmodore",
+      "name": "Cawmodore"
+    },
+    {
+      "id": "celebi",
+      "name": "Celebi"
+    },
+    {
+      "id": "celesteela",
+      "name": "Celesteela"
+    },
+    {
+      "id": "centiskorch",
+      "name": "Centiskorch"
+    },
+    {
+      "id": "centiskorchgmax",
+      "name": "Centiskorch-Gmax"
+    },
+    {
+      "id": "ceruledge",
+      "name": "Ceruledge"
+    },
+    {
+      "id": "cetitan",
+      "name": "Cetitan"
+    },
+    {
+      "id": "cetoddle",
+      "name": "Cetoddle"
+    },
+    {
+      "id": "chandelure",
+      "name": "Chandelure"
+    },
+    {
+      "id": "chandeluremega",
+      "name": "Chandelure-Mega"
+    },
+    {
+      "id": "chansey",
+      "name": "Chansey"
+    },
+    {
+      "id": "charcadet",
+      "name": "Charcadet"
+    },
+    {
+      "id": "charizard",
+      "name": "Charizard"
+    },
+    {
+      "id": "charizardgmax",
+      "name": "Charizard-Gmax"
+    },
+    {
+      "id": "charizardmegax",
+      "name": "Charizard-Mega-X"
+    },
+    {
+      "id": "charizardmegay",
+      "name": "Charizard-Mega-Y"
+    },
+    {
+      "id": "charjabug",
+      "name": "Charjabug"
+    },
+    {
+      "id": "charmander",
+      "name": "Charmander"
+    },
+    {
+      "id": "charmeleon",
+      "name": "Charmeleon"
+    },
+    {
+      "id": "chatot",
+      "name": "Chatot"
+    },
+    {
+      "id": "cherrim",
+      "name": "Cherrim"
+    },
+    {
+      "id": "cherrimsunshine",
+      "name": "Cherrim-Sunshine"
+    },
+    {
+      "id": "cherubi",
+      "name": "Cherubi"
+    },
+    {
+      "id": "chesnaught",
+      "name": "Chesnaught"
+    },
+    {
+      "id": "chesnaughtmega",
+      "name": "Chesnaught-Mega"
+    },
+    {
+      "id": "chespin",
+      "name": "Chespin"
+    },
+    {
+      "id": "chewtle",
+      "name": "Chewtle"
+    },
+    {
+      "id": "chienpao",
+      "name": "Chien-Pao"
+    },
+    {
+      "id": "chikorita",
+      "name": "Chikorita"
+    },
+    {
+      "id": "chimchar",
+      "name": "Chimchar"
+    },
+    {
+      "id": "chimecho",
+      "name": "Chimecho"
+    },
+    {
+      "id": "chimechomega",
+      "name": "Chimecho-Mega"
+    },
+    {
+      "id": "chinchou",
+      "name": "Chinchou"
+    },
+    {
+      "id": "chingling",
+      "name": "Chingling"
+    },
+    {
+      "id": "chiyu",
+      "name": "Chi-Yu"
+    },
+    {
+      "id": "chromera",
+      "name": "Chromera"
+    },
+    {
+      "id": "chuggalong",
+      "name": "Chuggalong"
+    },
+    {
+      "id": "chuggon",
+      "name": "Chuggon"
+    },
+    {
+      "id": "cinccino",
+      "name": "Cinccino"
+    },
+    {
+      "id": "cinderace",
+      "name": "Cinderace"
+    },
+    {
+      "id": "cinderacegmax",
+      "name": "Cinderace-Gmax"
+    },
+    {
+      "id": "clamperl",
+      "name": "Clamperl"
+    },
+    {
+      "id": "clauncher",
+      "name": "Clauncher"
+    },
+    {
+      "id": "clawitzer",
+      "name": "Clawitzer"
+    },
+    {
+      "id": "claydol",
+      "name": "Claydol"
+    },
+    {
+      "id": "clefable",
+      "name": "Clefable"
+    },
+    {
+      "id": "clefablemega",
+      "name": "Clefable-Mega"
+    },
+    {
+      "id": "clefairy",
+      "name": "Clefairy"
+    },
+    {
+      "id": "cleffa",
+      "name": "Cleffa"
+    },
+    {
+      "id": "clobbopus",
+      "name": "Clobbopus"
+    },
+    {
+      "id": "clodsire",
+      "name": "Clodsire"
+    },
+    {
+      "id": "cloyster",
+      "name": "Cloyster"
+    },
+    {
+      "id": "coalossal",
+      "name": "Coalossal"
+    },
+    {
+      "id": "coalossalgmax",
+      "name": "Coalossal-Gmax"
+    },
+    {
+      "id": "cobalion",
+      "name": "Cobalion"
+    },
+    {
+      "id": "cofagrigus",
+      "name": "Cofagrigus"
+    },
+    {
+      "id": "colossoil",
+      "name": "Colossoil"
+    },
+    {
+      "id": "combee",
+      "name": "Combee"
+    },
+    {
+      "id": "combusken",
+      "name": "Combusken"
+    },
+    {
+      "id": "comfey",
+      "name": "Comfey"
+    },
+    {
+      "id": "conkeldurr",
+      "name": "Conkeldurr"
+    },
+    {
+      "id": "copperajah",
+      "name": "Copperajah"
+    },
+    {
+      "id": "copperajahgmax",
+      "name": "Copperajah-Gmax"
+    },
+    {
+      "id": "coribalis",
+      "name": "Coribalis"
+    },
+    {
+      "id": "corphish",
+      "name": "Corphish"
+    },
+    {
+      "id": "corsola",
+      "name": "Corsola"
+    },
+    {
+      "id": "corsolagalar",
+      "name": "Corsola-Galar"
+    },
+    {
+      "id": "corviknight",
+      "name": "Corviknight"
+    },
+    {
+      "id": "corviknightgmax",
+      "name": "Corviknight-Gmax"
+    },
+    {
+      "id": "corvisquire",
+      "name": "Corvisquire"
+    },
+    {
+      "id": "cosmoem",
+      "name": "Cosmoem"
+    },
+    {
+      "id": "cosmog",
+      "name": "Cosmog"
+    },
+    {
+      "id": "cottonee",
+      "name": "Cottonee"
+    },
+    {
+      "id": "crabominable",
+      "name": "Crabominable"
+    },
+    {
+      "id": "crabominablemega",
+      "name": "Crabominable-Mega"
+    },
+    {
+      "id": "crabrawler",
+      "name": "Crabrawler"
+    },
+    {
+      "id": "cradily",
+      "name": "Cradily"
+    },
+    {
+      "id": "cramorant",
+      "name": "Cramorant"
+    },
+    {
+      "id": "cramorantgorging",
+      "name": "Cramorant-Gorging"
+    },
+    {
+      "id": "cramorantgulping",
+      "name": "Cramorant-Gulping"
+    },
+    {
+      "id": "cranidos",
+      "name": "Cranidos"
+    },
+    {
+      "id": "crawdaunt",
+      "name": "Crawdaunt"
+    },
+    {
+      "id": "cresceidon",
+      "name": "Cresceidon"
+    },
+    {
+      "id": "cresselia",
+      "name": "Cresselia"
+    },
+    {
+      "id": "croagunk",
+      "name": "Croagunk"
+    },
+    {
+      "id": "crobat",
+      "name": "Crobat"
+    },
+    {
+      "id": "crocalor",
+      "name": "Crocalor"
+    },
+    {
+      "id": "croconaw",
+      "name": "Croconaw"
+    },
+    {
+      "id": "crucibelle",
+      "name": "Crucibelle"
+    },
+    {
+      "id": "crucibellemega",
+      "name": "Crucibelle-Mega"
+    },
+    {
+      "id": "crustle",
+      "name": "Crustle"
+    },
+    {
+      "id": "cryogonal",
+      "name": "Cryogonal"
+    },
+    {
+      "id": "cubchoo",
+      "name": "Cubchoo"
+    },
+    {
+      "id": "cubone",
+      "name": "Cubone"
+    },
+    {
+      "id": "cufant",
+      "name": "Cufant"
+    },
+    {
+      "id": "cupra",
+      "name": "Cupra"
+    },
+    {
+      "id": "cursola",
+      "name": "Cursola"
+    },
+    {
+      "id": "cutiefly",
+      "name": "Cutiefly"
+    },
+    {
+      "id": "cyclizar",
+      "name": "Cyclizar"
+    },
+    {
+      "id": "cyclohm",
+      "name": "Cyclohm"
+    },
+    {
+      "id": "cyndaquil",
+      "name": "Cyndaquil"
+    },
+    {
+      "id": "dachsbun",
+      "name": "Dachsbun"
+    },
+    {
+      "id": "darkrai",
+      "name": "Darkrai"
+    },
+    {
+      "id": "darkraimega",
+      "name": "Darkrai-Mega"
+    },
+    {
+      "id": "darmanitan",
+      "name": "Darmanitan"
+    },
+    {
+      "id": "darmanitangalar",
+      "name": "Darmanitan-Galar"
+    },
+    {
+      "id": "darmanitangalarzen",
+      "name": "Darmanitan-Galar-Zen"
+    },
+    {
+      "id": "darmanitanzen",
+      "name": "Darmanitan-Zen"
+    },
+    {
+      "id": "dartrix",
+      "name": "Dartrix"
+    },
+    {
+      "id": "darumaka",
+      "name": "Darumaka"
+    },
+    {
+      "id": "darumakagalar",
+      "name": "Darumaka-Galar"
+    },
+    {
+      "id": "decidueye",
+      "name": "Decidueye"
+    },
+    {
+      "id": "decidueyehisui",
+      "name": "Decidueye-Hisui"
+    },
+    {
+      "id": "dedenne",
+      "name": "Dedenne"
+    },
+    {
+      "id": "deerling",
+      "name": "Deerling"
+    },
+    {
+      "id": "deerlingautumn",
+      "name": "Deerling-Autumn"
+    },
+    {
+      "id": "deerlingsummer",
+      "name": "Deerling-Summer"
+    },
+    {
+      "id": "deerlingwinter",
+      "name": "Deerling-Winter"
+    },
+    {
+      "id": "deino",
+      "name": "Deino"
+    },
+    {
+      "id": "delcatty",
+      "name": "Delcatty"
+    },
+    {
+      "id": "delibird",
+      "name": "Delibird"
+    },
+    {
+      "id": "delphox",
+      "name": "Delphox"
+    },
+    {
+      "id": "delphoxmega",
+      "name": "Delphox-Mega"
+    },
+    {
+      "id": "deoxys",
+      "name": "Deoxys"
+    },
+    {
+      "id": "deoxysattack",
+      "name": "Deoxys-Attack"
+    },
+    {
+      "id": "deoxysdefense",
+      "name": "Deoxys-Defense"
+    },
+    {
+      "id": "deoxysspeed",
+      "name": "Deoxys-Speed"
+    },
+    {
+      "id": "dewgong",
+      "name": "Dewgong"
+    },
+    {
+      "id": "dewott",
+      "name": "Dewott"
+    },
+    {
+      "id": "dewpider",
+      "name": "Dewpider"
+    },
+    {
+      "id": "dhelmise",
+      "name": "Dhelmise"
+    },
+    {
+      "id": "dialga",
+      "name": "Dialga"
+    },
+    {
+      "id": "dialgaorigin",
+      "name": "Dialga-Origin"
+    },
+    {
+      "id": "diancie",
+      "name": "Diancie"
+    },
+    {
+      "id": "dianciemega",
+      "name": "Diancie-Mega"
+    },
+    {
+      "id": "diggersby",
+      "name": "Diggersby"
+    },
+    {
+      "id": "diglett",
+      "name": "Diglett"
+    },
+    {
+      "id": "diglettalola",
+      "name": "Diglett-Alola"
+    },
+    {
+      "id": "dipplin",
+      "name": "Dipplin"
+    },
+    {
+      "id": "ditto",
+      "name": "Ditto"
+    },
+    {
+      "id": "dodrio",
+      "name": "Dodrio"
+    },
+    {
+      "id": "doduo",
+      "name": "Doduo"
+    },
+    {
+      "id": "dolliv",
+      "name": "Dolliv"
+    },
+    {
+      "id": "dondozo",
+      "name": "Dondozo"
+    },
+    {
+      "id": "donphan",
+      "name": "Donphan"
+    },
+    {
+      "id": "dorsoil",
+      "name": "Dorsoil"
+    },
+    {
+      "id": "dottler",
+      "name": "Dottler"
+    },
+    {
+      "id": "doublade",
+      "name": "Doublade"
+    },
+    {
+      "id": "dracovish",
+      "name": "Dracovish"
+    },
+    {
+      "id": "dracozolt",
+      "name": "Dracozolt"
+    },
+    {
+      "id": "dragalge",
+      "name": "Dragalge"
+    },
+    {
+      "id": "dragalgemega",
+      "name": "Dragalge-Mega"
+    },
+    {
+      "id": "dragapult",
+      "name": "Dragapult"
+    },
+    {
+      "id": "draggalong",
+      "name": "Draggalong"
+    },
+    {
+      "id": "dragonair",
+      "name": "Dragonair"
+    },
+    {
+      "id": "dragonite",
+      "name": "Dragonite"
+    },
+    {
+      "id": "dragonitemega",
+      "name": "Dragonite-Mega"
+    },
+    {
+      "id": "drakloak",
+      "name": "Drakloak"
+    },
+    {
+      "id": "drampa",
+      "name": "Drampa"
+    },
+    {
+      "id": "drampamega",
+      "name": "Drampa-Mega"
+    },
+    {
+      "id": "drapion",
+      "name": "Drapion"
+    },
+    {
+      "id": "dratini",
+      "name": "Dratini"
+    },
+    {
+      "id": "drednaw",
+      "name": "Drednaw"
+    },
+    {
+      "id": "drednawgmax",
+      "name": "Drednaw-Gmax"
+    },
+    {
+      "id": "dreepy",
+      "name": "Dreepy"
+    },
+    {
+      "id": "drifblim",
+      "name": "Drifblim"
+    },
+    {
+      "id": "drifloon",
+      "name": "Drifloon"
+    },
+    {
+      "id": "drilbur",
+      "name": "Drilbur"
+    },
+    {
+      "id": "drizzile",
+      "name": "Drizzile"
+    },
+    {
+      "id": "drowzee",
+      "name": "Drowzee"
+    },
+    {
+      "id": "druddigon",
+      "name": "Druddigon"
+    },
+    {
+      "id": "dubwool",
+      "name": "Dubwool"
+    },
+    {
+      "id": "ducklett",
+      "name": "Ducklett"
+    },
+    {
+      "id": "dudunsparce",
+      "name": "Dudunsparce"
+    },
+    {
+      "id": "dudunsparcethreesegment",
+      "name": "Dudunsparce-Three-Segment"
+    },
+    {
+      "id": "dugtrio",
+      "name": "Dugtrio"
+    },
+    {
+      "id": "dugtrioalola",
+      "name": "Dugtrio-Alola"
+    },
+    {
+      "id": "dunsparce",
+      "name": "Dunsparce"
+    },
+    {
+      "id": "duohm",
+      "name": "Duohm"
+    },
+    {
+      "id": "duosion",
+      "name": "Duosion"
+    },
+    {
+      "id": "duraludon",
+      "name": "Duraludon"
+    },
+    {
+      "id": "duraludongmax",
+      "name": "Duraludon-Gmax"
+    },
+    {
+      "id": "durant",
+      "name": "Durant"
+    },
+    {
+      "id": "dusclops",
+      "name": "Dusclops"
+    },
+    {
+      "id": "dusknoir",
+      "name": "Dusknoir"
+    },
+    {
+      "id": "duskull",
+      "name": "Duskull"
+    },
+    {
+      "id": "dustox",
+      "name": "Dustox"
+    },
+    {
+      "id": "dwebble",
+      "name": "Dwebble"
+    },
+    {
+      "id": "eelektrik",
+      "name": "Eelektrik"
+    },
+    {
+      "id": "eelektross",
+      "name": "Eelektross"
+    },
+    {
+      "id": "eelektrossmega",
+      "name": "Eelektross-Mega"
+    },
+    {
+      "id": "eevee",
+      "name": "Eevee"
+    },
+    {
+      "id": "eeveegmax",
+      "name": "Eevee-Gmax"
+    },
+    {
+      "id": "eeveestarter",
+      "name": "Eevee-Starter"
+    },
+    {
+      "id": "eiscue",
+      "name": "Eiscue"
+    },
+    {
+      "id": "eiscuenoice",
+      "name": "Eiscue-Noice"
+    },
+    {
+      "id": "ekans",
+      "name": "Ekans"
+    },
+    {
+      "id": "eldegoss",
+      "name": "Eldegoss"
+    },
+    {
+      "id": "electabuzz",
+      "name": "Electabuzz"
+    },
+    {
+      "id": "electivire",
+      "name": "Electivire"
+    },
+    {
+      "id": "electrelk",
+      "name": "Electrelk"
+    },
+    {
+      "id": "electrike",
+      "name": "Electrike"
+    },
+    {
+      "id": "electrode",
+      "name": "Electrode"
+    },
+    {
+      "id": "electrodehisui",
+      "name": "Electrode-Hisui"
+    },
+    {
+      "id": "elekid",
+      "name": "Elekid"
+    },
+    {
+      "id": "elgyem",
+      "name": "Elgyem"
+    },
+    {
+      "id": "embirch",
+      "name": "Embirch"
+    },
+    {
+      "id": "emboar",
+      "name": "Emboar"
+    },
+    {
+      "id": "emboarmega",
+      "name": "Emboar-Mega"
+    },
+    {
+      "id": "emolga",
+      "name": "Emolga"
+    },
+    {
+      "id": "empoleon",
+      "name": "Empoleon"
+    },
+    {
+      "id": "enamorus",
+      "name": "Enamorus"
+    },
+    {
+      "id": "enamorustherian",
+      "name": "Enamorus-Therian"
+    },
+    {
+      "id": "entei",
+      "name": "Entei"
+    },
+    {
+      "id": "equilibra",
+      "name": "Equilibra"
+    },
+    {
+      "id": "escavalier",
+      "name": "Escavalier"
+    },
+    {
+      "id": "espathra",
+      "name": "Espathra"
+    },
+    {
+      "id": "espeon",
+      "name": "Espeon"
+    },
+    {
+      "id": "espurr",
+      "name": "Espurr"
+    },
+    {
+      "id": "eternatus",
+      "name": "Eternatus"
+    },
+    {
+      "id": "eternatuseternamax",
+      "name": "Eternatus-Eternamax"
+    },
+    {
+      "id": "excadrill",
+      "name": "Excadrill"
+    },
+    {
+      "id": "excadrillmega",
+      "name": "Excadrill-Mega"
+    },
+    {
+      "id": "exeggcute",
+      "name": "Exeggcute"
+    },
+    {
+      "id": "exeggutor",
+      "name": "Exeggutor"
+    },
+    {
+      "id": "exeggutoralola",
+      "name": "Exeggutor-Alola"
+    },
+    {
+      "id": "exploud",
+      "name": "Exploud"
+    },
+    {
+      "id": "falinks",
+      "name": "Falinks"
+    },
+    {
+      "id": "falinksmega",
+      "name": "Falinks-Mega"
+    },
+    {
+      "id": "farfetchd",
+      "name": "Farfetch\u2019d"
+    },
+    {
+      "id": "farfetchdgalar",
+      "name": "Farfetch\u2019d-Galar"
+    },
+    {
+      "id": "farigiraf",
+      "name": "Farigiraf"
+    },
+    {
+      "id": "fawnifer",
+      "name": "Fawnifer"
+    },
+    {
+      "id": "fearow",
+      "name": "Fearow"
+    },
+    {
+      "id": "feebas",
+      "name": "Feebas"
+    },
+    {
+      "id": "fennekin",
+      "name": "Fennekin"
+    },
+    {
+      "id": "feraligatr",
+      "name": "Feraligatr"
+    },
+    {
+      "id": "feraligatrmega",
+      "name": "Feraligatr-Mega"
+    },
+    {
+      "id": "ferroseed",
+      "name": "Ferroseed"
+    },
+    {
+      "id": "ferrothorn",
+      "name": "Ferrothorn"
+    },
+    {
+      "id": "fezandipiti",
+      "name": "Fezandipiti"
+    },
+    {
+      "id": "fidgit",
+      "name": "Fidgit"
+    },
+    {
+      "id": "fidough",
+      "name": "Fidough"
+    },
+    {
+      "id": "finizen",
+      "name": "Finizen"
+    },
+    {
+      "id": "finneon",
+      "name": "Finneon"
+    },
+    {
+      "id": "flaaffy",
+      "name": "Flaaffy"
+    },
+    {
+      "id": "flabebe",
+      "name": "Flabe\u0301be\u0301"
+    },
+    {
+      "id": "flamigo",
+      "name": "Flamigo"
+    },
+    {
+      "id": "flapple",
+      "name": "Flapple"
+    },
+    {
+      "id": "flapplegmax",
+      "name": "Flapple-Gmax"
+    },
+    {
+      "id": "flarelm",
+      "name": "Flarelm"
+    },
+    {
+      "id": "flareon",
+      "name": "Flareon"
+    },
+    {
+      "id": "fletchinder",
+      "name": "Fletchinder"
+    },
+    {
+      "id": "fletchling",
+      "name": "Fletchling"
+    },
+    {
+      "id": "flittle",
+      "name": "Flittle"
+    },
+    {
+      "id": "floatoy",
+      "name": "Floatoy"
+    },
+    {
+      "id": "floatzel",
+      "name": "Floatzel"
+    },
+    {
+      "id": "floette",
+      "name": "Floette"
+    },
+    {
+      "id": "floetteeternal",
+      "name": "Floette-Eternal"
+    },
+    {
+      "id": "floettemega",
+      "name": "Floette-Mega"
+    },
+    {
+      "id": "floragato",
+      "name": "Floragato"
+    },
+    {
+      "id": "florges",
+      "name": "Florges"
+    },
+    {
+      "id": "fluttermane",
+      "name": "Flutter Mane"
+    },
+    {
+      "id": "flygon",
+      "name": "Flygon"
+    },
+    {
+      "id": "fomantis",
+      "name": "Fomantis"
+    },
+    {
+      "id": "foongus",
+      "name": "Foongus"
+    },
+    {
+      "id": "forretress",
+      "name": "Forretress"
+    },
+    {
+      "id": "fraxure",
+      "name": "Fraxure"
+    },
+    {
+      "id": "frigibax",
+      "name": "Frigibax"
+    },
+    {
+      "id": "frillish",
+      "name": "Frillish"
+    },
+    {
+      "id": "froakie",
+      "name": "Froakie"
+    },
+    {
+      "id": "frogadier",
+      "name": "Frogadier"
+    },
+    {
+      "id": "froslass",
+      "name": "Froslass"
+    },
+    {
+      "id": "froslassmega",
+      "name": "Froslass-Mega"
+    },
+    {
+      "id": "frosmoth",
+      "name": "Frosmoth"
+    },
+    {
+      "id": "fuecoco",
+      "name": "Fuecoco"
+    },
+    {
+      "id": "furfrou",
+      "name": "Furfrou"
+    },
+    {
+      "id": "furret",
+      "name": "Furret"
+    },
+    {
+      "id": "gabite",
+      "name": "Gabite"
+    },
+    {
+      "id": "gallade",
+      "name": "Gallade"
+    },
+    {
+      "id": "gallademega",
+      "name": "Gallade-Mega"
+    },
+    {
+      "id": "galvantula",
+      "name": "Galvantula"
+    },
+    {
+      "id": "garbodor",
+      "name": "Garbodor"
+    },
+    {
+      "id": "garbodorgmax",
+      "name": "Garbodor-Gmax"
+    },
+    {
+      "id": "garchomp",
+      "name": "Garchomp"
+    },
+    {
+      "id": "garchompmega",
+      "name": "Garchomp-Mega"
+    },
+    {
+      "id": "garchompmegaz",
+      "name": "Garchomp-Mega-Z"
+    },
+    {
+      "id": "gardevoir",
+      "name": "Gardevoir"
+    },
+    {
+      "id": "gardevoirmega",
+      "name": "Gardevoir-Mega"
+    },
+    {
+      "id": "garganacl",
+      "name": "Garganacl"
+    },
+    {
+      "id": "gastly",
+      "name": "Gastly"
+    },
+    {
+      "id": "gastrodon",
+      "name": "Gastrodon"
+    },
+    {
+      "id": "gastrodoneast",
+      "name": "Gastrodon-East"
+    },
+    {
+      "id": "genesect",
+      "name": "Genesect"
+    },
+    {
+      "id": "genesectburn",
+      "name": "Genesect-Burn"
+    },
+    {
+      "id": "genesectchill",
+      "name": "Genesect-Chill"
+    },
+    {
+      "id": "genesectdouse",
+      "name": "Genesect-Douse"
+    },
+    {
+      "id": "genesectshock",
+      "name": "Genesect-Shock"
+    },
+    {
+      "id": "gengar",
+      "name": "Gengar"
+    },
+    {
+      "id": "gengargmax",
+      "name": "Gengar-Gmax"
+    },
+    {
+      "id": "gengarmega",
+      "name": "Gengar-Mega"
+    },
+    {
+      "id": "geodude",
+      "name": "Geodude"
+    },
+    {
+      "id": "geodudealola",
+      "name": "Geodude-Alola"
+    },
+    {
+      "id": "gholdengo",
+      "name": "Gholdengo"
+    },
+    {
+      "id": "gible",
+      "name": "Gible"
+    },
+    {
+      "id": "gigalith",
+      "name": "Gigalith"
+    },
+    {
+      "id": "gimmighoul",
+      "name": "Gimmighoul"
+    },
+    {
+      "id": "gimmighoulroaming",
+      "name": "Gimmighoul-Roaming"
+    },
+    {
+      "id": "girafarig",
+      "name": "Girafarig"
+    },
+    {
+      "id": "giratina",
+      "name": "Giratina"
+    },
+    {
+      "id": "giratinaorigin",
+      "name": "Giratina-Origin"
+    },
+    {
+      "id": "glaceon",
+      "name": "Glaceon"
+    },
+    {
+      "id": "glalie",
+      "name": "Glalie"
+    },
+    {
+      "id": "glaliemega",
+      "name": "Glalie-Mega"
+    },
+    {
+      "id": "glameow",
+      "name": "Glameow"
+    },
+    {
+      "id": "glastrier",
+      "name": "Glastrier"
+    },
+    {
+      "id": "gligar",
+      "name": "Gligar"
+    },
+    {
+      "id": "glimmet",
+      "name": "Glimmet"
+    },
+    {
+      "id": "glimmora",
+      "name": "Glimmora"
+    },
+    {
+      "id": "glimmoramega",
+      "name": "Glimmora-Mega"
+    },
+    {
+      "id": "gliscor",
+      "name": "Gliscor"
+    },
+    {
+      "id": "gloom",
+      "name": "Gloom"
+    },
+    {
+      "id": "gogoat",
+      "name": "Gogoat"
+    },
+    {
+      "id": "golbat",
+      "name": "Golbat"
+    },
+    {
+      "id": "goldeen",
+      "name": "Goldeen"
+    },
+    {
+      "id": "golduck",
+      "name": "Golduck"
+    },
+    {
+      "id": "golem",
+      "name": "Golem"
+    },
+    {
+      "id": "golemalola",
+      "name": "Golem-Alola"
+    },
+    {
+      "id": "golett",
+      "name": "Golett"
+    },
+    {
+      "id": "golisopod",
+      "name": "Golisopod"
+    },
+    {
+      "id": "golisopodmega",
+      "name": "Golisopod-Mega"
+    },
+    {
+      "id": "golurk",
+      "name": "Golurk"
+    },
+    {
+      "id": "golurkmega",
+      "name": "Golurk-Mega"
+    },
+    {
+      "id": "goodra",
+      "name": "Goodra"
+    },
+    {
+      "id": "goodrahisui",
+      "name": "Goodra-Hisui"
+    },
+    {
+      "id": "goomy",
+      "name": "Goomy"
+    },
+    {
+      "id": "gorebyss",
+      "name": "Gorebyss"
+    },
+    {
+      "id": "gossifleur",
+      "name": "Gossifleur"
+    },
+    {
+      "id": "gothita",
+      "name": "Gothita"
+    },
+    {
+      "id": "gothitelle",
+      "name": "Gothitelle"
+    },
+    {
+      "id": "gothorita",
+      "name": "Gothorita"
+    },
+    {
+      "id": "gougingfire",
+      "name": "Gouging Fire"
+    },
+    {
+      "id": "gourgeist",
+      "name": "Gourgeist"
+    },
+    {
+      "id": "gourgeistlarge",
+      "name": "Gourgeist-Large"
+    },
+    {
+      "id": "gourgeistsmall",
+      "name": "Gourgeist-Small"
+    },
+    {
+      "id": "gourgeistsuper",
+      "name": "Gourgeist-Super"
+    },
+    {
+      "id": "grafaiai",
+      "name": "Grafaiai"
+    },
+    {
+      "id": "granbull",
+      "name": "Granbull"
+    },
+    {
+      "id": "grapploct",
+      "name": "Grapploct"
+    },
+    {
+      "id": "graveler",
+      "name": "Graveler"
+    },
+    {
+      "id": "graveleralola",
+      "name": "Graveler-Alola"
+    },
+    {
+      "id": "greattusk",
+      "name": "Great Tusk"
+    },
+    {
+      "id": "greavard",
+      "name": "Greavard"
+    },
+    {
+      "id": "greedent",
+      "name": "Greedent"
+    },
+    {
+      "id": "greninja",
+      "name": "Greninja"
+    },
+    {
+      "id": "greninjaash",
+      "name": "Greninja-Ash"
+    },
+    {
+      "id": "greninjabond",
+      "name": "Greninja-Bond"
+    },
+    {
+      "id": "greninjamega",
+      "name": "Greninja-Mega"
+    },
+    {
+      "id": "grimer",
+      "name": "Grimer"
+    },
+    {
+      "id": "grimeralola",
+      "name": "Grimer-Alola"
+    },
+    {
+      "id": "grimmsnarl",
+      "name": "Grimmsnarl"
+    },
+    {
+      "id": "grimmsnarlgmax",
+      "name": "Grimmsnarl-Gmax"
+    },
+    {
+      "id": "grookey",
+      "name": "Grookey"
+    },
+    {
+      "id": "grotle",
+      "name": "Grotle"
+    },
+    {
+      "id": "groudon",
+      "name": "Groudon"
+    },
+    {
+      "id": "groudonprimal",
+      "name": "Groudon-Primal"
+    },
+    {
+      "id": "grovyle",
+      "name": "Grovyle"
+    },
+    {
+      "id": "growlithe",
+      "name": "Growlithe"
+    },
+    {
+      "id": "growlithehisui",
+      "name": "Growlithe-Hisui"
+    },
+    {
+      "id": "grubbin",
+      "name": "Grubbin"
+    },
+    {
+      "id": "grumpig",
+      "name": "Grumpig"
+    },
+    {
+      "id": "gulpin",
+      "name": "Gulpin"
+    },
+    {
+      "id": "gumshoos",
+      "name": "Gumshoos"
+    },
+    {
+      "id": "gumshoostotem",
+      "name": "Gumshoos-Totem"
+    },
+    {
+      "id": "gurdurr",
+      "name": "Gurdurr"
+    },
+    {
+      "id": "guzzlord",
+      "name": "Guzzlord"
+    },
+    {
+      "id": "gyarados",
+      "name": "Gyarados"
+    },
+    {
+      "id": "gyaradosmega",
+      "name": "Gyarados-Mega"
+    },
+    {
+      "id": "hakamoo",
+      "name": "Hakamo-o"
+    },
+    {
+      "id": "happiny",
+      "name": "Happiny"
+    },
+    {
+      "id": "hariyama",
+      "name": "Hariyama"
+    },
+    {
+      "id": "hatenna",
+      "name": "Hatenna"
+    },
+    {
+      "id": "hatterene",
+      "name": "Hatterene"
+    },
+    {
+      "id": "hatterenegmax",
+      "name": "Hatterene-Gmax"
+    },
+    {
+      "id": "hattrem",
+      "name": "Hattrem"
+    },
+    {
+      "id": "haunter",
+      "name": "Haunter"
+    },
+    {
+      "id": "hawlucha",
+      "name": "Hawlucha"
+    },
+    {
+      "id": "hawluchamega",
+      "name": "Hawlucha-Mega"
+    },
+    {
+      "id": "haxorus",
+      "name": "Haxorus"
+    },
+    {
+      "id": "heatmor",
+      "name": "Heatmor"
+    },
+    {
+      "id": "heatran",
+      "name": "Heatran"
+    },
+    {
+      "id": "heatranmega",
+      "name": "Heatran-Mega"
+    },
+    {
+      "id": "heliolisk",
+      "name": "Heliolisk"
+    },
+    {
+      "id": "helioptile",
+      "name": "Helioptile"
+    },
+    {
+      "id": "hemogoblin",
+      "name": "Hemogoblin"
+    },
+    {
+      "id": "heracross",
+      "name": "Heracross"
+    },
+    {
+      "id": "heracrossmega",
+      "name": "Heracross-Mega"
+    },
+    {
+      "id": "herdier",
+      "name": "Herdier"
+    },
+    {
+      "id": "hippopotas",
+      "name": "Hippopotas"
+    },
+    {
+      "id": "hippowdon",
+      "name": "Hippowdon"
+    },
+    {
+      "id": "hitmonchan",
+      "name": "Hitmonchan"
+    },
+    {
+      "id": "hitmonlee",
+      "name": "Hitmonlee"
+    },
+    {
+      "id": "hitmontop",
+      "name": "Hitmontop"
+    },
+    {
+      "id": "honchkrow",
+      "name": "Honchkrow"
+    },
+    {
+      "id": "honedge",
+      "name": "Honedge"
+    },
+    {
+      "id": "hooh",
+      "name": "Ho-Oh"
+    },
+    {
+      "id": "hoopa",
+      "name": "Hoopa"
+    },
+    {
+      "id": "hoopaunbound",
+      "name": "Hoopa-Unbound"
+    },
+    {
+      "id": "hoothoot",
+      "name": "Hoothoot"
+    },
+    {
+      "id": "hoppip",
+      "name": "Hoppip"
+    },
+    {
+      "id": "horsea",
+      "name": "Horsea"
+    },
+    {
+      "id": "houndoom",
+      "name": "Houndoom"
+    },
+    {
+      "id": "houndoommega",
+      "name": "Houndoom-Mega"
+    },
+    {
+      "id": "houndour",
+      "name": "Houndour"
+    },
+    {
+      "id": "houndstone",
+      "name": "Houndstone"
+    },
+    {
+      "id": "huntail",
+      "name": "Huntail"
+    },
+    {
+      "id": "hydrapple",
+      "name": "Hydrapple"
+    },
+    {
+      "id": "hydreigon",
+      "name": "Hydreigon"
+    },
+    {
+      "id": "hypno",
+      "name": "Hypno"
+    },
+    {
+      "id": "igglybuff",
+      "name": "Igglybuff"
+    },
+    {
+      "id": "illumise",
+      "name": "Illumise"
+    },
+    {
+      "id": "impidimp",
+      "name": "Impidimp"
+    },
+    {
+      "id": "incineroar",
+      "name": "Incineroar"
+    },
+    {
+      "id": "indeedee",
+      "name": "Indeedee"
+    },
+    {
+      "id": "indeedeef",
+      "name": "Indeedee-F"
+    },
+    {
+      "id": "infernape",
+      "name": "Infernape"
+    },
+    {
+      "id": "inkay",
+      "name": "Inkay"
+    },
+    {
+      "id": "inteleon",
+      "name": "Inteleon"
+    },
+    {
+      "id": "inteleongmax",
+      "name": "Inteleon-Gmax"
+    },
+    {
+      "id": "ironboulder",
+      "name": "Iron Boulder"
+    },
+    {
+      "id": "ironbundle",
+      "name": "Iron Bundle"
+    },
+    {
+      "id": "ironcrown",
+      "name": "Iron Crown"
+    },
+    {
+      "id": "ironhands",
+      "name": "Iron Hands"
+    },
+    {
+      "id": "ironjugulis",
+      "name": "Iron Jugulis"
+    },
+    {
+      "id": "ironleaves",
+      "name": "Iron Leaves"
+    },
+    {
+      "id": "ironmoth",
+      "name": "Iron Moth"
+    },
+    {
+      "id": "ironthorns",
+      "name": "Iron Thorns"
+    },
+    {
+      "id": "irontreads",
+      "name": "Iron Treads"
+    },
+    {
+      "id": "ironvaliant",
+      "name": "Iron Valiant"
+    },
+    {
+      "id": "ivysaur",
+      "name": "Ivysaur"
+    },
+    {
+      "id": "jangmoo",
+      "name": "Jangmo-o"
+    },
+    {
+      "id": "jellicent",
+      "name": "Jellicent"
+    },
+    {
+      "id": "jigglypuff",
+      "name": "Jigglypuff"
+    },
+    {
+      "id": "jirachi",
+      "name": "Jirachi"
+    },
+    {
+      "id": "jolteon",
+      "name": "Jolteon"
+    },
+    {
+      "id": "joltik",
+      "name": "Joltik"
+    },
+    {
+      "id": "jumbao",
+      "name": "Jumbao"
+    },
+    {
+      "id": "jumpluff",
+      "name": "Jumpluff"
+    },
+    {
+      "id": "justyke",
+      "name": "Justyke"
+    },
+    {
+      "id": "jynx",
+      "name": "Jynx"
+    },
+    {
+      "id": "kabuto",
+      "name": "Kabuto"
+    },
+    {
+      "id": "kabutops",
+      "name": "Kabutops"
+    },
+    {
+      "id": "kadabra",
+      "name": "Kadabra"
+    },
+    {
+      "id": "kakuna",
+      "name": "Kakuna"
+    },
+    {
+      "id": "kangaskhan",
+      "name": "Kangaskhan"
+    },
+    {
+      "id": "kangaskhanmega",
+      "name": "Kangaskhan-Mega"
+    },
+    {
+      "id": "karrablast",
+      "name": "Karrablast"
+    },
+    {
+      "id": "kartana",
+      "name": "Kartana"
+    },
+    {
+      "id": "kecleon",
+      "name": "Kecleon"
+    },
+    {
+      "id": "keldeo",
+      "name": "Keldeo"
+    },
+    {
+      "id": "keldeoresolute",
+      "name": "Keldeo-Resolute"
+    },
+    {
+      "id": "kerfluffle",
+      "name": "Kerfluffle"
+    },
+    {
+      "id": "kilowattrel",
+      "name": "Kilowattrel"
+    },
+    {
+      "id": "kingambit",
+      "name": "Kingambit"
+    },
+    {
+      "id": "kingdra",
+      "name": "Kingdra"
+    },
+    {
+      "id": "kingler",
+      "name": "Kingler"
+    },
+    {
+      "id": "kinglergmax",
+      "name": "Kingler-Gmax"
+    },
+    {
+      "id": "kirlia",
+      "name": "Kirlia"
+    },
+    {
+      "id": "kitsunoh",
+      "name": "Kitsunoh"
+    },
+    {
+      "id": "klang",
+      "name": "Klang"
+    },
+    {
+      "id": "klawf",
+      "name": "Klawf"
+    },
+    {
+      "id": "kleavor",
+      "name": "Kleavor"
+    },
+    {
+      "id": "klefki",
+      "name": "Klefki"
+    },
+    {
+      "id": "klink",
+      "name": "Klink"
+    },
+    {
+      "id": "klinklang",
+      "name": "Klinklang"
+    },
+    {
+      "id": "koffing",
+      "name": "Koffing"
+    },
+    {
+      "id": "komala",
+      "name": "Komala"
+    },
+    {
+      "id": "kommoo",
+      "name": "Kommo-o"
+    },
+    {
+      "id": "kommoototem",
+      "name": "Kommo-o-Totem"
+    },
+    {
+      "id": "koraidon",
+      "name": "Koraidon"
+    },
+    {
+      "id": "krabby",
+      "name": "Krabby"
+    },
+    {
+      "id": "kricketot",
+      "name": "Kricketot"
+    },
+    {
+      "id": "kricketune",
+      "name": "Kricketune"
+    },
+    {
+      "id": "krilowatt",
+      "name": "Krilowatt"
+    },
+    {
+      "id": "krokorok",
+      "name": "Krokorok"
+    },
+    {
+      "id": "krookodile",
+      "name": "Krookodile"
+    },
+    {
+      "id": "kubfu",
+      "name": "Kubfu"
+    },
+    {
+      "id": "kyogre",
+      "name": "Kyogre"
+    },
+    {
+      "id": "kyogreprimal",
+      "name": "Kyogre-Primal"
+    },
+    {
+      "id": "kyurem",
+      "name": "Kyurem"
+    },
+    {
+      "id": "kyuremblack",
+      "name": "Kyurem-Black"
+    },
+    {
+      "id": "kyuremwhite",
+      "name": "Kyurem-White"
+    },
+    {
+      "id": "lairon",
+      "name": "Lairon"
+    },
+    {
+      "id": "lampent",
+      "name": "Lampent"
+    },
+    {
+      "id": "landorus",
+      "name": "Landorus"
+    },
+    {
+      "id": "landorustherian",
+      "name": "Landorus-Therian"
+    },
+    {
+      "id": "lanturn",
+      "name": "Lanturn"
+    },
+    {
+      "id": "lapras",
+      "name": "Lapras"
+    },
+    {
+      "id": "laprasgmax",
+      "name": "Lapras-Gmax"
+    },
+    {
+      "id": "larvesta",
+      "name": "Larvesta"
+    },
+    {
+      "id": "larvitar",
+      "name": "Larvitar"
+    },
+    {
+      "id": "latias",
+      "name": "Latias"
+    },
+    {
+      "id": "latiasmega",
+      "name": "Latias-Mega"
+    },
+    {
+      "id": "latios",
+      "name": "Latios"
+    },
+    {
+      "id": "latiosmega",
+      "name": "Latios-Mega"
+    },
+    {
+      "id": "leafeon",
+      "name": "Leafeon"
+    },
+    {
+      "id": "leavanny",
+      "name": "Leavanny"
+    },
+    {
+      "id": "lechonk",
+      "name": "Lechonk"
+    },
+    {
+      "id": "ledian",
+      "name": "Ledian"
+    },
+    {
+      "id": "ledyba",
+      "name": "Ledyba"
+    },
+    {
+      "id": "lickilicky",
+      "name": "Lickilicky"
+    },
+    {
+      "id": "lickitung",
+      "name": "Lickitung"
+    },
+    {
+      "id": "liepard",
+      "name": "Liepard"
+    },
+    {
+      "id": "lileep",
+      "name": "Lileep"
+    },
+    {
+      "id": "lilligant",
+      "name": "Lilligant"
+    },
+    {
+      "id": "lilliganthisui",
+      "name": "Lilligant-Hisui"
+    },
+    {
+      "id": "lillipup",
+      "name": "Lillipup"
+    },
+    {
+      "id": "linoone",
+      "name": "Linoone"
+    },
+    {
+      "id": "linoonegalar",
+      "name": "Linoone-Galar"
+    },
+    {
+      "id": "litleo",
+      "name": "Litleo"
+    },
+    {
+      "id": "litten",
+      "name": "Litten"
+    },
+    {
+      "id": "litwick",
+      "name": "Litwick"
+    },
+    {
+      "id": "lokix",
+      "name": "Lokix"
+    },
+    {
+      "id": "lombre",
+      "name": "Lombre"
+    },
+    {
+      "id": "lopunny",
+      "name": "Lopunny"
+    },
+    {
+      "id": "lopunnymega",
+      "name": "Lopunny-Mega"
+    },
+    {
+      "id": "lotad",
+      "name": "Lotad"
+    },
+    {
+      "id": "loudred",
+      "name": "Loudred"
+    },
+    {
+      "id": "lucario",
+      "name": "Lucario"
+    },
+    {
+      "id": "lucariomega",
+      "name": "Lucario-Mega"
+    },
+    {
+      "id": "lucariomegaz",
+      "name": "Lucario-Mega-Z"
+    },
+    {
+      "id": "ludicolo",
+      "name": "Ludicolo"
+    },
+    {
+      "id": "lugia",
+      "name": "Lugia"
+    },
+    {
+      "id": "lumineon",
+      "name": "Lumineon"
+    },
+    {
+      "id": "lunala",
+      "name": "Lunala"
+    },
+    {
+      "id": "lunatone",
+      "name": "Lunatone"
+    },
+    {
+      "id": "lurantis",
+      "name": "Lurantis"
+    },
+    {
+      "id": "lurantistotem",
+      "name": "Lurantis-Totem"
+    },
+    {
+      "id": "luvdisc",
+      "name": "Luvdisc"
+    },
+    {
+      "id": "luxio",
+      "name": "Luxio"
+    },
+    {
+      "id": "luxray",
+      "name": "Luxray"
+    },
+    {
+      "id": "lycanroc",
+      "name": "Lycanroc"
+    },
+    {
+      "id": "lycanrocdusk",
+      "name": "Lycanroc-Dusk"
+    },
+    {
+      "id": "lycanrocmidnight",
+      "name": "Lycanroc-Midnight"
+    },
+    {
+      "id": "mabosstiff",
+      "name": "Mabosstiff"
+    },
+    {
+      "id": "machamp",
+      "name": "Machamp"
+    },
+    {
+      "id": "machampgmax",
+      "name": "Machamp-Gmax"
+    },
+    {
+      "id": "machoke",
+      "name": "Machoke"
+    },
+    {
+      "id": "machop",
+      "name": "Machop"
+    },
+    {
+      "id": "magby",
+      "name": "Magby"
+    },
+    {
+      "id": "magcargo",
+      "name": "Magcargo"
+    },
+    {
+      "id": "magearna",
+      "name": "Magearna"
+    },
+    {
+      "id": "magearnamega",
+      "name": "Magearna-Mega"
+    },
+    {
+      "id": "magearnaoriginal",
+      "name": "Magearna-Original"
+    },
+    {
+      "id": "magearnaoriginalmega",
+      "name": "Magearna-Original-Mega"
+    },
+    {
+      "id": "magikarp",
+      "name": "Magikarp"
+    },
+    {
+      "id": "magmar",
+      "name": "Magmar"
+    },
+    {
+      "id": "magmortar",
+      "name": "Magmortar"
+    },
+    {
+      "id": "magnemite",
+      "name": "Magnemite"
+    },
+    {
+      "id": "magneton",
+      "name": "Magneton"
+    },
+    {
+      "id": "magnezone",
+      "name": "Magnezone"
+    },
+    {
+      "id": "makuhita",
+      "name": "Makuhita"
+    },
+    {
+      "id": "malaconda",
+      "name": "Malaconda"
+    },
+    {
+      "id": "malamar",
+      "name": "Malamar"
+    },
+    {
+      "id": "malamarmega",
+      "name": "Malamar-Mega"
+    },
+    {
+      "id": "mamoswine",
+      "name": "Mamoswine"
+    },
+    {
+      "id": "manaphy",
+      "name": "Manaphy"
+    },
+    {
+      "id": "mandibuzz",
+      "name": "Mandibuzz"
+    },
+    {
+      "id": "manectric",
+      "name": "Manectric"
+    },
+    {
+      "id": "manectricmega",
+      "name": "Manectric-Mega"
+    },
+    {
+      "id": "mankey",
+      "name": "Mankey"
+    },
+    {
+      "id": "mantine",
+      "name": "Mantine"
+    },
+    {
+      "id": "mantyke",
+      "name": "Mantyke"
+    },
+    {
+      "id": "maractus",
+      "name": "Maractus"
+    },
+    {
+      "id": "mareanie",
+      "name": "Mareanie"
+    },
+    {
+      "id": "mareep",
+      "name": "Mareep"
+    },
+    {
+      "id": "marill",
+      "name": "Marill"
+    },
+    {
+      "id": "marowak",
+      "name": "Marowak"
+    },
+    {
+      "id": "marowakalola",
+      "name": "Marowak-Alola"
+    },
+    {
+      "id": "marowakalolatotem",
+      "name": "Marowak-Alola-Totem"
+    },
+    {
+      "id": "marshadow",
+      "name": "Marshadow"
+    },
+    {
+      "id": "marshtomp",
+      "name": "Marshtomp"
+    },
+    {
+      "id": "maschiff",
+      "name": "Maschiff"
+    },
+    {
+      "id": "masquerain",
+      "name": "Masquerain"
+    },
+    {
+      "id": "maushold",
+      "name": "Maushold"
+    },
+    {
+      "id": "mausholdfour",
+      "name": "Maushold-Four"
+    },
+    {
+      "id": "mawile",
+      "name": "Mawile"
+    },
+    {
+      "id": "mawilemega",
+      "name": "Mawile-Mega"
+    },
+    {
+      "id": "medicham",
+      "name": "Medicham"
+    },
+    {
+      "id": "medichammega",
+      "name": "Medicham-Mega"
+    },
+    {
+      "id": "meditite",
+      "name": "Meditite"
+    },
+    {
+      "id": "meganium",
+      "name": "Meganium"
+    },
+    {
+      "id": "meganiummega",
+      "name": "Meganium-Mega"
+    },
+    {
+      "id": "melmetal",
+      "name": "Melmetal"
+    },
+    {
+      "id": "melmetalgmax",
+      "name": "Melmetal-Gmax"
+    },
+    {
+      "id": "meloetta",
+      "name": "Meloetta"
+    },
+    {
+      "id": "meloettapirouette",
+      "name": "Meloetta-Pirouette"
+    },
+    {
+      "id": "meltan",
+      "name": "Meltan"
+    },
+    {
+      "id": "meowscarada",
+      "name": "Meowscarada"
+    },
+    {
+      "id": "meowstic",
+      "name": "Meowstic"
+    },
+    {
+      "id": "meowsticf",
+      "name": "Meowstic-F"
+    },
+    {
+      "id": "meowsticfmega",
+      "name": "Meowstic-F-Mega"
+    },
+    {
+      "id": "meowsticmmega",
+      "name": "Meowstic-M-Mega"
+    },
+    {
+      "id": "meowth",
+      "name": "Meowth"
+    },
+    {
+      "id": "meowthalola",
+      "name": "Meowth-Alola"
+    },
+    {
+      "id": "meowthgalar",
+      "name": "Meowth-Galar"
+    },
+    {
+      "id": "meowthgmax",
+      "name": "Meowth-Gmax"
+    },
+    {
+      "id": "mesprit",
+      "name": "Mesprit"
+    },
+    {
+      "id": "metagross",
+      "name": "Metagross"
+    },
+    {
+      "id": "metagrossmega",
+      "name": "Metagross-Mega"
+    },
+    {
+      "id": "metang",
+      "name": "Metang"
+    },
+    {
+      "id": "metapod",
+      "name": "Metapod"
+    },
+    {
+      "id": "mew",
+      "name": "Mew"
+    },
+    {
+      "id": "mewtwo",
+      "name": "Mewtwo"
+    },
+    {
+      "id": "mewtwomegax",
+      "name": "Mewtwo-Mega-X"
+    },
+    {
+      "id": "mewtwomegay",
+      "name": "Mewtwo-Mega-Y"
+    },
+    {
+      "id": "miasmaw",
+      "name": "Miasmaw"
+    },
+    {
+      "id": "miasmite",
+      "name": "Miasmite"
+    },
+    {
+      "id": "mienfoo",
+      "name": "Mienfoo"
+    },
+    {
+      "id": "mienshao",
+      "name": "Mienshao"
+    },
+    {
+      "id": "mightyena",
+      "name": "Mightyena"
+    },
+    {
+      "id": "milcery",
+      "name": "Milcery"
+    },
+    {
+      "id": "milotic",
+      "name": "Milotic"
+    },
+    {
+      "id": "miltank",
+      "name": "Miltank"
+    },
+    {
+      "id": "mimejr",
+      "name": "Mime Jr."
+    },
+    {
+      "id": "mimikyu",
+      "name": "Mimikyu"
+    },
+    {
+      "id": "mimikyubusted",
+      "name": "Mimikyu-Busted"
+    },
+    {
+      "id": "mimikyubustedtotem",
+      "name": "Mimikyu-Busted-Totem"
+    },
+    {
+      "id": "mimikyutotem",
+      "name": "Mimikyu-Totem"
+    },
+    {
+      "id": "minccino",
+      "name": "Minccino"
+    },
+    {
+      "id": "minior",
+      "name": "Minior"
+    },
+    {
+      "id": "miniorblue",
+      "name": "Minior-Blue"
+    },
+    {
+      "id": "miniorgreen",
+      "name": "Minior-Green"
+    },
+    {
+      "id": "miniorindigo",
+      "name": "Minior-Indigo"
+    },
+    {
+      "id": "miniormeteor",
+      "name": "Minior-Meteor"
+    },
+    {
+      "id": "miniororange",
+      "name": "Minior-Orange"
+    },
+    {
+      "id": "miniorviolet",
+      "name": "Minior-Violet"
+    },
+    {
+      "id": "minioryellow",
+      "name": "Minior-Yellow"
+    },
+    {
+      "id": "minun",
+      "name": "Minun"
+    },
+    {
+      "id": "miraidon",
+      "name": "Miraidon"
+    },
+    {
+      "id": "misdreavus",
+      "name": "Misdreavus"
+    },
+    {
+      "id": "mismagius",
+      "name": "Mismagius"
+    },
+    {
+      "id": "missingno",
+      "name": "MissingNo."
+    },
+    {
+      "id": "mollux",
+      "name": "Mollux"
+    },
+    {
+      "id": "moltres",
+      "name": "Moltres"
+    },
+    {
+      "id": "moltresgalar",
+      "name": "Moltres-Galar"
+    },
+    {
+      "id": "monferno",
+      "name": "Monferno"
+    },
+    {
+      "id": "monohm",
+      "name": "Monohm"
+    },
+    {
+      "id": "morelull",
+      "name": "Morelull"
+    },
+    {
+      "id": "morgrem",
+      "name": "Morgrem"
+    },
+    {
+      "id": "morpeko",
+      "name": "Morpeko"
+    },
+    {
+      "id": "morpekohangry",
+      "name": "Morpeko-Hangry"
+    },
+    {
+      "id": "mothim",
+      "name": "Mothim"
+    },
+    {
+      "id": "mrmime",
+      "name": "Mr. Mime"
+    },
+    {
+      "id": "mrmimegalar",
+      "name": "Mr. Mime-Galar"
+    },
+    {
+      "id": "mrrime",
+      "name": "Mr. Rime"
+    },
+    {
+      "id": "mudbray",
+      "name": "Mudbray"
+    },
+    {
+      "id": "mudkip",
+      "name": "Mudkip"
+    },
+    {
+      "id": "mudsdale",
+      "name": "Mudsdale"
+    },
+    {
+      "id": "muk",
+      "name": "Muk"
+    },
+    {
+      "id": "mukalola",
+      "name": "Muk-Alola"
+    },
+    {
+      "id": "mumbao",
+      "name": "Mumbao"
+    },
+    {
+      "id": "munchlax",
+      "name": "Munchlax"
+    },
+    {
+      "id": "munkidori",
+      "name": "Munkidori"
+    },
+    {
+      "id": "munna",
+      "name": "Munna"
+    },
+    {
+      "id": "murkrow",
+      "name": "Murkrow"
+    },
+    {
+      "id": "musharna",
+      "name": "Musharna"
+    },
+    {
+      "id": "nacli",
+      "name": "Nacli"
+    },
+    {
+      "id": "naclstack",
+      "name": "Naclstack"
+    },
+    {
+      "id": "naganadel",
+      "name": "Naganadel"
+    },
+    {
+      "id": "natu",
+      "name": "Natu"
+    },
+    {
+      "id": "naviathan",
+      "name": "Naviathan"
+    },
+    {
+      "id": "necrozma",
+      "name": "Necrozma"
+    },
+    {
+      "id": "necrozmadawnwings",
+      "name": "Necrozma-Dawn-Wings"
+    },
+    {
+      "id": "necrozmaduskmane",
+      "name": "Necrozma-Dusk-Mane"
+    },
+    {
+      "id": "necrozmaultra",
+      "name": "Necrozma-Ultra"
+    },
+    {
+      "id": "necturine",
+      "name": "Necturine"
+    },
+    {
+      "id": "necturna",
+      "name": "Necturna"
+    },
+    {
+      "id": "nickit",
+      "name": "Nickit"
+    },
+    {
+      "id": "nidoking",
+      "name": "Nidoking"
+    },
+    {
+      "id": "nidoqueen",
+      "name": "Nidoqueen"
+    },
+    {
+      "id": "nidoranf",
+      "name": "Nidoran-F"
+    },
+    {
+      "id": "nidoranm",
+      "name": "Nidoran-M"
+    },
+    {
+      "id": "nidorina",
+      "name": "Nidorina"
+    },
+    {
+      "id": "nidorino",
+      "name": "Nidorino"
+    },
+    {
+      "id": "nihilego",
+      "name": "Nihilego"
+    },
+    {
+      "id": "nincada",
+      "name": "Nincada"
+    },
+    {
+      "id": "ninetales",
+      "name": "Ninetales"
+    },
+    {
+      "id": "ninetalesalola",
+      "name": "Ninetales-Alola"
+    },
+    {
+      "id": "ninjask",
+      "name": "Ninjask"
+    },
+    {
+      "id": "noctowl",
+      "name": "Noctowl"
+    },
+    {
+      "id": "nohface",
+      "name": "Nohface"
+    },
+    {
+      "id": "noibat",
+      "name": "Noibat"
+    },
+    {
+      "id": "noivern",
+      "name": "Noivern"
+    },
+    {
+      "id": "nosepass",
+      "name": "Nosepass"
+    },
+    {
+      "id": "numel",
+      "name": "Numel"
+    },
+    {
+      "id": "nuzleaf",
+      "name": "Nuzleaf"
+    },
+    {
+      "id": "nymble",
+      "name": "Nymble"
+    },
+    {
+      "id": "obstagoon",
+      "name": "Obstagoon"
+    },
+    {
+      "id": "octillery",
+      "name": "Octillery"
+    },
+    {
+      "id": "oddish",
+      "name": "Oddish"
+    },
+    {
+      "id": "ogerpon",
+      "name": "Ogerpon"
+    },
+    {
+      "id": "ogerponcornerstone",
+      "name": "Ogerpon-Cornerstone"
+    },
+    {
+      "id": "ogerponcornerstonetera",
+      "name": "Ogerpon-Cornerstone-Tera"
+    },
+    {
+      "id": "ogerponhearthflame",
+      "name": "Ogerpon-Hearthflame"
+    },
+    {
+      "id": "ogerponhearthflametera",
+      "name": "Ogerpon-Hearthflame-Tera"
+    },
+    {
+      "id": "ogerpontealtera",
+      "name": "Ogerpon-Teal-Tera"
+    },
+    {
+      "id": "ogerponwellspring",
+      "name": "Ogerpon-Wellspring"
+    },
+    {
+      "id": "ogerponwellspringtera",
+      "name": "Ogerpon-Wellspring-Tera"
+    },
+    {
+      "id": "oinkologne",
+      "name": "Oinkologne"
+    },
+    {
+      "id": "oinkolognef",
+      "name": "Oinkologne-F"
+    },
+    {
+      "id": "okidogi",
+      "name": "Okidogi"
+    },
+    {
+      "id": "omanyte",
+      "name": "Omanyte"
+    },
+    {
+      "id": "omastar",
+      "name": "Omastar"
+    },
+    {
+      "id": "onix",
+      "name": "Onix"
+    },
+    {
+      "id": "oranguru",
+      "name": "Oranguru"
+    },
+    {
+      "id": "orbeetle",
+      "name": "Orbeetle"
+    },
+    {
+      "id": "orbeetlegmax",
+      "name": "Orbeetle-Gmax"
+    },
+    {
+      "id": "oricorio",
+      "name": "Oricorio"
+    },
+    {
+      "id": "oricoriopau",
+      "name": "Oricorio-Pa'u"
+    },
+    {
+      "id": "oricoriopompom",
+      "name": "Oricorio-Pom-Pom"
+    },
+    {
+      "id": "oricoriosensu",
+      "name": "Oricorio-Sensu"
+    },
+    {
+      "id": "orthworm",
+      "name": "Orthworm"
+    },
+    {
+      "id": "oshawott",
+      "name": "Oshawott"
+    },
+    {
+      "id": "overqwil",
+      "name": "Overqwil"
+    },
+    {
+      "id": "pachirisu",
+      "name": "Pachirisu"
+    },
+    {
+      "id": "pajantom",
+      "name": "Pajantom"
+    },
+    {
+      "id": "palafin",
+      "name": "Palafin"
+    },
+    {
+      "id": "palafinhero",
+      "name": "Palafin-Hero"
+    },
+    {
+      "id": "palkia",
+      "name": "Palkia"
+    },
+    {
+      "id": "palkiaorigin",
+      "name": "Palkia-Origin"
+    },
+    {
+      "id": "palossand",
+      "name": "Palossand"
+    },
+    {
+      "id": "palpitoad",
+      "name": "Palpitoad"
+    },
+    {
+      "id": "pancham",
+      "name": "Pancham"
+    },
+    {
+      "id": "pangoro",
+      "name": "Pangoro"
+    },
+    {
+      "id": "panpour",
+      "name": "Panpour"
+    },
+    {
+      "id": "pansage",
+      "name": "Pansage"
+    },
+    {
+      "id": "pansear",
+      "name": "Pansear"
+    },
+    {
+      "id": "paras",
+      "name": "Paras"
+    },
+    {
+      "id": "parasect",
+      "name": "Parasect"
+    },
+    {
+      "id": "passimian",
+      "name": "Passimian"
+    },
+    {
+      "id": "patrat",
+      "name": "Patrat"
+    },
+    {
+      "id": "pawmi",
+      "name": "Pawmi"
+    },
+    {
+      "id": "pawmo",
+      "name": "Pawmo"
+    },
+    {
+      "id": "pawmot",
+      "name": "Pawmot"
+    },
+    {
+      "id": "pawniard",
+      "name": "Pawniard"
+    },
+    {
+      "id": "pecharunt",
+      "name": "Pecharunt"
+    },
+    {
+      "id": "pelipper",
+      "name": "Pelipper"
+    },
+    {
+      "id": "perrserker",
+      "name": "Perrserker"
+    },
+    {
+      "id": "persian",
+      "name": "Persian"
+    },
+    {
+      "id": "persianalola",
+      "name": "Persian-Alola"
+    },
+    {
+      "id": "petilil",
+      "name": "Petilil"
+    },
+    {
+      "id": "phanpy",
+      "name": "Phanpy"
+    },
+    {
+      "id": "phantump",
+      "name": "Phantump"
+    },
+    {
+      "id": "pheromosa",
+      "name": "Pheromosa"
+    },
+    {
+      "id": "phione",
+      "name": "Phione"
+    },
+    {
+      "id": "pichu",
+      "name": "Pichu"
+    },
+    {
+      "id": "pichuspikyeared",
+      "name": "Pichu-Spiky-eared"
+    },
+    {
+      "id": "pidgeot",
+      "name": "Pidgeot"
+    },
+    {
+      "id": "pidgeotmega",
+      "name": "Pidgeot-Mega"
+    },
+    {
+      "id": "pidgeotto",
+      "name": "Pidgeotto"
+    },
+    {
+      "id": "pidgey",
+      "name": "Pidgey"
+    },
+    {
+      "id": "pidove",
+      "name": "Pidove"
+    },
+    {
+      "id": "pignite",
+      "name": "Pignite"
+    },
+    {
+      "id": "pikachu",
+      "name": "Pikachu"
+    },
+    {
+      "id": "pikachualola",
+      "name": "Pikachu-Alola"
+    },
+    {
+      "id": "pikachubelle",
+      "name": "Pikachu-Belle"
+    },
+    {
+      "id": "pikachucosplay",
+      "name": "Pikachu-Cosplay"
+    },
+    {
+      "id": "pikachugmax",
+      "name": "Pikachu-Gmax"
+    },
+    {
+      "id": "pikachuhoenn",
+      "name": "Pikachu-Hoenn"
+    },
+    {
+      "id": "pikachukalos",
+      "name": "Pikachu-Kalos"
+    },
+    {
+      "id": "pikachulibre",
+      "name": "Pikachu-Libre"
+    },
+    {
+      "id": "pikachuoriginal",
+      "name": "Pikachu-Original"
+    },
+    {
+      "id": "pikachupartner",
+      "name": "Pikachu-Partner"
+    },
+    {
+      "id": "pikachuphd",
+      "name": "Pikachu-PhD"
+    },
+    {
+      "id": "pikachupopstar",
+      "name": "Pikachu-Pop-Star"
+    },
+    {
+      "id": "pikachurockstar",
+      "name": "Pikachu-Rock-Star"
+    },
+    {
+      "id": "pikachusinnoh",
+      "name": "Pikachu-Sinnoh"
+    },
+    {
+      "id": "pikachustarter",
+      "name": "Pikachu-Starter"
+    },
+    {
+      "id": "pikachuunova",
+      "name": "Pikachu-Unova"
+    },
+    {
+      "id": "pikachuworld",
+      "name": "Pikachu-World"
+    },
+    {
+      "id": "pikipek",
+      "name": "Pikipek"
+    },
+    {
+      "id": "piloswine",
+      "name": "Piloswine"
+    },
+    {
+      "id": "pincurchin",
+      "name": "Pincurchin"
+    },
+    {
+      "id": "pineco",
+      "name": "Pineco"
+    },
+    {
+      "id": "pinsir",
+      "name": "Pinsir"
+    },
+    {
+      "id": "pinsirmega",
+      "name": "Pinsir-Mega"
+    },
+    {
+      "id": "piplup",
+      "name": "Piplup"
+    },
+    {
+      "id": "plasmanta",
+      "name": "Plasmanta"
+    },
+    {
+      "id": "pluffle",
+      "name": "Pluffle"
+    },
+    {
+      "id": "plusle",
+      "name": "Plusle"
+    },
+    {
+      "id": "poipole",
+      "name": "Poipole"
+    },
+    {
+      "id": "pokestarblackbelt",
+      "name": "Pokestar Black Belt"
+    },
+    {
+      "id": "pokestarblackdoor",
+      "name": "Pokestar Black Door"
+    },
+    {
+      "id": "pokestarbrycenman",
+      "name": "Pokestar Brycen-Man"
+    },
+    {
+      "id": "pokestarf00",
+      "name": "Pokestar F-00"
+    },
+    {
+      "id": "pokestarf002",
+      "name": "Pokestar F-002"
+    },
+    {
+      "id": "pokestargiant",
+      "name": "Pokestar Giant"
+    },
+    {
+      "id": "pokestarhumanoid",
+      "name": "Pokestar Humanoid"
+    },
+    {
+      "id": "pokestarmonster",
+      "name": "Pokestar Monster"
+    },
+    {
+      "id": "pokestarmt",
+      "name": "Pokestar MT"
+    },
+    {
+      "id": "pokestarmt2",
+      "name": "Pokestar MT2"
+    },
+    {
+      "id": "pokestarsmeargle",
+      "name": "Pokestar Smeargle"
+    },
+    {
+      "id": "pokestarspirit",
+      "name": "Pokestar Spirit"
+    },
+    {
+      "id": "pokestartransport",
+      "name": "Pokestar Transport"
+    },
+    {
+      "id": "pokestarufo",
+      "name": "Pokestar UFO"
+    },
+    {
+      "id": "pokestarufo2",
+      "name": "Pokestar UFO-2"
+    },
+    {
+      "id": "pokestarufopropu2",
+      "name": "Pokestar UFO-PropU2"
+    },
+    {
+      "id": "pokestarwhitedoor",
+      "name": "Pokestar White Door"
+    },
+    {
+      "id": "politoed",
+      "name": "Politoed"
+    },
+    {
+      "id": "poliwag",
+      "name": "Poliwag"
+    },
+    {
+      "id": "poliwhirl",
+      "name": "Poliwhirl"
+    },
+    {
+      "id": "poliwrath",
+      "name": "Poliwrath"
+    },
+    {
+      "id": "poltchageist",
+      "name": "Poltchageist"
+    },
+    {
+      "id": "poltchageistartisan",
+      "name": "Poltchageist-Artisan"
+    },
+    {
+      "id": "polteageist",
+      "name": "Polteageist"
+    },
+    {
+      "id": "polteageistantique",
+      "name": "Polteageist-Antique"
+    },
+    {
+      "id": "ponyta",
+      "name": "Ponyta"
+    },
+    {
+      "id": "ponytagalar",
+      "name": "Ponyta-Galar"
+    },
+    {
+      "id": "poochyena",
+      "name": "Poochyena"
+    },
+    {
+      "id": "popplio",
+      "name": "Popplio"
+    },
+    {
+      "id": "porygon",
+      "name": "Porygon"
+    },
+    {
+      "id": "porygon2",
+      "name": "Porygon2"
+    },
+    {
+      "id": "porygonz",
+      "name": "Porygon-Z"
+    },
+    {
+      "id": "primarina",
+      "name": "Primarina"
+    },
+    {
+      "id": "primeape",
+      "name": "Primeape"
+    },
+    {
+      "id": "prinplup",
+      "name": "Prinplup"
+    },
+    {
+      "id": "privatyke",
+      "name": "Privatyke"
+    },
+    {
+      "id": "probopass",
+      "name": "Probopass"
+    },
+    {
+      "id": "protowatt",
+      "name": "Protowatt"
+    },
+    {
+      "id": "psyduck",
+      "name": "Psyduck"
+    },
+    {
+      "id": "pumpkaboo",
+      "name": "Pumpkaboo"
+    },
+    {
+      "id": "pumpkaboolarge",
+      "name": "Pumpkaboo-Large"
+    },
+    {
+      "id": "pumpkaboosmall",
+      "name": "Pumpkaboo-Small"
+    },
+    {
+      "id": "pumpkaboosuper",
+      "name": "Pumpkaboo-Super"
+    },
+    {
+      "id": "pupitar",
+      "name": "Pupitar"
+    },
+    {
+      "id": "purrloin",
+      "name": "Purrloin"
+    },
+    {
+      "id": "purugly",
+      "name": "Purugly"
+    },
+    {
+      "id": "pyroak",
+      "name": "Pyroak"
+    },
+    {
+      "id": "pyroar",
+      "name": "Pyroar"
+    },
+    {
+      "id": "pyroarmega",
+      "name": "Pyroar-Mega"
+    },
+    {
+      "id": "pyukumuku",
+      "name": "Pyukumuku"
+    },
+    {
+      "id": "quagsire",
+      "name": "Quagsire"
+    },
+    {
+      "id": "quaquaval",
+      "name": "Quaquaval"
+    },
+    {
+      "id": "quaxly",
+      "name": "Quaxly"
+    },
+    {
+      "id": "quaxwell",
+      "name": "Quaxwell"
+    },
+    {
+      "id": "quilava",
+      "name": "Quilava"
+    },
+    {
+      "id": "quilladin",
+      "name": "Quilladin"
+    },
+    {
+      "id": "qwilfish",
+      "name": "Qwilfish"
+    },
+    {
+      "id": "qwilfishhisui",
+      "name": "Qwilfish-Hisui"
+    },
+    {
+      "id": "raboot",
+      "name": "Raboot"
+    },
+    {
+      "id": "rabsca",
+      "name": "Rabsca"
+    },
+    {
+      "id": "ragingbolt",
+      "name": "Raging Bolt"
+    },
+    {
+      "id": "raichu",
+      "name": "Raichu"
+    },
+    {
+      "id": "raichualola",
+      "name": "Raichu-Alola"
+    },
+    {
+      "id": "raichumegax",
+      "name": "Raichu-Mega-X"
+    },
+    {
+      "id": "raichumegay",
+      "name": "Raichu-Mega-Y"
+    },
+    {
+      "id": "raikou",
+      "name": "Raikou"
+    },
+    {
+      "id": "ralts",
+      "name": "Ralts"
+    },
+    {
+      "id": "ramnarok",
+      "name": "Ramnarok"
+    },
+    {
+      "id": "ramnarokradiant",
+      "name": "Ramnarok-Radiant"
+    },
+    {
+      "id": "rampardos",
+      "name": "Rampardos"
+    },
+    {
+      "id": "rapidash",
+      "name": "Rapidash"
+    },
+    {
+      "id": "rapidashgalar",
+      "name": "Rapidash-Galar"
+    },
+    {
+      "id": "raticate",
+      "name": "Raticate"
+    },
+    {
+      "id": "raticatealola",
+      "name": "Raticate-Alola"
+    },
+    {
+      "id": "raticatealolatotem",
+      "name": "Raticate-Alola-Totem"
+    },
+    {
+      "id": "rattata",
+      "name": "Rattata"
+    },
+    {
+      "id": "rattataalola",
+      "name": "Rattata-Alola"
+    },
+    {
+      "id": "rayquaza",
+      "name": "Rayquaza"
+    },
+    {
+      "id": "rayquazamega",
+      "name": "Rayquaza-Mega"
+    },
+    {
+      "id": "rebble",
+      "name": "Rebble"
+    },
+    {
+      "id": "regice",
+      "name": "Regice"
+    },
+    {
+      "id": "regidrago",
+      "name": "Regidrago"
+    },
+    {
+      "id": "regieleki",
+      "name": "Regieleki"
+    },
+    {
+      "id": "regigigas",
+      "name": "Regigigas"
+    },
+    {
+      "id": "regirock",
+      "name": "Regirock"
+    },
+    {
+      "id": "registeel",
+      "name": "Registeel"
+    },
+    {
+      "id": "relicanth",
+      "name": "Relicanth"
+    },
+    {
+      "id": "rellor",
+      "name": "Rellor"
+    },
+    {
+      "id": "remoraid",
+      "name": "Remoraid"
+    },
+    {
+      "id": "reshiram",
+      "name": "Reshiram"
+    },
+    {
+      "id": "reuniclus",
+      "name": "Reuniclus"
+    },
+    {
+      "id": "revavroom",
+      "name": "Revavroom"
+    },
+    {
+      "id": "revenankh",
+      "name": "Revenankh"
+    },
+    {
+      "id": "rhydon",
+      "name": "Rhydon"
+    },
+    {
+      "id": "rhyhorn",
+      "name": "Rhyhorn"
+    },
+    {
+      "id": "rhyperior",
+      "name": "Rhyperior"
+    },
+    {
+      "id": "ribombee",
+      "name": "Ribombee"
+    },
+    {
+      "id": "ribombeetotem",
+      "name": "Ribombee-Totem"
+    },
+    {
+      "id": "rillaboom",
+      "name": "Rillaboom"
+    },
+    {
+      "id": "rillaboomgmax",
+      "name": "Rillaboom-Gmax"
+    },
+    {
+      "id": "riolu",
+      "name": "Riolu"
+    },
+    {
+      "id": "roaringmoon",
+      "name": "Roaring Moon"
+    },
+    {
+      "id": "rockruff",
+      "name": "Rockruff"
+    },
+    {
+      "id": "rockruffdusk",
+      "name": "Rockruff-Dusk"
+    },
+    {
+      "id": "roggenrola",
+      "name": "Roggenrola"
+    },
+    {
+      "id": "rolycoly",
+      "name": "Rolycoly"
+    },
+    {
+      "id": "rookidee",
+      "name": "Rookidee"
+    },
+    {
+      "id": "roselia",
+      "name": "Roselia"
+    },
+    {
+      "id": "roserade",
+      "name": "Roserade"
+    },
+    {
+      "id": "rotom",
+      "name": "Rotom"
+    },
+    {
+      "id": "rotomfan",
+      "name": "Rotom-Fan"
+    },
+    {
+      "id": "rotomfrost",
+      "name": "Rotom-Frost"
+    },
+    {
+      "id": "rotomheat",
+      "name": "Rotom-Heat"
+    },
+    {
+      "id": "rotommow",
+      "name": "Rotom-Mow"
+    },
+    {
+      "id": "rotomwash",
+      "name": "Rotom-Wash"
+    },
+    {
+      "id": "rowlet",
+      "name": "Rowlet"
+    },
+    {
+      "id": "rufflet",
+      "name": "Rufflet"
+    },
+    {
+      "id": "runerigus",
+      "name": "Runerigus"
+    },
+    {
+      "id": "sableye",
+      "name": "Sableye"
+    },
+    {
+      "id": "sableyemega",
+      "name": "Sableye-Mega"
+    },
+    {
+      "id": "saharaja",
+      "name": "Saharaja"
+    },
+    {
+      "id": "saharascal",
+      "name": "Saharascal"
+    },
+    {
+      "id": "salamence",
+      "name": "Salamence"
+    },
+    {
+      "id": "salamencemega",
+      "name": "Salamence-Mega"
+    },
+    {
+      "id": "salandit",
+      "name": "Salandit"
+    },
+    {
+      "id": "salazzle",
+      "name": "Salazzle"
+    },
+    {
+      "id": "salazzletotem",
+      "name": "Salazzle-Totem"
+    },
+    {
+      "id": "samurott",
+      "name": "Samurott"
+    },
+    {
+      "id": "samurotthisui",
+      "name": "Samurott-Hisui"
+    },
+    {
+      "id": "sandaconda",
+      "name": "Sandaconda"
+    },
+    {
+      "id": "sandacondagmax",
+      "name": "Sandaconda-Gmax"
+    },
+    {
+      "id": "sandile",
+      "name": "Sandile"
+    },
+    {
+      "id": "sandshrew",
+      "name": "Sandshrew"
+    },
+    {
+      "id": "sandshrewalola",
+      "name": "Sandshrew-Alola"
+    },
+    {
+      "id": "sandslash",
+      "name": "Sandslash"
+    },
+    {
+      "id": "sandslashalola",
+      "name": "Sandslash-Alola"
+    },
+    {
+      "id": "sandygast",
+      "name": "Sandygast"
+    },
+    {
+      "id": "sandyshocks",
+      "name": "Sandy Shocks"
+    },
+    {
+      "id": "sawk",
+      "name": "Sawk"
+    },
+    {
+      "id": "sawsbuck",
+      "name": "Sawsbuck"
+    },
+    {
+      "id": "scatterbug",
+      "name": "Scatterbug"
+    },
+    {
+      "id": "scattervein",
+      "name": "Scattervein"
+    },
+    {
+      "id": "sceptile",
+      "name": "Sceptile"
+    },
+    {
+      "id": "sceptilemega",
+      "name": "Sceptile-Mega"
+    },
+    {
+      "id": "scizor",
+      "name": "Scizor"
+    },
+    {
+      "id": "scizormega",
+      "name": "Scizor-Mega"
+    },
+    {
+      "id": "scolipede",
+      "name": "Scolipede"
+    },
+    {
+      "id": "scolipedemega",
+      "name": "Scolipede-Mega"
+    },
+    {
+      "id": "scorbunny",
+      "name": "Scorbunny"
+    },
+    {
+      "id": "scovillain",
+      "name": "Scovillain"
+    },
+    {
+      "id": "scovillainmega",
+      "name": "Scovillain-Mega"
+    },
+    {
+      "id": "scrafty",
+      "name": "Scrafty"
+    },
+    {
+      "id": "scraftymega",
+      "name": "Scrafty-Mega"
+    },
+    {
+      "id": "scraggy",
+      "name": "Scraggy"
+    },
+    {
+      "id": "scratchet",
+      "name": "Scratchet"
+    },
+    {
+      "id": "screamtail",
+      "name": "Scream Tail"
+    },
+    {
+      "id": "scyther",
+      "name": "Scyther"
+    },
+    {
+      "id": "seadra",
+      "name": "Seadra"
+    },
+    {
+      "id": "seaking",
+      "name": "Seaking"
+    },
+    {
+      "id": "sealeo",
+      "name": "Sealeo"
+    },
+    {
+      "id": "seedot",
+      "name": "Seedot"
+    },
+    {
+      "id": "seel",
+      "name": "Seel"
+    },
+    {
+      "id": "seismitoad",
+      "name": "Seismitoad"
+    },
+    {
+      "id": "sentret",
+      "name": "Sentret"
+    },
+    {
+      "id": "serperior",
+      "name": "Serperior"
+    },
+    {
+      "id": "servine",
+      "name": "Servine"
+    },
+    {
+      "id": "seviper",
+      "name": "Seviper"
+    },
+    {
+      "id": "sewaddle",
+      "name": "Sewaddle"
+    },
+    {
+      "id": "sharpedo",
+      "name": "Sharpedo"
+    },
+    {
+      "id": "sharpedomega",
+      "name": "Sharpedo-Mega"
+    },
+    {
+      "id": "shaymin",
+      "name": "Shaymin"
+    },
+    {
+      "id": "shayminsky",
+      "name": "Shaymin-Sky"
+    },
+    {
+      "id": "shedinja",
+      "name": "Shedinja"
+    },
+    {
+      "id": "shelgon",
+      "name": "Shelgon"
+    },
+    {
+      "id": "shellder",
+      "name": "Shellder"
+    },
+    {
+      "id": "shellos",
+      "name": "Shellos"
+    },
+    {
+      "id": "shelloseast",
+      "name": "Shellos-East"
+    },
+    {
+      "id": "shelmet",
+      "name": "Shelmet"
+    },
+    {
+      "id": "shieldon",
+      "name": "Shieldon"
+    },
+    {
+      "id": "shiftry",
+      "name": "Shiftry"
+    },
+    {
+      "id": "shiinotic",
+      "name": "Shiinotic"
+    },
+    {
+      "id": "shinx",
+      "name": "Shinx"
+    },
+    {
+      "id": "shox",
+      "name": "Shox"
+    },
+    {
+      "id": "shroodle",
+      "name": "Shroodle"
+    },
+    {
+      "id": "shroomish",
+      "name": "Shroomish"
+    },
+    {
+      "id": "shuckle",
+      "name": "Shuckle"
+    },
+    {
+      "id": "shuppet",
+      "name": "Shuppet"
+    },
+    {
+      "id": "sigilyph",
+      "name": "Sigilyph"
+    },
+    {
+      "id": "silcoon",
+      "name": "Silcoon"
+    },
+    {
+      "id": "silicobra",
+      "name": "Silicobra"
+    },
+    {
+      "id": "silvally",
+      "name": "Silvally"
+    },
+    {
+      "id": "silvallybug",
+      "name": "Silvally-Bug"
+    },
+    {
+      "id": "silvallydark",
+      "name": "Silvally-Dark"
+    },
+    {
+      "id": "silvallydragon",
+      "name": "Silvally-Dragon"
+    },
+    {
+      "id": "silvallyelectric",
+      "name": "Silvally-Electric"
+    },
+    {
+      "id": "silvallyfairy",
+      "name": "Silvally-Fairy"
+    },
+    {
+      "id": "silvallyfighting",
+      "name": "Silvally-Fighting"
+    },
+    {
+      "id": "silvallyfire",
+      "name": "Silvally-Fire"
+    },
+    {
+      "id": "silvallyflying",
+      "name": "Silvally-Flying"
+    },
+    {
+      "id": "silvallyghost",
+      "name": "Silvally-Ghost"
+    },
+    {
+      "id": "silvallygrass",
+      "name": "Silvally-Grass"
+    },
+    {
+      "id": "silvallyground",
+      "name": "Silvally-Ground"
+    },
+    {
+      "id": "silvallyice",
+      "name": "Silvally-Ice"
+    },
+    {
+      "id": "silvallypoison",
+      "name": "Silvally-Poison"
+    },
+    {
+      "id": "silvallypsychic",
+      "name": "Silvally-Psychic"
+    },
+    {
+      "id": "silvallyrock",
+      "name": "Silvally-Rock"
+    },
+    {
+      "id": "silvallysteel",
+      "name": "Silvally-Steel"
+    },
+    {
+      "id": "silvallywater",
+      "name": "Silvally-Water"
+    },
+    {
+      "id": "simipour",
+      "name": "Simipour"
+    },
+    {
+      "id": "simisage",
+      "name": "Simisage"
+    },
+    {
+      "id": "simisear",
+      "name": "Simisear"
+    },
+    {
+      "id": "sinistcha",
+      "name": "Sinistcha"
+    },
+    {
+      "id": "sinistchamasterpiece",
+      "name": "Sinistcha-Masterpiece"
+    },
+    {
+      "id": "sinistea",
+      "name": "Sinistea"
+    },
+    {
+      "id": "sinisteaantique",
+      "name": "Sinistea-Antique"
+    },
+    {
+      "id": "sirfetchd",
+      "name": "Sirfetch\u2019d"
+    },
+    {
+      "id": "sizzlipede",
+      "name": "Sizzlipede"
+    },
+    {
+      "id": "skarmory",
+      "name": "Skarmory"
+    },
+    {
+      "id": "skarmorymega",
+      "name": "Skarmory-Mega"
+    },
+    {
+      "id": "skeledirge",
+      "name": "Skeledirge"
+    },
+    {
+      "id": "skiddo",
+      "name": "Skiddo"
+    },
+    {
+      "id": "skiploom",
+      "name": "Skiploom"
+    },
+    {
+      "id": "skitty",
+      "name": "Skitty"
+    },
+    {
+      "id": "skorupi",
+      "name": "Skorupi"
+    },
+    {
+      "id": "skrelp",
+      "name": "Skrelp"
+    },
+    {
+      "id": "skuntank",
+      "name": "Skuntank"
+    },
+    {
+      "id": "skwovet",
+      "name": "Skwovet"
+    },
+    {
+      "id": "slaking",
+      "name": "Slaking"
+    },
+    {
+      "id": "slakoth",
+      "name": "Slakoth"
+    },
+    {
+      "id": "sliggoo",
+      "name": "Sliggoo"
+    },
+    {
+      "id": "sliggoohisui",
+      "name": "Sliggoo-Hisui"
+    },
+    {
+      "id": "slitherwing",
+      "name": "Slither Wing"
+    },
+    {
+      "id": "slowbro",
+      "name": "Slowbro"
+    },
+    {
+      "id": "slowbrogalar",
+      "name": "Slowbro-Galar"
+    },
+    {
+      "id": "slowbromega",
+      "name": "Slowbro-Mega"
+    },
+    {
+      "id": "slowking",
+      "name": "Slowking"
+    },
+    {
+      "id": "slowkinggalar",
+      "name": "Slowking-Galar"
+    },
+    {
+      "id": "slowpoke",
+      "name": "Slowpoke"
+    },
+    {
+      "id": "slowpokegalar",
+      "name": "Slowpoke-Galar"
+    },
+    {
+      "id": "slugma",
+      "name": "Slugma"
+    },
+    {
+      "id": "slurpuff",
+      "name": "Slurpuff"
+    },
+    {
+      "id": "smeargle",
+      "name": "Smeargle"
+    },
+    {
+      "id": "smogecko",
+      "name": "Smogecko"
+    },
+    {
+      "id": "smoguana",
+      "name": "Smoguana"
+    },
+    {
+      "id": "smokomodo",
+      "name": "Smokomodo"
+    },
+    {
+      "id": "smoliv",
+      "name": "Smoliv"
+    },
+    {
+      "id": "smoochum",
+      "name": "Smoochum"
+    },
+    {
+      "id": "snaelstrom",
+      "name": "Snaelstrom"
+    },
+    {
+      "id": "sneasel",
+      "name": "Sneasel"
+    },
+    {
+      "id": "sneaselhisui",
+      "name": "Sneasel-Hisui"
+    },
+    {
+      "id": "sneasler",
+      "name": "Sneasler"
+    },
+    {
+      "id": "snivy",
+      "name": "Snivy"
+    },
+    {
+      "id": "snom",
+      "name": "Snom"
+    },
+    {
+      "id": "snorlax",
+      "name": "Snorlax"
+    },
+    {
+      "id": "snorlaxgmax",
+      "name": "Snorlax-Gmax"
+    },
+    {
+      "id": "snorunt",
+      "name": "Snorunt"
+    },
+    {
+      "id": "snover",
+      "name": "Snover"
+    },
+    {
+      "id": "snubbull",
+      "name": "Snubbull"
+    },
+    {
+      "id": "snugglow",
+      "name": "Snugglow"
+    },
+    {
+      "id": "sobble",
+      "name": "Sobble"
+    },
+    {
+      "id": "solgaleo",
+      "name": "Solgaleo"
+    },
+    {
+      "id": "solosis",
+      "name": "Solosis"
+    },
+    {
+      "id": "solotl",
+      "name": "Solotl"
+    },
+    {
+      "id": "solrock",
+      "name": "Solrock"
+    },
+    {
+      "id": "spearow",
+      "name": "Spearow"
+    },
+    {
+      "id": "spectrier",
+      "name": "Spectrier"
+    },
+    {
+      "id": "spewpa",
+      "name": "Spewpa"
+    },
+    {
+      "id": "spheal",
+      "name": "Spheal"
+    },
+    {
+      "id": "spidops",
+      "name": "Spidops"
+    },
+    {
+      "id": "spinarak",
+      "name": "Spinarak"
+    },
+    {
+      "id": "spinda",
+      "name": "Spinda"
+    },
+    {
+      "id": "spiritomb",
+      "name": "Spiritomb"
+    },
+    {
+      "id": "spoink",
+      "name": "Spoink"
+    },
+    {
+      "id": "sprigatito",
+      "name": "Sprigatito"
+    },
+    {
+      "id": "spritzee",
+      "name": "Spritzee"
+    },
+    {
+      "id": "squawkabilly",
+      "name": "Squawkabilly"
+    },
+    {
+      "id": "squawkabillyblue",
+      "name": "Squawkabilly-Blue"
+    },
+    {
+      "id": "squawkabillywhite",
+      "name": "Squawkabilly-White"
+    },
+    {
+      "id": "squawkabillyyellow",
+      "name": "Squawkabilly-Yellow"
+    },
+    {
+      "id": "squirtle",
+      "name": "Squirtle"
+    },
+    {
+      "id": "stakataka",
+      "name": "Stakataka"
+    },
+    {
+      "id": "stantler",
+      "name": "Stantler"
+    },
+    {
+      "id": "staraptor",
+      "name": "Staraptor"
+    },
+    {
+      "id": "staraptormega",
+      "name": "Staraptor-Mega"
+    },
+    {
+      "id": "staravia",
+      "name": "Staravia"
+    },
+    {
+      "id": "starly",
+      "name": "Starly"
+    },
+    {
+      "id": "starmie",
+      "name": "Starmie"
+    },
+    {
+      "id": "starmiemega",
+      "name": "Starmie-Mega"
+    },
+    {
+      "id": "staryu",
+      "name": "Staryu"
+    },
+    {
+      "id": "steelix",
+      "name": "Steelix"
+    },
+    {
+      "id": "steelixmega",
+      "name": "Steelix-Mega"
+    },
+    {
+      "id": "steenee",
+      "name": "Steenee"
+    },
+    {
+      "id": "stonjourner",
+      "name": "Stonjourner"
+    },
+    {
+      "id": "stoutland",
+      "name": "Stoutland"
+    },
+    {
+      "id": "stratagem",
+      "name": "Stratagem"
+    },
+    {
+      "id": "stufful",
+      "name": "Stufful"
+    },
+    {
+      "id": "stunfisk",
+      "name": "Stunfisk"
+    },
+    {
+      "id": "stunfiskgalar",
+      "name": "Stunfisk-Galar"
+    },
+    {
+      "id": "stunky",
+      "name": "Stunky"
+    },
+    {
+      "id": "sudowoodo",
+      "name": "Sudowoodo"
+    },
+    {
+      "id": "suicune",
+      "name": "Suicune"
+    },
+    {
+      "id": "sunflora",
+      "name": "Sunflora"
+    },
+    {
+      "id": "sunkern",
+      "name": "Sunkern"
+    },
+    {
+      "id": "surskit",
+      "name": "Surskit"
+    },
+    {
+      "id": "swablu",
+      "name": "Swablu"
+    },
+    {
+      "id": "swadloon",
+      "name": "Swadloon"
+    },
+    {
+      "id": "swalot",
+      "name": "Swalot"
+    },
+    {
+      "id": "swampert",
+      "name": "Swampert"
+    },
+    {
+      "id": "swampertmega",
+      "name": "Swampert-Mega"
+    },
+    {
+      "id": "swanna",
+      "name": "Swanna"
+    },
+    {
+      "id": "swellow",
+      "name": "Swellow"
+    },
+    {
+      "id": "swinub",
+      "name": "Swinub"
+    },
+    {
+      "id": "swirlix",
+      "name": "Swirlix"
+    },
+    {
+      "id": "swirlpool",
+      "name": "Swirlpool"
+    },
+    {
+      "id": "swoobat",
+      "name": "Swoobat"
+    },
+    {
+      "id": "syclant",
+      "name": "Syclant"
+    },
+    {
+      "id": "syclar",
+      "name": "Syclar"
+    },
+    {
+      "id": "sylveon",
+      "name": "Sylveon"
+    },
+    {
+      "id": "tactite",
+      "name": "Tactite"
+    },
+    {
+      "id": "tadbulb",
+      "name": "Tadbulb"
+    },
+    {
+      "id": "taillow",
+      "name": "Taillow"
+    },
+    {
+      "id": "talonflame",
+      "name": "Talonflame"
+    },
+    {
+      "id": "tandemaus",
+      "name": "Tandemaus"
+    },
+    {
+      "id": "tangela",
+      "name": "Tangela"
+    },
+    {
+      "id": "tangrowth",
+      "name": "Tangrowth"
+    },
+    {
+      "id": "tapubulu",
+      "name": "Tapu Bulu"
+    },
+    {
+      "id": "tapufini",
+      "name": "Tapu Fini"
+    },
+    {
+      "id": "tapukoko",
+      "name": "Tapu Koko"
+    },
+    {
+      "id": "tapulele",
+      "name": "Tapu Lele"
+    },
+    {
+      "id": "tarountula",
+      "name": "Tarountula"
+    },
+    {
+      "id": "tatsugiri",
+      "name": "Tatsugiri"
+    },
+    {
+      "id": "tatsugiricurlymega",
+      "name": "Tatsugiri-Curly-Mega"
+    },
+    {
+      "id": "tatsugiridroopy",
+      "name": "Tatsugiri-Droopy"
+    },
+    {
+      "id": "tatsugiridroopymega",
+      "name": "Tatsugiri-Droopy-Mega"
+    },
+    {
+      "id": "tatsugiristretchy",
+      "name": "Tatsugiri-Stretchy"
+    },
+    {
+      "id": "tatsugiristretchymega",
+      "name": "Tatsugiri-Stretchy-Mega"
+    },
+    {
+      "id": "tauros",
+      "name": "Tauros"
+    },
+    {
+      "id": "taurospaldeaaqua",
+      "name": "Tauros-Paldea-Aqua"
+    },
+    {
+      "id": "taurospaldeablaze",
+      "name": "Tauros-Paldea-Blaze"
+    },
+    {
+      "id": "taurospaldeacombat",
+      "name": "Tauros-Paldea-Combat"
+    },
+    {
+      "id": "teddiursa",
+      "name": "Teddiursa"
+    },
+    {
+      "id": "tentacool",
+      "name": "Tentacool"
+    },
+    {
+      "id": "tentacruel",
+      "name": "Tentacruel"
+    },
+    {
+      "id": "tepig",
+      "name": "Tepig"
+    },
+    {
+      "id": "terapagos",
+      "name": "Terapagos"
+    },
+    {
+      "id": "terapagosstellar",
+      "name": "Terapagos-Stellar"
+    },
+    {
+      "id": "terapagosterastal",
+      "name": "Terapagos-Terastal"
+    },
+    {
+      "id": "terrakion",
+      "name": "Terrakion"
+    },
+    {
+      "id": "thievul",
+      "name": "Thievul"
+    },
+    {
+      "id": "throh",
+      "name": "Throh"
+    },
+    {
+      "id": "thundurus",
+      "name": "Thundurus"
+    },
+    {
+      "id": "thundurustherian",
+      "name": "Thundurus-Therian"
+    },
+    {
+      "id": "thwackey",
+      "name": "Thwackey"
+    },
+    {
+      "id": "timburr",
+      "name": "Timburr"
+    },
+    {
+      "id": "tinglu",
+      "name": "Ting-Lu"
+    },
+    {
+      "id": "tinkatink",
+      "name": "Tinkatink"
+    },
+    {
+      "id": "tinkaton",
+      "name": "Tinkaton"
+    },
+    {
+      "id": "tinkatuff",
+      "name": "Tinkatuff"
+    },
+    {
+      "id": "tirtouga",
+      "name": "Tirtouga"
+    },
+    {
+      "id": "toedscool",
+      "name": "Toedscool"
+    },
+    {
+      "id": "toedscruel",
+      "name": "Toedscruel"
+    },
+    {
+      "id": "togedemaru",
+      "name": "Togedemaru"
+    },
+    {
+      "id": "togedemarutotem",
+      "name": "Togedemaru-Totem"
+    },
+    {
+      "id": "togekiss",
+      "name": "Togekiss"
+    },
+    {
+      "id": "togepi",
+      "name": "Togepi"
+    },
+    {
+      "id": "togetic",
+      "name": "Togetic"
+    },
+    {
+      "id": "tomohawk",
+      "name": "Tomohawk"
+    },
+    {
+      "id": "torchic",
+      "name": "Torchic"
+    },
+    {
+      "id": "torkoal",
+      "name": "Torkoal"
+    },
+    {
+      "id": "tornadus",
+      "name": "Tornadus"
+    },
+    {
+      "id": "tornadustherian",
+      "name": "Tornadus-Therian"
+    },
+    {
+      "id": "torracat",
+      "name": "Torracat"
+    },
+    {
+      "id": "torterra",
+      "name": "Torterra"
+    },
+    {
+      "id": "totodile",
+      "name": "Totodile"
+    },
+    {
+      "id": "toucannon",
+      "name": "Toucannon"
+    },
+    {
+      "id": "toxapex",
+      "name": "Toxapex"
+    },
+    {
+      "id": "toxel",
+      "name": "Toxel"
+    },
+    {
+      "id": "toxicroak",
+      "name": "Toxicroak"
+    },
+    {
+      "id": "toxtricity",
+      "name": "Toxtricity"
+    },
+    {
+      "id": "toxtricitygmax",
+      "name": "Toxtricity-Gmax"
+    },
+    {
+      "id": "toxtricitylowkey",
+      "name": "Toxtricity-Low-Key"
+    },
+    {
+      "id": "toxtricitylowkeygmax",
+      "name": "Toxtricity-Low-Key-Gmax"
+    },
+    {
+      "id": "tranquill",
+      "name": "Tranquill"
+    },
+    {
+      "id": "trapinch",
+      "name": "Trapinch"
+    },
+    {
+      "id": "treecko",
+      "name": "Treecko"
+    },
+    {
+      "id": "trevenant",
+      "name": "Trevenant"
+    },
+    {
+      "id": "tropius",
+      "name": "Tropius"
+    },
+    {
+      "id": "trubbish",
+      "name": "Trubbish"
+    },
+    {
+      "id": "trumbeak",
+      "name": "Trumbeak"
+    },
+    {
+      "id": "tsareena",
+      "name": "Tsareena"
+    },
+    {
+      "id": "turtonator",
+      "name": "Turtonator"
+    },
+    {
+      "id": "turtwig",
+      "name": "Turtwig"
+    },
+    {
+      "id": "tympole",
+      "name": "Tympole"
+    },
+    {
+      "id": "tynamo",
+      "name": "Tynamo"
+    },
+    {
+      "id": "typenull",
+      "name": "Type: Null"
+    },
+    {
+      "id": "typhlosion",
+      "name": "Typhlosion"
+    },
+    {
+      "id": "typhlosionhisui",
+      "name": "Typhlosion-Hisui"
+    },
+    {
+      "id": "tyranitar",
+      "name": "Tyranitar"
+    },
+    {
+      "id": "tyranitarmega",
+      "name": "Tyranitar-Mega"
+    },
+    {
+      "id": "tyrantrum",
+      "name": "Tyrantrum"
+    },
+    {
+      "id": "tyrogue",
+      "name": "Tyrogue"
+    },
+    {
+      "id": "tyrunt",
+      "name": "Tyrunt"
+    },
+    {
+      "id": "umbreon",
+      "name": "Umbreon"
+    },
+    {
+      "id": "unfezant",
+      "name": "Unfezant"
+    },
+    {
+      "id": "unown",
+      "name": "Unown"
+    },
+    {
+      "id": "ursaluna",
+      "name": "Ursaluna"
+    },
+    {
+      "id": "ursalunabloodmoon",
+      "name": "Ursaluna-Bloodmoon"
+    },
+    {
+      "id": "ursaring",
+      "name": "Ursaring"
+    },
+    {
+      "id": "urshifu",
+      "name": "Urshifu"
+    },
+    {
+      "id": "urshifugmax",
+      "name": "Urshifu-Gmax"
+    },
+    {
+      "id": "urshifurapidstrike",
+      "name": "Urshifu-Rapid-Strike"
+    },
+    {
+      "id": "urshifurapidstrikegmax",
+      "name": "Urshifu-Rapid-Strike-Gmax"
+    },
+    {
+      "id": "uxie",
+      "name": "Uxie"
+    },
+    {
+      "id": "vanillish",
+      "name": "Vanillish"
+    },
+    {
+      "id": "vanillite",
+      "name": "Vanillite"
+    },
+    {
+      "id": "vanilluxe",
+      "name": "Vanilluxe"
+    },
+    {
+      "id": "vaporeon",
+      "name": "Vaporeon"
+    },
+    {
+      "id": "varoom",
+      "name": "Varoom"
+    },
+    {
+      "id": "veluza",
+      "name": "Veluza"
+    },
+    {
+      "id": "venipede",
+      "name": "Venipede"
+    },
+    {
+      "id": "venomicon",
+      "name": "Venomicon"
+    },
+    {
+      "id": "venomiconepilogue",
+      "name": "Venomicon-Epilogue"
+    },
+    {
+      "id": "venomoth",
+      "name": "Venomoth"
+    },
+    {
+      "id": "venonat",
+      "name": "Venonat"
+    },
+    {
+      "id": "venusaur",
+      "name": "Venusaur"
+    },
+    {
+      "id": "venusaurgmax",
+      "name": "Venusaur-Gmax"
+    },
+    {
+      "id": "venusaurmega",
+      "name": "Venusaur-Mega"
+    },
+    {
+      "id": "vespiquen",
+      "name": "Vespiquen"
+    },
+    {
+      "id": "vibrava",
+      "name": "Vibrava"
+    },
+    {
+      "id": "victini",
+      "name": "Victini"
+    },
+    {
+      "id": "victreebel",
+      "name": "Victreebel"
+    },
+    {
+      "id": "victreebelmega",
+      "name": "Victreebel-Mega"
+    },
+    {
+      "id": "vigoroth",
+      "name": "Vigoroth"
+    },
+    {
+      "id": "vikavolt",
+      "name": "Vikavolt"
+    },
+    {
+      "id": "vikavolttotem",
+      "name": "Vikavolt-Totem"
+    },
+    {
+      "id": "vileplume",
+      "name": "Vileplume"
+    },
+    {
+      "id": "virizion",
+      "name": "Virizion"
+    },
+    {
+      "id": "vivillon",
+      "name": "Vivillon"
+    },
+    {
+      "id": "vivillonarchipelago",
+      "name": "Vivillon-Archipelago"
+    },
+    {
+      "id": "vivilloncontinental",
+      "name": "Vivillon-Continental"
+    },
+    {
+      "id": "vivillonelegant",
+      "name": "Vivillon-Elegant"
+    },
+    {
+      "id": "vivillonfancy",
+      "name": "Vivillon-Fancy"
+    },
+    {
+      "id": "vivillongarden",
+      "name": "Vivillon-Garden"
+    },
+    {
+      "id": "vivillonhighplains",
+      "name": "Vivillon-High Plains"
+    },
+    {
+      "id": "vivillonicysnow",
+      "name": "Vivillon-Icy Snow"
+    },
+    {
+      "id": "vivillonjungle",
+      "name": "Vivillon-Jungle"
+    },
+    {
+      "id": "vivillonmarine",
+      "name": "Vivillon-Marine"
+    },
+    {
+      "id": "vivillonmodern",
+      "name": "Vivillon-Modern"
+    },
+    {
+      "id": "vivillonmonsoon",
+      "name": "Vivillon-Monsoon"
+    },
+    {
+      "id": "vivillonocean",
+      "name": "Vivillon-Ocean"
+    },
+    {
+      "id": "vivillonpokeball",
+      "name": "Vivillon-Pokeball"
+    },
+    {
+      "id": "vivillonpolar",
+      "name": "Vivillon-Polar"
+    },
+    {
+      "id": "vivillonriver",
+      "name": "Vivillon-River"
+    },
+    {
+      "id": "vivillonsandstorm",
+      "name": "Vivillon-Sandstorm"
+    },
+    {
+      "id": "vivillonsavanna",
+      "name": "Vivillon-Savanna"
+    },
+    {
+      "id": "vivillonsun",
+      "name": "Vivillon-Sun"
+    },
+    {
+      "id": "vivillontundra",
+      "name": "Vivillon-Tundra"
+    },
+    {
+      "id": "volbeat",
+      "name": "Volbeat"
+    },
+    {
+      "id": "volcanion",
+      "name": "Volcanion"
+    },
+    {
+      "id": "volcarona",
+      "name": "Volcarona"
+    },
+    {
+      "id": "volkraken",
+      "name": "Volkraken"
+    },
+    {
+      "id": "volkritter",
+      "name": "Volkritter"
+    },
+    {
+      "id": "voltorb",
+      "name": "Voltorb"
+    },
+    {
+      "id": "voltorbhisui",
+      "name": "Voltorb-Hisui"
+    },
+    {
+      "id": "voodoll",
+      "name": "Voodoll"
+    },
+    {
+      "id": "voodoom",
+      "name": "Voodoom"
+    },
+    {
+      "id": "vullaby",
+      "name": "Vullaby"
+    },
+    {
+      "id": "vulpix",
+      "name": "Vulpix"
+    },
+    {
+      "id": "vulpixalola",
+      "name": "Vulpix-Alola"
+    },
+    {
+      "id": "wailmer",
+      "name": "Wailmer"
+    },
+    {
+      "id": "wailord",
+      "name": "Wailord"
+    },
+    {
+      "id": "walkingwake",
+      "name": "Walking Wake"
+    },
+    {
+      "id": "walrein",
+      "name": "Walrein"
+    },
+    {
+      "id": "wartortle",
+      "name": "Wartortle"
+    },
+    {
+      "id": "watchog",
+      "name": "Watchog"
+    },
+    {
+      "id": "wattrel",
+      "name": "Wattrel"
+    },
+    {
+      "id": "weavile",
+      "name": "Weavile"
+    },
+    {
+      "id": "weedle",
+      "name": "Weedle"
+    },
+    {
+      "id": "weepinbell",
+      "name": "Weepinbell"
+    },
+    {
+      "id": "weezing",
+      "name": "Weezing"
+    },
+    {
+      "id": "weezinggalar",
+      "name": "Weezing-Galar"
+    },
+    {
+      "id": "whimsicott",
+      "name": "Whimsicott"
+    },
+    {
+      "id": "whirlipede",
+      "name": "Whirlipede"
+    },
+    {
+      "id": "whiscash",
+      "name": "Whiscash"
+    },
+    {
+      "id": "whismur",
+      "name": "Whismur"
+    },
+    {
+      "id": "wigglytuff",
+      "name": "Wigglytuff"
+    },
+    {
+      "id": "wiglett",
+      "name": "Wiglett"
+    },
+    {
+      "id": "wimpod",
+      "name": "Wimpod"
+    },
+    {
+      "id": "wingull",
+      "name": "Wingull"
+    },
+    {
+      "id": "wishiwashi",
+      "name": "Wishiwashi"
+    },
+    {
+      "id": "wishiwashischool",
+      "name": "Wishiwashi-School"
+    },
+    {
+      "id": "wobbuffet",
+      "name": "Wobbuffet"
+    },
+    {
+      "id": "wochien",
+      "name": "Wo-Chien"
+    },
+    {
+      "id": "woobat",
+      "name": "Woobat"
+    },
+    {
+      "id": "wooloo",
+      "name": "Wooloo"
+    },
+    {
+      "id": "wooper",
+      "name": "Wooper"
+    },
+    {
+      "id": "wooperpaldea",
+      "name": "Wooper-Paldea"
+    },
+    {
+      "id": "wormadam",
+      "name": "Wormadam"
+    },
+    {
+      "id": "wormadamsandy",
+      "name": "Wormadam-Sandy"
+    },
+    {
+      "id": "wormadamtrash",
+      "name": "Wormadam-Trash"
+    },
+    {
+      "id": "wugtrio",
+      "name": "Wugtrio"
+    },
+    {
+      "id": "wurmple",
+      "name": "Wurmple"
+    },
+    {
+      "id": "wynaut",
+      "name": "Wynaut"
+    },
+    {
+      "id": "wyrdeer",
+      "name": "Wyrdeer"
+    },
+    {
+      "id": "xatu",
+      "name": "Xatu"
+    },
+    {
+      "id": "xerneas",
+      "name": "Xerneas"
+    },
+    {
+      "id": "xerneasneutral",
+      "name": "Xerneas-Neutral"
+    },
+    {
+      "id": "xurkitree",
+      "name": "Xurkitree"
+    },
+    {
+      "id": "yamask",
+      "name": "Yamask"
+    },
+    {
+      "id": "yamaskgalar",
+      "name": "Yamask-Galar"
+    },
+    {
+      "id": "yamper",
+      "name": "Yamper"
+    },
+    {
+      "id": "yanma",
+      "name": "Yanma"
+    },
+    {
+      "id": "yanmega",
+      "name": "Yanmega"
+    },
+    {
+      "id": "yungoos",
+      "name": "Yungoos"
+    },
+    {
+      "id": "yveltal",
+      "name": "Yveltal"
+    },
+    {
+      "id": "zacian",
+      "name": "Zacian"
+    },
+    {
+      "id": "zaciancrowned",
+      "name": "Zacian-Crowned"
+    },
+    {
+      "id": "zamazenta",
+      "name": "Zamazenta"
+    },
+    {
+      "id": "zamazentacrowned",
+      "name": "Zamazenta-Crowned"
+    },
+    {
+      "id": "zangoose",
+      "name": "Zangoose"
+    },
+    {
+      "id": "zapdos",
+      "name": "Zapdos"
+    },
+    {
+      "id": "zapdosgalar",
+      "name": "Zapdos-Galar"
+    },
+    {
+      "id": "zarude",
+      "name": "Zarude"
+    },
+    {
+      "id": "zarudedada",
+      "name": "Zarude-Dada"
+    },
+    {
+      "id": "zebstrika",
+      "name": "Zebstrika"
+    },
+    {
+      "id": "zekrom",
+      "name": "Zekrom"
+    },
+    {
+      "id": "zeraora",
+      "name": "Zeraora"
+    },
+    {
+      "id": "zeraoramega",
+      "name": "Zeraora-Mega"
+    },
+    {
+      "id": "zigzagoon",
+      "name": "Zigzagoon"
+    },
+    {
+      "id": "zigzagoongalar",
+      "name": "Zigzagoon-Galar"
+    },
+    {
+      "id": "zoroark",
+      "name": "Zoroark"
+    },
+    {
+      "id": "zoroarkhisui",
+      "name": "Zoroark-Hisui"
+    },
+    {
+      "id": "zorua",
+      "name": "Zorua"
+    },
+    {
+      "id": "zoruahisui",
+      "name": "Zorua-Hisui"
+    },
+    {
+      "id": "zubat",
+      "name": "Zubat"
+    },
+    {
+      "id": "zweilous",
+      "name": "Zweilous"
+    },
+    {
+      "id": "zygarde",
+      "name": "Zygarde"
+    },
+    {
+      "id": "zygarde10",
+      "name": "Zygarde-10%"
+    },
+    {
+      "id": "zygardecomplete",
+      "name": "Zygarde-Complete"
+    },
+    {
+      "id": "zygardemega",
+      "name": "Zygarde-Mega"
+    }
+  ],
+  "items": [
+    {
+      "id": "abilityshield",
+      "name": "Ability Shield"
+    },
+    {
+      "id": "abomasite",
+      "name": "Abomasite"
+    },
+    {
+      "id": "absolite",
+      "name": "Absolite"
+    },
+    {
+      "id": "absolitez",
+      "name": "Absolite Z"
+    },
+    {
+      "id": "absorbbulb",
+      "name": "Absorb Bulb"
+    },
+    {
+      "id": "adamantcrystal",
+      "name": "Adamant Crystal"
+    },
+    {
+      "id": "adamantorb",
+      "name": "Adamant Orb"
+    },
+    {
+      "id": "adrenalineorb",
+      "name": "Adrenaline Orb"
+    },
+    {
+      "id": "aerodactylite",
+      "name": "Aerodactylite"
+    },
+    {
+      "id": "aggronite",
+      "name": "Aggronite"
+    },
+    {
+      "id": "aguavberry",
+      "name": "Aguav Berry"
+    },
+    {
+      "id": "airballoon",
+      "name": "Air Balloon"
+    },
+    {
+      "id": "alakazite",
+      "name": "Alakazite"
+    },
+    {
+      "id": "aloraichiumz",
+      "name": "Aloraichium Z"
+    },
+    {
+      "id": "altarianite",
+      "name": "Altarianite"
+    },
+    {
+      "id": "ampharosite",
+      "name": "Ampharosite"
+    },
+    {
+      "id": "apicotberry",
+      "name": "Apicot Berry"
+    },
+    {
+      "id": "armorfossil",
+      "name": "Armor Fossil"
+    },
+    {
+      "id": "aspearberry",
+      "name": "Aspear Berry"
+    },
+    {
+      "id": "assaultvest",
+      "name": "Assault Vest"
+    },
+    {
+      "id": "audinite",
+      "name": "Audinite"
+    },
+    {
+      "id": "auspiciousarmor",
+      "name": "Auspicious Armor"
+    },
+    {
+      "id": "babiriberry",
+      "name": "Babiri Berry"
+    },
+    {
+      "id": "banettite",
+      "name": "Banettite"
+    },
+    {
+      "id": "barbaracite",
+      "name": "Barbaracite"
+    },
+    {
+      "id": "baxcalibrite",
+      "name": "Baxcalibrite"
+    },
+    {
+      "id": "beastball",
+      "name": "Beast Ball"
+    },
+    {
+      "id": "beedrillite",
+      "name": "Beedrillite"
+    },
+    {
+      "id": "belueberry",
+      "name": "Belue Berry"
+    },
+    {
+      "id": "berry",
+      "name": "Berry"
+    },
+    {
+      "id": "berryjuice",
+      "name": "Berry Juice"
+    },
+    {
+      "id": "berrysweet",
+      "name": "Berry Sweet"
+    },
+    {
+      "id": "berserkgene",
+      "name": "Berserk Gene"
+    },
+    {
+      "id": "bignugget",
+      "name": "Big Nugget"
+    },
+    {
+      "id": "bigroot",
+      "name": "Big Root"
+    },
+    {
+      "id": "bindingband",
+      "name": "Binding Band"
+    },
+    {
+      "id": "bitterberry",
+      "name": "Bitter Berry"
+    },
+    {
+      "id": "blackbelt",
+      "name": "Black Belt"
+    },
+    {
+      "id": "blackglasses",
+      "name": "Black Glasses"
+    },
+    {
+      "id": "blacksludge",
+      "name": "Black Sludge"
+    },
+    {
+      "id": "blastoisinite",
+      "name": "Blastoisinite"
+    },
+    {
+      "id": "blazikenite",
+      "name": "Blazikenite"
+    },
+    {
+      "id": "blueorb",
+      "name": "Blue Orb"
+    },
+    {
+      "id": "blukberry",
+      "name": "Bluk Berry"
+    },
+    {
+      "id": "blunderpolicy",
+      "name": "Blunder Policy"
+    },
+    {
+      "id": "boosterenergy",
+      "name": "Booster Energy"
+    },
+    {
+      "id": "bottlecap",
+      "name": "Bottle Cap"
+    },
+    {
+      "id": "brightpowder",
+      "name": "Bright Powder"
+    },
+    {
+      "id": "buggem",
+      "name": "Bug Gem"
+    },
+    {
+      "id": "buginiumz",
+      "name": "Buginium Z"
+    },
+    {
+      "id": "bugmemory",
+      "name": "Bug Memory"
+    },
+    {
+      "id": "burndrive",
+      "name": "Burn Drive"
+    },
+    {
+      "id": "burntberry",
+      "name": "Burnt Berry"
+    },
+    {
+      "id": "cameruptite",
+      "name": "Cameruptite"
+    },
+    {
+      "id": "cellbattery",
+      "name": "Cell Battery"
+    },
+    {
+      "id": "chandelurite",
+      "name": "Chandelurite"
+    },
+    {
+      "id": "charcoal",
+      "name": "Charcoal"
+    },
+    {
+      "id": "charizarditex",
+      "name": "Charizardite X"
+    },
+    {
+      "id": "charizarditey",
+      "name": "Charizardite Y"
+    },
+    {
+      "id": "chartiberry",
+      "name": "Charti Berry"
+    },
+    {
+      "id": "cheriberry",
+      "name": "Cheri Berry"
+    },
+    {
+      "id": "cherishball",
+      "name": "Cherish Ball"
+    },
+    {
+      "id": "chesnaughtite",
+      "name": "Chesnaughtite"
+    },
+    {
+      "id": "chestoberry",
+      "name": "Chesto Berry"
+    },
+    {
+      "id": "chilanberry",
+      "name": "Chilan Berry"
+    },
+    {
+      "id": "chilldrive",
+      "name": "Chill Drive"
+    },
+    {
+      "id": "chimechite",
+      "name": "Chimechite"
+    },
+    {
+      "id": "chippedpot",
+      "name": "Chipped Pot"
+    },
+    {
+      "id": "choiceband",
+      "name": "Choice Band"
+    },
+    {
+      "id": "choicescarf",
+      "name": "Choice Scarf"
+    },
+    {
+      "id": "choicespecs",
+      "name": "Choice Specs"
+    },
+    {
+      "id": "chopleberry",
+      "name": "Chople Berry"
+    },
+    {
+      "id": "clawfossil",
+      "name": "Claw Fossil"
+    },
+    {
+      "id": "clearamulet",
+      "name": "Clear Amulet"
+    },
+    {
+      "id": "clefablite",
+      "name": "Clefablite"
+    },
+    {
+      "id": "cloversweet",
+      "name": "Clover Sweet"
+    },
+    {
+      "id": "cobaberry",
+      "name": "Coba Berry"
+    },
+    {
+      "id": "colburberry",
+      "name": "Colbur Berry"
+    },
+    {
+      "id": "cornerstonemask",
+      "name": "Cornerstone Mask"
+    },
+    {
+      "id": "cornnberry",
+      "name": "Cornn Berry"
+    },
+    {
+      "id": "coverfossil",
+      "name": "Cover Fossil"
+    },
+    {
+      "id": "covertcloak",
+      "name": "Covert Cloak"
+    },
+    {
+      "id": "crabominite",
+      "name": "Crabominite"
+    },
+    {
+      "id": "crackedpot",
+      "name": "Cracked Pot"
+    },
+    {
+      "id": "crucibellite",
+      "name": "Crucibellite"
+    },
+    {
+      "id": "custapberry",
+      "name": "Custap Berry"
+    },
+    {
+      "id": "damprock",
+      "name": "Damp Rock"
+    },
+    {
+      "id": "darkgem",
+      "name": "Dark Gem"
+    },
+    {
+      "id": "darkiniumz",
+      "name": "Darkinium Z"
+    },
+    {
+      "id": "darkmemory",
+      "name": "Dark Memory"
+    },
+    {
+      "id": "darkranite",
+      "name": "Darkranite"
+    },
+    {
+      "id": "dawnstone",
+      "name": "Dawn Stone"
+    },
+    {
+      "id": "decidiumz",
+      "name": "Decidium Z"
+    },
+    {
+      "id": "deepseascale",
+      "name": "Deep Sea Scale"
+    },
+    {
+      "id": "deepseatooth",
+      "name": "Deep Sea Tooth"
+    },
+    {
+      "id": "delphoxite",
+      "name": "Delphoxite"
+    },
+    {
+      "id": "destinyknot",
+      "name": "Destiny Knot"
+    },
+    {
+      "id": "diancite",
+      "name": "Diancite"
+    },
+    {
+      "id": "diveball",
+      "name": "Dive Ball"
+    },
+    {
+      "id": "domefossil",
+      "name": "Dome Fossil"
+    },
+    {
+      "id": "dousedrive",
+      "name": "Douse Drive"
+    },
+    {
+      "id": "dracoplate",
+      "name": "Draco Plate"
+    },
+    {
+      "id": "dragalgite",
+      "name": "Dragalgite"
+    },
+    {
+      "id": "dragonfang",
+      "name": "Dragon Fang"
+    },
+    {
+      "id": "dragongem",
+      "name": "Dragon Gem"
+    },
+    {
+      "id": "dragoninite",
+      "name": "Dragoninite"
+    },
+    {
+      "id": "dragoniumz",
+      "name": "Dragonium Z"
+    },
+    {
+      "id": "dragonmemory",
+      "name": "Dragon Memory"
+    },
+    {
+      "id": "dragonscale",
+      "name": "Dragon Scale"
+    },
+    {
+      "id": "drampanite",
+      "name": "Drampanite"
+    },
+    {
+      "id": "dreadplate",
+      "name": "Dread Plate"
+    },
+    {
+      "id": "dreamball",
+      "name": "Dream Ball"
+    },
+    {
+      "id": "dubiousdisc",
+      "name": "Dubious Disc"
+    },
+    {
+      "id": "durinberry",
+      "name": "Durin Berry"
+    },
+    {
+      "id": "duskball",
+      "name": "Dusk Ball"
+    },
+    {
+      "id": "duskstone",
+      "name": "Dusk Stone"
+    },
+    {
+      "id": "earthplate",
+      "name": "Earth Plate"
+    },
+    {
+      "id": "eelektrossite",
+      "name": "Eelektrossite"
+    },
+    {
+      "id": "eeviumz",
+      "name": "Eevium Z"
+    },
+    {
+      "id": "ejectbutton",
+      "name": "Eject Button"
+    },
+    {
+      "id": "ejectpack",
+      "name": "Eject Pack"
+    },
+    {
+      "id": "electirizer",
+      "name": "Electirizer"
+    },
+    {
+      "id": "electricgem",
+      "name": "Electric Gem"
+    },
+    {
+      "id": "electricmemory",
+      "name": "Electric Memory"
+    },
+    {
+      "id": "electricseed",
+      "name": "Electric Seed"
+    },
+    {
+      "id": "electriumz",
+      "name": "Electrium Z"
+    },
+    {
+      "id": "emboarite",
+      "name": "Emboarite"
+    },
+    {
+      "id": "enigmaberry",
+      "name": "Enigma Berry"
+    },
+    {
+      "id": "eviolite",
+      "name": "Eviolite"
+    },
+    {
+      "id": "excadrite",
+      "name": "Excadrite"
+    },
+    {
+      "id": "expertbelt",
+      "name": "Expert Belt"
+    },
+    {
+      "id": "fairiumz",
+      "name": "Fairium Z"
+    },
+    {
+      "id": "fairyfeather",
+      "name": "Fairy Feather"
+    },
+    {
+      "id": "fairygem",
+      "name": "Fairy Gem"
+    },
+    {
+      "id": "fairymemory",
+      "name": "Fairy Memory"
+    },
+    {
+      "id": "falinksite",
+      "name": "Falinksite"
+    },
+    {
+      "id": "fastball",
+      "name": "Fast Ball"
+    },
+    {
+      "id": "feraligite",
+      "name": "Feraligite"
+    },
+    {
+      "id": "fightinggem",
+      "name": "Fighting Gem"
+    },
+    {
+      "id": "fightingmemory",
+      "name": "Fighting Memory"
+    },
+    {
+      "id": "fightiniumz",
+      "name": "Fightinium Z"
+    },
+    {
+      "id": "figyberry",
+      "name": "Figy Berry"
+    },
+    {
+      "id": "firegem",
+      "name": "Fire Gem"
+    },
+    {
+      "id": "firememory",
+      "name": "Fire Memory"
+    },
+    {
+      "id": "firestone",
+      "name": "Fire Stone"
+    },
+    {
+      "id": "firiumz",
+      "name": "Firium Z"
+    },
+    {
+      "id": "fistplate",
+      "name": "Fist Plate"
+    },
+    {
+      "id": "flameorb",
+      "name": "Flame Orb"
+    },
+    {
+      "id": "flameplate",
+      "name": "Flame Plate"
+    },
+    {
+      "id": "floatstone",
+      "name": "Float Stone"
+    },
+    {
+      "id": "floettite",
+      "name": "Floettite"
+    },
+    {
+      "id": "flowersweet",
+      "name": "Flower Sweet"
+    },
+    {
+      "id": "flyinggem",
+      "name": "Flying Gem"
+    },
+    {
+      "id": "flyingmemory",
+      "name": "Flying Memory"
+    },
+    {
+      "id": "flyiniumz",
+      "name": "Flyinium Z"
+    },
+    {
+      "id": "focusband",
+      "name": "Focus Band"
+    },
+    {
+      "id": "focussash",
+      "name": "Focus Sash"
+    },
+    {
+      "id": "fossilizedbird",
+      "name": "Fossilized Bird"
+    },
+    {
+      "id": "fossilizeddino",
+      "name": "Fossilized Dino"
+    },
+    {
+      "id": "fossilizeddrake",
+      "name": "Fossilized Drake"
+    },
+    {
+      "id": "fossilizedfish",
+      "name": "Fossilized Fish"
+    },
+    {
+      "id": "friendball",
+      "name": "Friend Ball"
+    },
+    {
+      "id": "froslassite",
+      "name": "Froslassite"
+    },
+    {
+      "id": "fullincense",
+      "name": "Full Incense"
+    },
+    {
+      "id": "galaricacuff",
+      "name": "Galarica Cuff"
+    },
+    {
+      "id": "galaricawreath",
+      "name": "Galarica Wreath"
+    },
+    {
+      "id": "galladite",
+      "name": "Galladite"
+    },
+    {
+      "id": "ganlonberry",
+      "name": "Ganlon Berry"
+    },
+    {
+      "id": "garchompite",
+      "name": "Garchompite"
+    },
+    {
+      "id": "garchompitez",
+      "name": "Garchompite Z"
+    },
+    {
+      "id": "gardevoirite",
+      "name": "Gardevoirite"
+    },
+    {
+      "id": "gengarite",
+      "name": "Gengarite"
+    },
+    {
+      "id": "ghostgem",
+      "name": "Ghost Gem"
+    },
+    {
+      "id": "ghostiumz",
+      "name": "Ghostium Z"
+    },
+    {
+      "id": "ghostmemory",
+      "name": "Ghost Memory"
+    },
+    {
+      "id": "glalitite",
+      "name": "Glalitite"
+    },
+    {
+      "id": "glimmoranite",
+      "name": "Glimmoranite"
+    },
+    {
+      "id": "goldberry",
+      "name": "Gold Berry"
+    },
+    {
+      "id": "goldbottlecap",
+      "name": "Gold Bottle Cap"
+    },
+    {
+      "id": "golisopite",
+      "name": "Golisopite"
+    },
+    {
+      "id": "golurkite",
+      "name": "Golurkite"
+    },
+    {
+      "id": "grassgem",
+      "name": "Grass Gem"
+    },
+    {
+      "id": "grassiumz",
+      "name": "Grassium Z"
+    },
+    {
+      "id": "grassmemory",
+      "name": "Grass Memory"
+    },
+    {
+      "id": "grassyseed",
+      "name": "Grassy Seed"
+    },
+    {
+      "id": "greatball",
+      "name": "Great Ball"
+    },
+    {
+      "id": "greninjite",
+      "name": "Greninjite"
+    },
+    {
+      "id": "grepaberry",
+      "name": "Grepa Berry"
+    },
+    {
+      "id": "gripclaw",
+      "name": "Grip Claw"
+    },
+    {
+      "id": "griseouscore",
+      "name": "Griseous Core"
+    },
+    {
+      "id": "griseousorb",
+      "name": "Griseous Orb"
+    },
+    {
+      "id": "groundgem",
+      "name": "Ground Gem"
+    },
+    {
+      "id": "groundiumz",
+      "name": "Groundium Z"
+    },
+    {
+      "id": "groundmemory",
+      "name": "Ground Memory"
+    },
+    {
+      "id": "gyaradosite",
+      "name": "Gyaradosite"
+    },
+    {
+      "id": "habanberry",
+      "name": "Haban Berry"
+    },
+    {
+      "id": "hardstone",
+      "name": "Hard Stone"
+    },
+    {
+      "id": "hawluchanite",
+      "name": "Hawluchanite"
+    },
+    {
+      "id": "healball",
+      "name": "Heal Ball"
+    },
+    {
+      "id": "hearthflamemask",
+      "name": "Hearthflame Mask"
+    },
+    {
+      "id": "heatranite",
+      "name": "Heatranite"
+    },
+    {
+      "id": "heatrock",
+      "name": "Heat Rock"
+    },
+    {
+      "id": "heavyball",
+      "name": "Heavy Ball"
+    },
+    {
+      "id": "heavydutyboots",
+      "name": "Heavy-Duty Boots"
+    },
+    {
+      "id": "helixfossil",
+      "name": "Helix Fossil"
+    },
+    {
+      "id": "heracronite",
+      "name": "Heracronite"
+    },
+    {
+      "id": "hondewberry",
+      "name": "Hondew Berry"
+    },
+    {
+      "id": "houndoominite",
+      "name": "Houndoominite"
+    },
+    {
+      "id": "iapapaberry",
+      "name": "Iapapa Berry"
+    },
+    {
+      "id": "iceberry",
+      "name": "Ice Berry"
+    },
+    {
+      "id": "icegem",
+      "name": "Ice Gem"
+    },
+    {
+      "id": "icememory",
+      "name": "Ice Memory"
+    },
+    {
+      "id": "icestone",
+      "name": "Ice Stone"
+    },
+    {
+      "id": "icicleplate",
+      "name": "Icicle Plate"
+    },
+    {
+      "id": "iciumz",
+      "name": "Icium Z"
+    },
+    {
+      "id": "icyrock",
+      "name": "Icy Rock"
+    },
+    {
+      "id": "inciniumz",
+      "name": "Incinium Z"
+    },
+    {
+      "id": "insectplate",
+      "name": "Insect Plate"
+    },
+    {
+      "id": "ironball",
+      "name": "Iron Ball"
+    },
+    {
+      "id": "ironplate",
+      "name": "Iron Plate"
+    },
+    {
+      "id": "jabocaberry",
+      "name": "Jaboca Berry"
+    },
+    {
+      "id": "jawfossil",
+      "name": "Jaw Fossil"
+    },
+    {
+      "id": "kangaskhanite",
+      "name": "Kangaskhanite"
+    },
+    {
+      "id": "kasibberry",
+      "name": "Kasib Berry"
+    },
+    {
+      "id": "kebiaberry",
+      "name": "Kebia Berry"
+    },
+    {
+      "id": "keeberry",
+      "name": "Kee Berry"
+    },
+    {
+      "id": "kelpsyberry",
+      "name": "Kelpsy Berry"
+    },
+    {
+      "id": "kingsrock",
+      "name": "King's Rock"
+    },
+    {
+      "id": "kommoniumz",
+      "name": "Kommonium Z"
+    },
+    {
+      "id": "laggingtail",
+      "name": "Lagging Tail"
+    },
+    {
+      "id": "lansatberry",
+      "name": "Lansat Berry"
+    },
+    {
+      "id": "latiasite",
+      "name": "Latiasite"
+    },
+    {
+      "id": "latiosite",
+      "name": "Latiosite"
+    },
+    {
+      "id": "laxincense",
+      "name": "Lax Incense"
+    },
+    {
+      "id": "leafstone",
+      "name": "Leaf Stone"
+    },
+    {
+      "id": "leek",
+      "name": "Leek"
+    },
+    {
+      "id": "leftovers",
+      "name": "Leftovers"
+    },
+    {
+      "id": "leppaberry",
+      "name": "Leppa Berry"
+    },
+    {
+      "id": "levelball",
+      "name": "Level Ball"
+    },
+    {
+      "id": "liechiberry",
+      "name": "Liechi Berry"
+    },
+    {
+      "id": "lifeorb",
+      "name": "Life Orb"
+    },
+    {
+      "id": "lightball",
+      "name": "Light Ball"
+    },
+    {
+      "id": "lightclay",
+      "name": "Light Clay"
+    },
+    {
+      "id": "loadeddice",
+      "name": "Loaded Dice"
+    },
+    {
+      "id": "lopunnite",
+      "name": "Lopunnite"
+    },
+    {
+      "id": "loveball",
+      "name": "Love Ball"
+    },
+    {
+      "id": "lovesweet",
+      "name": "Love Sweet"
+    },
+    {
+      "id": "lucarionite",
+      "name": "Lucarionite"
+    },
+    {
+      "id": "lucarionitez",
+      "name": "Lucarionite Z"
+    },
+    {
+      "id": "luckypunch",
+      "name": "Lucky Punch"
+    },
+    {
+      "id": "lumberry",
+      "name": "Lum Berry"
+    },
+    {
+      "id": "luminousmoss",
+      "name": "Luminous Moss"
+    },
+    {
+      "id": "lunaliumz",
+      "name": "Lunalium Z"
+    },
+    {
+      "id": "lureball",
+      "name": "Lure Ball"
+    },
+    {
+      "id": "lustrousglobe",
+      "name": "Lustrous Globe"
+    },
+    {
+      "id": "lustrousorb",
+      "name": "Lustrous Orb"
+    },
+    {
+      "id": "luxuryball",
+      "name": "Luxury Ball"
+    },
+    {
+      "id": "lycaniumz",
+      "name": "Lycanium Z"
+    },
+    {
+      "id": "machobrace",
+      "name": "Macho Brace"
+    },
+    {
+      "id": "magearnite",
+      "name": "Magearnite"
+    },
+    {
+      "id": "magmarizer",
+      "name": "Magmarizer"
+    },
+    {
+      "id": "magnet",
+      "name": "Magnet"
+    },
+    {
+      "id": "magoberry",
+      "name": "Mago Berry"
+    },
+    {
+      "id": "magostberry",
+      "name": "Magost Berry"
+    },
+    {
+      "id": "mail",
+      "name": "Mail"
+    },
+    {
+      "id": "malamarite",
+      "name": "Malamarite"
+    },
+    {
+      "id": "maliciousarmor",
+      "name": "Malicious Armor"
+    },
+    {
+      "id": "manectite",
+      "name": "Manectite"
+    },
+    {
+      "id": "marangaberry",
+      "name": "Maranga Berry"
+    },
+    {
+      "id": "marshadiumz",
+      "name": "Marshadium Z"
+    },
+    {
+      "id": "masterball",
+      "name": "Master Ball"
+    },
+    {
+      "id": "masterpieceteacup",
+      "name": "Masterpiece Teacup"
+    },
+    {
+      "id": "mawilite",
+      "name": "Mawilite"
+    },
+    {
+      "id": "meadowplate",
+      "name": "Meadow Plate"
+    },
+    {
+      "id": "medichamite",
+      "name": "Medichamite"
+    },
+    {
+      "id": "meganiumite",
+      "name": "Meganiumite"
+    },
+    {
+      "id": "mentalherb",
+      "name": "Mental Herb"
+    },
+    {
+      "id": "meowsticite",
+      "name": "Meowsticite"
+    },
+    {
+      "id": "metagrossite",
+      "name": "Metagrossite"
+    },
+    {
+      "id": "metalalloy",
+      "name": "Metal Alloy"
+    },
+    {
+      "id": "metalcoat",
+      "name": "Metal Coat"
+    },
+    {
+      "id": "metalpowder",
+      "name": "Metal Powder"
+    },
+    {
+      "id": "metronome",
+      "name": "Metronome"
+    },
+    {
+      "id": "mewniumz",
+      "name": "Mewnium Z"
+    },
+    {
+      "id": "mewtwonitex",
+      "name": "Mewtwonite X"
+    },
+    {
+      "id": "mewtwonitey",
+      "name": "Mewtwonite Y"
+    },
+    {
+      "id": "micleberry",
+      "name": "Micle Berry"
+    },
+    {
+      "id": "mimikiumz",
+      "name": "Mimikium Z"
+    },
+    {
+      "id": "mindplate",
+      "name": "Mind Plate"
+    },
+    {
+      "id": "mintberry",
+      "name": "Mint Berry"
+    },
+    {
+      "id": "miracleberry",
+      "name": "Miracle Berry"
+    },
+    {
+      "id": "miracleseed",
+      "name": "Miracle Seed"
+    },
+    {
+      "id": "mirrorherb",
+      "name": "Mirror Herb"
+    },
+    {
+      "id": "mistyseed",
+      "name": "Misty Seed"
+    },
+    {
+      "id": "moonball",
+      "name": "Moon Ball"
+    },
+    {
+      "id": "moonstone",
+      "name": "Moon Stone"
+    },
+    {
+      "id": "muscleband",
+      "name": "Muscle Band"
+    },
+    {
+      "id": "mysteryberry",
+      "name": "Mystery Berry"
+    },
+    {
+      "id": "mysticwater",
+      "name": "Mystic Water"
+    },
+    {
+      "id": "nanabberry",
+      "name": "Nanab Berry"
+    },
+    {
+      "id": "nestball",
+      "name": "Nest Ball"
+    },
+    {
+      "id": "netball",
+      "name": "Net Ball"
+    },
+    {
+      "id": "nevermeltice",
+      "name": "Never-Melt Ice"
+    },
+    {
+      "id": "nomelberry",
+      "name": "Nomel Berry"
+    },
+    {
+      "id": "normalgem",
+      "name": "Normal Gem"
+    },
+    {
+      "id": "normaliumz",
+      "name": "Normalium Z"
+    },
+    {
+      "id": "occaberry",
+      "name": "Occa Berry"
+    },
+    {
+      "id": "oddincense",
+      "name": "Odd Incense"
+    },
+    {
+      "id": "oldamber",
+      "name": "Old Amber"
+    },
+    {
+      "id": "oranberry",
+      "name": "Oran Berry"
+    },
+    {
+      "id": "ovalstone",
+      "name": "Oval Stone"
+    },
+    {
+      "id": "pamtreberry",
+      "name": "Pamtre Berry"
+    },
+    {
+      "id": "parkball",
+      "name": "Park Ball"
+    },
+    {
+      "id": "passhoberry",
+      "name": "Passho Berry"
+    },
+    {
+      "id": "payapaberry",
+      "name": "Payapa Berry"
+    },
+    {
+      "id": "pechaberry",
+      "name": "Pecha Berry"
+    },
+    {
+      "id": "persimberry",
+      "name": "Persim Berry"
+    },
+    {
+      "id": "petayaberry",
+      "name": "Petaya Berry"
+    },
+    {
+      "id": "pidgeotite",
+      "name": "Pidgeotite"
+    },
+    {
+      "id": "pikaniumz",
+      "name": "Pikanium Z"
+    },
+    {
+      "id": "pikashuniumz",
+      "name": "Pikashunium Z"
+    },
+    {
+      "id": "pinapberry",
+      "name": "Pinap Berry"
+    },
+    {
+      "id": "pinkbow",
+      "name": "Pink Bow"
+    },
+    {
+      "id": "pinsirite",
+      "name": "Pinsirite"
+    },
+    {
+      "id": "pixieplate",
+      "name": "Pixie Plate"
+    },
+    {
+      "id": "plumefossil",
+      "name": "Plume Fossil"
+    },
+    {
+      "id": "poisonbarb",
+      "name": "Poison Barb"
+    },
+    {
+      "id": "poisongem",
+      "name": "Poison Gem"
+    },
+    {
+      "id": "poisoniumz",
+      "name": "Poisonium Z"
+    },
+    {
+      "id": "poisonmemory",
+      "name": "Poison Memory"
+    },
+    {
+      "id": "pokeball",
+      "name": "Poke Ball"
+    },
+    {
+      "id": "polkadotbow",
+      "name": "Polkadot Bow"
+    },
+    {
+      "id": "pomegberry",
+      "name": "Pomeg Berry"
+    },
+    {
+      "id": "poweranklet",
+      "name": "Power Anklet"
+    },
+    {
+      "id": "powerband",
+      "name": "Power Band"
+    },
+    {
+      "id": "powerbelt",
+      "name": "Power Belt"
+    },
+    {
+      "id": "powerbracer",
+      "name": "Power Bracer"
+    },
+    {
+      "id": "powerherb",
+      "name": "Power Herb"
+    },
+    {
+      "id": "powerlens",
+      "name": "Power Lens"
+    },
+    {
+      "id": "powerweight",
+      "name": "Power Weight"
+    },
+    {
+      "id": "premierball",
+      "name": "Premier Ball"
+    },
+    {
+      "id": "prettyfeather",
+      "name": "Pretty Feather"
+    },
+    {
+      "id": "primariumz",
+      "name": "Primarium Z"
+    },
+    {
+      "id": "prismscale",
+      "name": "Prism Scale"
+    },
+    {
+      "id": "protectivepads",
+      "name": "Protective Pads"
+    },
+    {
+      "id": "protector",
+      "name": "Protector"
+    },
+    {
+      "id": "przcureberry",
+      "name": "PRZ Cure Berry"
+    },
+    {
+      "id": "psncureberry",
+      "name": "PSN Cure Berry"
+    },
+    {
+      "id": "psychicgem",
+      "name": "Psychic Gem"
+    },
+    {
+      "id": "psychicmemory",
+      "name": "Psychic Memory"
+    },
+    {
+      "id": "psychicseed",
+      "name": "Psychic Seed"
+    },
+    {
+      "id": "psychiumz",
+      "name": "Psychium Z"
+    },
+    {
+      "id": "punchingglove",
+      "name": "Punching Glove"
+    },
+    {
+      "id": "pyroarite",
+      "name": "Pyroarite"
+    },
+    {
+      "id": "qualotberry",
+      "name": "Qualot Berry"
+    },
+    {
+      "id": "quickball",
+      "name": "Quick Ball"
+    },
+    {
+      "id": "quickclaw",
+      "name": "Quick Claw"
+    },
+    {
+      "id": "quickpowder",
+      "name": "Quick Powder"
+    },
+    {
+      "id": "rabutaberry",
+      "name": "Rabuta Berry"
+    },
+    {
+      "id": "raichunitex",
+      "name": "Raichunite X"
+    },
+    {
+      "id": "raichunitey",
+      "name": "Raichunite Y"
+    },
+    {
+      "id": "rarebone",
+      "name": "Rare Bone"
+    },
+    {
+      "id": "rawstberry",
+      "name": "Rawst Berry"
+    },
+    {
+      "id": "razorclaw",
+      "name": "Razor Claw"
+    },
+    {
+      "id": "razorfang",
+      "name": "Razor Fang"
+    },
+    {
+      "id": "razzberry",
+      "name": "Razz Berry"
+    },
+    {
+      "id": "reapercloth",
+      "name": "Reaper Cloth"
+    },
+    {
+      "id": "redcard",
+      "name": "Red Card"
+    },
+    {
+      "id": "redorb",
+      "name": "Red Orb"
+    },
+    {
+      "id": "repeatball",
+      "name": "Repeat Ball"
+    },
+    {
+      "id": "ribbonsweet",
+      "name": "Ribbon Sweet"
+    },
+    {
+      "id": "rindoberry",
+      "name": "Rindo Berry"
+    },
+    {
+      "id": "ringtarget",
+      "name": "Ring Target"
+    },
+    {
+      "id": "rockgem",
+      "name": "Rock Gem"
+    },
+    {
+      "id": "rockincense",
+      "name": "Rock Incense"
+    },
+    {
+      "id": "rockiumz",
+      "name": "Rockium Z"
+    },
+    {
+      "id": "rockmemory",
+      "name": "Rock Memory"
+    },
+    {
+      "id": "rockyhelmet",
+      "name": "Rocky Helmet"
+    },
+    {
+      "id": "roomservice",
+      "name": "Room Service"
+    },
+    {
+      "id": "rootfossil",
+      "name": "Root Fossil"
+    },
+    {
+      "id": "roseincense",
+      "name": "Rose Incense"
+    },
+    {
+      "id": "roseliberry",
+      "name": "Roseli Berry"
+    },
+    {
+      "id": "rowapberry",
+      "name": "Rowap Berry"
+    },
+    {
+      "id": "rustedshield",
+      "name": "Rusted Shield"
+    },
+    {
+      "id": "rustedsword",
+      "name": "Rusted Sword"
+    },
+    {
+      "id": "sablenite",
+      "name": "Sablenite"
+    },
+    {
+      "id": "sachet",
+      "name": "Sachet"
+    },
+    {
+      "id": "safariball",
+      "name": "Safari Ball"
+    },
+    {
+      "id": "safetygoggles",
+      "name": "Safety Goggles"
+    },
+    {
+      "id": "sailfossil",
+      "name": "Sail Fossil"
+    },
+    {
+      "id": "salacberry",
+      "name": "Salac Berry"
+    },
+    {
+      "id": "salamencite",
+      "name": "Salamencite"
+    },
+    {
+      "id": "sceptilite",
+      "name": "Sceptilite"
+    },
+    {
+      "id": "scizorite",
+      "name": "Scizorite"
+    },
+    {
+      "id": "scolipite",
+      "name": "Scolipite"
+    },
+    {
+      "id": "scopelens",
+      "name": "Scope Lens"
+    },
+    {
+      "id": "scovillainite",
+      "name": "Scovillainite"
+    },
+    {
+      "id": "scraftinite",
+      "name": "Scraftinite"
+    },
+    {
+      "id": "seaincense",
+      "name": "Sea Incense"
+    },
+    {
+      "id": "sharpbeak",
+      "name": "Sharp Beak"
+    },
+    {
+      "id": "sharpedonite",
+      "name": "Sharpedonite"
+    },
+    {
+      "id": "shedshell",
+      "name": "Shed Shell"
+    },
+    {
+      "id": "shellbell",
+      "name": "Shell Bell"
+    },
+    {
+      "id": "shinystone",
+      "name": "Shiny Stone"
+    },
+    {
+      "id": "shockdrive",
+      "name": "Shock Drive"
+    },
+    {
+      "id": "shucaberry",
+      "name": "Shuca Berry"
+    },
+    {
+      "id": "silkscarf",
+      "name": "Silk Scarf"
+    },
+    {
+      "id": "silverpowder",
+      "name": "Silver Powder"
+    },
+    {
+      "id": "sitrusberry",
+      "name": "Sitrus Berry"
+    },
+    {
+      "id": "skarmorite",
+      "name": "Skarmorite"
+    },
+    {
+      "id": "skullfossil",
+      "name": "Skull Fossil"
+    },
+    {
+      "id": "skyplate",
+      "name": "Sky Plate"
+    },
+    {
+      "id": "slowbronite",
+      "name": "Slowbronite"
+    },
+    {
+      "id": "smoothrock",
+      "name": "Smooth Rock"
+    },
+    {
+      "id": "snorliumz",
+      "name": "Snorlium Z"
+    },
+    {
+      "id": "snowball",
+      "name": "Snowball"
+    },
+    {
+      "id": "softsand",
+      "name": "Soft Sand"
+    },
+    {
+      "id": "solganiumz",
+      "name": "Solganium Z"
+    },
+    {
+      "id": "souldew",
+      "name": "Soul Dew"
+    },
+    {
+      "id": "spelltag",
+      "name": "Spell Tag"
+    },
+    {
+      "id": "spelonberry",
+      "name": "Spelon Berry"
+    },
+    {
+      "id": "splashplate",
+      "name": "Splash Plate"
+    },
+    {
+      "id": "spookyplate",
+      "name": "Spooky Plate"
+    },
+    {
+      "id": "sportball",
+      "name": "Sport Ball"
+    },
+    {
+      "id": "staraptite",
+      "name": "Staraptite"
+    },
+    {
+      "id": "starfberry",
+      "name": "Starf Berry"
+    },
+    {
+      "id": "starminite",
+      "name": "Starminite"
+    },
+    {
+      "id": "starsweet",
+      "name": "Star Sweet"
+    },
+    {
+      "id": "steelgem",
+      "name": "Steel Gem"
+    },
+    {
+      "id": "steeliumz",
+      "name": "Steelium Z"
+    },
+    {
+      "id": "steelixite",
+      "name": "Steelixite"
+    },
+    {
+      "id": "steelmemory",
+      "name": "Steel Memory"
+    },
+    {
+      "id": "stick",
+      "name": "Stick"
+    },
+    {
+      "id": "stickybarb",
+      "name": "Sticky Barb"
+    },
+    {
+      "id": "stoneplate",
+      "name": "Stone Plate"
+    },
+    {
+      "id": "strangeball",
+      "name": "Strange Ball"
+    },
+    {
+      "id": "strawberrysweet",
+      "name": "Strawberry Sweet"
+    },
+    {
+      "id": "sunstone",
+      "name": "Sun Stone"
+    },
+    {
+      "id": "swampertite",
+      "name": "Swampertite"
+    },
+    {
+      "id": "sweetapple",
+      "name": "Sweet Apple"
+    },
+    {
+      "id": "syrupyapple",
+      "name": "Syrupy Apple"
+    },
+    {
+      "id": "tamatoberry",
+      "name": "Tamato Berry"
+    },
+    {
+      "id": "tangaberry",
+      "name": "Tanga Berry"
+    },
+    {
+      "id": "tapuniumz",
+      "name": "Tapunium Z"
+    },
+    {
+      "id": "tartapple",
+      "name": "Tart Apple"
+    },
+    {
+      "id": "tatsugirinite",
+      "name": "Tatsugirinite"
+    },
+    {
+      "id": "terrainextender",
+      "name": "Terrain Extender"
+    },
+    {
+      "id": "thickclub",
+      "name": "Thick Club"
+    },
+    {
+      "id": "throatspray",
+      "name": "Throat Spray"
+    },
+    {
+      "id": "thunderstone",
+      "name": "Thunder Stone"
+    },
+    {
+      "id": "timerball",
+      "name": "Timer Ball"
+    },
+    {
+      "id": "toxicorb",
+      "name": "Toxic Orb"
+    },
+    {
+      "id": "toxicplate",
+      "name": "Toxic Plate"
+    },
+    {
+      "id": "tr00",
+      "name": "TR00"
+    },
+    {
+      "id": "tr01",
+      "name": "TR01"
+    },
+    {
+      "id": "tr02",
+      "name": "TR02"
+    },
+    {
+      "id": "tr03",
+      "name": "TR03"
+    },
+    {
+      "id": "tr04",
+      "name": "TR04"
+    },
+    {
+      "id": "tr05",
+      "name": "TR05"
+    },
+    {
+      "id": "tr06",
+      "name": "TR06"
+    },
+    {
+      "id": "tr07",
+      "name": "TR07"
+    },
+    {
+      "id": "tr08",
+      "name": "TR08"
+    },
+    {
+      "id": "tr09",
+      "name": "TR09"
+    },
+    {
+      "id": "tr10",
+      "name": "TR10"
+    },
+    {
+      "id": "tr11",
+      "name": "TR11"
+    },
+    {
+      "id": "tr12",
+      "name": "TR12"
+    },
+    {
+      "id": "tr13",
+      "name": "TR13"
+    },
+    {
+      "id": "tr14",
+      "name": "TR14"
+    },
+    {
+      "id": "tr15",
+      "name": "TR15"
+    },
+    {
+      "id": "tr16",
+      "name": "TR16"
+    },
+    {
+      "id": "tr17",
+      "name": "TR17"
+    },
+    {
+      "id": "tr18",
+      "name": "TR18"
+    },
+    {
+      "id": "tr19",
+      "name": "TR19"
+    },
+    {
+      "id": "tr20",
+      "name": "TR20"
+    },
+    {
+      "id": "tr21",
+      "name": "TR21"
+    },
+    {
+      "id": "tr22",
+      "name": "TR22"
+    },
+    {
+      "id": "tr23",
+      "name": "TR23"
+    },
+    {
+      "id": "tr24",
+      "name": "TR24"
+    },
+    {
+      "id": "tr25",
+      "name": "TR25"
+    },
+    {
+      "id": "tr26",
+      "name": "TR26"
+    },
+    {
+      "id": "tr27",
+      "name": "TR27"
+    },
+    {
+      "id": "tr28",
+      "name": "TR28"
+    },
+    {
+      "id": "tr29",
+      "name": "TR29"
+    },
+    {
+      "id": "tr30",
+      "name": "TR30"
+    },
+    {
+      "id": "tr31",
+      "name": "TR31"
+    },
+    {
+      "id": "tr32",
+      "name": "TR32"
+    },
+    {
+      "id": "tr33",
+      "name": "TR33"
+    },
+    {
+      "id": "tr34",
+      "name": "TR34"
+    },
+    {
+      "id": "tr35",
+      "name": "TR35"
+    },
+    {
+      "id": "tr36",
+      "name": "TR36"
+    },
+    {
+      "id": "tr37",
+      "name": "TR37"
+    },
+    {
+      "id": "tr38",
+      "name": "TR38"
+    },
+    {
+      "id": "tr39",
+      "name": "TR39"
+    },
+    {
+      "id": "tr40",
+      "name": "TR40"
+    },
+    {
+      "id": "tr41",
+      "name": "TR41"
+    },
+    {
+      "id": "tr42",
+      "name": "TR42"
+    },
+    {
+      "id": "tr43",
+      "name": "TR43"
+    },
+    {
+      "id": "tr44",
+      "name": "TR44"
+    },
+    {
+      "id": "tr45",
+      "name": "TR45"
+    },
+    {
+      "id": "tr46",
+      "name": "TR46"
+    },
+    {
+      "id": "tr47",
+      "name": "TR47"
+    },
+    {
+      "id": "tr48",
+      "name": "TR48"
+    },
+    {
+      "id": "tr49",
+      "name": "TR49"
+    },
+    {
+      "id": "tr50",
+      "name": "TR50"
+    },
+    {
+      "id": "tr51",
+      "name": "TR51"
+    },
+    {
+      "id": "tr52",
+      "name": "TR52"
+    },
+    {
+      "id": "tr53",
+      "name": "TR53"
+    },
+    {
+      "id": "tr54",
+      "name": "TR54"
+    },
+    {
+      "id": "tr55",
+      "name": "TR55"
+    },
+    {
+      "id": "tr56",
+      "name": "TR56"
+    },
+    {
+      "id": "tr57",
+      "name": "TR57"
+    },
+    {
+      "id": "tr58",
+      "name": "TR58"
+    },
+    {
+      "id": "tr59",
+      "name": "TR59"
+    },
+    {
+      "id": "tr60",
+      "name": "TR60"
+    },
+    {
+      "id": "tr61",
+      "name": "TR61"
+    },
+    {
+      "id": "tr62",
+      "name": "TR62"
+    },
+    {
+      "id": "tr63",
+      "name": "TR63"
+    },
+    {
+      "id": "tr64",
+      "name": "TR64"
+    },
+    {
+      "id": "tr65",
+      "name": "TR65"
+    },
+    {
+      "id": "tr66",
+      "name": "TR66"
+    },
+    {
+      "id": "tr67",
+      "name": "TR67"
+    },
+    {
+      "id": "tr68",
+      "name": "TR68"
+    },
+    {
+      "id": "tr69",
+      "name": "TR69"
+    },
+    {
+      "id": "tr70",
+      "name": "TR70"
+    },
+    {
+      "id": "tr71",
+      "name": "TR71"
+    },
+    {
+      "id": "tr72",
+      "name": "TR72"
+    },
+    {
+      "id": "tr73",
+      "name": "TR73"
+    },
+    {
+      "id": "tr74",
+      "name": "TR74"
+    },
+    {
+      "id": "tr75",
+      "name": "TR75"
+    },
+    {
+      "id": "tr76",
+      "name": "TR76"
+    },
+    {
+      "id": "tr77",
+      "name": "TR77"
+    },
+    {
+      "id": "tr78",
+      "name": "TR78"
+    },
+    {
+      "id": "tr79",
+      "name": "TR79"
+    },
+    {
+      "id": "tr80",
+      "name": "TR80"
+    },
+    {
+      "id": "tr81",
+      "name": "TR81"
+    },
+    {
+      "id": "tr82",
+      "name": "TR82"
+    },
+    {
+      "id": "tr83",
+      "name": "TR83"
+    },
+    {
+      "id": "tr84",
+      "name": "TR84"
+    },
+    {
+      "id": "tr85",
+      "name": "TR85"
+    },
+    {
+      "id": "tr86",
+      "name": "TR86"
+    },
+    {
+      "id": "tr87",
+      "name": "TR87"
+    },
+    {
+      "id": "tr88",
+      "name": "TR88"
+    },
+    {
+      "id": "tr89",
+      "name": "TR89"
+    },
+    {
+      "id": "tr90",
+      "name": "TR90"
+    },
+    {
+      "id": "tr91",
+      "name": "TR91"
+    },
+    {
+      "id": "tr92",
+      "name": "TR92"
+    },
+    {
+      "id": "tr93",
+      "name": "TR93"
+    },
+    {
+      "id": "tr94",
+      "name": "TR94"
+    },
+    {
+      "id": "tr95",
+      "name": "TR95"
+    },
+    {
+      "id": "tr96",
+      "name": "TR96"
+    },
+    {
+      "id": "tr97",
+      "name": "TR97"
+    },
+    {
+      "id": "tr98",
+      "name": "TR98"
+    },
+    {
+      "id": "tr99",
+      "name": "TR99"
+    },
+    {
+      "id": "twistedspoon",
+      "name": "Twisted Spoon"
+    },
+    {
+      "id": "tyranitarite",
+      "name": "Tyranitarite"
+    },
+    {
+      "id": "ultraball",
+      "name": "Ultra Ball"
+    },
+    {
+      "id": "ultranecroziumz",
+      "name": "Ultranecrozium Z"
+    },
+    {
+      "id": "unremarkableteacup",
+      "name": "Unremarkable Teacup"
+    },
+    {
+      "id": "upgrade",
+      "name": "Up-Grade"
+    },
+    {
+      "id": "utilityumbrella",
+      "name": "Utility Umbrella"
+    },
+    {
+      "id": "venusaurite",
+      "name": "Venusaurite"
+    },
+    {
+      "id": "victreebelite",
+      "name": "Victreebelite"
+    },
+    {
+      "id": "vilevial",
+      "name": "Vile Vial"
+    },
+    {
+      "id": "wacanberry",
+      "name": "Wacan Berry"
+    },
+    {
+      "id": "watergem",
+      "name": "Water Gem"
+    },
+    {
+      "id": "wateriumz",
+      "name": "Waterium Z"
+    },
+    {
+      "id": "watermemory",
+      "name": "Water Memory"
+    },
+    {
+      "id": "waterstone",
+      "name": "Water Stone"
+    },
+    {
+      "id": "watmelberry",
+      "name": "Watmel Berry"
+    },
+    {
+      "id": "waveincense",
+      "name": "Wave Incense"
+    },
+    {
+      "id": "weaknesspolicy",
+      "name": "Weakness Policy"
+    },
+    {
+      "id": "wellspringmask",
+      "name": "Wellspring Mask"
+    },
+    {
+      "id": "wepearberry",
+      "name": "Wepear Berry"
+    },
+    {
+      "id": "whippeddream",
+      "name": "Whipped Dream"
+    },
+    {
+      "id": "whiteherb",
+      "name": "White Herb"
+    },
+    {
+      "id": "widelens",
+      "name": "Wide Lens"
+    },
+    {
+      "id": "wikiberry",
+      "name": "Wiki Berry"
+    },
+    {
+      "id": "wiseglasses",
+      "name": "Wise Glasses"
+    },
+    {
+      "id": "yacheberry",
+      "name": "Yache Berry"
+    },
+    {
+      "id": "zapplate",
+      "name": "Zap Plate"
+    },
+    {
+      "id": "zeraorite",
+      "name": "Zeraorite"
+    },
+    {
+      "id": "zoomlens",
+      "name": "Zoom Lens"
+    },
+    {
+      "id": "zygardite",
+      "name": "Zygardite"
+    }
+  ],
+  "abilities": [
+    {
+      "id": "adaptability",
+      "name": "Adaptability"
+    },
+    {
+      "id": "aerilate",
+      "name": "Aerilate"
+    },
+    {
+      "id": "aftermath",
+      "name": "Aftermath"
+    },
+    {
+      "id": "airlock",
+      "name": "Air Lock"
+    },
+    {
+      "id": "analytic",
+      "name": "Analytic"
+    },
+    {
+      "id": "angerpoint",
+      "name": "Anger Point"
+    },
+    {
+      "id": "angershell",
+      "name": "Anger Shell"
+    },
+    {
+      "id": "anticipation",
+      "name": "Anticipation"
+    },
+    {
+      "id": "arenatrap",
+      "name": "Arena Trap"
+    },
+    {
+      "id": "armortail",
+      "name": "Armor Tail"
+    },
+    {
+      "id": "aromaveil",
+      "name": "Aroma Veil"
+    },
+    {
+      "id": "asoneglastrier",
+      "name": "As One (Glastrier)"
+    },
+    {
+      "id": "asonespectrier",
+      "name": "As One (Spectrier)"
+    },
+    {
+      "id": "aurabreak",
+      "name": "Aura Break"
+    },
+    {
+      "id": "baddreams",
+      "name": "Bad Dreams"
+    },
+    {
+      "id": "ballfetch",
+      "name": "Ball Fetch"
+    },
+    {
+      "id": "battery",
+      "name": "Battery"
+    },
+    {
+      "id": "battlearmor",
+      "name": "Battle Armor"
+    },
+    {
+      "id": "battlebond",
+      "name": "Battle Bond"
+    },
+    {
+      "id": "beadsofruin",
+      "name": "Beads of Ruin"
+    },
+    {
+      "id": "beastboost",
+      "name": "Beast Boost"
+    },
+    {
+      "id": "berserk",
+      "name": "Berserk"
+    },
+    {
+      "id": "bigpecks",
+      "name": "Big Pecks"
+    },
+    {
+      "id": "blaze",
+      "name": "Blaze"
+    },
+    {
+      "id": "bulletproof",
+      "name": "Bulletproof"
+    },
+    {
+      "id": "cheekpouch",
+      "name": "Cheek Pouch"
+    },
+    {
+      "id": "chillingneigh",
+      "name": "Chilling Neigh"
+    },
+    {
+      "id": "chlorophyll",
+      "name": "Chlorophyll"
+    },
+    {
+      "id": "clearbody",
+      "name": "Clear Body"
+    },
+    {
+      "id": "cloudnine",
+      "name": "Cloud Nine"
+    },
+    {
+      "id": "colorchange",
+      "name": "Color Change"
+    },
+    {
+      "id": "comatose",
+      "name": "Comatose"
+    },
+    {
+      "id": "commander",
+      "name": "Commander"
+    },
+    {
+      "id": "competitive",
+      "name": "Competitive"
+    },
+    {
+      "id": "compoundeyes",
+      "name": "Compound Eyes"
+    },
+    {
+      "id": "contrary",
+      "name": "Contrary"
+    },
+    {
+      "id": "corrosion",
+      "name": "Corrosion"
+    },
+    {
+      "id": "costar",
+      "name": "Costar"
+    },
+    {
+      "id": "cottondown",
+      "name": "Cotton Down"
+    },
+    {
+      "id": "cudchew",
+      "name": "Cud Chew"
+    },
+    {
+      "id": "curiousmedicine",
+      "name": "Curious Medicine"
+    },
+    {
+      "id": "cursedbody",
+      "name": "Cursed Body"
+    },
+    {
+      "id": "cutecharm",
+      "name": "Cute Charm"
+    },
+    {
+      "id": "damp",
+      "name": "Damp"
+    },
+    {
+      "id": "dancer",
+      "name": "Dancer"
+    },
+    {
+      "id": "darkaura",
+      "name": "Dark Aura"
+    },
+    {
+      "id": "dauntlessshield",
+      "name": "Dauntless Shield"
+    },
+    {
+      "id": "dazzling",
+      "name": "Dazzling"
+    },
+    {
+      "id": "defeatist",
+      "name": "Defeatist"
+    },
+    {
+      "id": "defiant",
+      "name": "Defiant"
+    },
+    {
+      "id": "deltastream",
+      "name": "Delta Stream"
+    },
+    {
+      "id": "desolateland",
+      "name": "Desolate Land"
+    },
+    {
+      "id": "disguise",
+      "name": "Disguise"
+    },
+    {
+      "id": "download",
+      "name": "Download"
+    },
+    {
+      "id": "dragonsmaw",
+      "name": "Dragon's Maw"
+    },
+    {
+      "id": "drizzle",
+      "name": "Drizzle"
+    },
+    {
+      "id": "drought",
+      "name": "Drought"
+    },
+    {
+      "id": "dryskin",
+      "name": "Dry Skin"
+    },
+    {
+      "id": "earlybird",
+      "name": "Early Bird"
+    },
+    {
+      "id": "eartheater",
+      "name": "Earth Eater"
+    },
+    {
+      "id": "effectspore",
+      "name": "Effect Spore"
+    },
+    {
+      "id": "electricsurge",
+      "name": "Electric Surge"
+    },
+    {
+      "id": "electromorphosis",
+      "name": "Electromorphosis"
+    },
+    {
+      "id": "embodyaspectcornerstone",
+      "name": "Embody Aspect (Cornerstone)"
+    },
+    {
+      "id": "embodyaspecthearthflame",
+      "name": "Embody Aspect (Hearthflame)"
+    },
+    {
+      "id": "embodyaspectteal",
+      "name": "Embody Aspect (Teal)"
+    },
+    {
+      "id": "embodyaspectwellspring",
+      "name": "Embody Aspect (Wellspring)"
+    },
+    {
+      "id": "emergencyexit",
+      "name": "Emergency Exit"
+    },
+    {
+      "id": "fairyaura",
+      "name": "Fairy Aura"
+    },
+    {
+      "id": "filter",
+      "name": "Filter"
+    },
+    {
+      "id": "flamebody",
+      "name": "Flame Body"
+    },
+    {
+      "id": "flareboost",
+      "name": "Flare Boost"
+    },
+    {
+      "id": "flashfire",
+      "name": "Flash Fire"
+    },
+    {
+      "id": "flowergift",
+      "name": "Flower Gift"
+    },
+    {
+      "id": "flowerveil",
+      "name": "Flower Veil"
+    },
+    {
+      "id": "fluffy",
+      "name": "Fluffy"
+    },
+    {
+      "id": "forecast",
+      "name": "Forecast"
+    },
+    {
+      "id": "forewarn",
+      "name": "Forewarn"
+    },
+    {
+      "id": "friendguard",
+      "name": "Friend Guard"
+    },
+    {
+      "id": "frisk",
+      "name": "Frisk"
+    },
+    {
+      "id": "fullmetalbody",
+      "name": "Full Metal Body"
+    },
+    {
+      "id": "furcoat",
+      "name": "Fur Coat"
+    },
+    {
+      "id": "galewings",
+      "name": "Gale Wings"
+    },
+    {
+      "id": "galvanize",
+      "name": "Galvanize"
+    },
+    {
+      "id": "gluttony",
+      "name": "Gluttony"
+    },
+    {
+      "id": "goodasgold",
+      "name": "Good as Gold"
+    },
+    {
+      "id": "gooey",
+      "name": "Gooey"
+    },
+    {
+      "id": "gorillatactics",
+      "name": "Gorilla Tactics"
+    },
+    {
+      "id": "grasspelt",
+      "name": "Grass Pelt"
+    },
+    {
+      "id": "grassysurge",
+      "name": "Grassy Surge"
+    },
+    {
+      "id": "grimneigh",
+      "name": "Grim Neigh"
+    },
+    {
+      "id": "guarddog",
+      "name": "Guard Dog"
+    },
+    {
+      "id": "gulpmissile",
+      "name": "Gulp Missile"
+    },
+    {
+      "id": "guts",
+      "name": "Guts"
+    },
+    {
+      "id": "hadronengine",
+      "name": "Hadron Engine"
+    },
+    {
+      "id": "harvest",
+      "name": "Harvest"
+    },
+    {
+      "id": "healer",
+      "name": "Healer"
+    },
+    {
+      "id": "heatproof",
+      "name": "Heatproof"
+    },
+    {
+      "id": "heavymetal",
+      "name": "Heavy Metal"
+    },
+    {
+      "id": "honeygather",
+      "name": "Honey Gather"
+    },
+    {
+      "id": "hospitality",
+      "name": "Hospitality"
+    },
+    {
+      "id": "hugepower",
+      "name": "Huge Power"
+    },
+    {
+      "id": "hungerswitch",
+      "name": "Hunger Switch"
+    },
+    {
+      "id": "hustle",
+      "name": "Hustle"
+    },
+    {
+      "id": "hydration",
+      "name": "Hydration"
+    },
+    {
+      "id": "hypercutter",
+      "name": "Hyper Cutter"
+    },
+    {
+      "id": "icebody",
+      "name": "Ice Body"
+    },
+    {
+      "id": "iceface",
+      "name": "Ice Face"
+    },
+    {
+      "id": "icescales",
+      "name": "Ice Scales"
+    },
+    {
+      "id": "illuminate",
+      "name": "Illuminate"
+    },
+    {
+      "id": "illusion",
+      "name": "Illusion"
+    },
+    {
+      "id": "immunity",
+      "name": "Immunity"
+    },
+    {
+      "id": "imposter",
+      "name": "Imposter"
+    },
+    {
+      "id": "infiltrator",
+      "name": "Infiltrator"
+    },
+    {
+      "id": "innardsout",
+      "name": "Innards Out"
+    },
+    {
+      "id": "innerfocus",
+      "name": "Inner Focus"
+    },
+    {
+      "id": "insomnia",
+      "name": "Insomnia"
+    },
+    {
+      "id": "intimidate",
+      "name": "Intimidate"
+    },
+    {
+      "id": "intrepidsword",
+      "name": "Intrepid Sword"
+    },
+    {
+      "id": "ironbarbs",
+      "name": "Iron Barbs"
+    },
+    {
+      "id": "ironfist",
+      "name": "Iron Fist"
+    },
+    {
+      "id": "justified",
+      "name": "Justified"
+    },
+    {
+      "id": "keeneye",
+      "name": "Keen Eye"
+    },
+    {
+      "id": "klutz",
+      "name": "Klutz"
+    },
+    {
+      "id": "leafguard",
+      "name": "Leaf Guard"
+    },
+    {
+      "id": "levitate",
+      "name": "Levitate"
+    },
+    {
+      "id": "libero",
+      "name": "Libero"
+    },
+    {
+      "id": "lightmetal",
+      "name": "Light Metal"
+    },
+    {
+      "id": "lightningrod",
+      "name": "Lightning Rod"
+    },
+    {
+      "id": "limber",
+      "name": "Limber"
+    },
+    {
+      "id": "lingeringaroma",
+      "name": "Lingering Aroma"
+    },
+    {
+      "id": "liquidooze",
+      "name": "Liquid Ooze"
+    },
+    {
+      "id": "liquidvoice",
+      "name": "Liquid Voice"
+    },
+    {
+      "id": "longreach",
+      "name": "Long Reach"
+    },
+    {
+      "id": "magicbounce",
+      "name": "Magic Bounce"
+    },
+    {
+      "id": "magicguard",
+      "name": "Magic Guard"
+    },
+    {
+      "id": "magician",
+      "name": "Magician"
+    },
+    {
+      "id": "magmaarmor",
+      "name": "Magma Armor"
+    },
+    {
+      "id": "magnetpull",
+      "name": "Magnet Pull"
+    },
+    {
+      "id": "marvelscale",
+      "name": "Marvel Scale"
+    },
+    {
+      "id": "megalauncher",
+      "name": "Mega Launcher"
+    },
+    {
+      "id": "merciless",
+      "name": "Merciless"
+    },
+    {
+      "id": "mimicry",
+      "name": "Mimicry"
+    },
+    {
+      "id": "mindseye",
+      "name": "Mind's Eye"
+    },
+    {
+      "id": "minus",
+      "name": "Minus"
+    },
+    {
+      "id": "mirrorarmor",
+      "name": "Mirror Armor"
+    },
+    {
+      "id": "mistysurge",
+      "name": "Misty Surge"
+    },
+    {
+      "id": "moldbreaker",
+      "name": "Mold Breaker"
+    },
+    {
+      "id": "moody",
+      "name": "Moody"
+    },
+    {
+      "id": "motordrive",
+      "name": "Motor Drive"
+    },
+    {
+      "id": "mountaineer",
+      "name": "Mountaineer"
+    },
+    {
+      "id": "moxie",
+      "name": "Moxie"
+    },
+    {
+      "id": "multiscale",
+      "name": "Multiscale"
+    },
+    {
+      "id": "multitype",
+      "name": "Multitype"
+    },
+    {
+      "id": "mummy",
+      "name": "Mummy"
+    },
+    {
+      "id": "myceliummight",
+      "name": "Mycelium Might"
+    },
+    {
+      "id": "naturalcure",
+      "name": "Natural Cure"
+    },
+    {
+      "id": "neuroforce",
+      "name": "Neuroforce"
+    },
+    {
+      "id": "neutralizinggas",
+      "name": "Neutralizing Gas"
+    },
+    {
+      "id": "noability",
+      "name": "No Ability"
+    },
+    {
+      "id": "noguard",
+      "name": "No Guard"
+    },
+    {
+      "id": "normalize",
+      "name": "Normalize"
+    },
+    {
+      "id": "oblivious",
+      "name": "Oblivious"
+    },
+    {
+      "id": "opportunist",
+      "name": "Opportunist"
+    },
+    {
+      "id": "orichalcumpulse",
+      "name": "Orichalcum Pulse"
+    },
+    {
+      "id": "overcoat",
+      "name": "Overcoat"
+    },
+    {
+      "id": "overgrow",
+      "name": "Overgrow"
+    },
+    {
+      "id": "owntempo",
+      "name": "Own Tempo"
+    },
+    {
+      "id": "parentalbond",
+      "name": "Parental Bond"
+    },
+    {
+      "id": "pastelveil",
+      "name": "Pastel Veil"
+    },
+    {
+      "id": "perishbody",
+      "name": "Perish Body"
+    },
+    {
+      "id": "persistent",
+      "name": "Persistent"
+    },
+    {
+      "id": "pickpocket",
+      "name": "Pickpocket"
+    },
+    {
+      "id": "pickup",
+      "name": "Pickup"
+    },
+    {
+      "id": "pixilate",
+      "name": "Pixilate"
+    },
+    {
+      "id": "plus",
+      "name": "Plus"
+    },
+    {
+      "id": "poisonheal",
+      "name": "Poison Heal"
+    },
+    {
+      "id": "poisonpoint",
+      "name": "Poison Point"
+    },
+    {
+      "id": "poisonpuppeteer",
+      "name": "Poison Puppeteer"
+    },
+    {
+      "id": "poisontouch",
+      "name": "Poison Touch"
+    },
+    {
+      "id": "powerconstruct",
+      "name": "Power Construct"
+    },
+    {
+      "id": "powerofalchemy",
+      "name": "Power of Alchemy"
+    },
+    {
+      "id": "powerspot",
+      "name": "Power Spot"
+    },
+    {
+      "id": "prankster",
+      "name": "Prankster"
+    },
+    {
+      "id": "pressure",
+      "name": "Pressure"
+    },
+    {
+      "id": "primordialsea",
+      "name": "Primordial Sea"
+    },
+    {
+      "id": "prismarmor",
+      "name": "Prism Armor"
+    },
+    {
+      "id": "propellertail",
+      "name": "Propeller Tail"
+    },
+    {
+      "id": "protean",
+      "name": "Protean"
+    },
+    {
+      "id": "protosynthesis",
+      "name": "Protosynthesis"
+    },
+    {
+      "id": "psychicsurge",
+      "name": "Psychic Surge"
+    },
+    {
+      "id": "punkrock",
+      "name": "Punk Rock"
+    },
+    {
+      "id": "purepower",
+      "name": "Pure Power"
+    },
+    {
+      "id": "purifyingsalt",
+      "name": "Purifying Salt"
+    },
+    {
+      "id": "quarkdrive",
+      "name": "Quark Drive"
+    },
+    {
+      "id": "queenlymajesty",
+      "name": "Queenly Majesty"
+    },
+    {
+      "id": "quickdraw",
+      "name": "Quick Draw"
+    },
+    {
+      "id": "quickfeet",
+      "name": "Quick Feet"
+    },
+    {
+      "id": "raindish",
+      "name": "Rain Dish"
+    },
+    {
+      "id": "rattled",
+      "name": "Rattled"
+    },
+    {
+      "id": "rebound",
+      "name": "Rebound"
+    },
+    {
+      "id": "receiver",
+      "name": "Receiver"
+    },
+    {
+      "id": "reckless",
+      "name": "Reckless"
+    },
+    {
+      "id": "refrigerate",
+      "name": "Refrigerate"
+    },
+    {
+      "id": "regenerator",
+      "name": "Regenerator"
+    },
+    {
+      "id": "ripen",
+      "name": "Ripen"
+    },
+    {
+      "id": "rivalry",
+      "name": "Rivalry"
+    },
+    {
+      "id": "rkssystem",
+      "name": "RKS System"
+    },
+    {
+      "id": "rockhead",
+      "name": "Rock Head"
+    },
+    {
+      "id": "rockypayload",
+      "name": "Rocky Payload"
+    },
+    {
+      "id": "roughskin",
+      "name": "Rough Skin"
+    },
+    {
+      "id": "runaway",
+      "name": "Run Away"
+    },
+    {
+      "id": "sandforce",
+      "name": "Sand Force"
+    },
+    {
+      "id": "sandrush",
+      "name": "Sand Rush"
+    },
+    {
+      "id": "sandspit",
+      "name": "Sand Spit"
+    },
+    {
+      "id": "sandstream",
+      "name": "Sand Stream"
+    },
+    {
+      "id": "sandveil",
+      "name": "Sand Veil"
+    },
+    {
+      "id": "sapsipper",
+      "name": "Sap Sipper"
+    },
+    {
+      "id": "schooling",
+      "name": "Schooling"
+    },
+    {
+      "id": "scrappy",
+      "name": "Scrappy"
+    },
+    {
+      "id": "screencleaner",
+      "name": "Screen Cleaner"
+    },
+    {
+      "id": "seedsower",
+      "name": "Seed Sower"
+    },
+    {
+      "id": "serenegrace",
+      "name": "Serene Grace"
+    },
+    {
+      "id": "shadowshield",
+      "name": "Shadow Shield"
+    },
+    {
+      "id": "shadowtag",
+      "name": "Shadow Tag"
+    },
+    {
+      "id": "sharpness",
+      "name": "Sharpness"
+    },
+    {
+      "id": "shedskin",
+      "name": "Shed Skin"
+    },
+    {
+      "id": "sheerforce",
+      "name": "Sheer Force"
+    },
+    {
+      "id": "shellarmor",
+      "name": "Shell Armor"
+    },
+    {
+      "id": "shielddust",
+      "name": "Shield Dust"
+    },
+    {
+      "id": "shieldsdown",
+      "name": "Shields Down"
+    },
+    {
+      "id": "simple",
+      "name": "Simple"
+    },
+    {
+      "id": "skilllink",
+      "name": "Skill Link"
+    },
+    {
+      "id": "slowstart",
+      "name": "Slow Start"
+    },
+    {
+      "id": "slushrush",
+      "name": "Slush Rush"
+    },
+    {
+      "id": "sniper",
+      "name": "Sniper"
+    },
+    {
+      "id": "snowcloak",
+      "name": "Snow Cloak"
+    },
+    {
+      "id": "snowwarning",
+      "name": "Snow Warning"
+    },
+    {
+      "id": "solarpower",
+      "name": "Solar Power"
+    },
+    {
+      "id": "solidrock",
+      "name": "Solid Rock"
+    },
+    {
+      "id": "soulheart",
+      "name": "Soul-Heart"
+    },
+    {
+      "id": "soundproof",
+      "name": "Soundproof"
+    },
+    {
+      "id": "speedboost",
+      "name": "Speed Boost"
+    },
+    {
+      "id": "stakeout",
+      "name": "Stakeout"
+    },
+    {
+      "id": "stall",
+      "name": "Stall"
+    },
+    {
+      "id": "stalwart",
+      "name": "Stalwart"
+    },
+    {
+      "id": "stamina",
+      "name": "Stamina"
+    },
+    {
+      "id": "stancechange",
+      "name": "Stance Change"
+    },
+    {
+      "id": "static",
+      "name": "Static"
+    },
+    {
+      "id": "steadfast",
+      "name": "Steadfast"
+    },
+    {
+      "id": "steamengine",
+      "name": "Steam Engine"
+    },
+    {
+      "id": "steelworker",
+      "name": "Steelworker"
+    },
+    {
+      "id": "steelyspirit",
+      "name": "Steely Spirit"
+    },
+    {
+      "id": "stench",
+      "name": "Stench"
+    },
+    {
+      "id": "stickyhold",
+      "name": "Sticky Hold"
+    },
+    {
+      "id": "stormdrain",
+      "name": "Storm Drain"
+    },
+    {
+      "id": "strongjaw",
+      "name": "Strong Jaw"
+    },
+    {
+      "id": "sturdy",
+      "name": "Sturdy"
+    },
+    {
+      "id": "suctioncups",
+      "name": "Suction Cups"
+    },
+    {
+      "id": "superluck",
+      "name": "Super Luck"
+    },
+    {
+      "id": "supersweetsyrup",
+      "name": "Supersweet Syrup"
+    },
+    {
+      "id": "supremeoverlord",
+      "name": "Supreme Overlord"
+    },
+    {
+      "id": "surgesurfer",
+      "name": "Surge Surfer"
+    },
+    {
+      "id": "swarm",
+      "name": "Swarm"
+    },
+    {
+      "id": "sweetveil",
+      "name": "Sweet Veil"
+    },
+    {
+      "id": "swiftswim",
+      "name": "Swift Swim"
+    },
+    {
+      "id": "swordofruin",
+      "name": "Sword of Ruin"
+    },
+    {
+      "id": "symbiosis",
+      "name": "Symbiosis"
+    },
+    {
+      "id": "synchronize",
+      "name": "Synchronize"
+    },
+    {
+      "id": "tabletsofruin",
+      "name": "Tablets of Ruin"
+    },
+    {
+      "id": "tangledfeet",
+      "name": "Tangled Feet"
+    },
+    {
+      "id": "tanglinghair",
+      "name": "Tangling Hair"
+    },
+    {
+      "id": "technician",
+      "name": "Technician"
+    },
+    {
+      "id": "telepathy",
+      "name": "Telepathy"
+    },
+    {
+      "id": "teraformzero",
+      "name": "Teraform Zero"
+    },
+    {
+      "id": "terashell",
+      "name": "Tera Shell"
+    },
+    {
+      "id": "terashift",
+      "name": "Tera Shift"
+    },
+    {
+      "id": "teravolt",
+      "name": "Teravolt"
+    },
+    {
+      "id": "thermalexchange",
+      "name": "Thermal Exchange"
+    },
+    {
+      "id": "thickfat",
+      "name": "Thick Fat"
+    },
+    {
+      "id": "tintedlens",
+      "name": "Tinted Lens"
+    },
+    {
+      "id": "torrent",
+      "name": "Torrent"
+    },
+    {
+      "id": "toughclaws",
+      "name": "Tough Claws"
+    },
+    {
+      "id": "toxicboost",
+      "name": "Toxic Boost"
+    },
+    {
+      "id": "toxicchain",
+      "name": "Toxic Chain"
+    },
+    {
+      "id": "toxicdebris",
+      "name": "Toxic Debris"
+    },
+    {
+      "id": "trace",
+      "name": "Trace"
+    },
+    {
+      "id": "transistor",
+      "name": "Transistor"
+    },
+    {
+      "id": "triage",
+      "name": "Triage"
+    },
+    {
+      "id": "truant",
+      "name": "Truant"
+    },
+    {
+      "id": "turboblaze",
+      "name": "Turboblaze"
+    },
+    {
+      "id": "unaware",
+      "name": "Unaware"
+    },
+    {
+      "id": "unburden",
+      "name": "Unburden"
+    },
+    {
+      "id": "unnerve",
+      "name": "Unnerve"
+    },
+    {
+      "id": "unseenfist",
+      "name": "Unseen Fist"
+    },
+    {
+      "id": "vesselofruin",
+      "name": "Vessel of Ruin"
+    },
+    {
+      "id": "victorystar",
+      "name": "Victory Star"
+    },
+    {
+      "id": "vitalspirit",
+      "name": "Vital Spirit"
+    },
+    {
+      "id": "voltabsorb",
+      "name": "Volt Absorb"
+    },
+    {
+      "id": "wanderingspirit",
+      "name": "Wandering Spirit"
+    },
+    {
+      "id": "waterabsorb",
+      "name": "Water Absorb"
+    },
+    {
+      "id": "waterbubble",
+      "name": "Water Bubble"
+    },
+    {
+      "id": "watercompaction",
+      "name": "Water Compaction"
+    },
+    {
+      "id": "waterveil",
+      "name": "Water Veil"
+    },
+    {
+      "id": "weakarmor",
+      "name": "Weak Armor"
+    },
+    {
+      "id": "wellbakedbody",
+      "name": "Well-Baked Body"
+    },
+    {
+      "id": "whitesmoke",
+      "name": "White Smoke"
+    },
+    {
+      "id": "wimpout",
+      "name": "Wimp Out"
+    },
+    {
+      "id": "windpower",
+      "name": "Wind Power"
+    },
+    {
+      "id": "windrider",
+      "name": "Wind Rider"
+    },
+    {
+      "id": "wonderguard",
+      "name": "Wonder Guard"
+    },
+    {
+      "id": "wonderskin",
+      "name": "Wonder Skin"
+    },
+    {
+      "id": "zenmode",
+      "name": "Zen Mode"
+    },
+    {
+      "id": "zerotohero",
+      "name": "Zero to Hero"
+    }
+  ],
+  "metadata": {
+    "dex_mod": "gen8",
+    "generated_at": "2026-04-28T20:54:42.281220+00:00",
+    "generator": "pokemon-showdown Dex",
+    "showdown_dir": "pokemon-showdown",
+    "padding_id": 0
+  }
+}

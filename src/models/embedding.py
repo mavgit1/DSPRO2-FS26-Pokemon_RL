@@ -1,5 +1,4 @@
 import numpy as np
-import zlib
 from typing import Dict, List, Optional, Any
 
 # Poke-env imports (only for type hints and enums)
@@ -13,6 +12,8 @@ from poke_env.battle.status import Status
 from poke_env.battle.pokemon_type import PokemonType
 from poke_env.battle.move_category import MoveCategory
 from poke_env.battle.effect import Effect
+
+from src.models.vocab import get_embedding_vocab, vocab_sizes
 
 
 # =============================================================================
@@ -42,7 +43,10 @@ TRACKED_EFFECTS = [
 
 NUM_TOKENS = 13          # 1 global + 6 our team + 6 opponent team
 TOKEN_DIM = 164
-MAX_ID_VAL = 20000
+_VOCAB_SIZES = vocab_sizes()
+SPECIES_VOCAB_SIZE = _VOCAB_SIZES["species_vocab_size"]
+ITEM_VOCAB_SIZE = _VOCAB_SIZES["item_vocab_size"]
+ABILITY_VOCAB_SIZE = _VOCAB_SIZES["ability_vocab_size"]
 ACTION_SPACE_N = 22
 NATIVE_SWITCH_ACTIONS = range(0, 6)
 
@@ -50,22 +54,6 @@ NATIVE_SWITCH_ACTIONS = range(0, 6)
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
-
-def hash_str_to_int(s: str, max_val: int = MAX_ID_VAL) -> int:
-    """
-    Consistently hash string IDs to categorical integers.
-    
-    Args:
-        s: String to hash (species, item, ability, etc.)
-        max_val: Maximum hash value
-    
-    Returns:
-        Integer hash in range [1, max_val], or 0 for empty string
-    """
-    if not s:
-        return 0
-    return (zlib.adler32(s.encode('utf-8')) % max_val) + 1
-
 
 def _get_list_index(value: Any, lst: List) -> int:
     """Safely get index of value in list, return -1 if not found."""
@@ -232,9 +220,10 @@ def embed_pokemon(
     # ---------------------------------------------------------------------
     # 11. Categorical IDs
     # ---------------------------------------------------------------------
-    species_id = hash_str_to_int(mon.species) if mon.species else 0
-    item_id = hash_str_to_int(mon.item) if mon.item else 0
-    ability_id = hash_str_to_int(mon.ability) if mon.ability else 0
+    vocab = get_embedding_vocab()
+    species_id = vocab.species_id(mon.species)
+    item_id = vocab.item_id(mon.item)
+    ability_id = vocab.ability_id(mon.ability)
     
     return {
         'obs': obs,

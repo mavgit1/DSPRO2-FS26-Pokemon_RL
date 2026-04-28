@@ -6,7 +6,9 @@ from src.models.embedding import (
     estimate_win_probability,
     NUM_TOKENS,
     TOKEN_DIM,
-    MAX_ID_VAL,
+    SPECIES_VOCAB_SIZE,
+    ITEM_VOCAB_SIZE,
+    ABILITY_VOCAB_SIZE,
 )
 
 from src.envs.battle_env import (
@@ -24,7 +26,9 @@ __all__ = [
     "estimate_win_probability",
     "NUM_TOKENS",
     "TOKEN_DIM",
-    "MAX_ID_VAL",
+    "SPECIES_VOCAB_SIZE",
+    "ITEM_VOCAB_SIZE",
+    "ABILITY_VOCAB_SIZE",
     # Environment
     "PokemonBattleEnv",
     "create_env_creator",

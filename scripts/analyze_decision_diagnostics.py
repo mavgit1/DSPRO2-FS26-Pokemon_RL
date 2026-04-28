@@ -12,7 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.models.battle_transformer import PokemonTransformerModel
+from src.models.battle_transformer import PokemonTransformerModel  # noqa: E402
+from src.models.vocab import vocab_sizes  # noqa: E402
 
 
 def main() -> None:
@@ -31,12 +32,13 @@ def main() -> None:
         name="pokemon_transformer_diag_test",
     )
     model.eval()
+    sizes = vocab_sizes()
 
     obs = {
         "obs": torch.randn(1, 13, 164),
-        "species": torch.randint(0, 20000, (1, 13)),
-        "items": torch.randint(0, 20000, (1, 13)),
-        "abilities": torch.randint(0, 20000, (1, 13)),
+        "species": torch.randint(0, sizes["species_vocab_size"], (1, 13)),
+        "items": torch.randint(0, sizes["item_vocab_size"], (1, 13)),
+        "abilities": torch.randint(0, sizes["ability_vocab_size"], (1, 13)),
         "action_mask": torch.ones(1, 22),
     }
     diag = model.analyze_observation(obs_dict=obs, top_k=5)
