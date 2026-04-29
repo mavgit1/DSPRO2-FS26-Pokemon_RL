@@ -105,6 +105,7 @@ class PokemonBattleEnv(SinglesEnv):
         self._completed_battle_ttl = 4096
         self._cleanup_interval_steps = 256
         self._fallback_events_current_episode = 0
+        self._opponent_context: Optional[str] = None
         
         super().__init__(**kwargs)
         
@@ -125,7 +126,11 @@ class PokemonBattleEnv(SinglesEnv):
         Returns:
             Dict with obs, species, items, abilities, action_mask
         """
-        return embed_battle(battle)
+        return embed_battle(battle, opponent_type=self._opponent_context)
+
+    def set_opponent_context(self, opponent_type: Optional[str]) -> None:
+        """Attach selected opponent metadata to future observations."""
+        self._opponent_context = opponent_type
     
     def calc_reward(self, battle: AbstractBattle) -> float:
         """Calculate reward based on battle state."""
@@ -146,7 +151,7 @@ class PokemonBattleEnv(SinglesEnv):
             )
 
             # Track valid-action density during the episode.
-            action_mask = embed_battle(battle)["action_mask"]
+            action_mask = self.embed_battle(battle)["action_mask"]
             step_stats["action_mask_valid_sum"] += float(np.sum(action_mask))
             step_stats["action_mask_count"] += 1.0
             step_stats["last_seen_step"] = float(self._env_step_counter)
@@ -345,6 +350,8 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         self._recent_observation_cap = 64
 
         self._opponent_pool[initial_key] = opponent
+        if hasattr(self.env, "set_opponent_context"):
+            self.env.set_opponent_context(initial_key)
 
     @staticmethod
     def _normalize_opponent_mix(opponent_mix: Optional[Dict[str, float]]) -> Dict[str, float]:
@@ -417,6 +424,8 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             self._opponent_pool[opponent_key] = self._build_opponent(opponent_key)
         self.opponent = self._opponent_pool[opponent_key]
         self._current_opponent_key = opponent_key
+        if hasattr(self.env, "set_opponent_context"):
+            self.env.set_opponent_context(opponent_key)
         self._episode_total_actions = 0
         self._episode_switch_actions = 0
         self._episode_attack_actions = 0

@@ -49,6 +49,19 @@ ITEM_VOCAB_SIZE = _VOCAB_SIZES["item_vocab_size"]
 ABILITY_VOCAB_SIZE = _VOCAB_SIZES["ability_vocab_size"]
 ACTION_SPACE_N = 22
 NATIVE_SWITCH_ACTIONS = range(0, 6)
+GLOBAL_EXTRA_FEATURE_NAMES = [
+    "opponent_random",
+    "opponent_heuristic",
+    "opponent_other",
+    "battle_turn_norm",
+    "force_switch",
+    "active_trapped",
+    "available_move_count_norm",
+    "available_switch_count_norm",
+    "can_dynamax",
+    "can_mega_evolve",
+    "can_z_move",
+]
 
 
 # =============================================================================
@@ -237,7 +250,10 @@ def embed_pokemon(
 # FULL BATTLE EMBEDDING
 # =============================================================================
 
-def embed_battle(battle: AbstractBattle) -> Dict[str, np.ndarray]:
+def embed_battle(
+    battle: AbstractBattle,
+    opponent_type: Optional[str] = None,
+) -> Dict[str, np.ndarray]:
     """
     Convert full battle state to transformer-ready embedding.
     
@@ -248,6 +264,7 @@ def embed_battle(battle: AbstractBattle) -> Dict[str, np.ndarray]:
     
     Args:
         battle: AbstractBattle object from poke-env
+        opponent_type: Optional selected opponent label for the episode.
     
     Returns:
         Dict with:
@@ -293,6 +310,15 @@ def embed_battle(battle: AbstractBattle) -> Dict[str, np.ndarray]:
         sc_idx = _get_list_index(sc, SIDE_CONDITION_LIST)
         if sc_idx >= 0:
             obs[0, global_idx + sc_idx] = 1.0
+    global_idx += len(SIDE_CONDITION_LIST)
+
+    # Extra global context features. These fit in the existing spare token
+    # capacity, so improves coverage without changing TOKEN_DIM.
+    extra_features = _global_extra_features(battle, opponent_type)
+    available = max(0, TOKEN_DIM - global_idx)
+    if available > 0:
+        count = min(len(extra_features), available)
+        obs[0, global_idx : global_idx + count] = extra_features[:count]
     
     # -------------------------------------------------------------------------
     # Tokens 1-6: Our Team
@@ -350,6 +376,43 @@ def embed_battle(battle: AbstractBattle) -> Dict[str, np.ndarray]:
     }
 
 
+def _global_extra_features(
+    battle: AbstractBattle,
+    opponent_type: Optional[str],
+) -> np.ndarray:
+    features = np.zeros(len(GLOBAL_EXTRA_FEATURE_NAMES), dtype=np.float32)
+    opponent_key = _canonical_opponent_type(opponent_type)
+    if opponent_key == "random":
+        features[0] = 1.0
+    elif opponent_key == "heuristic":
+        features[1] = 1.0
+    elif opponent_key:
+        features[2] = 1.0
+
+    features[3] = min(float(max(0, int(getattr(battle, "turn", 0)))) / 100.0, 1.0)
+    features[4] = 1.0 if bool(getattr(battle, "force_switch", False)) else 0.0
+
+    active = getattr(battle, "active_pokemon", None)
+    features[5] = 1.0 if active is not None and bool(getattr(active, "trapped", False)) else 0.0
+    features[6] = min(float(len(getattr(battle, "available_moves", []) or [])) / 4.0, 1.0)
+    features[7] = min(float(len(getattr(battle, "available_switches", []) or [])) / 6.0, 1.0)
+    features[8] = 1.0 if bool(getattr(battle, "can_dynamax", False)) else 0.0
+    features[9] = 1.0 if bool(getattr(battle, "can_mega_evolve", False)) else 0.0
+    features[10] = 1.0 if bool(getattr(battle, "can_z_move", False)) else 0.0
+    return features
+
+
+def _canonical_opponent_type(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    key = str(value).strip().lower()
+    if not key or key == "unknown":
+        return None
+    if key == "heuristics":
+        return "heuristic"
+    return key
+
+
 # =============================================================================
 # ACTION MASKING
 # =============================================================================
@@ -385,7 +448,7 @@ def get_action_mask(battle: AbstractBattle) -> np.ndarray:
                 strict=True,
             )
             mask[action] = 1.0
-        except ValueError:
+        except (IndexError, ValueError):
             continue
 
     # Safety fallback for rare edge cases (prevents all-zero mask instability).
