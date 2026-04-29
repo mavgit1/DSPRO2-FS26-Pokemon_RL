@@ -250,7 +250,7 @@ class PokemonBattleEnv(SinglesEnv):
         reward_hp_diff = hp_diff * self.reward_config.hp_value_weight
         reward_faint = (
             opp_fainted * self.reward_config.fainted_value
-            - our_fainted * self.reward_config.fainted_penalty
+            + our_fainted * self.reward_config.fainted_penalty
         )
         battle_turns = float(max(0, int(getattr(battle, "turn", 0))))
         reward_step = battle_turns * self.reward_config.step_penalty
@@ -591,7 +591,7 @@ def compute_reward(battle: AbstractBattle, config: RewardConfig) -> float:
     opp_fainted = sum(1 for m in battle.opponent_team.values() if m.fainted)
     
     reward += opp_fainted * config.fainted_value
-    reward -= our_fainted * config.fainted_penalty
+    reward += our_fainted * config.fainted_penalty
     
     # Step penalty (encourage efficiency)
     reward += config.step_penalty

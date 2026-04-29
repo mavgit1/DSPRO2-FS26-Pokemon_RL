@@ -23,6 +23,8 @@ class ModelConfig:
     num_heads: int = 8
     num_transformer_layers: int = 4
     dropout: float = 0.1
+    use_position_embeddings: bool = True
+    use_role_embeddings: bool = True
 
     # LSTM (for memory across turns)
     lstm_hidden: int = 512
@@ -40,6 +42,8 @@ class ModelConfig:
             "num_heads": self.num_heads,
             "num_transformer_layers": self.num_transformer_layers,
             "dropout": self.dropout,
+            "use_position_embeddings": self.use_position_embeddings,
+            "use_role_embeddings": self.use_role_embeddings,
             "lstm_hidden": self.lstm_hidden,
             "use_lstm": self.use_lstm,
         }
@@ -105,7 +109,7 @@ class RewardConfig:
 
     # Fainting rewards
     fainted_value: float = 3.0
-    fainted_penalty: float = 3.0
+    fainted_penalty: float = -3.0
 
     # Progress rewards
     step_penalty: float = -0.02
@@ -159,7 +163,7 @@ class CurriculumConfig:
                     defeat_penalty=-80.0,
                     hp_value_weight=1.2,
                     fainted_value=3.0,
-                    fainted_penalty=2.0,
+                    fainted_penalty=-2.0,
                     step_penalty=0.0,
                 ),
             ),
@@ -173,7 +177,7 @@ class CurriculumConfig:
                     defeat_penalty=-100.0,
                     hp_value_weight=1.0,
                     fainted_value=3.0,
-                    fainted_penalty=3.0,
+                    fainted_penalty=-3.0,
                     step_penalty=-0.01,
                 ),
             ),
@@ -187,7 +191,7 @@ class CurriculumConfig:
                     defeat_penalty=-120.0,
                     hp_value_weight=0.8,
                     fainted_value=4.0,
-                    fainted_penalty=3.0,
+                    fainted_penalty=-3.0,
                     step_penalty=-0.02,
                 ),
             ),

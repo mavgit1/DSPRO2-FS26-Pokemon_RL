@@ -27,6 +27,8 @@ DEFAULT_MODEL_CONFIG = {
     "num_heads": 4,
     "num_transformer_layers": 2,
     "dropout": 0.1,
+    "use_position_embeddings": True,
+    "use_role_embeddings": True,
     "lstm_hidden": 256,
     "use_lstm": False,
 }
@@ -67,6 +69,8 @@ class PokemonTransformerModel(nn.Module):
         self.hidden_dim = cfg["hidden_dim"]
         self.num_heads = cfg["num_heads"]
         self.num_layers = cfg["num_transformer_layers"]
+        self.use_position_embeddings = cfg["use_position_embeddings"]
+        self.use_role_embeddings = cfg["use_role_embeddings"]
         self.lstm_hidden = cfg["lstm_hidden"]
         self.use_lstm = cfg["use_lstm"]
         
@@ -91,6 +95,19 @@ class PokemonTransformerModel(nn.Module):
         # -----------------------------------------------------------------
         self.input_proj = nn.Linear(self.total_token_dim, self.hidden_dim)
         self.input_norm = nn.LayerNorm(self.hidden_dim)
+
+        self.position_embed = (
+            nn.Embedding(self.num_tokens, self.hidden_dim)
+            if self.use_position_embeddings
+            else None
+        )
+        self.role_embed = (
+            nn.Embedding(5, self.hidden_dim)
+            if self.use_role_embeddings
+            else None
+        )
+        role_ids = self._build_role_ids(self.num_tokens)
+        self.register_buffer("token_role_ids", role_ids, persistent=False)
         
         # -----------------------------------------------------------------
         # Transformer Encoder
@@ -189,7 +206,33 @@ class PokemonTransformerModel(nn.Module):
         # Project to hidden dim
         x = self.input_proj(x)
         x = self.input_norm(x)
+        x = self._add_token_structure_embeddings(x)
         
+        return x
+
+    @staticmethod
+    def _build_role_ids(num_tokens: int) -> torch.Tensor:
+        """Map token slots to coarse battle roles."""
+        role_ids = torch.zeros(num_tokens, dtype=torch.long)
+        if num_tokens > 1:
+            role_ids[1] = 1  # our active
+        if num_tokens > 2:
+            role_ids[2:min(num_tokens, 7)] = 2  # our bench
+        if num_tokens > 7:
+            role_ids[7] = 3  # opponent active
+        if num_tokens > 8:
+            role_ids[8:min(num_tokens, 13)] = 4  # opponent bench
+        return role_ids
+
+    def _add_token_structure_embeddings(self, x: TensorType) -> TensorType:
+        """Add learned absolute slot and coarse role embeddings."""
+        token_count = x.shape[1]
+        if self.position_embed is not None:
+            position_ids = torch.arange(token_count, device=x.device, dtype=torch.long)
+            x = x + self.position_embed(position_ids).unsqueeze(0)
+        if self.role_embed is not None:
+            role_ids = self.token_role_ids[:token_count].to(device=x.device)
+            x = x + self.role_embed(role_ids).unsqueeze(0)
         return x
 
     def _embed_obs_parts(self, obs_dict: Dict[str, TensorType]) -> Dict[str, TensorType]:
@@ -231,6 +274,7 @@ class PokemonTransformerModel(nn.Module):
             dim=-1,
         )
         x = self.input_norm(self.input_proj(x))
+        x = self._add_token_structure_embeddings(x)
         x.retain_grad()
 
         encoded = self._transformer_forward(x)
