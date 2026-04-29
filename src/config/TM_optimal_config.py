@@ -156,10 +156,10 @@ class CurriculumConfig:
     stages: List[CurriculumStageConfig] = field(
         default_factory=lambda: [
             CurriculumStageConfig(
-                name="easy",
-                promote_at_win_rate=0.93,
+                name="innit",
+                promote_at_win_rate=0.75,
                 min_samples_for_promotion=50,
-                opponent_mix={"random": 1.0},
+                opponent_mix={"random": 0.8, "heuristic": 0.2},
                 reward_config=RewardConfig(
                     victory_reward=80.0,
                     defeat_penalty=-80.0,
@@ -170,10 +170,38 @@ class CurriculumConfig:
                 ),
             ),
             CurriculumStageConfig(
+                name="easy",
+                promote_at_win_rate=0.75,
+                min_samples_for_promotion=50,
+                opponent_mix={"random": 0.65, "heuristic": 0.35},
+                reward_config=RewardConfig(
+                    victory_reward=100.0,
+                    defeat_penalty=-100.0,
+                    hp_value_weight=1.0,
+                    fainted_value=3.0,
+                    fainted_penalty=-3.0,
+                    step_penalty=-0.01,
+                ),
+            ),
+            CurriculumStageConfig(
                 name="medium",
                 promote_at_win_rate=0.75,
                 min_samples_for_promotion=50,
-                opponent_mix={"random": 0.5, "heuristic": 0.5},
+                opponent_mix={"random": 0.4, "heuristic": 0.6},
+                reward_config=RewardConfig(
+                    victory_reward=100.0,
+                    defeat_penalty=-100.0,
+                    hp_value_weight=1.0,
+                    fainted_value=3.0,
+                    fainted_penalty=-3.0,
+                    step_penalty=-0.01,
+                ),
+            ),
+            CurriculumStageConfig(
+                name="advanced",
+                promote_at_win_rate=0.75,
+                min_samples_for_promotion=50,
+                opponent_mix={"random": 0.2, "heuristic": 0.8},
                 reward_config=RewardConfig(
                     victory_reward=100.0,
                     defeat_penalty=-100.0,
