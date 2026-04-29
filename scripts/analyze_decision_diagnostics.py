@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
 
 from src.models.battle_transformer import PokemonTransformerModel  # noqa: E402
 from src.models.vocab import vocab_sizes  # noqa: E402
+from src.action_space import COMPRESSED_ACTION_SPACE_N  # noqa: E402
 
 
 def main() -> None:
@@ -27,7 +28,7 @@ def main() -> None:
     args = parser.parse_args()
 
     model = PokemonTransformerModel(
-        num_outputs=22,
+        num_outputs=COMPRESSED_ACTION_SPACE_N,
         model_config={"custom_model_config": {}},
         name="pokemon_transformer_diag_test",
     )
@@ -39,7 +40,7 @@ def main() -> None:
         "species": torch.randint(0, sizes["species_vocab_size"], (1, 13)),
         "items": torch.randint(0, sizes["item_vocab_size"], (1, 13)),
         "abilities": torch.randint(0, sizes["ability_vocab_size"], (1, 13)),
-        "action_mask": torch.ones(1, 22),
+        "action_mask": torch.ones(1, COMPRESSED_ACTION_SPACE_N),
     }
     diag = model.analyze_observation(obs_dict=obs, top_k=5)
 

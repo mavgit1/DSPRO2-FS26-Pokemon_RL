@@ -12,9 +12,14 @@ from poke_env.player import RandomPlayer, SimpleHeuristicsPlayer
 from poke_env.environment.single_agent_wrapper import SingleAgentWrapper
 from poke_env.ps_client.account_configuration import AccountConfiguration
 
+from src.action_space import (
+    COMPRESSED_ACTION_SPACE_N,
+    NATIVE_ACTION_SPACE_N,
+    compressed_to_native_action,
+    is_compressed_switch_action,
+)
 from src.models.embedding import (
     embed_battle,
-    is_native_switch_action,
     NUM_TOKENS,
     TOKEN_DIM,
     SPECIES_VOCAB_SIZE,
@@ -58,7 +63,7 @@ def get_observation_space() -> gym.spaces.Dict:
         "action_mask": gym.spaces.Box(
             low=0,
             high=1,
-            shape=(22,),
+            shape=(COMPRESSED_ACTION_SPACE_N,),
             dtype=np.float32,
         ),
     })
@@ -306,8 +311,7 @@ class PokemonBattleEnv(SinglesEnv):
                 continue
 
         # Hard fallback: pick the first action that converts legally.
-        # 26 covers up to gen9 singles action size; gen8 uses 22.
-        for action in range(26):
+        for action in range(NATIVE_ACTION_SPACE_N):
             try:
                 self._fallback_events_current_episode += 1
                 SinglesEnv.action_to_order(
@@ -442,12 +446,15 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         if action is not None:
             action_int = int(action)
             self._episode_total_actions += 1
-            if is_native_switch_action(action_int):
+            if is_compressed_switch_action(action_int):
                 self._episode_switch_actions += 1
             else:
                 self._episode_attack_actions += 1
+            native_action = compressed_to_native_action(action_int, self.env.battle1)
+        else:
+            native_action = action
 
-        result = super().step(action)
+        result = super().step(native_action)
         terminated = False
         truncated = False
         if isinstance(result, tuple):

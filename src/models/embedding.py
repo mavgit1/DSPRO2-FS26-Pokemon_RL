@@ -4,7 +4,6 @@ from typing import Dict, List, Optional, Any
 # Poke-env imports (only for type hints and enums)
 from poke_env.battle.abstract_battle import AbstractBattle
 from poke_env.battle.pokemon import Pokemon
-from poke_env.environment.singles_env import SinglesEnv
 from poke_env.battle.weather import Weather
 from poke_env.battle.field import Field
 from poke_env.battle.side_condition import SideCondition
@@ -13,6 +12,11 @@ from poke_env.battle.pokemon_type import PokemonType
 from poke_env.battle.move_category import MoveCategory
 from poke_env.battle.effect import Effect
 
+from src.action_space import (
+    COMPRESSED_ACTION_SPACE_N,
+    NATIVE_SWITCH_ACTIONS,
+    get_compressed_action_mask,
+)
 from src.models.vocab import get_embedding_vocab, vocab_sizes
 
 
@@ -47,8 +51,7 @@ _VOCAB_SIZES = vocab_sizes()
 SPECIES_VOCAB_SIZE = _VOCAB_SIZES["species_vocab_size"]
 ITEM_VOCAB_SIZE = _VOCAB_SIZES["item_vocab_size"]
 ABILITY_VOCAB_SIZE = _VOCAB_SIZES["ability_vocab_size"]
-ACTION_SPACE_N = 22
-NATIVE_SWITCH_ACTIONS = range(0, 6)
+ACTION_SPACE_N = COMPRESSED_ACTION_SPACE_N
 GLOBAL_EXTRA_FEATURE_NAMES = [
     "opponent_random",
     "opponent_heuristic",
@@ -421,41 +424,18 @@ def get_action_mask(battle: AbstractBattle) -> np.ndarray:
     """
     Generate action mask for valid actions.
     
-    Action space layout (gen8randombattle - 22 native poke-env actions):
-        - 0-5: Switches
-        - 6-9: Moves
-        - 10-13: Mega Evolution
-        - 14-17: Z-Move
-        - 18-21: Dynamax
+    Action space layout (compressed gen8 singles actions):
+        - 0-3: regular moves
+        - 4-7: legal gimmick variant for each move slot
+        - 8-13: legal switch slots
     
     Args:
         battle: AbstractBattle object
     
     Returns:
-        np.ndarray of shape (22,) with 1.0 for valid actions, 0.0 for invalid
+        np.ndarray of shape (18,) with 1.0 for valid actions, 0.0 for invalid
     """
-    # For gen8 singles the action space is 22:
-    # 0-5 switches, 6-9 moves, 10-13 mega, 14-17 z-move, 18-21 dynamax.
-    # Use poke-env's own converter so mask indices exactly match env semantics.
-    mask = np.zeros(ACTION_SPACE_N, dtype=np.float32)
-
-    for action in range(ACTION_SPACE_N):
-        try:
-            SinglesEnv.action_to_order(
-                np.int64(action),
-                battle,
-                fake=False,
-                strict=True,
-            )
-            mask[action] = 1.0
-        except (IndexError, ValueError):
-            continue
-
-    # Safety fallback for rare edge cases (prevents all-zero mask instability).
-    if not mask.any():
-        mask[6] = 1.0
-
-    return mask
+    return get_compressed_action_mask(battle)
 
 
 def get_valid_action_indices(battle: AbstractBattle) -> List[int]:
