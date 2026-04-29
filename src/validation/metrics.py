@@ -78,9 +78,6 @@ def aggregate_validation_metrics(results: List[BattleResult]) -> Dict[str, float
         )
         metrics[f"validation/episodes_vs_{opponent}"] = float(opponent_total)
 
-    metrics.update(_aggregate_group_metrics(results, "pair_id", "pair"))
-    metrics.update(_aggregate_group_metrics(results, "rl_team_id", "team"))
-
     return metrics
 
 
@@ -124,35 +121,6 @@ def build_validation_diagnostics(results: List[BattleResult]) -> Dict[str, Any]:
             "top_episodes": fallback_episodes[:10],
         },
     }
-
-
-def _aggregate_group_metrics(
-    results: List[BattleResult],
-    attr: str,
-    label: str,
-) -> Dict[str, float]:
-    summaries = _group_summaries(results, attr)
-    if not summaries:
-        return {}
-
-    win_rates = [float(summary["win_rate"]) for summary in summaries.values()]
-    fallback_rates = [
-        float(summary["fallback_events_per_battle"]) for summary in summaries.values()
-    ]
-    metrics = {
-        f"validation/{label}_win_rate_mean": float(sum(win_rates) / len(win_rates)),
-        f"validation/{label}_win_rate_min": float(min(win_rates)),
-        f"validation/{label}_win_rate_max": float(max(win_rates)),
-        f"validation/{label}_fallback_events_per_battle_mean": float(
-            sum(fallback_rates) / len(fallback_rates)
-        ),
-    }
-
-    for group_id, summary in summaries.items():
-        metrics[f"validation/{label}/{group_id}/win_rate"] = float(summary["win_rate"])
-        metrics[f"validation/{label}/{group_id}/episodes"] = float(summary["episodes"])
-
-    return metrics
 
 
 def _group_summaries(
