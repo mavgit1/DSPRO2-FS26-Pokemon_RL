@@ -50,6 +50,11 @@ def main() -> int:
         help="Training config preset used to rebuild the RLlib module.",
     )
     parser.add_argument(
+        "--use-lstm",
+        action="store_true",
+        help="Rebuild the validation policy with the recurrent LSTM model.",
+    )
+    parser.add_argument(
         "--num-servers",
         type=int,
         default=1,
@@ -139,8 +144,14 @@ def main() -> int:
             seed=args.seed,
             team_manifest=str(args.team_manifest) if args.team_manifest else None,
             battle_format=args.battle_format,
+            use_lstm=args.use_lstm,
         )
-    except (ConnectionError, FileNotFoundError, NotImplementedError, RuntimeError) as exc:
+    except (
+        ConnectionError,
+        FileNotFoundError,
+        NotImplementedError,
+        RuntimeError,
+    ) as exc:
         print(f"Validation failed: {exc}", file=sys.stderr)
         return 1
     report_path = write_validation_report(report, args.output_json)

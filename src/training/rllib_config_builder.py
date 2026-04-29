@@ -66,6 +66,7 @@ def build_ppo_config(
                 observation_space=get_observation_space(),
                 action_space=gym.spaces.Discrete(COMPRESSED_ACTION_SPACE_N),
                 model_config={
+                    **config.model.to_dict(),
                     "custom_model_config": config.model.to_dict(),
                 },
             )

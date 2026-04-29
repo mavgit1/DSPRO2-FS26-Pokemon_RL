@@ -33,68 +33,68 @@ from src.config.TM_optimal_config import RewardConfig
 # OBSERVATION SPACE
 # =============================================================================
 
+
 def get_observation_space() -> gym.spaces.Dict:
     """Create the observation space for the environment."""
-    return gym.spaces.Dict({
-        "obs": gym.spaces.Box(
-            low=-1.0,
-            high=10.0,
-            shape=(NUM_TOKENS, TOKEN_DIM),
-            dtype=np.float32,
-        ),
-        "species": gym.spaces.Box(
-            low=0,
-            high=SPECIES_VOCAB_SIZE - 1,
-            shape=(NUM_TOKENS,),
-            dtype=np.int32,
-        ),
-        "items": gym.spaces.Box(
-            low=0,
-            high=ITEM_VOCAB_SIZE - 1,
-            shape=(NUM_TOKENS,),
-            dtype=np.int32,
-        ),
-        "abilities": gym.spaces.Box(
-            low=0,
-            high=ABILITY_VOCAB_SIZE - 1,
-            shape=(NUM_TOKENS,),
-            dtype=np.int32,
-        ),
-        "action_mask": gym.spaces.Box(
-            low=0,
-            high=1,
-            shape=(COMPRESSED_ACTION_SPACE_N,),
-            dtype=np.float32,
-        ),
-    })
+    return gym.spaces.Dict(
+        {
+            "obs": gym.spaces.Box(
+                low=-1.0,
+                high=10.0,
+                shape=(NUM_TOKENS, TOKEN_DIM),
+                dtype=np.float32,
+            ),
+            "species": gym.spaces.Box(
+                low=0,
+                high=SPECIES_VOCAB_SIZE - 1,
+                shape=(NUM_TOKENS,),
+                dtype=np.int32,
+            ),
+            "items": gym.spaces.Box(
+                low=0,
+                high=ITEM_VOCAB_SIZE - 1,
+                shape=(NUM_TOKENS,),
+                dtype=np.int32,
+            ),
+            "abilities": gym.spaces.Box(
+                low=0,
+                high=ABILITY_VOCAB_SIZE - 1,
+                shape=(NUM_TOKENS,),
+                dtype=np.int32,
+            ),
+            "action_mask": gym.spaces.Box(
+                low=0,
+                high=1,
+                shape=(COMPRESSED_ACTION_SPACE_N,),
+                dtype=np.float32,
+            ),
+        }
+    )
 
 
 # =============================================================================
-# BASE ENVIRONMENT 
+# BASE ENVIRONMENT
 # =============================================================================
+
 
 class PokemonBattleEnv(SinglesEnv):
     """
     Gymnasium environment for Pokemon battles with transformer-friendly embeddings.
-    
+
     Extends SinglesEnv (PettingZoo ParallelEnv) and sets observation_spaces
     as a dict keyed by agent usernames.
-    
+
     Features:
         - Token-based observation space
         - Categorical embeddings for species, items, abilities
         - Action masking for valid actions
         - Configurable reward function
     """
-    
-    def __init__(
-        self,
-        reward_config: Optional[RewardConfig] = None,
-        **kwargs
-    ):
+
+    def __init__(self, reward_config: Optional[RewardConfig] = None, **kwargs):
         """
         Initialize the environment.
-        
+
         Args:
             reward_config: Reward configuration
             **kwargs: Passed to SinglesEnv (battle_format, account_configuration1,
@@ -111,23 +111,20 @@ class PokemonBattleEnv(SinglesEnv):
         self._cleanup_interval_steps = 256
         self._fallback_events_current_episode = 0
         self._opponent_context: Optional[str] = None
-        
+
         super().__init__(**kwargs)
-        
+
         # PettingZoo-style observation_spaces dict keyed by agent
         obs_space = get_observation_space()
-        self.observation_spaces = {
-            agent: obs_space
-            for agent in self.possible_agents
-        }
-    
+        self.observation_spaces = {agent: obs_space for agent in self.possible_agents}
+
     def embed_battle(self, battle: AbstractBattle) -> Dict[str, np.ndarray]:
         """
         Convert battle state to embedding.
-        
+
         Args:
             battle: Current battle state
-        
+
         Returns:
             Dict with obs, species, items, abilities, action_mask
         """
@@ -136,7 +133,7 @@ class PokemonBattleEnv(SinglesEnv):
     def set_opponent_context(self, opponent_type: Optional[str]) -> None:
         """Attach selected opponent metadata to future observations."""
         self._opponent_context = opponent_type
-    
+
     def calc_reward(self, battle: AbstractBattle) -> float:
         """Calculate reward based on battle state."""
         battle_tag = getattr(battle, "battle_tag", None)
@@ -177,12 +174,40 @@ class PokemonBattleEnv(SinglesEnv):
             # Refresh terminal marker while reward callbacks are still firing.
             self._completed_battle_steps[battle_key] = self._env_step_counter
 
-        return self.reward_computing_helper(
-            battle,
-            fainted_value=self.reward_config.fainted_value,
-            hp_value=self.reward_config.hp_value_weight,
-            victory_value=self.reward_config.victory_reward,
-        )
+        return self._compute_configured_delta_reward(battle)
+
+    def _compute_configured_delta_reward(self, battle: AbstractBattle) -> float:
+        """Poke-env style delta reward with asymmetric terminal values."""
+        if battle not in self._reward_buffer:
+            self._reward_buffer[battle] = 0.0
+
+        current_value = 0.0
+        hp_value = self.reward_config.hp_value_weight
+        fainted_value = self.reward_config.fainted_value
+        number_of_pokemons = 6
+
+        for mon in battle.team.values():
+            current_value += mon.current_hp_fraction * hp_value
+            if mon.fainted:
+                current_value -= fainted_value
+
+        current_value += (number_of_pokemons - len(battle.team)) * hp_value
+
+        for mon in battle.opponent_team.values():
+            current_value -= mon.current_hp_fraction * hp_value
+            if mon.fainted:
+                current_value += fainted_value
+
+        current_value -= (number_of_pokemons - len(battle.opponent_team)) * hp_value
+
+        if battle.won:
+            current_value += self.reward_config.victory_reward
+        elif battle.lost:
+            current_value += self.reward_config.defeat_penalty
+
+        reward = current_value - self._reward_buffer[battle]
+        self._reward_buffer[battle] = current_value
+        return reward
 
     def set_reward_config(self, reward_config: RewardConfig) -> None:
         """Update reward configuration at runtime."""
@@ -250,7 +275,9 @@ class PokemonBattleEnv(SinglesEnv):
         hp_diff = our_hp - opp_hp
 
         reward_victory = (
-            self.reward_config.victory_reward if outcome == 1 else self.reward_config.defeat_penalty
+            self.reward_config.victory_reward
+            if outcome == 1
+            else self.reward_config.defeat_penalty
         )
         reward_hp_diff = hp_diff * self.reward_config.hp_value_weight
         reward_faint = (
@@ -358,7 +385,9 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             self.env.set_opponent_context(initial_key)
 
     @staticmethod
-    def _normalize_opponent_mix(opponent_mix: Optional[Dict[str, float]]) -> Dict[str, float]:
+    def _normalize_opponent_mix(
+        opponent_mix: Optional[Dict[str, float]],
+    ) -> Dict[str, float]:
         default_mix = {"random": 1.0}
         if not opponent_mix:
             return default_mix
@@ -493,13 +522,17 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
                 "species": np.asarray(obs["species"]).astype(np.int64, copy=False),
                 "items": np.asarray(obs["items"]).astype(np.int64, copy=False),
                 "abilities": np.asarray(obs["abilities"]).astype(np.int64, copy=False),
-                "action_mask": np.asarray(obs["action_mask"]).astype(np.float32, copy=False),
+                "action_mask": np.asarray(obs["action_mask"]).astype(
+                    np.float32, copy=False
+                ),
             }
         except Exception:
             return
         self._recent_observation_samples.append(sample)
         if len(self._recent_observation_samples) > self._recent_observation_cap:
-            self._recent_observation_samples = self._recent_observation_samples[-self._recent_observation_cap :]
+            self._recent_observation_samples = self._recent_observation_samples[
+                -self._recent_observation_cap :
+            ]
 
     def set_opponent_mix(self, opponent_mix: Dict[str, float]) -> None:
         self._opponent_mix = self._normalize_opponent_mix(opponent_mix)
@@ -535,18 +568,24 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             merged.append(item)
         return merged
 
-    def pop_recent_observation_samples(self, max_samples: int = 3) -> List[Dict[str, Any]]:
+    def pop_recent_observation_samples(
+        self, max_samples: int = 3
+    ) -> List[Dict[str, Any]]:
         max_samples = max(0, int(max_samples))
         if max_samples == 0:
             return []
         samples = self._recent_observation_samples[:max_samples]
-        self._recent_observation_samples = self._recent_observation_samples[max_samples:]
+        self._recent_observation_samples = self._recent_observation_samples[
+            max_samples:
+        ]
         return samples
 
     def get_memory_counters(self) -> Dict[str, float]:
         out = {
             "wrapper_recent_action_stats_len": float(len(self._recent_action_stats)),
-            "wrapper_recent_observation_samples_len": float(len(self._recent_observation_samples)),
+            "wrapper_recent_observation_samples_len": float(
+                len(self._recent_observation_samples)
+            ),
             "wrapper_opponent_pool_len": float(len(self._opponent_pool)),
         }
         if hasattr(self.env, "get_memory_counters"):
@@ -563,46 +602,48 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             self.env.reset_tracking_state()
         return super().close()
 
+
 # =============================================================================
 # REWARD FUNCTION todo: create more for different curriculum stages
 # =============================================================================
 
+
 def compute_reward(battle: AbstractBattle, config: RewardConfig) -> float:
     """
     Compute reward based on battle state and configuration.
-    
+
     Args:
         battle: Current battle state
         config: Reward configuration
-    
+
     Returns:
         Float reward value
     """
     reward = 0.0
-    
+
     # Victory/Loss (terminal)
     if battle.won:
         return config.victory_reward
     if battle.lost:
         return config.defeat_penalty
-    
+
     # HP-based reward
     our_hp = _get_team_hp_fraction(battle.team)
     opp_hp = _get_team_hp_fraction(battle.opponent_team)
-    
+
     hp_diff = our_hp - opp_hp
     reward += hp_diff * config.hp_value_weight
-    
+
     # Fainting rewards
     our_fainted = sum(1 for m in battle.team.values() if m.fainted)
     opp_fainted = sum(1 for m in battle.opponent_team.values() if m.fainted)
-    
+
     reward += opp_fainted * config.fainted_value
     reward += our_fainted * config.fainted_penalty
-    
+
     # Step penalty (encourage efficiency)
     reward += config.step_penalty
-    
+
     return reward
 
 
@@ -619,6 +660,7 @@ def _get_team_hp_fraction(team: Dict) -> float:
 # ENVIRONMENT CREATOR FOR RAY
 # =============================================================================
 
+
 def create_env_creator(
     battle_format: str = "gen8randombattle",
     server_host: str = "localhost",
@@ -631,7 +673,7 @@ def create_env_creator(
 ):
     """
     Create an environment creator function for Ray RLlib.
-    
+
     Args:
         battle_format: Battle format string
         server_host: Showdown server host
@@ -641,13 +683,14 @@ def create_env_creator(
         opponent_mix: Optional per-episode sampling mix, e.g. {"random": 0.7, "heuristic": 0.3}
         player_team: Optional fixed Showdown team text for the learning agent
         opponent_team: Optional fixed Showdown team text for the opponent
-    
+
     Returns:
         Callable that creates environments
     """
+
     def env_creator(env_config: Optional[Dict] = None):
         env_config = env_config or {}
-        
+
         # Resolve settings
         fmt = env_config.get("battle_format", battle_format)
         host = env_config.get("server_host", server_host)
@@ -673,13 +716,13 @@ def create_env_creator(
                 env_config["_pokemon_sub_env_index"] = sub_i + 1
                 slot = wi * nepw + sub_i
                 port = start_p + (slot % num_srv)
-        
+
         # Build proper websocket ServerConfiguration
         server_config = ServerConfiguration(
             f"ws://{host}:{port}/showdown/websocket",
             "https://play.pokemonshowdown.com/action.php?",
         )
-        
+
         # Create a starting opponent. Wrapper will resample per episode
         # when opponent mixes are configured.
         opponent_id = f"Opp_{uuid.uuid4().hex[:6]}"
@@ -694,7 +737,7 @@ def create_env_creator(
             server_configuration=server_config,
             team=o_team,
         )
-        
+
         # Create the PettingZoo env
         player_id = f"RL_{uuid.uuid4().hex[:8]}"
         env = PokemonBattleEnv(
@@ -705,7 +748,7 @@ def create_env_creator(
             strict=False,
             team=p_team,
         )
-        
+
         # Wrap into single-agent gym env
         return CurriculumSingleAgentWrapper(
             env=env,
@@ -715,5 +758,5 @@ def create_env_creator(
             opponent_mix=mix,
             opponent_team=o_team,
         )
-    
+
     return env_creator

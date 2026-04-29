@@ -37,6 +37,12 @@ def build_validation_config(preset: str) -> TrainingConfig:
     return config
 
 
+_VALIDATION_RESTORE_COMPONENTS = (
+    "env_runner/rl_module",
+    "learner_group/learner/rl_module",
+)
+
+
 def run_validation(
     protocol: ValidationProtocol,
     checkpoint: str,
@@ -47,6 +53,7 @@ def run_validation(
     seed: int,
     team_manifest: str | None = None,
     battle_format: str | None = None,
+    use_lstm: bool = False,
 ) -> Dict[str, Any]:
     """Restore a checkpoint and run a validation protocol."""
     if protocol.name not in {"smoke", "fixed_paired", "mirror"}:
@@ -56,6 +63,7 @@ def run_validation(
 
     _seed_everything(seed)
     config = build_validation_config(preset)
+    config.model.use_lstm = use_lstm
     if battle_format:
         config.env.battle_format = battle_format
     checkpoint_path = resolve_resume_checkpoint(checkpoint, config.checkpoint_dir)
@@ -65,7 +73,9 @@ def run_validation(
         )
     checkpoint_path_obj = Path(checkpoint_path).expanduser().resolve()
     if not checkpoint_path_obj.exists():
-        raise FileNotFoundError(f"Checkpoint path does not exist: {checkpoint_path_obj}")
+        raise FileNotFoundError(
+            f"Checkpoint path does not exist: {checkpoint_path_obj}"
+        )
     checkpoint_path = str(checkpoint_path_obj)
     _ensure_showdown_server(config.env.showdown_host, start_port)
 
@@ -84,7 +94,19 @@ def run_validation(
             start_port=start_port,
             num_servers=num_servers,
         ).build_algo()
-        algo.restore(checkpoint_path)
+        try:
+            _restore_checkpoint_for_validation(algo, checkpoint_path)
+        except RuntimeError:
+            if use_lstm:
+                raise
+            algo.stop()
+            config.model.use_lstm = True
+            algo = build_ppo_config(
+                config=config,
+                start_port=start_port,
+                num_servers=num_servers,
+            ).build_algo()
+            _restore_checkpoint_for_validation(algo, checkpoint_path)
 
         if protocol.name in {"fixed_paired", "mirror"}:
             if not team_manifest:
@@ -139,6 +161,35 @@ def run_validation(
         "diagnostics": build_validation_diagnostics(results),
         "episodes": [result.to_dict() for result in results],
     }
+
+
+def _restore_checkpoint_for_validation(algo, checkpoint_path: str) -> None:
+    """Restore only inference weights for checkpoint validation.
+
+    Full Algorithm restore includes learner optimizer state. Validation never
+    uses the optimizer, and restoring it is brittle when the validation build
+    intentionally changes learner-only settings or when checkpoints were
+    created before small model/config edits. Restoring the RLModule component
+    is enough because validation reads actions directly from the module.
+    """
+    restore_errors: list[str] = []
+    for component in _VALIDATION_RESTORE_COMPONENTS:
+        try:
+            algo.restore_from_path(checkpoint_path, component=component)
+            return
+        except Exception as exc:
+            restore_errors.append(f"{component}: {exc}")
+
+    try:
+        algo.restore(checkpoint_path)
+    except Exception as exc:
+        restore_errors.append(f"full algorithm restore: {exc}")
+        joined = "\n".join(f"- {error}" for error in restore_errors)
+        raise RuntimeError(
+            "Could not restore checkpoint for validation. Ensure the validation "
+            "preset and --use-lstm flag match the checkpoint's training config.\n"
+            f"Restore attempts:\n{joined}"
+        ) from exc
 
 
 def _seed_everything(seed: int) -> None:
@@ -266,9 +317,10 @@ def _run_one_episode(
     steps = 0
     terminated = False
     truncated = False
+    recurrent_state = None
 
     while not terminated and not truncated and steps < max_steps_per_battle:
-        action = _compute_action(algo, obs)
+        action, recurrent_state = _compute_action(algo, obs, recurrent_state)
         obs, reward, terminated, truncated, _info = env.step(action)
         total_reward += float(reward)
         steps += 1
@@ -294,18 +346,25 @@ def _run_one_episode(
     )
 
 
-def _compute_action(algo, obs: Dict[str, Any]) -> np.int64:
+def _compute_action(
+    algo,
+    obs: Dict[str, Any],
+    recurrent_state: Dict[str, torch.Tensor] | None = None,
+) -> tuple[np.int64, Dict[str, torch.Tensor] | None]:
+    module = _get_module(algo)
+    if _module_is_stateful(module):
+        return _compute_recurrent_action(module, obs, recurrent_state)
+
     compute_single_action = getattr(algo, "compute_single_action", None)
     if callable(compute_single_action):
         try:
             action = compute_single_action(obs, explore=False)
             if isinstance(action, tuple):
                 action = action[0]
-            return np.int64(action)
+            return np.int64(action), None
         except Exception:
             pass
 
-    module = _get_module(algo)
     batch = {Columns.OBS: _to_batched_tensors(obs)}
     with torch.no_grad():
         forward = getattr(module, "forward_inference", None)
@@ -314,7 +373,40 @@ def _compute_action(algo, obs: Dict[str, Any]) -> np.int64:
         else:
             output = module._forward_inference(batch)
     logits = output[Columns.ACTION_DIST_INPUTS]
-    return np.int64(torch.argmax(logits, dim=-1).item())
+    return np.int64(torch.argmax(logits, dim=-1).item()), None
+
+
+def _compute_recurrent_action(
+    module,
+    obs: Dict[str, Any],
+    recurrent_state: Dict[str, torch.Tensor] | None,
+) -> tuple[np.int64, Dict[str, torch.Tensor]]:
+    """Run direct validation inference for a stateful RLModule.
+
+    Validation does not use RLlib's env-runner connector stack, so we must do
+    the two recurrent connector jobs manually: add a single-step time rank to
+    observations and feed STATE_OUT back as the next STATE_IN.
+    """
+    if recurrent_state is None:
+        recurrent_state = _initial_state_as_batched_tensors(module)
+
+    batch = {
+        Columns.OBS: _to_batched_tensors(obs, add_time_dim=True),
+        Columns.STATE_IN: recurrent_state,
+    }
+    with torch.no_grad():
+        forward = getattr(module, "forward_inference", None)
+        if callable(forward):
+            output = forward(batch)
+        else:
+            output = module._forward_inference(batch)
+
+    logits = output[Columns.ACTION_DIST_INPUTS]
+    action = np.int64(torch.argmax(logits, dim=-1).item())
+    next_state = {
+        key: value.detach() for key, value in output[Columns.STATE_OUT].items()
+    }
+    return action, next_state
 
 
 def _get_module(algo):
@@ -327,7 +419,32 @@ def _get_module(algo):
     raise RuntimeError("Restored algorithm does not expose an RLModule.")
 
 
-def _to_batched_tensors(obs: Dict[str, Any]) -> Dict[str, torch.Tensor]:
+def _module_is_stateful(module) -> bool:
+    is_stateful = getattr(module, "is_stateful", None)
+    return bool(is_stateful()) if callable(is_stateful) else False
+
+
+def _initial_state_as_batched_tensors(module) -> Dict[str, torch.Tensor]:
+    initial_state = module.get_initial_state()
+    device = _module_device(module)
+    return {
+        key: torch.as_tensor(value, dtype=torch.float32, device=device).unsqueeze(0)
+        for key, value in initial_state.items()
+    }
+
+
+def _module_device(module) -> torch.device:
+    try:
+        return next(module.parameters()).device
+    except StopIteration:
+        return torch.device("cpu")
+
+
+def _to_batched_tensors(
+    obs: Dict[str, Any],
+    *,
+    add_time_dim: bool = False,
+) -> Dict[str, torch.Tensor]:
     batched: Dict[str, torch.Tensor] = {}
     for key, value in obs.items():
         tensor = torch.as_tensor(value)
@@ -339,12 +456,18 @@ def _to_batched_tensors(obs: Dict[str, Any]) -> Dict[str, torch.Tensor]:
             tensor = tensor.long()
         if tensor.dim() >= 1:
             tensor = tensor.unsqueeze(0)
+        if add_time_dim:
+            tensor = tensor.unsqueeze(1)
         batched[key] = tensor
     return batched
 
 
 def _episode_stats(env) -> Dict[str, Any]:
-    stats = env.pop_recent_episode_stats() if hasattr(env, "pop_recent_episode_stats") else []
+    stats = (
+        env.pop_recent_episode_stats()
+        if hasattr(env, "pop_recent_episode_stats")
+        else []
+    )
     if stats:
         return dict(stats[-1])
     return {}

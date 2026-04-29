@@ -28,7 +28,8 @@ class ModelConfig:
 
     # LSTM (for memory across turns)
     lstm_hidden: int = 512
-    use_lstm: bool = False
+    use_lstm: bool = True
+    max_seq_len: int = 32
     
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -46,6 +47,7 @@ class ModelConfig:
             "use_role_embeddings": self.use_role_embeddings,
             "lstm_hidden": self.lstm_hidden,
             "use_lstm": self.use_lstm,
+            "max_seq_len": self.max_seq_len,
         }
 
 
@@ -155,7 +157,7 @@ class CurriculumConfig:
         default_factory=lambda: [
             CurriculumStageConfig(
                 name="easy",
-                promote_at_win_rate=0.85,
+                promote_at_win_rate=0.93,
                 min_samples_for_promotion=50,
                 opponent_mix={"random": 1.0},
                 reward_config=RewardConfig(
@@ -164,7 +166,7 @@ class CurriculumConfig:
                     hp_value_weight=1.2,
                     fainted_value=3.0,
                     fainted_penalty=-2.0,
-                    step_penalty=0.0,
+                    step_penalty=-0.005,
                 ),
             ),
             CurriculumStageConfig(
