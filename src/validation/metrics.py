@@ -1,4 +1,5 @@
 from dataclasses import asdict, dataclass
+import re
 from typing import Any, Dict, List
 
 
@@ -56,8 +57,18 @@ def aggregate_validation_metrics(results: List[BattleResult]) -> Dict[str, float
         metrics["validation/switch_action_ratio"] = float(switch_actions / total_actions)
 
     by_opponent: Dict[str, List[BattleResult]] = {}
+    missing_opponent_type_count = 0
     for result in results:
-        by_opponent.setdefault(result.opponent_type, []).append(result)
+        opponent = _canonical_opponent_type(result.opponent_type)
+        if opponent is None:
+            missing_opponent_type_count += 1
+            continue
+        by_opponent.setdefault(opponent, []).append(result)
+
+    if missing_opponent_type_count:
+        metrics["validation/missing_opponent_type_count"] = float(
+            missing_opponent_type_count
+        )
 
     for opponent, opponent_results in by_opponent.items():
         opponent_total = len(opponent_results)
@@ -71,6 +82,19 @@ def aggregate_validation_metrics(results: List[BattleResult]) -> Dict[str, float
     metrics.update(_aggregate_group_metrics(results, "rl_team_id", "team"))
 
     return metrics
+
+
+def _canonical_opponent_type(value: str | None) -> str | None:
+    if value is None:
+        return None
+    key = str(value).strip().lower()
+    if not key or key == "unknown":
+        return None
+    if key == "heuristics":
+        return "heuristic"
+    key = re.sub(r"[^a-z0-9_.-]+", "_", key)
+    key = re.sub(r"_+", "_", key).strip("_")
+    return key or None
 
 
 def build_validation_diagnostics(results: List[BattleResult]) -> Dict[str, Any]:

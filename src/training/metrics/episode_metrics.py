@@ -1,12 +1,13 @@
+import re
 from collections import defaultdict
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from src.training.metrics.common import mean
 
 
 def aggregate_episode_metrics(
     outcomes: List[int],
-    episode_stats: List[Dict[str, float]],
+    episode_stats: List[Dict[str, Any]],
     stage_name: Optional[str] = None,
 ) -> Dict[str, float]:
     metrics: Dict[str, float] = {}
@@ -25,11 +26,21 @@ def aggregate_episode_metrics(
 
     # Per-opponent win rates
     by_opponent: Dict[str, List[int]] = defaultdict(list)
+    missing_opponent_type_count = 0
     for stat in episode_stats:
-        opp_type = stat.get("opponent_type", "unknown")
+        opp_type = _canonical_opponent_type(stat.get("opponent_type"))
+        if opp_type is None:
+            missing_opponent_type_count += 1
+            continue
         outcome = stat.get("outcome")
-        if outcome is not None:
-            by_opponent[opp_type].append(int(outcome))
+        if outcome is None:
+            continue
+        outcome_int = int(outcome)
+        if outcome_int in {0, 1}:
+            by_opponent[opp_type].append(outcome_int)
+
+    if missing_opponent_type_count:
+        metrics["outcome/missing_opponent_type_count"] = float(missing_opponent_type_count)
 
     for opp_type, opp_outcomes in by_opponent.items():
         opp_wins = sum(opp_outcomes)
@@ -96,3 +107,16 @@ def aggregate_episode_metrics(
         )
 
     return metrics
+
+
+def _canonical_opponent_type(value) -> Optional[str]:
+    if value is None:
+        return None
+    key = str(value).strip().lower()
+    if not key or key == "unknown":
+        return None
+    if key == "heuristics":
+        return "heuristic"
+    key = re.sub(r"[^a-z0-9_.-]+", "_", key)
+    key = re.sub(r"_+", "_", key).strip("_")
+    return key or None

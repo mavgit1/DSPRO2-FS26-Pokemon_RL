@@ -3,6 +3,7 @@ import numpy as np
 from typing import Dict, Any, Optional, List
 import uuid
 import random
+import re
 
 from poke_env.battle.abstract_battle import AbstractBattle
 from poke_env.environment.singles_env import SinglesEnv
@@ -334,14 +335,15 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         self._opponent_team = opponent_team
         self._opponent_mix = self._normalize_opponent_mix(opponent_mix)
         self._opponent_pool: Dict[str, Any] = {}
+        initial_key = self._opponent_key_from_instance(opponent)
         self._episode_total_actions = 0
         self._episode_switch_actions = 0
         self._episode_attack_actions = 0
-        self._recent_action_stats: List[Dict[str, float]] = []
+        self._current_opponent_key = initial_key
+        self._recent_action_stats: List[Dict[str, Any]] = []
         self._recent_observation_samples: List[Dict[str, Any]] = []
         self._recent_observation_cap = 64
 
-        initial_key = self._opponent_key_from_instance(opponent)
         self._opponent_pool[initial_key] = opponent
 
     @staticmethod
@@ -352,9 +354,8 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
 
         valid = {}
         for key, val in opponent_mix.items():
-            key_lower = str(key).strip().lower()
-            if key_lower in {"random", "heuristic", "heuristics"} and float(val) > 0:
-                canonical = "heuristic" if key_lower == "heuristics" else key_lower
+            canonical = CurriculumSingleAgentWrapper._canonical_opponent_key(key)
+            if canonical is not None and float(val) > 0:
                 valid[canonical] = valid.get(canonical, 0.0) + float(val)
 
         total = sum(valid.values())
@@ -365,8 +366,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
     def _choose_opponent_class(self):
         keys = list(self._opponent_mix.keys())
         weights = [self._opponent_mix[k] for k in keys]
-        selected = random.choices(keys, weights=weights, k=1)[0]
-        return "heuristic" if selected == "heuristic" else "random"
+        return random.choices(keys, weights=weights, k=1)[0]
 
     def _build_opponent(self, opponent_key: str):
         opponent_class = (
@@ -388,6 +388,19 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         return "random"
 
     @staticmethod
+    def _canonical_opponent_key(value: Any) -> Optional[str]:
+        if value is None:
+            return None
+        key = str(value).strip().lower()
+        if not key or key == "unknown":
+            return None
+        if key == "heuristics":
+            return "heuristic"
+        key = re.sub(r"[^a-z0-9_.-]+", "_", key)
+        key = re.sub(r"_+", "_", key).strip("_")
+        return key or None
+
+    @staticmethod
     def _close_opponent(opponent) -> None:
         close_fn = getattr(opponent, "close", None)
         if callable(close_fn):
@@ -403,6 +416,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         if opponent_key not in self._opponent_pool:
             self._opponent_pool[opponent_key] = self._build_opponent(opponent_key)
         self.opponent = self._opponent_pool[opponent_key]
+        self._current_opponent_key = opponent_key
         self._episode_total_actions = 0
         self._episode_switch_actions = 0
         self._episode_attack_actions = 0
@@ -444,6 +458,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
                     "episode_switch_actions": float(self._episode_switch_actions),
                     "episode_attack_actions": float(self._episode_attack_actions),
                     "episode_fallback_events": float(fallback_events),
+                    "opponent_type": self._current_opponent_key,
                 }
             )
         obs = result[0] if isinstance(result, tuple) and len(result) > 0 else None
@@ -488,7 +503,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             return self.env.pop_recent_outcomes()
         return []
 
-    def pop_recent_episode_stats(self) -> List[Dict[str, float]]:
+    def pop_recent_episode_stats(self) -> List[Dict[str, Any]]:
         env_stats = []
         if hasattr(self.env, "pop_recent_episode_stats"):
             env_stats = self.env.pop_recent_episode_stats()
@@ -623,6 +638,8 @@ def create_env_creator(
         rc = env_config.get("reward_config", reward_config or RewardConfig())
         difficulty = env_config.get("opponent_difficulty", opponent_difficulty)
         mix = env_config.get("opponent_mix", opponent_mix)
+        if mix is None:
+            mix = {difficulty: 1.0}
         p_team = env_config.get("player_team", player_team)
         o_team = env_config.get("opponent_team", opponent_team)
 
