@@ -66,7 +66,7 @@ class PPOConfig:
     clip_param: float = 0.2
 
     # Entropy bonus (exploration)
-    entropy_coeff: float = 0.02
+    entropy_coeff: float = 0.005
 
     # Value function
     vf_loss_coeff: float = 0.5
@@ -278,7 +278,7 @@ class TrainingConfig:
     
     # Checkpointing
     checkpoint_dir: str = "checkpoints"
-    checkpoint_freq: int = 500_000      # Save every N timesteps
+    checkpoint_freq: int = 250_000      # Save every N timesteps
     keep_checkpoints_num: int = 5
     
     # Logging
@@ -348,7 +348,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
     
     presets = {
         "quick": TrainingConfig(
-            total_timesteps=1_000_000,
+            total_timesteps=150_000,
             env=EnvironmentConfig(
                 num_workers=0,
                 num_envs_per_worker=1,

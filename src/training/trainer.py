@@ -118,304 +118,7 @@ class PokemonTrainer:
         self._diag_pruned_total = 0
         self._diag_records: list[Dict[str, Any]] = []
 
-    def _validate_curriculum_config(self) -> None:
-        if not self.curriculum:
-            return
-
-        stages = self.config.curriculum.stages
-        names = [s.name for s in stages]
-        if len(set(names)) != len(names):
-            raise ValueError(f"Curriculum stage names must be unique. Got: {names}")
-
-        for stage in stages:
-            if not (
-                0.0 <= stage.promote_at_win_rate <= 1.0
-                or stage.promote_at_win_rate > 1.0
-            ):
-                raise ValueError(
-                    f"Invalid threshold for stage '{stage.name}': {stage.promote_at_win_rate}"
-                )
-            if stage.min_samples_for_promotion <= 0:
-                raise ValueError(
-                    f"min_samples_for_promotion must be > 0 for stage '{stage.name}'"
-                )
-            if not stage.opponent_mix:
-                raise ValueError(
-                    f"opponent_mix cannot be empty for stage '{stage.name}'"
-                )
-            if sum(v for v in stage.opponent_mix.values() if float(v) > 0) <= 0:
-                raise ValueError(
-                    f"opponent_mix must contain at least one positive weight for stage '{stage.name}'"
-                )
-
-    def _apply_curriculum_stage(self, stage: CurriculumStageConfig) -> None:
-        """Push stage payload to all running env wrappers."""
-        if self.algo is None:
-            return
-        apply_curriculum_stage(self.algo, stage)
-        print(
-            f"Applied stage '{stage.name}' | threshold={stage.promote_at_win_rate:.2f} "
-            f"| mix={stage.opponent_mix}"
-        )
-
-    def _register_environments(self) -> None:
-        """Register environments with Ray."""
-        initial_stage = None
-        if self.curriculum:
-            initial_stage = self.curriculum.current_stage
-
-        register_environments(
-            config=self.config,
-            num_servers=self.num_servers,
-            start_port=self.start_port,
-            initial_stage=initial_stage,
-        )
-        print(
-            f"Env maps to Showdown ports {self.start_port}–{self.start_port + self.num_servers - 1} "
-            "(deterministic: RLlib worker_index × envs_per_runner + sub-env index, mod num_servers)"
-        )
-
-    def _build_config(self):
-        """Build PPO configuration."""
-        return build_ppo_config(
-            config=self.config,
-            start_port=self.start_port,
-            num_servers=self.num_servers,
-        )
-
-    def train_step(self) -> Dict[str, Any]:
-        result = self.algo.train()
-        self.total_steps = int(
-            result.get("num_env_steps_sampled_lifetime", self.total_steps)
-        )
-        self.iteration += 1
-        return result
-
-    def _get_diagnostic_analyzer(self):
-        if self.algo is None:
-            return None
-        module = None
-        get_module = getattr(self.algo, "get_module", None)
-        if callable(get_module):
-            try:
-                module = get_module("default_policy")
-            except Exception:
-                try:
-                    module = get_module()
-                except Exception:
-                    module = None
-
-        if module is not None:
-            analyze_fn = getattr(module, "analyze_observation", None)
-            if callable(analyze_fn):
-                return analyze_fn
-
-        get_policy = getattr(self.algo, "get_policy", None)
-        if callable(get_policy):
-            try:
-                policy = get_policy()
-                model = getattr(policy, "model", None)
-                analyze_fn = getattr(model, "analyze_observation", None)
-                if callable(analyze_fn):
-                    return analyze_fn
-            except Exception:
-                return None
-        return None
-
-    @staticmethod
-    def _to_batched_obs(obs_sample: Dict[str, Any]) -> Dict[str, torch.Tensor]:
-        obs = torch.as_tensor(obs_sample["obs"], dtype=torch.float32)
-        species = torch.as_tensor(obs_sample["species"], dtype=torch.long)
-        items = torch.as_tensor(obs_sample["items"], dtype=torch.long)
-        abilities = torch.as_tensor(obs_sample["abilities"], dtype=torch.long)
-        action_mask = torch.as_tensor(obs_sample["action_mask"], dtype=torch.float32)
-
-        if obs.dim() == 2:
-            obs = obs.unsqueeze(0)
-        if species.dim() == 1:
-            species = species.unsqueeze(0)
-        if items.dim() == 1:
-            items = items.unsqueeze(0)
-        if abilities.dim() == 1:
-            abilities = abilities.unsqueeze(0)
-        if action_mask.dim() == 1:
-            action_mask = action_mask.unsqueeze(0)
-
-        return {
-            "obs": obs,
-            "species": species,
-            "items": items,
-            "abilities": abilities,
-            "action_mask": action_mask,
-        }
-
-    def _record_decision_diagnostics(self) -> Dict[str, float]:
-        metrics: Dict[str, float] = {
-            "diag/samples_collected_iteration": 0.0,
-            "diag/samples_saved_total": float(self._diag_samples_saved),
-            "diag/samples_pruned_total": float(self._diag_pruned_total),
-        }
-        analyze_fn = self._get_diagnostic_analyzer()
-        if analyze_fn is None:
-            return metrics
-
-        raw_samples = collect_recent_observation_samples(
-            self.algo, max_samples_per_env=self.diag_samples_per_iteration
-        )
-        if not raw_samples:
-            return metrics
-
-        selected = raw_samples[: self.diag_samples_per_iteration]
-        new_records: list[Dict[str, Any]] = []
-        for sample in selected:
-            try:
-                diag = analyze_fn(self._to_batched_obs(sample), top_k=3)
-            except Exception:
-                continue
-            new_records.append(
-                {
-                    "iteration": self.iteration,
-                    "total_steps": self.total_steps,
-                    "diagnostics": diag,
-                }
-            )
-
-        if not new_records:
-            return metrics
-
-        self._diag_records.extend(new_records)
-        if len(self._diag_records) > self.diag_max_saved_samples:
-            overflow = len(self._diag_records) - self.diag_max_saved_samples
-            self._diag_records = self._diag_records[overflow:]
-            self._diag_pruned_total += overflow
-
-        self._diag_samples_saved = len(self._diag_records)
-        self.diag_output_path.parent.mkdir(parents=True, exist_ok=True)
-        self.diag_output_path.write_text(
-            json.dumps(
-                {
-                    "meta": {
-                        "max_saved_samples": self.diag_max_saved_samples,
-                        "samples_per_iteration": self.diag_samples_per_iteration,
-                        "pruned_total": self._diag_pruned_total,
-                    },
-                    "samples": self._diag_records,
-                },
-                indent=2,
-            ),
-            encoding="utf-8",
-        )
-
-        metrics["diag/samples_collected_iteration"] = float(len(new_records))
-        metrics["diag/samples_saved_total"] = float(self._diag_samples_saved)
-        metrics["diag/samples_pruned_total"] = float(self._diag_pruned_total)
-        return metrics
-
-    def should_checkpoint(self) -> bool:
-        """Check if we should save a checkpoint."""
-        return (
-            self.config.checkpoint_freq > 0
-            and self.total_steps - self._last_checkpoint_step
-            >= self.config.checkpoint_freq
-        )
-
-    def should_validate(self) -> bool:
-        """Check if scheduled checkpoint validation should run."""
-        validation = self.config.validation
-        return (
-            validation.enabled
-            and validation.freq_steps > 0
-            and bool(validation.protocols)
-            and self.total_steps - self._last_validation_step >= validation.freq_steps
-        )
-
-    def _save_checkpoint(self) -> Path:
-        ckpt_path = self.checkpoint_mgr.save_checkpoint(self.algo, self.total_steps)
-        self._last_checkpoint_step = self.total_steps
-        print(f"Checkpoint saved: {ckpt_path}")
-        return ckpt_path
-
-    def _manifest_for_validation_protocol(self, protocol: str) -> str | None:
-        if protocol == "fixed_paired":
-            return self.config.validation.fixed_pair_manifest
-        if protocol == "mirror":
-            return self.config.validation.mirror_manifest
-        return None
-
-    def _run_scheduled_validation(
-        self, checkpoint_path: Path, mlflow_run_id: str | None
-    ) -> None:
-        """Run configured validation protocols against a saved checkpoint."""
-        validation = self.config.validation
-        output_dir = Path("logs/validation") / f"step_{self.total_steps}"
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        for protocol in validation.protocols:
-            command = [
-                sys.executable,
-                "scripts/validate_checkpoint.py",
-                "--checkpoint",
-                str(checkpoint_path),
-                "--protocol",
-                protocol,
-                "--preset",
-                self.preset,
-                "--num-servers",
-                str(validation.num_servers),
-                "--start-port",
-                str(self.start_port),
-                "--max-steps-per-battle",
-                str(validation.max_steps_per_battle),
-                "--seed",
-                str(validation.seed),
-                "--output-json",
-                str(output_dir / f"{protocol}_validation_report.json"),
-            ]
-
-            team_manifest = self._manifest_for_validation_protocol(protocol)
-            if team_manifest:
-                command.extend(["--team-manifest", team_manifest])
-
-            if self.config.model.use_lstm:
-                command.append("--use-lstm")
-
-            if mlflow_run_id:
-                command.extend(
-                    [
-                        "--mlflow",
-                        "--mlflow-run-id",
-                        mlflow_run_id,
-                        "--mlflow-step",
-                        str(self.total_steps),
-                        "--metric-prefix",
-                        f"validation/{protocol}",
-                        "--experiment-name",
-                        "Pokemon_RL_Battler",
-                    ]
-                )
-
-            print(
-                f"Running scheduled validation '{protocol}' at step {self.total_steps:,}",
-                flush=True,
-            )
-            try:
-                subprocess.run(command, check=True)
-            except subprocess.CalledProcessError as exc:
-                message = (
-                    f"Scheduled validation '{protocol}' failed with exit code "
-                    f"{exc.returncode}."
-                )
-                if validation.continue_on_failure:
-                    print(f"{message} Continuing training.")
-                    continue
-                raise RuntimeError(message) from exc
-
-        self._last_validation_step = self.total_steps
-
-    def should_print(self) -> bool:
-        """Check if we should print progress."""
-        return self.total_steps >= (self.iteration * self.config.print_freq)
-
+    # Main training loop.
     def train(self) -> None:
         """Run the training loop."""
         seed = 42
@@ -635,6 +338,307 @@ class PokemonTrainer:
                 if self.algo is not None:
                     self.algo.stop()
                 ray.shutdown()
+    
+    def _validate_curriculum_config(self) -> None:
+        if not self.curriculum:
+            return
+
+        stages = self.config.curriculum.stages
+        names = [s.name for s in stages]
+        if len(set(names)) != len(names):
+            raise ValueError(f"Curriculum stage names must be unique. Got: {names}")
+
+        for stage in stages:
+            if not (
+                0.0 <= stage.promote_at_win_rate <= 1.0
+                or stage.promote_at_win_rate > 1.0
+            ):
+                raise ValueError(
+                    f"Invalid threshold for stage '{stage.name}': {stage.promote_at_win_rate}"
+                )
+            if stage.min_samples_for_promotion <= 0:
+                raise ValueError(
+                    f"min_samples_for_promotion must be > 0 for stage '{stage.name}'"
+                )
+            if not stage.opponent_mix:
+                raise ValueError(
+                    f"opponent_mix cannot be empty for stage '{stage.name}'"
+                )
+            if sum(v for v in stage.opponent_mix.values() if float(v) > 0) <= 0:
+                raise ValueError(
+                    f"opponent_mix must contain at least one positive weight for stage '{stage.name}'"
+                )
+
+    def _apply_curriculum_stage(self, stage: CurriculumStageConfig) -> None:
+        """Push stage payload to all running env wrappers."""
+        if self.algo is None:
+            return
+        apply_curriculum_stage(self.algo, stage)
+        print(
+            f"Applied stage '{stage.name}' | threshold={stage.promote_at_win_rate:.2f} "
+            f"| mix={stage.opponent_mix}"
+        )
+
+    def _register_environments(self) -> None:
+        """Register environments with Ray."""
+        initial_stage = None
+        if self.curriculum:
+            initial_stage = self.curriculum.current_stage
+
+        register_environments(
+            config=self.config,
+            num_servers=self.num_servers,
+            start_port=self.start_port,
+            initial_stage=initial_stage,
+        )
+        print(
+            f"Env maps to Showdown ports {self.start_port}–{self.start_port + self.num_servers - 1} "
+            "(deterministic: RLlib worker_index × envs_per_runner + sub-env index, mod num_servers)"
+        )
+
+    def _build_config(self):
+        """Build PPO configuration."""
+        return build_ppo_config(
+            config=self.config,
+            start_port=self.start_port,
+            num_servers=self.num_servers,
+        )
+
+    def train_step(self) -> Dict[str, Any]:
+        result = self.algo.train()
+        self.total_steps = int(
+            result.get("num_env_steps_sampled_lifetime", self.total_steps)
+        )
+        self.iteration += 1
+        return result
+
+    def _get_diagnostic_analyzer(self):
+        if self.algo is None:
+            return None
+        module = None
+        get_module = getattr(self.algo, "get_module", None)
+        if callable(get_module):
+            try:
+                module = get_module("default_policy")
+            except Exception:
+                try:
+                    module = get_module()
+                except Exception:
+                    module = None
+
+        if module is not None:
+            analyze_fn = getattr(module, "analyze_observation", None)
+            if callable(analyze_fn):
+                return analyze_fn
+
+        get_policy = getattr(self.algo, "get_policy", None)
+        if callable(get_policy):
+            try:
+                policy = get_policy()
+                model = getattr(policy, "model", None)
+                analyze_fn = getattr(model, "analyze_observation", None)
+                if callable(analyze_fn):
+                    return analyze_fn
+            except Exception:
+                return None
+        return None
+
+    # Converts obs to expected tensor shapes for the model.
+    @staticmethod
+    def _to_batched_obs(obs_sample: Dict[str, Any]) -> Dict[str, torch.Tensor]:
+        obs = torch.as_tensor(obs_sample["obs"], dtype=torch.float32)
+        species = torch.as_tensor(obs_sample["species"], dtype=torch.long)
+        items = torch.as_tensor(obs_sample["items"], dtype=torch.long)
+        abilities = torch.as_tensor(obs_sample["abilities"], dtype=torch.long)
+        action_mask = torch.as_tensor(obs_sample["action_mask"], dtype=torch.float32)
+
+        if obs.dim() == 2:
+            obs = obs.unsqueeze(0)
+        if species.dim() == 1:
+            species = species.unsqueeze(0)
+        if items.dim() == 1:
+            items = items.unsqueeze(0)
+        if abilities.dim() == 1:
+            abilities = abilities.unsqueeze(0)
+        if action_mask.dim() == 1:
+            action_mask = action_mask.unsqueeze(0)
+
+        return {
+            "obs": obs,
+            "species": species,
+            "items": items,
+            "abilities": abilities,
+            "action_mask": action_mask,
+        }
+
+    def _record_decision_diagnostics(self) -> Dict[str, float]:
+        metrics: Dict[str, float] = {
+            "diag/samples_collected_iteration": 0.0,
+            "diag/samples_saved_total": float(self._diag_samples_saved),
+            "diag/samples_pruned_total": float(self._diag_pruned_total),
+        }
+        analyze_fn = self._get_diagnostic_analyzer()
+        if analyze_fn is None:
+            return metrics
+
+        raw_samples = collect_recent_observation_samples(
+            self.algo, max_samples_per_env=self.diag_samples_per_iteration
+        )
+        if not raw_samples:
+            return metrics
+
+        selected = raw_samples[: self.diag_samples_per_iteration]
+        new_records: list[Dict[str, Any]] = []
+        for sample in selected:
+            try:
+                diag = analyze_fn(self._to_batched_obs(sample), top_k=3)
+            except Exception:
+                continue
+            new_records.append(
+                {
+                    "iteration": self.iteration,
+                    "total_steps": self.total_steps,
+                    "diagnostics": diag,
+                }
+            )
+
+        if not new_records:
+            return metrics
+
+        self._diag_records.extend(new_records)
+        if len(self._diag_records) > self.diag_max_saved_samples:
+            overflow = len(self._diag_records) - self.diag_max_saved_samples
+            self._diag_records = self._diag_records[overflow:]
+            self._diag_pruned_total += overflow
+
+        self._diag_samples_saved = len(self._diag_records)
+        self.diag_output_path.parent.mkdir(parents=True, exist_ok=True)
+        self.diag_output_path.write_text(
+            json.dumps(
+                {
+                    "meta": {
+                        "max_saved_samples": self.diag_max_saved_samples,
+                        "samples_per_iteration": self.diag_samples_per_iteration,
+                        "pruned_total": self._diag_pruned_total,
+                    },
+                    "samples": self._diag_records,
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+        metrics["diag/samples_collected_iteration"] = float(len(new_records))
+        metrics["diag/samples_saved_total"] = float(self._diag_samples_saved)
+        metrics["diag/samples_pruned_total"] = float(self._diag_pruned_total)
+        return metrics
+
+    def should_checkpoint(self) -> bool:
+        """Check if we should save a checkpoint."""
+        return (
+            self.config.checkpoint_freq > 0
+            and self.total_steps - self._last_checkpoint_step
+            >= self.config.checkpoint_freq
+        )
+
+    def should_validate(self) -> bool:
+        """Check if scheduled checkpoint validation should run."""
+        validation = self.config.validation
+        return (
+            validation.enabled
+            and validation.freq_steps > 0
+            and bool(validation.protocols)
+            and self.total_steps - self._last_validation_step >= validation.freq_steps
+        )
+
+    def _save_checkpoint(self) -> Path:
+        ckpt_path = self.checkpoint_mgr.save_checkpoint(self.algo, self.total_steps)
+        self._last_checkpoint_step = self.total_steps
+        print(f"Checkpoint saved: {ckpt_path}")
+        return ckpt_path
+
+    def _manifest_for_validation_protocol(self, protocol: str) -> str | None:
+        if protocol == "fixed_paired":
+            return self.config.validation.fixed_pair_manifest
+        if protocol == "mirror":
+            return self.config.validation.mirror_manifest
+        return None
+
+    # Just calls the validate_checkpoint.py script. Use the script directly if you want manual validation.
+    def _run_scheduled_validation(
+        self, checkpoint_path: Path, mlflow_run_id: str | None
+    ) -> None:
+        """Run configured validation protocols against a saved checkpoint."""
+        validation = self.config.validation
+        output_dir = Path("logs/validation") / f"step_{self.total_steps}"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        for protocol in validation.protocols:
+            command = [
+                sys.executable,
+                "scripts/validate_checkpoint.py",
+                "--checkpoint",
+                str(checkpoint_path),
+                "--protocol",
+                protocol,
+                "--preset",
+                self.preset,
+                "--num-servers",
+                str(validation.num_servers),
+                "--start-port",
+                str(self.start_port),
+                "--max-steps-per-battle",
+                str(validation.max_steps_per_battle),
+                "--seed",
+                str(validation.seed),
+                "--output-json",
+                str(output_dir / f"{protocol}_validation_report.json"),
+            ]
+
+            team_manifest = self._manifest_for_validation_protocol(protocol)
+            if team_manifest:
+                command.extend(["--team-manifest", team_manifest])
+
+            if self.config.model.use_lstm:
+                command.append("--use-lstm")
+
+            if mlflow_run_id:
+                command.extend(
+                    [
+                        "--mlflow",
+                        "--mlflow-run-id",
+                        mlflow_run_id,
+                        "--mlflow-step",
+                        str(self.total_steps),
+                        "--metric-prefix",
+                        f"validation/{protocol}",
+                        "--experiment-name",
+                        "Pokemon_RL_Battler",
+                    ]
+                )
+
+            print(
+                f"Running scheduled validation '{protocol}' at step {self.total_steps:,}",
+                flush=True,
+            )
+            try:
+                subprocess.run(command, check=True)
+            except subprocess.CalledProcessError as exc:
+                message = (
+                    f"Scheduled validation '{protocol}' failed with exit code "
+                    f"{exc.returncode}."
+                )
+                if validation.continue_on_failure:
+                    print(f"{message} Continuing training.")
+                    continue
+                raise RuntimeError(message) from exc
+
+        self._last_validation_step = self.total_steps
+
+    def should_print(self) -> bool:
+        """Check if we should print progress."""
+        return self.total_steps >= (self.iteration * self.config.print_freq)
+
 
 
 # =============================================================================

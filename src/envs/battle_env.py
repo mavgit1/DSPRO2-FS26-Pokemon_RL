@@ -128,6 +128,7 @@ class PokemonBattleEnv(SinglesEnv):
         Returns:
             Dict with obs, species, items, abilities, action_mask
         """
+        # Not recursive, just calls the embed_battle function from the embedding.py file.
         return embed_battle(battle, opponent_type=self._opponent_context)
 
     def set_opponent_context(self, opponent_type: Optional[str]) -> None:
@@ -326,7 +327,7 @@ class PokemonBattleEnv(SinglesEnv):
                 raise
 
         # Retry with random legal-looking orders a fixed number of times.
-        max_retries = 5
+        max_retries = 3
         for _ in range(max_retries):
             random_order = RandomPlayer.choose_random_singles_move(battle)
             try:
@@ -603,11 +604,6 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         return super().close()
 
 
-# =============================================================================
-# REWARD FUNCTION todo: create more for different curriculum stages
-# =============================================================================
-
-
 def compute_reward(battle: AbstractBattle, config: RewardConfig) -> float:
     """
     Compute reward based on battle state and configuration.
@@ -725,12 +721,13 @@ def create_env_creator(
 
         # Create a starting opponent. Wrapper will resample per episode
         # when opponent mixes are configured.
-        opponent_id = f"Opp_{uuid.uuid4().hex[:6]}"
-        opponent_config = AccountConfiguration(opponent_id, None)
+        opponent_id = f"rnd_{uuid.uuid4().hex[:6]}"
         if difficulty in {"heuristic", "heuristics"}:
             opponent_class = SimpleHeuristicsPlayer
+            opponent_id = f"hr_{uuid.uuid4().hex[:6]}"
         else:
             opponent_class = RandomPlayer
+        opponent_config = AccountConfiguration(opponent_id, None)
         opponent = opponent_class(
             battle_format=fmt,
             account_configuration=opponent_config,

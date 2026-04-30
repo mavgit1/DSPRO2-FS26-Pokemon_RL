@@ -9,7 +9,6 @@ Quick start:
     python train.py --preset quick            # Quick test run
     python train.py --timesteps 1000000       # Override timesteps
     python train.py --num-servers 4           # Use 4 Showdown servers
-    python train.py --use-lstm                # Enable recurrent model
 
 Requirements:
     - Pokemon Showdown server(s) running
@@ -67,16 +66,6 @@ def main():
         help="Enable debug logging (Note: standard logging replaced by MLflow/prints)"
     )
 
-    # Recurrent model
-    parser.add_argument(
-        "--use-lstm",
-        action="store_true",
-        help=(
-            "Enable recurrent LSTM state path. Disabled by default because "
-            "the current RLlib connector setup is non-recurrent."
-        ),
-    )
-
     parser.add_argument(
         "--resume-checkpoint",
         type=str,
@@ -93,17 +82,20 @@ def main():
         default=None,
         help="MLflow run ID to continue logging into the same run.",
     )
+
     parser.add_argument(
         "--disable-scheduled-validation",
         action="store_true",
         help="Disable automatic checkpoint validation during training.",
     )
+
     parser.add_argument(
         "--validation-freq-steps",
         type=int,
         default=None,
         help="Override scheduled validation frequency in environment steps.",
     )
+
     parser.add_argument(
         "--validation-max-steps-per-battle",
         type=int,
@@ -120,9 +112,9 @@ def main():
     # Initialize MLflow experiment
     mlflow.set_experiment("Pokemon_RL_Battler")
     
-    # Import and run
+    # Import and run. Change this to own config file if you want.
     from src.config.TM_optimal_config import get_config
-    # Make sure this points to your refactored trainer file!
+
     from src.training.trainer import PokemonTrainer
     
     print("=" * 60)
@@ -131,7 +123,6 @@ def main():
     print(f"Preset: {args.preset}")
     print(f"Num servers: {args.num_servers}")
     print(f"Start port: {args.start_port}")
-    print(f"Use LSTM: {args.use_lstm}")
     if args.resume_checkpoint:
         print(f"Resume checkpoint: {args.resume_checkpoint}")
     if args.mlflow_run_id:
@@ -144,8 +135,6 @@ def main():
     if args.timesteps:
         config.total_timesteps = args.timesteps
 
-    # Keep feed-forward by default to avoid RLlib recurrent connector errors.
-    config.model.use_lstm = args.use_lstm
     if args.disable_scheduled_validation:
         config.validation.enabled = False
     if args.validation_freq_steps is not None:
