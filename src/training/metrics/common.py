@@ -1,4 +1,5 @@
 import json
+import math
 from typing import Any, Dict, List, Optional
 
 
@@ -46,7 +47,9 @@ def find_numeric_by_substring(container: Any, key_substring: str) -> Optional[fl
     return _walk(container)
 
 
-def collect_numeric_values_for_exact_keys(container: Any, keys: List[str]) -> List[float]:
+def collect_numeric_values_for_exact_keys(
+    container: Any, keys: List[str]
+) -> List[float]:
     keys_set = {k.lower() for k in keys}
     out: List[float] = []
 
@@ -68,3 +71,18 @@ def mean(values: List[float]) -> Optional[float]:
     if not values:
         return None
     return float(sum(values) / len(values))
+
+
+def sanitize_mlflow_metrics(metrics: Dict[str, Any]) -> Dict[str, float]:
+    """Keep only finite float scalars — some tracking backends reject NaN/Inf or odd types."""
+    out: Dict[str, float] = {}
+    for key, value in metrics.items():
+        if not isinstance(key, str):
+            continue
+        try:
+            x = float(value)
+        except (TypeError, ValueError):
+            continue
+        if math.isfinite(x):
+            out[key] = x
+    return out

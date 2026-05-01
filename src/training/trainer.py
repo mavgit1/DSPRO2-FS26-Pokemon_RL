@@ -32,6 +32,7 @@ from src.training.metrics import (
     collect_ppo_metrics,
     collect_runtime_metrics,
     flatten_for_mlflow,
+    sanitize_mlflow_metrics,
 )
 from src.training.monitoring import SystemMetricsCollector
 from src.training.resume import (
@@ -289,7 +290,21 @@ class PokemonTrainer:
                     metrics.update(collect_env_memory_sentinels(self.algo))
                     metrics.update(self._record_decision_diagnostics())
 
-                    mlflow.log_metrics(metrics, step=self.total_steps)
+                    try:
+                        mlflow.log_metrics(metrics, step=int(self.total_steps))
+                    except Exception as exc:
+                        safe = sanitize_mlflow_metrics(metrics)
+                        try:
+                            mlflow.log_metrics(safe, step=int(self.total_steps))
+                            print(
+                                f"[WARN] mlflow.log_metrics failed ({exc!r}); "
+                                f"logged {len(safe)}/{len(metrics)} finite scalars only."
+                            )
+                        except Exception as exc2:
+                            print(
+                                f"[WARN] mlflow.log_metrics failed twice: {exc!r}; "
+                                f"retry error: {exc2!r}"
+                            )
 
                     # Print progress
                     if self.iteration % 10 == 0:
@@ -338,7 +353,7 @@ class PokemonTrainer:
                 if self.algo is not None:
                     self.algo.stop()
                 ray.shutdown()
-    
+
     def _validate_curriculum_config(self) -> None:
         if not self.curriculum:
             return
@@ -638,7 +653,6 @@ class PokemonTrainer:
     def should_print(self) -> bool:
         """Check if we should print progress."""
         return self.total_steps >= (self.iteration * self.config.print_freq)
-
 
 
 # =============================================================================

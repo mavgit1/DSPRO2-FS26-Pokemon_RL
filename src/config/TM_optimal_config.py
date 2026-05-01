@@ -86,7 +86,7 @@ class EnvironmentConfig:
     """Environment configuration."""
 
     # Battle settings
-    battle_format: str = "gen8randombattle"
+    battle_format: str = "gen5randombattle"
 
     # Server settings
     showdown_host: str = "localhost"
@@ -157,12 +157,12 @@ class CurriculumConfig:
         default_factory=lambda: [
             CurriculumStageConfig(
                 name="innit",
-                promote_at_win_rate=0.75,
+                promote_at_win_rate=1.01,
                 min_samples_for_promotion=50,
-                opponent_mix={"random": 0.8, "heuristic": 0.2},
+                opponent_mix={"random": 0, "heuristic": 1},
                 reward_config=RewardConfig(
-                    victory_reward=80.0,
-                    defeat_penalty=-80.0,
+                    victory_reward=30.0,
+                    defeat_penalty=-30.0,
                     hp_value_weight=1.2,
                     fainted_value=3.0,
                     fainted_penalty=-2.0,
@@ -350,8 +350,8 @@ def get_config(preset: str = "standard") -> TrainingConfig:
         "quick": TrainingConfig(
             total_timesteps=150_000,
             env=EnvironmentConfig(
-                num_workers=0,
-                num_envs_per_worker=1,
+                num_workers=12,
+                num_envs_per_worker=4,
             ),
             model=ModelConfig(
                 hidden_dim=128,
@@ -359,7 +359,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                 use_lstm=False,
             ),
             ppo=PPOConfig(
-                train_batch_size=2048,
+                train_batch_size=4096,
             ),
         ),
         
