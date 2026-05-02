@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any
-from pathlib import Path
+from typing import List, Dict, Any
+
+from src.models.vocab import vocab_sizes
+
+_VOCAB_SIZES = vocab_sizes()
 
 
 @dataclass
@@ -10,7 +13,9 @@ class ModelConfig:
     # Embedding dimensions
     num_tokens: int = 13
     token_dim: int = 164
-    max_id_val: int = 20000
+    species_vocab_size: int = _VOCAB_SIZES["species_vocab_size"]
+    item_vocab_size: int = _VOCAB_SIZES["item_vocab_size"]
+    ability_vocab_size: int = _VOCAB_SIZES["ability_vocab_size"]
     embedding_dim: int = 32
 
     # Transformer
@@ -18,23 +23,31 @@ class ModelConfig:
     num_heads: int = 8
     num_transformer_layers: int = 4
     dropout: float = 0.1
+    use_position_embeddings: bool = True
+    use_role_embeddings: bool = True
 
     # LSTM (for memory across turns)
     lstm_hidden: int = 512
-    use_lstm: bool = False
+    use_lstm: bool = True
+    max_seq_len: int = 32
     
     def to_dict(self) -> Dict[str, Any]:
         return {
             "num_tokens": self.num_tokens,
             "token_dim": self.token_dim,
-            "max_id_val": self.max_id_val,
+            "species_vocab_size": self.species_vocab_size,
+            "item_vocab_size": self.item_vocab_size,
+            "ability_vocab_size": self.ability_vocab_size,
             "embedding_dim": self.embedding_dim,
             "hidden_dim": self.hidden_dim,
             "num_heads": self.num_heads,
             "num_transformer_layers": self.num_transformer_layers,
             "dropout": self.dropout,
+            "use_position_embeddings": self.use_position_embeddings,
+            "use_role_embeddings": self.use_role_embeddings,
             "lstm_hidden": self.lstm_hidden,
             "use_lstm": self.use_lstm,
+            "max_seq_len": self.max_seq_len,
         }
 
 
@@ -53,7 +66,7 @@ class PPOConfig:
     clip_param: float = 0.2
 
     # Entropy bonus (exploration)
-    entropy_coeff: float = 0.02
+    entropy_coeff: float = 0.005
 
     # Value function
     vf_loss_coeff: float = 0.5
@@ -73,7 +86,7 @@ class EnvironmentConfig:
     """Environment configuration."""
 
     # Battle settings
-    battle_format: str = "gen8randombattle"
+    battle_format: str = "gen5randombattle"
 
     # Server settings
     showdown_host: str = "localhost"
@@ -98,7 +111,7 @@ class RewardConfig:
 
     # Fainting rewards
     fainted_value: float = 3.0
-    fainted_penalty: float = 3.0
+    fainted_penalty: float = -3.0
 
     # Progress rewards
     step_penalty: float = -0.02
@@ -143,30 +156,58 @@ class CurriculumConfig:
     stages: List[CurriculumStageConfig] = field(
         default_factory=lambda: [
             CurriculumStageConfig(
-                name="easy",
-                promote_at_win_rate=0.85,
+                name="innit",
+                promote_at_win_rate=1.01,
                 min_samples_for_promotion=50,
-                opponent_mix={"random": 1.0},
+                opponent_mix={"random": 0, "heuristic": 1},
                 reward_config=RewardConfig(
-                    victory_reward=80.0,
-                    defeat_penalty=-80.0,
+                    victory_reward=30.0,
+                    defeat_penalty=-30.0,
                     hp_value_weight=1.2,
                     fainted_value=3.0,
-                    fainted_penalty=2.0,
-                    step_penalty=0.0,
+                    fainted_penalty=-2.0,
+                    step_penalty=-0.005,
+                ),
+            ),
+            CurriculumStageConfig(
+                name="easy",
+                promote_at_win_rate=0.75,
+                min_samples_for_promotion=50,
+                opponent_mix={"random": 0.65, "heuristic": 0.35},
+                reward_config=RewardConfig(
+                    victory_reward=100.0,
+                    defeat_penalty=-100.0,
+                    hp_value_weight=1.0,
+                    fainted_value=3.0,
+                    fainted_penalty=-3.0,
+                    step_penalty=-0.01,
                 ),
             ),
             CurriculumStageConfig(
                 name="medium",
                 promote_at_win_rate=0.75,
                 min_samples_for_promotion=50,
-                opponent_mix={"random": 0.5, "heuristic": 0.5},
+                opponent_mix={"random": 0.4, "heuristic": 0.6},
                 reward_config=RewardConfig(
                     victory_reward=100.0,
                     defeat_penalty=-100.0,
                     hp_value_weight=1.0,
                     fainted_value=3.0,
-                    fainted_penalty=3.0,
+                    fainted_penalty=-3.0,
+                    step_penalty=-0.01,
+                ),
+            ),
+            CurriculumStageConfig(
+                name="advanced",
+                promote_at_win_rate=0.75,
+                min_samples_for_promotion=50,
+                opponent_mix={"random": 0.2, "heuristic": 0.8},
+                reward_config=RewardConfig(
+                    victory_reward=100.0,
+                    defeat_penalty=-100.0,
+                    hp_value_weight=1.0,
+                    fainted_value=3.0,
+                    fainted_penalty=-3.0,
                     step_penalty=-0.01,
                 ),
             ),
@@ -180,7 +221,7 @@ class CurriculumConfig:
                     defeat_penalty=-120.0,
                     hp_value_weight=0.8,
                     fainted_value=4.0,
-                    fainted_penalty=3.0,
+                    fainted_penalty=-3.0,
                     step_penalty=-0.02,
                 ),
             ),
@@ -199,6 +240,36 @@ class CurriculumConfig:
 
 
 @dataclass
+class ValidationScheduleConfig:
+    """Scheduled checkpoint validation during training."""
+
+    enabled: bool = True
+    freq_steps: int = 100_000
+    protocols: List[str] = field(
+        default_factory=lambda: ["smoke", "fixed_paired", "mirror"]
+    )
+    fixed_pair_manifest: str = "data/validation/gen8_random_battle_team_pairs.json"
+    mirror_manifest: str = "data/validation/gen8_random_battle_mirror_teams.json"
+    max_steps_per_battle: int = 500
+    seed: int = 42
+    num_servers: int = 1
+    continue_on_failure: bool = True
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "enabled": self.enabled,
+            "freq_steps": self.freq_steps,
+            "protocols": list(self.protocols),
+            "fixed_pair_manifest": self.fixed_pair_manifest,
+            "mirror_manifest": self.mirror_manifest,
+            "max_steps_per_battle": self.max_steps_per_battle,
+            "seed": self.seed,
+            "num_servers": self.num_servers,
+            "continue_on_failure": self.continue_on_failure,
+        }
+
+
+@dataclass
 class TrainingConfig:
     """Main training configuration."""
     
@@ -207,7 +278,7 @@ class TrainingConfig:
     
     # Checkpointing
     checkpoint_dir: str = "checkpoints"
-    checkpoint_freq: int = 500_000      # Save every N timesteps
+    checkpoint_freq: int = 250_000      # Save every N timesteps
     keep_checkpoints_num: int = 5
     
     # Logging
@@ -224,6 +295,7 @@ class TrainingConfig:
     # Evaluation
     evaluation_interval: int = 100_000
     evaluation_duration: int = 100
+    validation: ValidationScheduleConfig = field(default_factory=ValidationScheduleConfig)
     
     # Sub-configs
     model: ModelConfig = field(default_factory=ModelConfig)
@@ -238,6 +310,7 @@ class TrainingConfig:
             "checkpoint_freq": self.checkpoint_freq,
             "num_gpus": self.num_gpus,
             "curriculum": self.curriculum.to_dict(),
+            "validation": self.validation.to_dict(),
             "model": self.model.to_dict(),
             "ppo": {
                 "lr": self.ppo.lr,
@@ -275,10 +348,10 @@ def get_config(preset: str = "standard") -> TrainingConfig:
     
     presets = {
         "quick": TrainingConfig(
-            total_timesteps=1_000_000,
+            total_timesteps=150_000,
             env=EnvironmentConfig(
-                num_workers=0,
-                num_envs_per_worker=1,
+                num_workers=12,
+                num_envs_per_worker=4,
             ),
             model=ModelConfig(
                 hidden_dim=128,
@@ -286,7 +359,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                 use_lstm=False,
             ),
             ppo=PPOConfig(
-                train_batch_size=2048,
+                train_batch_size=4096,
             ),
         ),
         

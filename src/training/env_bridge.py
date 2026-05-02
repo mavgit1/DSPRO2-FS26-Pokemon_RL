@@ -160,6 +160,25 @@ def collect_recent_episode_stats(algo: Any) -> List[Dict[str, float]]:
     return stats
 
 
+def collect_recent_observation_samples(algo: Any, max_samples_per_env: int = 3) -> List[Dict[str, Any]]:
+    nested = _foreach_vector_env(
+        algo,
+        "pop_recent_observation_samples",
+        (int(max_samples_per_env),),
+        fallback=[],
+    )
+    samples: List[Dict[str, Any]] = []
+    if not nested:
+        return samples
+    for env_item in _nested_per_env_batches(nested):
+        if not isinstance(env_item, (list, tuple)):
+            continue
+        for item in env_item:
+            if isinstance(item, dict):
+                samples.append(item)
+    return samples
+
+
 def collect_env_memory_sentinels(algo: Any) -> Dict[str, float]:
     nested = _foreach_vector_env(algo, "get_memory_counters", fallback={})
     if not nested:

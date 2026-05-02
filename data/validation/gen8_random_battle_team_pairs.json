@@ -1,0 +1,4146 @@
+{
+  "metadata": {
+    "generation_format": "gen8randombattle",
+    "execution_format": "gen8customgame",
+    "team_count": 20,
+    "pair_count": 10,
+    "seed": "pokemon-rl-validation-v1",
+    "generated_at": "2026-04-28T11:49:24.861505+00:00",
+    "generator": "pokemon-showdown Teams.generate",
+    "showdown_dir": "pokemon-showdown"
+  },
+  "teams": [
+    {
+      "id": "team_01",
+      "seed": [
+        3321720260,
+        220023914,
+        3811300711,
+        2855936538
+      ],
+      "showdown": "Xerneas @ Power Herb  \nAbility: Fairy Aura  \nLevel: 65  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- focusblast  \n- geomancy  \n- psyshock  \n- moonblast  \n\nAraquanid (F) @ Heavy-Duty Boots  \nAbility: Water Bubble  \nLevel: 80  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- liquidation  \n- toxic  \n- leechlife  \n- stickyweb  \n\nVespiquen (F) @ Heavy-Duty Boots  \nAbility: Pressure  \nLevel: 98  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- uturn  \n- roost  \n- toxic  \n- airslash  \n\nJirachi @ Leftovers  \nAbility: Serene Grace  \nLevel: 78  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- toxic  \n- ironhead  \n- stealthrock  \n- firepunch  \n\nWeezing (Weezing-Galar) (M) @ Black Sludge  \nAbility: Levitate  \nLevel: 85  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- willowisp  \n- strangesteam  \n- fireblast  \n- defog  \n\nDracovish @ Choice Band  \nAbility: Strong Jaw  \nLevel: 77  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- crunch  \n- lowkick  \n- fishiousrend  \n- psychicfangs  \n\n",
+      "pokemon": [
+        {
+          "name": "Xerneas",
+          "species": "Xerneas",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 65,
+          "moves": [
+            "focusblast",
+            "geomancy",
+            "psyshock",
+            "moonblast"
+          ],
+          "ability": "Fairy Aura",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Power Herb"
+        },
+        {
+          "name": "Araquanid",
+          "species": "Araquanid",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 80,
+          "moves": [
+            "liquidation",
+            "toxic",
+            "leechlife",
+            "stickyweb"
+          ],
+          "ability": "Water Bubble",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Vespiquen",
+          "species": "Vespiquen",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 98,
+          "moves": [
+            "uturn",
+            "roost",
+            "toxic",
+            "airslash"
+          ],
+          "ability": "Pressure",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Jirachi",
+          "species": "Jirachi",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 78,
+          "moves": [
+            "toxic",
+            "ironhead",
+            "stealthrock",
+            "firepunch"
+          ],
+          "ability": "Serene Grace",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Weezing",
+          "species": "Weezing-Galar",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 85,
+          "moves": [
+            "willowisp",
+            "strangesteam",
+            "fireblast",
+            "defog"
+          ],
+          "ability": "Levitate",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Black Sludge"
+        },
+        {
+          "name": "Dracovish",
+          "species": "Dracovish",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 77,
+          "moves": [
+            "crunch",
+            "lowkick",
+            "fishiousrend",
+            "psychicfangs"
+          ],
+          "ability": "Strong Jaw",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Band"
+        }
+      ]
+    },
+    {
+      "id": "team_02",
+      "seed": [
+        1601234394,
+        356584389,
+        2940552327,
+        3834645694
+      ],
+      "showdown": "Pyukumuku (M) @ Leftovers  \nAbility: Unaware  \nLevel: 86  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- toxic  \n- mirrorcoat  \n- recover  \n- counter  \n\nLandorus (Landorus-Therian) (M) @ Life Orb  \nAbility: Intimidate  \nLevel: 73  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- fly  \n- swordsdance  \n- earthquake  \n- stoneedge  \n\nWhimsicott (F) @ Leftovers  \nAbility: Prankster  \nLevel: 84  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- taunt  \n- moonblast  \n- stunspore  \n- defog  \n\nFlareon (M) @ Toxic Orb  \nAbility: Guts  \nLevel: 87  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- superpower  \n- flamecharge  \n- facade  \n- flareblitz  \n\nArticuno @ Heavy-Duty Boots  \nAbility: Pressure  \nLevel: 85  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- freezedry  \n- roost  \n- toxic  \n- healbell  \n\nAzelf @ Life Orb  \nAbility: Levitate  \nLevel: 81  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- dazzlinggleam  \n- nastyplot  \n- psyshock  \n- fireblast  \n\n",
+      "pokemon": [
+        {
+          "name": "Pyukumuku",
+          "species": "Pyukumuku",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 86,
+          "moves": [
+            "toxic",
+            "mirrorcoat",
+            "recover",
+            "counter"
+          ],
+          "ability": "Unaware",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Landorus",
+          "species": "Landorus-Therian",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 73,
+          "moves": [
+            "fly",
+            "swordsdance",
+            "earthquake",
+            "stoneedge"
+          ],
+          "ability": "Intimidate",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Whimsicott",
+          "species": "Whimsicott",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 84,
+          "moves": [
+            "taunt",
+            "moonblast",
+            "stunspore",
+            "defog"
+          ],
+          "ability": "Prankster",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Flareon",
+          "species": "Flareon",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 87,
+          "moves": [
+            "superpower",
+            "flamecharge",
+            "facade",
+            "flareblitz"
+          ],
+          "ability": "Guts",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Toxic Orb"
+        },
+        {
+          "name": "Articuno",
+          "species": "Articuno",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 85,
+          "moves": [
+            "freezedry",
+            "roost",
+            "toxic",
+            "healbell"
+          ],
+          "ability": "Pressure",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Azelf",
+          "species": "Azelf",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 81,
+          "moves": [
+            "dazzlinggleam",
+            "nastyplot",
+            "psyshock",
+            "fireblast"
+          ],
+          "ability": "Levitate",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        }
+      ]
+    },
+    {
+      "id": "team_03",
+      "seed": [
+        1899759725,
+        3354396392,
+        4057917874,
+        514181998
+      ],
+      "showdown": "Type: Null @ Eviolite  \nAbility: Battle Armor  \nLevel: 86  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- swordsdance  \n- sleeptalk  \n- rest  \n- crushclaw  \n\nSlowbro (Slowbro-Galar) (F) @ Life Orb  \nAbility: Regenerator  \nLevel: 88  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD  \nIVs: 0 Spe  \n- flamethrower  \n- trickroom  \n- psychic  \n- shellsidearm  \n\nXerneas @ Power Herb  \nAbility: Fairy Aura  \nLevel: 65  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- moonblast  \n- focusblast  \n- geomancy  \n- psyshock  \n\nGurdurr (F) @ Eviolite  \nAbility: Guts  \nLevel: 85  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- machpunch  \n- drainpunch  \n- bulkup  \n- knockoff  \n\nCresselia (F) @ Leftovers  \nAbility: Levitate  \nLevel: 80  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- moonblast  \n- moonlight  \n- thunderwave  \n- psyshock  \n\nDracozolt @ Choice Band  \nAbility: Hustle  \nLevel: 76  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- outrage  \n- boltbeak  \n- aerialace  \n- lowkick  \n\n",
+      "pokemon": [
+        {
+          "name": "Type: Null",
+          "species": "Type: Null",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 86,
+          "moves": [
+            "swordsdance",
+            "sleeptalk",
+            "rest",
+            "crushclaw"
+          ],
+          "ability": "Battle Armor",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Eviolite"
+        },
+        {
+          "name": "Slowbro",
+          "species": "Slowbro-Galar",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 88,
+          "moves": [
+            "flamethrower",
+            "trickroom",
+            "psychic",
+            "shellsidearm"
+          ],
+          "ability": "Regenerator",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 0
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 0
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Xerneas",
+          "species": "Xerneas",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 65,
+          "moves": [
+            "moonblast",
+            "focusblast",
+            "geomancy",
+            "psyshock"
+          ],
+          "ability": "Fairy Aura",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Power Herb"
+        },
+        {
+          "name": "Gurdurr",
+          "species": "Gurdurr",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 85,
+          "moves": [
+            "machpunch",
+            "drainpunch",
+            "bulkup",
+            "knockoff"
+          ],
+          "ability": "Guts",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Eviolite"
+        },
+        {
+          "name": "Cresselia",
+          "species": "Cresselia",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 80,
+          "moves": [
+            "moonblast",
+            "moonlight",
+            "thunderwave",
+            "psyshock"
+          ],
+          "ability": "Levitate",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Dracozolt",
+          "species": "Dracozolt",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 76,
+          "moves": [
+            "outrage",
+            "boltbeak",
+            "aerialace",
+            "lowkick"
+          ],
+          "ability": "Hustle",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Band"
+        }
+      ]
+    },
+    {
+      "id": "team_04",
+      "seed": [
+        2365645471,
+        585602971,
+        4284752531,
+        1576808437
+      ],
+      "showdown": "Silvally (Silvally-Ice) @ Ice Memory  \nAbility: RKS System  \nLevel: 83  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- multiattack  \n- rockslide  \n- swordsdance  \n- flamecharge  \n\nZekrom @ Lum Berry  \nAbility: Teravolt  \nLevel: 68  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- outrage  \n- dragondance  \n- boltstrike  \n- roost  \n\nBeheeyem (F) @ Life Orb  \nAbility: Analytic  \nLevel: 90  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD  \nIVs: 0 Atk / 0 Spe  \n- darkpulse  \n- psychic  \n- thunderbolt  \n- trickroom  \n\nSlowbro (M) @ Leftovers  \nAbility: Regenerator  \nLevel: 86  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- scald  \n- futuresight  \n- teleport  \n- slackoff  \n\nArctovish @ Assault Vest  \nAbility: Water Absorb  \nLevel: 87  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- iciclecrash  \n- bodyslam  \n- freezedry  \n- fishiousrend  \n\nCobalion @ Lum Berry  \nAbility: Justified  \nLevel: 78  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- ironhead  \n- closecombat  \n- swordsdance  \n- stoneedge  \n\n",
+      "pokemon": [
+        {
+          "name": "Silvally",
+          "species": "Silvally-Ice",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 83,
+          "moves": [
+            "multiattack",
+            "rockslide",
+            "swordsdance",
+            "flamecharge"
+          ],
+          "ability": "RKS System",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Ice Memory"
+        },
+        {
+          "name": "Zekrom",
+          "species": "Zekrom",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 68,
+          "moves": [
+            "outrage",
+            "dragondance",
+            "boltstrike",
+            "roost"
+          ],
+          "ability": "Teravolt",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Lum Berry"
+        },
+        {
+          "name": "Beheeyem",
+          "species": "Beheeyem",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 90,
+          "moves": [
+            "darkpulse",
+            "psychic",
+            "thunderbolt",
+            "trickroom"
+          ],
+          "ability": "Analytic",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 0
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 0
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Slowbro",
+          "species": "Slowbro",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 86,
+          "moves": [
+            "scald",
+            "futuresight",
+            "teleport",
+            "slackoff"
+          ],
+          "ability": "Regenerator",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Arctovish",
+          "species": "Arctovish",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 87,
+          "moves": [
+            "iciclecrash",
+            "bodyslam",
+            "freezedry",
+            "fishiousrend"
+          ],
+          "ability": "Water Absorb",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Assault Vest"
+        },
+        {
+          "name": "Cobalion",
+          "species": "Cobalion",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 78,
+          "moves": [
+            "ironhead",
+            "closecombat",
+            "swordsdance",
+            "stoneedge"
+          ],
+          "ability": "Justified",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Lum Berry"
+        }
+      ]
+    },
+    {
+      "id": "team_05",
+      "seed": [
+        5483221,
+        975755037,
+        1826876796,
+        2771960165
+      ],
+      "showdown": "Giratina (Giratina-Origin) @ Griseous Orb  \nAbility: Levitate  \nLevel: 71  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- outrage  \n- shadowsneak  \n- poltergeist  \n- honeclaws  \n\nHeliolisk (M) @ Life Orb  \nAbility: Dry Skin  \nLevel: 82  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- glare  \n- grassknot  \n- thunderbolt  \n- voltswitch  \n\nGigalith (M) @ Leftovers  \nAbility: Sand Stream  \nLevel: 83  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- superpower  \n- stealthrock  \n- stoneedge  \n- earthquake  \n\nNoctowl (M) @ Heavy-Duty Boots  \nAbility: Tinted Lens  \nLevel: 88  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- roost  \n- hurricane  \n- nastyplot  \n- heatwave  \n\nRhyperior (F) @ Weakness Policy  \nAbility: Solid Rock  \nLevel: 79  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- megahorn  \n- rockpolish  \n- stoneedge  \n- earthquake  \n\nMilotic (M) @ Leftovers  \nAbility: Marvel Scale  \nLevel: 81  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- icebeam  \n- scald  \n- recover  \n- toxic  \n\n",
+      "pokemon": [
+        {
+          "name": "Giratina",
+          "species": "Giratina-Origin",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 71,
+          "moves": [
+            "outrage",
+            "shadowsneak",
+            "poltergeist",
+            "honeclaws"
+          ],
+          "ability": "Levitate",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Griseous Orb"
+        },
+        {
+          "name": "Heliolisk",
+          "species": "Heliolisk",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 82,
+          "moves": [
+            "glare",
+            "grassknot",
+            "thunderbolt",
+            "voltswitch"
+          ],
+          "ability": "Dry Skin",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Gigalith",
+          "species": "Gigalith",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 83,
+          "moves": [
+            "superpower",
+            "stealthrock",
+            "stoneedge",
+            "earthquake"
+          ],
+          "ability": "Sand Stream",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Noctowl",
+          "species": "Noctowl",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 88,
+          "moves": [
+            "roost",
+            "hurricane",
+            "nastyplot",
+            "heatwave"
+          ],
+          "ability": "Tinted Lens",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Rhyperior",
+          "species": "Rhyperior",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 79,
+          "moves": [
+            "megahorn",
+            "rockpolish",
+            "stoneedge",
+            "earthquake"
+          ],
+          "ability": "Solid Rock",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Weakness Policy"
+        },
+        {
+          "name": "Milotic",
+          "species": "Milotic",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 81,
+          "moves": [
+            "icebeam",
+            "scald",
+            "recover",
+            "toxic"
+          ],
+          "ability": "Marvel Scale",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        }
+      ]
+    },
+    {
+      "id": "team_06",
+      "seed": [
+        172424022,
+        3399469124,
+        2434782980,
+        368649165
+      ],
+      "showdown": "Gastrodon (Gastrodon-East) (F) @ Leftovers  \nAbility: Storm Drain  \nLevel: 85  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- scald  \n- recover  \n- toxic  \n- earthquake  \n\nThievul (M) @ Leftovers  \nAbility: Stakeout  \nLevel: 91  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- darkpulse  \n- nastyplot  \n- grassknot  \n- partingshot  \n\nSkuntank (M) @ Life Orb  \nAbility: Aftermath  \nLevel: 84  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- taunt  \n- crunch  \n- fireblast  \n- poisonjab  \n\nDusknoir (M) @ Leftovers  \nAbility: Pressure  \nLevel: 89  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- poltergeist  \n- painsplit  \n- willowisp  \n- shadowsneak  \n\nTyrantrum (F) @ Life Orb  \nAbility: Rock Head  \nLevel: 83  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- closecombat  \n- headsmash  \n- outrage  \n- dragondance  \n\nType: Null @ Eviolite  \nAbility: Battle Armor  \nLevel: 86  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- crushclaw  \n- rest  \n- swordsdance  \n- payback  \n\n",
+      "pokemon": [
+        {
+          "name": "Gastrodon",
+          "species": "Gastrodon-East",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 85,
+          "moves": [
+            "scald",
+            "recover",
+            "toxic",
+            "earthquake"
+          ],
+          "ability": "Storm Drain",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Thievul",
+          "species": "Thievul",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 91,
+          "moves": [
+            "darkpulse",
+            "nastyplot",
+            "grassknot",
+            "partingshot"
+          ],
+          "ability": "Stakeout",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Skuntank",
+          "species": "Skuntank",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 84,
+          "moves": [
+            "taunt",
+            "crunch",
+            "fireblast",
+            "poisonjab"
+          ],
+          "ability": "Aftermath",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Dusknoir",
+          "species": "Dusknoir",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 89,
+          "moves": [
+            "poltergeist",
+            "painsplit",
+            "willowisp",
+            "shadowsneak"
+          ],
+          "ability": "Pressure",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Tyrantrum",
+          "species": "Tyrantrum",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 83,
+          "moves": [
+            "closecombat",
+            "headsmash",
+            "outrage",
+            "dragondance"
+          ],
+          "ability": "Rock Head",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Type: Null",
+          "species": "Type: Null",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 86,
+          "moves": [
+            "crushclaw",
+            "rest",
+            "swordsdance",
+            "payback"
+          ],
+          "ability": "Battle Armor",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Eviolite"
+        }
+      ]
+    },
+    {
+      "id": "team_07",
+      "seed": [
+        640975379,
+        3949513685,
+        1082450435,
+        507536967
+      ],
+      "showdown": "Gallade (M) @ Life Orb  \nAbility: Justified  \nLevel: 82  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- closecombat  \n- knockoff  \n- swordsdance  \n- zenheadbutt  \n\nCherrim (F) @ Choice Scarf  \nAbility: Flower Gift  \nLevel: 94  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- healingwish  \n- energyball  \n- petaldance  \n- pollenpuff  \n\nZapdos (Zapdos-Galar) @ Life Orb  \nAbility: Defiant  \nLevel: 74  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- throatchop  \n- closecombat  \n- bulkup  \n- bravebird  \n\nDragonite (M) @ Heavy-Duty Boots  \nAbility: Multiscale  \nLevel: 74  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- dualwingbeat  \n- dragondance  \n- earthquake  \n- outrage  \n\nPolitoed (F) @ Leftovers  \nAbility: Drizzle  \nLevel: 87  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- toxic  \n- icebeam  \n- scald  \n- encore  \n\nJynx (F) @ Heavy-Duty Boots  \nAbility: Dry Skin  \nLevel: 85  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- icebeam  \n- psyshock  \n- lovelykiss  \n- nastyplot  \n\n",
+      "pokemon": [
+        {
+          "name": "Gallade",
+          "species": "Gallade",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 82,
+          "moves": [
+            "closecombat",
+            "knockoff",
+            "swordsdance",
+            "zenheadbutt"
+          ],
+          "ability": "Justified",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Cherrim",
+          "species": "Cherrim",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 94,
+          "moves": [
+            "healingwish",
+            "energyball",
+            "petaldance",
+            "pollenpuff"
+          ],
+          "ability": "Flower Gift",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Scarf"
+        },
+        {
+          "name": "Zapdos",
+          "species": "Zapdos-Galar",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 74,
+          "moves": [
+            "throatchop",
+            "closecombat",
+            "bulkup",
+            "bravebird"
+          ],
+          "ability": "Defiant",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Dragonite",
+          "species": "Dragonite",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 74,
+          "moves": [
+            "dualwingbeat",
+            "dragondance",
+            "earthquake",
+            "outrage"
+          ],
+          "ability": "Multiscale",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Politoed",
+          "species": "Politoed",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 87,
+          "moves": [
+            "toxic",
+            "icebeam",
+            "scald",
+            "encore"
+          ],
+          "ability": "Drizzle",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Jynx",
+          "species": "Jynx",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 85,
+          "moves": [
+            "icebeam",
+            "psyshock",
+            "lovelykiss",
+            "nastyplot"
+          ],
+          "ability": "Dry Skin",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        }
+      ]
+    },
+    {
+      "id": "team_08",
+      "seed": [
+        3010923569,
+        1347235092,
+        1562291839,
+        1788905681
+      ],
+      "showdown": "Espeon (M) @ Life Orb  \nAbility: Magic Bounce  \nLevel: 81  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- dazzlinggleam  \n- calmmind  \n- psychic  \n- shadowball  \n\nTornadus (Tornadus-Therian) (M) @ Assault Vest  \nAbility: Regenerator  \nLevel: 77  \nEVs: 81 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- hurricane  \n- superpower  \n- uturn  \n- knockoff  \n\nCramorant (M) @ Heavy-Duty Boots  \nAbility: Gulp Missile  \nLevel: 85  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- bravebird  \n- superpower  \n- surf  \n- roost  \n\nBeartic (M) @ Choice Band  \nAbility: Slush Rush  \nLevel: 86  \nEVs: 81 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- iciclecrash  \n- stoneedge  \n- superpower  \n- aquajet  \n\nDiancie @ Leftovers  \nAbility: Clear Body  \nLevel: 82  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- diamondstorm  \n- moonblast  \n- toxic  \n- earthpower  \n\nPangoro (M) @ Choice Band  \nAbility: Scrappy  \nLevel: 84  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- partingshot  \n- knockoff  \n- closecombat  \n- icepunch  \n\n",
+      "pokemon": [
+        {
+          "name": "Espeon",
+          "species": "Espeon",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 81,
+          "moves": [
+            "dazzlinggleam",
+            "calmmind",
+            "psychic",
+            "shadowball"
+          ],
+          "ability": "Magic Bounce",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Tornadus",
+          "species": "Tornadus-Therian",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 77,
+          "moves": [
+            "hurricane",
+            "superpower",
+            "uturn",
+            "knockoff"
+          ],
+          "ability": "Regenerator",
+          "evs": {
+            "hp": 81,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Assault Vest"
+        },
+        {
+          "name": "Cramorant",
+          "species": "Cramorant",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 85,
+          "moves": [
+            "bravebird",
+            "superpower",
+            "surf",
+            "roost"
+          ],
+          "ability": "Gulp Missile",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Beartic",
+          "species": "Beartic",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 86,
+          "moves": [
+            "iciclecrash",
+            "stoneedge",
+            "superpower",
+            "aquajet"
+          ],
+          "ability": "Slush Rush",
+          "evs": {
+            "hp": 81,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Band"
+        },
+        {
+          "name": "Diancie",
+          "species": "Diancie",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 82,
+          "moves": [
+            "diamondstorm",
+            "moonblast",
+            "toxic",
+            "earthpower"
+          ],
+          "ability": "Clear Body",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Pangoro",
+          "species": "Pangoro",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 84,
+          "moves": [
+            "partingshot",
+            "knockoff",
+            "closecombat",
+            "icepunch"
+          ],
+          "ability": "Scrappy",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Band"
+        }
+      ]
+    },
+    {
+      "id": "team_09",
+      "seed": [
+        3983244509,
+        252157246,
+        2779233155,
+        377242969
+      ],
+      "showdown": "Blaziken (F) @ Life Orb  \nAbility: Speed Boost  \nLevel: 75  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- swordsdance  \n- stoneedge  \n- flareblitz  \n- closecombat  \n\nCrawdaunt (F) @ Life Orb  \nAbility: Adaptability  \nLevel: 85  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- knockoff  \n- dragondance  \n- crabhammer  \n- aquajet  \n\nCoalossal (M) @ Heavy-Duty Boots  \nAbility: Flame Body  \nLevel: 89  \nGigantamax: Yes  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- spikes  \n- stoneedge  \n- rapidspin  \n- overheat  \n\nArcheops (M) @ Heavy-Duty Boots  \nAbility: Defeatist  \nLevel: 82  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- uturn  \n- roost  \n- stoneedge  \n- dualwingbeat  \n\nWailord (M) @ Choice Specs  \nAbility: Water Veil  \nLevel: 92  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- hydropump  \n- waterspout  \n- icebeam  \n- hypervoice  \n\nHatterene (F) @ Leftovers  \nAbility: Magic Bounce  \nLevel: 85  \nGigantamax: Yes  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- calmmind  \n- mysticalfire  \n- psychic  \n- dazzlinggleam  \n\n",
+      "pokemon": [
+        {
+          "name": "Blaziken",
+          "species": "Blaziken",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 75,
+          "moves": [
+            "swordsdance",
+            "stoneedge",
+            "flareblitz",
+            "closecombat"
+          ],
+          "ability": "Speed Boost",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Crawdaunt",
+          "species": "Crawdaunt",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 85,
+          "moves": [
+            "knockoff",
+            "dragondance",
+            "crabhammer",
+            "aquajet"
+          ],
+          "ability": "Adaptability",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Coalossal",
+          "species": "Coalossal",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": true,
+          "level": 89,
+          "moves": [
+            "spikes",
+            "stoneedge",
+            "rapidspin",
+            "overheat"
+          ],
+          "ability": "Flame Body",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Archeops",
+          "species": "Archeops",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 82,
+          "moves": [
+            "uturn",
+            "roost",
+            "stoneedge",
+            "dualwingbeat"
+          ],
+          "ability": "Defeatist",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Wailord",
+          "species": "Wailord",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 92,
+          "moves": [
+            "hydropump",
+            "waterspout",
+            "icebeam",
+            "hypervoice"
+          ],
+          "ability": "Water Veil",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Specs"
+        },
+        {
+          "name": "Hatterene",
+          "species": "Hatterene",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": true,
+          "level": 85,
+          "moves": [
+            "calmmind",
+            "mysticalfire",
+            "psychic",
+            "dazzlinggleam"
+          ],
+          "ability": "Magic Bounce",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        }
+      ]
+    },
+    {
+      "id": "team_10",
+      "seed": [
+        1408345908,
+        1124148804,
+        2885367145,
+        3358574724
+      ],
+      "showdown": "Pangoro (M) @ Choice Band  \nAbility: Scrappy  \nLevel: 84  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- knockoff  \n- icepunch  \n- closecombat  \n- partingshot  \n\nGrapploct (F) @ Life Orb  \nAbility: Technician  \nLevel: 88  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- icepunch  \n- drainpunch  \n- brutalswing  \n- bulkup  \n\nSceptile (M) @ Leftovers  \nAbility: Overgrow  \nLevel: 86  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- substitute  \n- leechseed  \n- earthquake  \n- gigadrain  \n\nChandelure (F) @ Heavy-Duty Boots  \nAbility: Flash Fire  \nLevel: 82  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- calmmind  \n- substitute  \n- shadowball  \n- fireblast  \n\nSudowoodo (M) @ Choice Band  \nAbility: Rock Head  \nLevel: 90  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- woodhammer  \n- headsmash  \n- suckerpunch  \n- earthquake  \n\nMagmortar (M) @ Heavy-Duty Boots  \nAbility: Vital Spirit  \nLevel: 88  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- focusblast  \n- fireblast  \n- taunt  \n- psychic  \n\n",
+      "pokemon": [
+        {
+          "name": "Pangoro",
+          "species": "Pangoro",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 84,
+          "moves": [
+            "knockoff",
+            "icepunch",
+            "closecombat",
+            "partingshot"
+          ],
+          "ability": "Scrappy",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Band"
+        },
+        {
+          "name": "Grapploct",
+          "species": "Grapploct",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 88,
+          "moves": [
+            "icepunch",
+            "drainpunch",
+            "brutalswing",
+            "bulkup"
+          ],
+          "ability": "Technician",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Sceptile",
+          "species": "Sceptile",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 86,
+          "moves": [
+            "substitute",
+            "leechseed",
+            "earthquake",
+            "gigadrain"
+          ],
+          "ability": "Overgrow",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Chandelure",
+          "species": "Chandelure",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 82,
+          "moves": [
+            "calmmind",
+            "substitute",
+            "shadowball",
+            "fireblast"
+          ],
+          "ability": "Flash Fire",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Sudowoodo",
+          "species": "Sudowoodo",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 90,
+          "moves": [
+            "woodhammer",
+            "headsmash",
+            "suckerpunch",
+            "earthquake"
+          ],
+          "ability": "Rock Head",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Band"
+        },
+        {
+          "name": "Magmortar",
+          "species": "Magmortar",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 88,
+          "moves": [
+            "focusblast",
+            "fireblast",
+            "taunt",
+            "psychic"
+          ],
+          "ability": "Vital Spirit",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        }
+      ]
+    },
+    {
+      "id": "team_11",
+      "seed": [
+        720643815,
+        2396226598,
+        1883749785,
+        334781198
+      ],
+      "showdown": "Spiritomb (M) @ Choice Band  \nAbility: Infiltrator  \nLevel: 88  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- foulplay  \n- trick  \n- suckerpunch  \n- poltergeist  \n\nGoodra (F) @ Assault Vest  \nAbility: Sap Sipper  \nLevel: 83  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- earthquake  \n- sludgebomb  \n- dracometeor  \n- thunderbolt  \n\nClefable (F) @ Life Orb  \nAbility: Magic Guard  \nLevel: 81  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- fireblast  \n- calmmind  \n- moonblast  \n- softboiled  \n\nLucario (M) @ Life Orb  \nAbility: Justified  \nLevel: 80  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- meteormash  \n- swordsdance  \n- closecombat  \n- extremespeed  \n\nFlapple (M) @ Life Orb  \nAbility: Hustle  \nLevel: 84  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- gravapple  \n- dragondance  \n- outrage  \n- suckerpunch  \n\nDrapion (F) @ Life Orb  \nAbility: Sniper  \nLevel: 81  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- swordsdance  \n- knockoff  \n- earthquake  \n- poisonjab  \n\n",
+      "pokemon": [
+        {
+          "name": "Spiritomb",
+          "species": "Spiritomb",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 88,
+          "moves": [
+            "foulplay",
+            "trick",
+            "suckerpunch",
+            "poltergeist"
+          ],
+          "ability": "Infiltrator",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Band"
+        },
+        {
+          "name": "Goodra",
+          "species": "Goodra",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 83,
+          "moves": [
+            "earthquake",
+            "sludgebomb",
+            "dracometeor",
+            "thunderbolt"
+          ],
+          "ability": "Sap Sipper",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Assault Vest"
+        },
+        {
+          "name": "Clefable",
+          "species": "Clefable",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 81,
+          "moves": [
+            "fireblast",
+            "calmmind",
+            "moonblast",
+            "softboiled"
+          ],
+          "ability": "Magic Guard",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Lucario",
+          "species": "Lucario",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 80,
+          "moves": [
+            "meteormash",
+            "swordsdance",
+            "closecombat",
+            "extremespeed"
+          ],
+          "ability": "Justified",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Flapple",
+          "species": "Flapple",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 84,
+          "moves": [
+            "gravapple",
+            "dragondance",
+            "outrage",
+            "suckerpunch"
+          ],
+          "ability": "Hustle",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Drapion",
+          "species": "Drapion",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 81,
+          "moves": [
+            "swordsdance",
+            "knockoff",
+            "earthquake",
+            "poisonjab"
+          ],
+          "ability": "Sniper",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        }
+      ]
+    },
+    {
+      "id": "team_12",
+      "seed": [
+        1153274633,
+        2567572737,
+        3673020561,
+        3485646687
+      ],
+      "showdown": "Porygon-Z @ Life Orb  \nAbility: Download  \nLevel: 80  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- icebeam  \n- triattack  \n- darkpulse  \n- nastyplot  \n\nHeatran (M) @ Air Balloon  \nAbility: Flash Fire  \nLevel: 78  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- toxic  \n- lavaplume  \n- flashcannon  \n- stealthrock  \n\nDrednaw (F) @ Life Orb  \nAbility: Swift Swim  \nLevel: 83  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- stoneedge  \n- liquidation  \n- swordsdance  \n- superpower  \n\nMaractus (F) @ Leftovers  \nAbility: Water Absorb  \nLevel: 96  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- toxic  \n- leechseed  \n- energyball  \n- spikyshield  \n\nCrobat (M) @ Heavy-Duty Boots  \nAbility: Infiltrator  \nLevel: 82  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- bravebird  \n- roost  \n- uturn  \n- toxic  \n\nMimikyu (M) @ Life Orb  \nAbility: Disguise  \nLevel: 74  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- swordsdance  \n- drainpunch  \n- playrough  \n- shadowsneak  \n\n",
+      "pokemon": [
+        {
+          "name": "Porygon-Z",
+          "species": "Porygon-Z",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 80,
+          "moves": [
+            "icebeam",
+            "triattack",
+            "darkpulse",
+            "nastyplot"
+          ],
+          "ability": "Download",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Heatran",
+          "species": "Heatran",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 78,
+          "moves": [
+            "toxic",
+            "lavaplume",
+            "flashcannon",
+            "stealthrock"
+          ],
+          "ability": "Flash Fire",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Air Balloon"
+        },
+        {
+          "name": "Drednaw",
+          "species": "Drednaw",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 83,
+          "moves": [
+            "stoneedge",
+            "liquidation",
+            "swordsdance",
+            "superpower"
+          ],
+          "ability": "Swift Swim",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Maractus",
+          "species": "Maractus",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 96,
+          "moves": [
+            "toxic",
+            "leechseed",
+            "energyball",
+            "spikyshield"
+          ],
+          "ability": "Water Absorb",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Crobat",
+          "species": "Crobat",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 82,
+          "moves": [
+            "bravebird",
+            "roost",
+            "uturn",
+            "toxic"
+          ],
+          "ability": "Infiltrator",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Mimikyu",
+          "species": "Mimikyu",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 74,
+          "moves": [
+            "swordsdance",
+            "drainpunch",
+            "playrough",
+            "shadowsneak"
+          ],
+          "ability": "Disguise",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        }
+      ]
+    },
+    {
+      "id": "team_13",
+      "seed": [
+        1307215251,
+        2414802082,
+        682827108,
+        3217618722
+      ],
+      "showdown": "Seaking (M) @ Life Orb  \nAbility: Swift Swim  \nLevel: 90  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- knockoff  \n- megahorn  \n- swordsdance  \n- waterfall  \n\nMamoswine (F) @ Life Orb  \nAbility: Thick Fat  \nLevel: 79  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- stealthrock  \n- superpower  \n- earthquake  \n- iciclecrash  \n\nTyrantrum (F) @ Life Orb  \nAbility: Rock Head  \nLevel: 83  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- outrage  \n- headsmash  \n- closecombat  \n- dragondance  \n\nWhiscash (M) @ Life Orb  \nAbility: Oblivious  \nLevel: 87  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- zenheadbutt  \n- earthquake  \n- liquidation  \n- dragondance  \n\nWeezing (Weezing-Galar) (F) @ Black Sludge  \nAbility: Neutralizing Gas  \nLevel: 85  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- sludgebomb  \n- fireblast  \n- strangesteam  \n- toxicspikes  \n\nScolipede (M) @ Life Orb  \nAbility: Speed Boost  \nLevel: 80  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- poisonjab  \n- swordsdance  \n- earthquake  \n- megahorn  \n\n",
+      "pokemon": [
+        {
+          "name": "Seaking",
+          "species": "Seaking",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 90,
+          "moves": [
+            "knockoff",
+            "megahorn",
+            "swordsdance",
+            "waterfall"
+          ],
+          "ability": "Swift Swim",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Mamoswine",
+          "species": "Mamoswine",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 79,
+          "moves": [
+            "stealthrock",
+            "superpower",
+            "earthquake",
+            "iciclecrash"
+          ],
+          "ability": "Thick Fat",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Tyrantrum",
+          "species": "Tyrantrum",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 83,
+          "moves": [
+            "outrage",
+            "headsmash",
+            "closecombat",
+            "dragondance"
+          ],
+          "ability": "Rock Head",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Whiscash",
+          "species": "Whiscash",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 87,
+          "moves": [
+            "zenheadbutt",
+            "earthquake",
+            "liquidation",
+            "dragondance"
+          ],
+          "ability": "Oblivious",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Weezing",
+          "species": "Weezing-Galar",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 85,
+          "moves": [
+            "sludgebomb",
+            "fireblast",
+            "strangesteam",
+            "toxicspikes"
+          ],
+          "ability": "Neutralizing Gas",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Black Sludge"
+        },
+        {
+          "name": "Scolipede",
+          "species": "Scolipede",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 80,
+          "moves": [
+            "poisonjab",
+            "swordsdance",
+            "earthquake",
+            "megahorn"
+          ],
+          "ability": "Speed Boost",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        }
+      ]
+    },
+    {
+      "id": "team_14",
+      "seed": [
+        4133415183,
+        350029150,
+        1495050294,
+        1518043300
+      ],
+      "showdown": "Hitmontop (M) @ Leftovers  \nAbility: Intimidate  \nLevel: 87  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- earthquake  \n- rapidspin  \n- closecombat  \n- toxic  \n\nEiscue (M) @ Salac Berry  \nAbility: Ice Face  \nLevel: 83  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- liquidation  \n- substitute  \n- iciclecrash  \n- bellydrum  \n\nSkarmory (F) @ Leftovers  \nAbility: Sturdy  \nLevel: 80  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- roost  \n- bravebird  \n- whirlwind  \n- spikes  \n\nMew @ Lum Berry  \nAbility: Synchronize  \nLevel: 79  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- psychicfangs  \n- dragondance  \n- closecombat  \n- flareblitz  \n\nClawitzer (M) @ Choice Specs  \nAbility: Mega Launcher  \nLevel: 85  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- aurasphere  \n- icebeam  \n- uturn  \n- scald  \n\nCrustle (M) @ Heavy-Duty Boots  \nAbility: Sturdy  \nLevel: 81  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- shellsmash  \n- xscissor  \n- earthquake  \n- stoneedge  \n\n",
+      "pokemon": [
+        {
+          "name": "Hitmontop",
+          "species": "Hitmontop",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 87,
+          "moves": [
+            "earthquake",
+            "rapidspin",
+            "closecombat",
+            "toxic"
+          ],
+          "ability": "Intimidate",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Eiscue",
+          "species": "Eiscue",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 83,
+          "moves": [
+            "liquidation",
+            "substitute",
+            "iciclecrash",
+            "bellydrum"
+          ],
+          "ability": "Ice Face",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Salac Berry"
+        },
+        {
+          "name": "Skarmory",
+          "species": "Skarmory",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 80,
+          "moves": [
+            "roost",
+            "bravebird",
+            "whirlwind",
+            "spikes"
+          ],
+          "ability": "Sturdy",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Mew",
+          "species": "Mew",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 79,
+          "moves": [
+            "psychicfangs",
+            "dragondance",
+            "closecombat",
+            "flareblitz"
+          ],
+          "ability": "Synchronize",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Lum Berry"
+        },
+        {
+          "name": "Clawitzer",
+          "species": "Clawitzer",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 85,
+          "moves": [
+            "aurasphere",
+            "icebeam",
+            "uturn",
+            "scald"
+          ],
+          "ability": "Mega Launcher",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Specs"
+        },
+        {
+          "name": "Crustle",
+          "species": "Crustle",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 81,
+          "moves": [
+            "shellsmash",
+            "xscissor",
+            "earthquake",
+            "stoneedge"
+          ],
+          "ability": "Sturdy",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        }
+      ]
+    },
+    {
+      "id": "team_15",
+      "seed": [
+        1706295617,
+        3141651490,
+        4288083083,
+        34500554
+      ],
+      "showdown": "Urshifu (Urshifu-Rapid-Strike) (F) @ Leftovers  \nAbility: Unseen Fist  \nLevel: 76  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- substitute  \n- bulkup  \n- drainpunch  \n- surgingstrikes  \n\nRaichu (Raichu-Alola) (F) @ Life Orb  \nAbility: Surge Surfer  \nLevel: 84  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- focusblast  \n- psyshock  \n- nastyplot  \n- thunderbolt  \n\nMalamar (M) @ Leftovers  \nAbility: Contrary  \nLevel: 81  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- substitute  \n- knockoff  \n- psychocut  \n- superpower  \n\nGalvantula (F) @ Heavy-Duty Boots  \nAbility: Compound Eyes  \nLevel: 80  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- stickyweb  \n- voltswitch  \n- gigadrain  \n- thunder  \n\nSandslash (F) @ Life Orb  \nAbility: Sand Rush  \nLevel: 87  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- earthquake  \n- stoneedge  \n- toxic  \n- knockoff  \n\nRegigigas @ Leftovers  \nAbility: Slow Start  \nLevel: 82  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- bodyslam  \n- protect  \n- toxic  \n- substitute  \n\n",
+      "pokemon": [
+        {
+          "name": "Urshifu",
+          "species": "Urshifu-Rapid-Strike",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 76,
+          "moves": [
+            "substitute",
+            "bulkup",
+            "drainpunch",
+            "surgingstrikes"
+          ],
+          "ability": "Unseen Fist",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Raichu",
+          "species": "Raichu-Alola",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 84,
+          "moves": [
+            "focusblast",
+            "psyshock",
+            "nastyplot",
+            "thunderbolt"
+          ],
+          "ability": "Surge Surfer",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Malamar",
+          "species": "Malamar",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 81,
+          "moves": [
+            "substitute",
+            "knockoff",
+            "psychocut",
+            "superpower"
+          ],
+          "ability": "Contrary",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Galvantula",
+          "species": "Galvantula",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 80,
+          "moves": [
+            "stickyweb",
+            "voltswitch",
+            "gigadrain",
+            "thunder"
+          ],
+          "ability": "Compound Eyes",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Sandslash",
+          "species": "Sandslash",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 87,
+          "moves": [
+            "earthquake",
+            "stoneedge",
+            "toxic",
+            "knockoff"
+          ],
+          "ability": "Sand Rush",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Regigigas",
+          "species": "Regigigas",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 82,
+          "moves": [
+            "bodyslam",
+            "protect",
+            "toxic",
+            "substitute"
+          ],
+          "ability": "Slow Start",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        }
+      ]
+    },
+    {
+      "id": "team_16",
+      "seed": [
+        1025832955,
+        2514422364,
+        667855386,
+        2295790507
+      ],
+      "showdown": "Mantine (F) @ Heavy-Duty Boots  \nAbility: Water Absorb  \nLevel: 88  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- roost  \n- hurricane  \n- toxic  \n- scald  \n\nKlinklang @ Leftovers  \nAbility: Clear Body  \nLevel: 83  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- substitute  \n- shiftgear  \n- wildcharge  \n- geargrind  \n\nFroslass (F) @ Wide Lens  \nAbility: Cursed Body  \nLevel: 84  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- poltergeist  \n- tripleaxel  \n- taunt  \n- destinybond  \n\nWishiwashi (F) @ Expert Belt  \nAbility: Schooling  \nLevel: 87  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- uturn  \n- hydropump  \n- earthquake  \n- scald  \n\nAbsol (F) @ Life Orb  \nAbility: Justified  \nLevel: 84  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- playrough  \n- suckerpunch  \n- swordsdance  \n- knockoff  \n\nSolrock @ Leftovers  \nAbility: Levitate  \nLevel: 91  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- rockslide  \n- morningsun  \n- stealthrock  \n- earthquake  \n\n",
+      "pokemon": [
+        {
+          "name": "Mantine",
+          "species": "Mantine",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 88,
+          "moves": [
+            "roost",
+            "hurricane",
+            "toxic",
+            "scald"
+          ],
+          "ability": "Water Absorb",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Klinklang",
+          "species": "Klinklang",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 83,
+          "moves": [
+            "substitute",
+            "shiftgear",
+            "wildcharge",
+            "geargrind"
+          ],
+          "ability": "Clear Body",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Froslass",
+          "species": "Froslass",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 84,
+          "moves": [
+            "poltergeist",
+            "tripleaxel",
+            "taunt",
+            "destinybond"
+          ],
+          "ability": "Cursed Body",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Wide Lens"
+        },
+        {
+          "name": "Wishiwashi",
+          "species": "Wishiwashi",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 87,
+          "moves": [
+            "uturn",
+            "hydropump",
+            "earthquake",
+            "scald"
+          ],
+          "ability": "Schooling",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Expert Belt"
+        },
+        {
+          "name": "Absol",
+          "species": "Absol",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 84,
+          "moves": [
+            "playrough",
+            "suckerpunch",
+            "swordsdance",
+            "knockoff"
+          ],
+          "ability": "Justified",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Solrock",
+          "species": "Solrock",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 91,
+          "moves": [
+            "rockslide",
+            "morningsun",
+            "stealthrock",
+            "earthquake"
+          ],
+          "ability": "Levitate",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        }
+      ]
+    },
+    {
+      "id": "team_17",
+      "seed": [
+        826807186,
+        2349122531,
+        2260226060,
+        1181464621
+      ],
+      "showdown": "Palkia @ Choice Specs  \nAbility: Pressure  \nLevel: 73  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- hydropump  \n- fireblast  \n- spacialrend  \n- dracometeor  \n\nWalrein (M) @ Leftovers  \nAbility: Thick Fat  \nLevel: 87  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- protect  \n- surf  \n- icebeam  \n- toxic  \n\nRhyperior (M) @ Weakness Policy  \nAbility: Solid Rock  \nLevel: 79  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- rockpolish  \n- earthquake  \n- firepunch  \n- stoneedge  \n\nMalamar (M) @ Leftovers  \nAbility: Contrary  \nLevel: 81  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- sleeptalk  \n- rest  \n- knockoff  \n- superpower  \n\nTyranitar (F) @ Leftovers  \nAbility: Sand Stream  \nLevel: 78  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- stealthrock  \n- stoneedge  \n- firepunch  \n- crunch  \n\nVolcarona (F) @ Heavy-Duty Boots  \nAbility: Flame Body  \nLevel: 75  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- fireblast  \n- bugbuzz  \n- roost  \n- quiverdance  \n\n",
+      "pokemon": [
+        {
+          "name": "Palkia",
+          "species": "Palkia",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 73,
+          "moves": [
+            "hydropump",
+            "fireblast",
+            "spacialrend",
+            "dracometeor"
+          ],
+          "ability": "Pressure",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Specs"
+        },
+        {
+          "name": "Walrein",
+          "species": "Walrein",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 87,
+          "moves": [
+            "protect",
+            "surf",
+            "icebeam",
+            "toxic"
+          ],
+          "ability": "Thick Fat",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Rhyperior",
+          "species": "Rhyperior",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 79,
+          "moves": [
+            "rockpolish",
+            "earthquake",
+            "firepunch",
+            "stoneedge"
+          ],
+          "ability": "Solid Rock",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Weakness Policy"
+        },
+        {
+          "name": "Malamar",
+          "species": "Malamar",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 81,
+          "moves": [
+            "sleeptalk",
+            "rest",
+            "knockoff",
+            "superpower"
+          ],
+          "ability": "Contrary",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Tyranitar",
+          "species": "Tyranitar",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 78,
+          "moves": [
+            "stealthrock",
+            "stoneedge",
+            "firepunch",
+            "crunch"
+          ],
+          "ability": "Sand Stream",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Volcarona",
+          "species": "Volcarona",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 75,
+          "moves": [
+            "fireblast",
+            "bugbuzz",
+            "roost",
+            "quiverdance"
+          ],
+          "ability": "Flame Body",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        }
+      ]
+    },
+    {
+      "id": "team_18",
+      "seed": [
+        829031400,
+        1437925017,
+        2337687672,
+        2833239969
+      ],
+      "showdown": "Zapdos (Zapdos-Galar) @ Choice Scarf  \nAbility: Defiant  \nLevel: 74  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- bravebird  \n- closecombat  \n- uturn  \n- throatchop  \n\nDedenne (F) @ Sitrus Berry  \nAbility: Cheek Pouch  \nLevel: 91  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- recycle  \n- protect  \n- toxic  \n- thunderbolt  \n\nSandslash (M) @ Leftovers  \nAbility: Sand Rush  \nLevel: 87  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- rapidspin  \n- spikes  \n- earthquake  \n- toxic  \n\nSnorlax (M) @ Choice Band  \nAbility: Thick Fat  \nLevel: 82  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- heatcrash  \n- earthquake  \n- facade  \n- doubleedge  \n\nPerrserker (M) @ Choice Band  \nAbility: Steely Spirit  \nLevel: 88  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- uturn  \n- ironhead  \n- crunch  \n- closecombat  \n\nPoliwrath (M) @ Life Orb  \nAbility: Swift Swim  \nLevel: 86  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- closecombat  \n- darkestlariat  \n- raindance  \n- liquidation  \n\n",
+      "pokemon": [
+        {
+          "name": "Zapdos",
+          "species": "Zapdos-Galar",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 74,
+          "moves": [
+            "bravebird",
+            "closecombat",
+            "uturn",
+            "throatchop"
+          ],
+          "ability": "Defiant",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Scarf"
+        },
+        {
+          "name": "Dedenne",
+          "species": "Dedenne",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 91,
+          "moves": [
+            "recycle",
+            "protect",
+            "toxic",
+            "thunderbolt"
+          ],
+          "ability": "Cheek Pouch",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Sitrus Berry"
+        },
+        {
+          "name": "Sandslash",
+          "species": "Sandslash",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 87,
+          "moves": [
+            "rapidspin",
+            "spikes",
+            "earthquake",
+            "toxic"
+          ],
+          "ability": "Sand Rush",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Snorlax",
+          "species": "Snorlax",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 82,
+          "moves": [
+            "heatcrash",
+            "earthquake",
+            "facade",
+            "doubleedge"
+          ],
+          "ability": "Thick Fat",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Band"
+        },
+        {
+          "name": "Perrserker",
+          "species": "Perrserker",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 88,
+          "moves": [
+            "uturn",
+            "ironhead",
+            "crunch",
+            "closecombat"
+          ],
+          "ability": "Steely Spirit",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Band"
+        },
+        {
+          "name": "Poliwrath",
+          "species": "Poliwrath",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 86,
+          "moves": [
+            "closecombat",
+            "darkestlariat",
+            "raindance",
+            "liquidation"
+          ],
+          "ability": "Swift Swim",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        }
+      ]
+    },
+    {
+      "id": "team_19",
+      "seed": [
+        2055131545,
+        3723119969,
+        1279309001,
+        511308048
+      ],
+      "showdown": "Tsareena (F) @ Assault Vest  \nAbility: Queenly Majesty  \nLevel: 85  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- uturn  \n- highjumpkick  \n- rapidspin  \n- powerwhip  \n\nMeowstic (M) @ Light Clay  \nAbility: Prankster  \nLevel: 84  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- yawn  \n- psychic  \n- reflect  \n- lightscreen  \n\nBellossom (M) @ Leftovers  \nAbility: Chlorophyll  \nLevel: 83  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- strengthsap  \n- moonblast  \n- gigadrain  \n- quiverdance  \n\nAegislash (M) @ Life Orb  \nAbility: Stance Change  \nLevel: 79  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- swordsdance  \n- shadowsneak  \n- closecombat  \n- ironhead  \n\nBlacephalon @ Choice Scarf  \nAbility: Beast Boost  \nLevel: 79  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- trick  \n- shadowball  \n- fireblast  \n- psyshock  \n\nPyukumuku (M) @ Leftovers  \nAbility: Unaware  \nLevel: 86  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- recover  \n- counter  \n- toxic  \n- mirrorcoat  \n\n",
+      "pokemon": [
+        {
+          "name": "Tsareena",
+          "species": "Tsareena",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 85,
+          "moves": [
+            "uturn",
+            "highjumpkick",
+            "rapidspin",
+            "powerwhip"
+          ],
+          "ability": "Queenly Majesty",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Assault Vest"
+        },
+        {
+          "name": "Meowstic",
+          "species": "Meowstic",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 84,
+          "moves": [
+            "yawn",
+            "psychic",
+            "reflect",
+            "lightscreen"
+          ],
+          "ability": "Prankster",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Light Clay"
+        },
+        {
+          "name": "Bellossom",
+          "species": "Bellossom",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 83,
+          "moves": [
+            "strengthsap",
+            "moonblast",
+            "gigadrain",
+            "quiverdance"
+          ],
+          "ability": "Chlorophyll",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        },
+        {
+          "name": "Aegislash",
+          "species": "Aegislash",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 79,
+          "moves": [
+            "swordsdance",
+            "shadowsneak",
+            "closecombat",
+            "ironhead"
+          ],
+          "ability": "Stance Change",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Life Orb"
+        },
+        {
+          "name": "Blacephalon",
+          "species": "Blacephalon",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 79,
+          "moves": [
+            "trick",
+            "shadowball",
+            "fireblast",
+            "psyshock"
+          ],
+          "ability": "Beast Boost",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Scarf"
+        },
+        {
+          "name": "Pyukumuku",
+          "species": "Pyukumuku",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 86,
+          "moves": [
+            "recover",
+            "counter",
+            "toxic",
+            "mirrorcoat"
+          ],
+          "ability": "Unaware",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        }
+      ]
+    },
+    {
+      "id": "team_20",
+      "seed": [
+        610596833,
+        1623069629,
+        1763951140,
+        247030629
+      ],
+      "showdown": "Xerneas @ Power Herb  \nAbility: Fairy Aura  \nLevel: 65  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- moonblast  \n- geomancy  \n- focusblast  \n- psyshock  \n\nPinsir (F) @ Heavy-Duty Boots  \nAbility: Mold Breaker  \nLevel: 84  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- stoneedge  \n- earthquake  \n- stealthrock  \n- xscissor  \n\nHydreigon (M) @ Choice Specs  \nAbility: Levitate  \nLevel: 78  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- darkpulse  \n- dracometeor  \n- fireblast  \n- uturn  \n\nTsareena (F) @ Assault Vest  \nAbility: Queenly Majesty  \nLevel: 85  \nEVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  \n- powerwhip  \n- highjumpkick  \n- tripleaxel  \n- rapidspin  \n\nNinetales (F) @ Heavy-Duty Boots  \nAbility: Drought  \nLevel: 82  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- fireblast  \n- willowisp  \n- nastyplot  \n- solarbeam  \n\nJellicent (F) @ Leftovers  \nAbility: Water Absorb  \nLevel: 86  \nEVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  \nIVs: 0 Atk  \n- icebeam  \n- shadowball  \n- scald  \n- recover  \n\n",
+      "pokemon": [
+        {
+          "name": "Xerneas",
+          "species": "Xerneas",
+          "gender": "N",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 65,
+          "moves": [
+            "moonblast",
+            "geomancy",
+            "focusblast",
+            "psyshock"
+          ],
+          "ability": "Fairy Aura",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Power Herb"
+        },
+        {
+          "name": "Pinsir",
+          "species": "Pinsir",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 84,
+          "moves": [
+            "stoneedge",
+            "earthquake",
+            "stealthrock",
+            "xscissor"
+          ],
+          "ability": "Mold Breaker",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Hydreigon",
+          "species": "Hydreigon",
+          "gender": "M",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 78,
+          "moves": [
+            "darkpulse",
+            "dracometeor",
+            "fireblast",
+            "uturn"
+          ],
+          "ability": "Levitate",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Choice Specs"
+        },
+        {
+          "name": "Tsareena",
+          "species": "Tsareena",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 85,
+          "moves": [
+            "powerwhip",
+            "highjumpkick",
+            "tripleaxel",
+            "rapidspin"
+          ],
+          "ability": "Queenly Majesty",
+          "evs": {
+            "hp": 85,
+            "atk": 85,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 31,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Assault Vest"
+        },
+        {
+          "name": "Ninetales",
+          "species": "Ninetales",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 82,
+          "moves": [
+            "fireblast",
+            "willowisp",
+            "nastyplot",
+            "solarbeam"
+          ],
+          "ability": "Drought",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Heavy-Duty Boots"
+        },
+        {
+          "name": "Jellicent",
+          "species": "Jellicent",
+          "gender": "F",
+          "shiny": false,
+          "gigantamax": false,
+          "level": 86,
+          "moves": [
+            "icebeam",
+            "shadowball",
+            "scald",
+            "recover"
+          ],
+          "ability": "Water Absorb",
+          "evs": {
+            "hp": 85,
+            "atk": 0,
+            "def": 85,
+            "spa": 85,
+            "spd": 85,
+            "spe": 85
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 0,
+            "def": 31,
+            "spa": 31,
+            "spd": 31,
+            "spe": 31
+          },
+          "item": "Leftovers"
+        }
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "id": "pair_01",
+      "team_a": "team_01",
+      "team_b": "team_02"
+    },
+    {
+      "id": "pair_02",
+      "team_a": "team_03",
+      "team_b": "team_04"
+    },
+    {
+      "id": "pair_03",
+      "team_a": "team_05",
+      "team_b": "team_06"
+    },
+    {
+      "id": "pair_04",
+      "team_a": "team_07",
+      "team_b": "team_08"
+    },
+    {
+      "id": "pair_05",
+      "team_a": "team_09",
+      "team_b": "team_10"
+    },
+    {
+      "id": "pair_06",
+      "team_a": "team_11",
+      "team_b": "team_12"
+    },
+    {
+      "id": "pair_07",
+      "team_a": "team_13",
+      "team_b": "team_14"
+    },
+    {
+      "id": "pair_08",
+      "team_a": "team_15",
+      "team_b": "team_16"
+    },
+    {
+      "id": "pair_09",
+      "team_a": "team_17",
+      "team_b": "team_18"
+    },
+    {
+      "id": "pair_10",
+      "team_a": "team_19",
+      "team_b": "team_20"
+    }
+  ]
+}

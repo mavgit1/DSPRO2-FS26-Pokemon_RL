@@ -1,11 +1,9 @@
 import numpy as np
-import zlib
 from typing import Dict, List, Optional, Any
 
 # Poke-env imports (only for type hints and enums)
 from poke_env.battle.abstract_battle import AbstractBattle
 from poke_env.battle.pokemon import Pokemon
-from poke_env.environment.singles_env import SinglesEnv
 from poke_env.battle.weather import Weather
 from poke_env.battle.field import Field
 from poke_env.battle.side_condition import SideCondition
@@ -13,6 +11,13 @@ from poke_env.battle.status import Status
 from poke_env.battle.pokemon_type import PokemonType
 from poke_env.battle.move_category import MoveCategory
 from poke_env.battle.effect import Effect
+
+from src.action_space import (
+    COMPRESSED_ACTION_SPACE_N,
+    NATIVE_SWITCH_ACTIONS,
+    get_compressed_action_mask,
+)
+from src.models.vocab import get_embedding_vocab, vocab_sizes
 
 
 # =============================================================================
@@ -42,28 +47,29 @@ TRACKED_EFFECTS = [
 
 NUM_TOKENS = 13          # 1 global + 6 our team + 6 opponent team
 TOKEN_DIM = 164
-MAX_ID_VAL = 20000
+_VOCAB_SIZES = vocab_sizes()
+SPECIES_VOCAB_SIZE = _VOCAB_SIZES["species_vocab_size"]
+ITEM_VOCAB_SIZE = _VOCAB_SIZES["item_vocab_size"]
+ABILITY_VOCAB_SIZE = _VOCAB_SIZES["ability_vocab_size"]
+ACTION_SPACE_N = COMPRESSED_ACTION_SPACE_N
+GLOBAL_EXTRA_FEATURE_NAMES = [
+    "opponent_random",
+    "opponent_heuristic",
+    "opponent_other",
+    "battle_turn_norm",
+    "force_switch",
+    "active_trapped",
+    "available_move_count_norm",
+    "available_switch_count_norm",
+    "can_dynamax",
+    "can_mega_evolve",
+    "can_z_move",
+]
 
 
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
-
-def hash_str_to_int(s: str, max_val: int = MAX_ID_VAL) -> int:
-    """
-    Consistently hash string IDs to categorical integers.
-    
-    Args:
-        s: String to hash (species, item, ability, etc.)
-        max_val: Maximum hash value
-    
-    Returns:
-        Integer hash in range [1, max_val], or 0 for empty string
-    """
-    if not s:
-        return 0
-    return (zlib.adler32(s.encode('utf-8')) % max_val) + 1
-
 
 def _get_list_index(value: Any, lst: List) -> int:
     """Safely get index of value in list, return -1 if not found."""
@@ -230,9 +236,10 @@ def embed_pokemon(
     # ---------------------------------------------------------------------
     # 11. Categorical IDs
     # ---------------------------------------------------------------------
-    species_id = hash_str_to_int(mon.species) if mon.species else 0
-    item_id = hash_str_to_int(mon.item) if mon.item else 0
-    ability_id = hash_str_to_int(mon.ability) if mon.ability else 0
+    vocab = get_embedding_vocab()
+    species_id = vocab.species_id(mon.species)
+    item_id = vocab.item_id(mon.item)
+    ability_id = vocab.ability_id(mon.ability)
     
     return {
         'obs': obs,
@@ -246,7 +253,10 @@ def embed_pokemon(
 # FULL BATTLE EMBEDDING
 # =============================================================================
 
-def embed_battle(battle: AbstractBattle) -> Dict[str, np.ndarray]:
+def embed_battle(
+    battle: AbstractBattle,
+    opponent_type: Optional[str] = None,
+) -> Dict[str, np.ndarray]:
     """
     Convert full battle state to transformer-ready embedding.
     
@@ -257,6 +267,7 @@ def embed_battle(battle: AbstractBattle) -> Dict[str, np.ndarray]:
     
     Args:
         battle: AbstractBattle object from poke-env
+        opponent_type: Optional selected opponent label for the episode.
     
     Returns:
         Dict with:
@@ -302,6 +313,15 @@ def embed_battle(battle: AbstractBattle) -> Dict[str, np.ndarray]:
         sc_idx = _get_list_index(sc, SIDE_CONDITION_LIST)
         if sc_idx >= 0:
             obs[0, global_idx + sc_idx] = 1.0
+    global_idx += len(SIDE_CONDITION_LIST)
+
+    # Extra global context features. These fit in the existing spare token
+    # capacity, so improves coverage without changing TOKEN_DIM.
+    extra_features = _global_extra_features(battle, opponent_type)
+    available = max(0, TOKEN_DIM - global_idx)
+    if available > 0:
+        count = min(len(extra_features), available)
+        obs[0, global_idx : global_idx + count] = extra_features[:count]
     
     # -------------------------------------------------------------------------
     # Tokens 1-6: Our Team
@@ -359,6 +379,43 @@ def embed_battle(battle: AbstractBattle) -> Dict[str, np.ndarray]:
     }
 
 
+def _global_extra_features(
+    battle: AbstractBattle,
+    opponent_type: Optional[str],
+) -> np.ndarray:
+    features = np.zeros(len(GLOBAL_EXTRA_FEATURE_NAMES), dtype=np.float32)
+    opponent_key = _canonical_opponent_type(opponent_type)
+    if opponent_key == "random":
+        features[0] = 1.0
+    elif opponent_key == "heuristic":
+        features[1] = 1.0
+    elif opponent_key:
+        features[2] = 1.0
+
+    features[3] = min(float(max(0, int(getattr(battle, "turn", 0)))) / 100.0, 1.0)
+    features[4] = 1.0 if bool(getattr(battle, "force_switch", False)) else 0.0
+
+    active = getattr(battle, "active_pokemon", None)
+    features[5] = 1.0 if active is not None and bool(getattr(active, "trapped", False)) else 0.0
+    features[6] = min(float(len(getattr(battle, "available_moves", []) or [])) / 4.0, 1.0)
+    features[7] = min(float(len(getattr(battle, "available_switches", []) or [])) / 6.0, 1.0)
+    features[8] = 1.0 if bool(getattr(battle, "can_dynamax", False)) else 0.0
+    features[9] = 1.0 if bool(getattr(battle, "can_mega_evolve", False)) else 0.0
+    features[10] = 1.0 if bool(getattr(battle, "can_z_move", False)) else 0.0
+    return features
+
+
+def _canonical_opponent_type(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    key = str(value).strip().lower()
+    if not key or key == "unknown":
+        return None
+    if key == "heuristics":
+        return "heuristic"
+    return key
+
+
 # =============================================================================
 # ACTION MASKING
 # =============================================================================
@@ -367,48 +424,28 @@ def get_action_mask(battle: AbstractBattle) -> np.ndarray:
     """
     Generate action mask for valid actions.
     
-    Action space layout (gen8randombattle - 22 actions):
-        - 0-3: Moves
-        - 0-5: Switches
-        - 6-9: Moves
-        - 10-13: Mega Evolution
-        - 14-17: Z-Move
-        - 18-21: Dynamax
+    Action space layout (compressed gen8 singles actions):
+        - 0-3: regular moves
+        - 4-7: legal gimmick variant for each move slot
+        - 8-13: legal switch slots
     
     Args:
         battle: AbstractBattle object
     
     Returns:
-        np.ndarray of shape (22,) with 1.0 for valid actions, 0.0 for invalid
+        np.ndarray of shape (18,) with 1.0 for valid actions, 0.0 for invalid
     """
-    # For gen8 singles the action space is 22:
-    # 0-5 switches, 6-9 moves, 10-13 mega, 14-17 z-move, 18-21 dynamax.
-    # Use poke-env's own converter so mask indices exactly match env semantics.
-    action_space_n = 22
-    mask = np.zeros(action_space_n, dtype=np.float32)
-
-    for action in range(action_space_n):
-        try:
-            SinglesEnv.action_to_order(
-                np.int64(action),
-                battle,
-                fake=False,
-                strict=True,
-            )
-            mask[action] = 1.0
-        except ValueError:
-            continue
-
-    # Safety fallback for rare edge cases (prevents all-zero mask instability).
-    if not mask.any():
-        mask[6] = 1.0
-
-    return mask
+    return get_compressed_action_mask(battle)
 
 
 def get_valid_action_indices(battle: AbstractBattle) -> List[int]:
     """Get list of valid action indices."""
     return [i for i, valid in enumerate(get_action_mask(battle)) if valid]
+
+
+def is_native_switch_action(action: int) -> bool:
+    """Return whether a native gen8 singles poke-env action is a switch."""
+    return int(action) in NATIVE_SWITCH_ACTIONS
 
 
 # =============================================================================

@@ -1,0 +1,397 @@
+\documentclass[11pt, a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{margin=0.85in}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{microtype}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% --- Custom Colors ---
+\definecolor{primaryBlue}{RGB}{10, 80, 160}
+\definecolor{lightGray}{RGB}{245, 245, 245}
+
+% --- Section Styling ---
+\titleformat{\section}{\large\bfseries\color{primaryBlue}}{}{0em}{}[\titlerule]
+\setlist[itemize]{leftmargin=*, noitemsep, topsep=2pt}
+
+% --- Custom Box for Project Info ---
+\newtcolorbox{studentbox}{
+    colback=lightGray,
+    colframe=primaryBlue,
+    boxrule=0.5pt,
+    arc=4pt,
+    left=15pt,
+    right=15pt,
+    top=10pt,
+    bottom=10pt
+}
+
+\begin{document}
+
+% --- Header Section ---
+\begin{center}
+    {\huge \bfseries \color{primaryBlue} RL Project Sheet} \\[0.2cm]
+    {\large \textbf{Course:} DSPRO 2 FS26} \\[0.1cm]
+\end{center}
+
+\vspace{0.4cm}
+
+% --- Student & Project Information ---
+\begin{studentbox}
+    \begin{tabularx}{\textwidth}{l X}
+        \textbf{Project Name:} & Reproducible RL Benchmark based on Pok\'{e}mon Nuzlocke \\
+        \textbf{Student Names:} & Tristan Muri, Marvin Hueber, Viacheslav Godovskii, Alex Liubov \\
+        \textbf{Date:} & \today \\
+        \textbf{GitHub Repository:} & \url{https://github.com/mavgit1/DSPRO2-FS26-Pokemon_RL} \\
+        \textbf{RL Library:} & Ray RLlib (with PyTorch backend) \\
+        \textbf{Environment:} & Custom Gymnasium env wrapping \texttt{poke-env} / Pok\'{e}mon Showdown \\
+    \end{tabularx}
+\end{studentbox}
+
+\vspace{0.5cm}
+
+% ======================================================================
+% SECTION 1
+% ======================================================================
+\section{Goal of the Project (In Plain Words)}
+\begin{itemize}
+    \item \textbf{What should the agent learn to do?}
+        Train an AI agent to complete a Pok\'{e}mon Nuzlocke challenge, beating all mandatory trainers in Pok\'{e}mon Brilliant Diamond without losing. The agent must make optimal battle decisions (move selection, switching) under permanent-consequence rules: fainted Pok\'{e}mon are lost for the remainder of the run, and a single battle loss ends the entire attempt.
+
+    \item \textbf{Why is this useful/interesting?}
+        The Nuzlocke challenge is a complex sequential decision-making problem under uncertainty with irreversible consequences and limited resources. It serves as a reusable experimental benchmark for evaluating RL algorithms on generalization, robustness, and risk-aware decision-making.
+
+    \item \textbf{What does ``success'' look like?}
+        Success is measured by gauntlet completion rate (beating all trainers in order), average progression depth before failure, remaining resources upon completion, and generalization to unseen gauntlet orderings. Near-term: achieve stable $>50\%$ win rate against heuristic opponents in the medium curriculum stage.
+\end{itemize}
+
+% ======================================================================
+% SECTION 2
+% ======================================================================
+\section{Environment (Where the agent lives)}
+\begin{itemize}
+    \item \textbf{Environment description:}
+        The environment is a Pok\'{e}mon Showdown battle simulator (Gen~8 / \texttt{gen8randombattle} format), accessed via the \texttt{poke-env} Python library. Showdown runs as 8 local Node.js servers on ports 8000--8007. Each server hosts parallel battles; the agent connects via WebSocket. The environment follows official Pok\'{e}mon battle mechanics (turn-based, 6v6 singles).
+
+    \item \textbf{What does the agent observe?}
+        A dictionary observation with the following components:
+
+        \begin{center}
+        \small
+        \begin{tabularx}{\textwidth}{l l X}
+            \toprule
+            \textbf{Key} & \textbf{Shape} & \textbf{Content} \\
+            \midrule
+            \texttt{obs}           & $(13,\, 164)$ float32  & Token matrix: 1 global token + 6 own-team tokens + 6 opponent-team tokens. Each token encodes presence flags, HP fraction, base stats (6), types (multi-hot, 18), status (one-hot, 7), volatile effects (9), stat boosts (7), item/ability flags (2), weight, and 4~moves $\times$~26~features (power, accuracy, category, type). \\
+            \texttt{species}       & $(13,)$ int32          & Hashed species IDs per token (Adler-32 modulo 20\,000). \\
+            \texttt{items}         & $(13,)$ int32          & Hashed held-item IDs per token. \\
+            \texttt{abilities}     & $(13,)$ int32          & Hashed ability IDs per token. \\
+            \texttt{action\_mask}  & $(22,)$ float32        & Binary mask: 1.0 for valid actions, 0.0 for invalid. \\
+            \bottomrule
+        \end{tabularx}
+        \end{center}
+
+        \textbf{Token layout:}
+        \begin{itemize}
+            \item Token~0: Global state: weather (9~dims), terrain/fields (15~dims), own side conditions (38~dims), opponent side conditions (38~dims).
+            \item Token~1: Active own Pok\'{e}mon. Tokens~2--6, Bench Pok\'{e}mon.
+            \item Token~7: Active opponent Pok\'{e}mon. Tokens~8--12, Opponent bench.
+        \end{itemize}
+
+        \textbf{Per-Pok\'{e}mon token} (164~dims): presence/active/fainted flags~(3) + HP~fraction~(1) + base~stats~(6) + types~(18) + status~(7) + volatile~effects~(9) + stat~boosts~(7) + item/ability~flags~(2) + weight~(1) + 4~moves $\times$~26~features~(104).
+
+    \item \textbf{What actions can the agent take?}
+        A discrete action space of size~22 (Gen~8 singles):
+        \begin{itemize}
+            \item Actions 0--5: Switch to Pok\'{e}mon in party slot 1--6.
+            \item Actions 6--9: Use move 1--4.
+            \item Actions 10--13: Mega Evolution + move 1--4.
+            \item Actions 14--17: Z-Move + move 1--4.
+            \item Actions 18--21: Dynamax + move 1--4.
+        \end{itemize}
+        Invalid actions are masked via \texttt{action\_mask} (logits set to $-10^8$ before softmax), so the agent can only select legally available moves or switches.
+
+    \item \textbf{When does an episode end?}
+        An episode terminates when one side has no remaining conscious Pok\'{e}mon (win/loss). There is no explicit time limit or truncation within a single battle.
+\end{itemize}
+
+% ======================================================================
+% SECTION 3
+% ======================================================================
+\section{Reward (What the agent tries to maximize)}
+\begin{itemize}
+    \item \textbf{Reward function:}
+        The reward is computed each step by \texttt{poke-env}'s \texttt{reward\_computing\_helper}, parameterized by the active \texttt{RewardConfig}. The helper tracks HP changes and fainting events internally. At the terminal step, explicit outcome rewards are also applied. In addition, a standalone \texttt{compute\_reward} function is available with the following explicit components:
+
+        \begin{center}
+        \small
+        \begin{tabularx}{\textwidth}{l l X}
+            \toprule
+            \textbf{Component} & \textbf{Default Value} & \textbf{Description} \\
+            \midrule
+            Victory reward     & $+100.0$              & Agent wins the battle (terminal). \\
+            Defeat penalty     & $-100.0$              & Agent loses the battle (terminal). \\
+            HP difference      & $\times\,1.0$ weight  & $(\text{our\_HP} - \text{opp\_HP}) \times w_{\text{hp}}$ (shaped reward). \\
+            Opponent fainted   & $+3.0$ per faint      & Reward for each opponent Pok\'{e}mon knocked out. \\
+            Own fainted        & $-3.0$ per faint      & Penalty for each of the agent's Pok\'{e}mon that faints. \\
+            Step penalty       & $-0.02$ per step      & Encourages battle efficiency (fewer turns). \\
+            \bottomrule
+        \end{tabularx}
+        \end{center}
+
+    \item \textbf{Curriculum-stage reward variants:}
+
+        \begin{center}
+        \small
+        \begin{tabularx}{\textwidth}{l c c c}
+            \toprule
+            \textbf{Parameter} & \textbf{Easy} & \textbf{Medium} & \textbf{Hard} \\
+            \midrule
+            Victory / Defeat       & $\pm80$  & $\pm100$ & $\pm120$ \\
+            HP weight              & 1.2      & 1.0      & 0.8      \\
+            Opponent fainted       & $+3.0$   & $+3.0$   & $+4.0$   \\
+            Own fainted penalty    & $-2.0$   & $-3.0$   & $-3.0$   \\
+            Step penalty           & $0.0$    & $-0.01$  & $-0.02$  \\
+            \bottomrule
+        \end{tabularx}
+        \end{center}
+
+    \item \textbf{Potential reward issues:}
+        The medium curriculum stage exhibits a plateau near 50\% win rate, which may be partly caused by reward-scale transfer between stages. High value loss and entropy persist alongside low policy loss, indicating the value network struggles to predict returns accurately.
+\end{itemize}
+
+% ======================================================================
+% SECTION 4
+% ======================================================================
+\section{Agent (How it learns)}
+\begin{itemize}
+    \item \textbf{Algorithm used:}
+        PPO (Proximal Policy Optimization) via Ray RLlib, with distributed synchronous rollouts.
+
+    \item \textbf{Policy type:}
+        Transformer-based neural network with categorical hash embeddings and action masking.
+
+        \textbf{Architecture overview:}
+        \begin{enumerate}
+            \item \textbf{Categorical embeddings:} Three separate \texttt{nn.Embedding} layers (vocabulary size 20\,001, embedding dimension 32) for species, items, and abilities. Padding index~0 represents absent entities. String IDs are mapped to integers via Adler-32 hashing modulo 20\,000.
+            \item \textbf{Input projection:} Concatenation of the base token vector ($164$~dims) and three embedding vectors ($3 \times 32 = 96$~dims) $\rightarrow$ total $260$~dims per token $\rightarrow$ linear projection + LayerNorm to hidden dimension.
+            \item \textbf{Transformer encoder:} Standard \texttt{nn.TransformerEncoder} with GELU activation, feedforward expansion $\times4$. The CLS token (position~0) is extracted for downstream heads.
+            \item \textbf{LSTM (optional, currently disabled):} Single-layer LSTM over CLS-token sequence for cross-turn memory. Disabled in production due to RLlib connector constraints.
+            \item \textbf{Policy head:} Linear $\rightarrow$ GELU $\rightarrow$ Linear ($\text{hidden} \to 256 \to 22$).
+            \item \textbf{Value head:} Linear $\rightarrow$ GELU $\rightarrow$ Linear ($\text{hidden} \to 256 \to 1$).
+            \item \textbf{Action masking:} Invalid-action logits set to $-10^8$ before softmax.
+        \end{enumerate}
+
+    \item \textbf{Input to the policy:}
+        The observation dictionary described in Section~2 (\texttt{obs}, \texttt{species}, \texttt{items}, \texttt{abilities}, \texttt{action\_mask}).
+
+    \item \textbf{Output of the policy:}
+        Action logits over 22~discrete actions (masked), from which a categorical distribution is sampled. The value head produces a scalar state-value estimate $V(s)$.
+\end{itemize}
+
+% ======================================================================
+% SECTION 5
+% ======================================================================
+\section{Training Setup (How you trained it)}
+\begin{itemize}
+    \item \textbf{Training time / steps:}
+        Default total timesteps: 10\,000\,000. Checkpoints saved every 500\,000 steps (up to 5 retained). Evaluation every 100\,000 steps over 100 episodes.
+
+    \item \textbf{PPO hyperparameters (default / \texttt{standard} preset):}
+
+        \begin{center}
+        \small
+        \begin{tabularx}{0.85\textwidth}{l r}
+            \toprule
+            \textbf{Parameter} & \textbf{Value} \\
+            \midrule
+            Learning rate          & $3 \times 10^{-4}$ \\
+            Discount ($\gamma$)    & 0.99 \\
+            GAE lambda ($\lambda$) & 0.95 \\
+            Clip range ($\epsilon$)& 0.2 \\
+            Entropy coefficient    & 0.02 \\
+            Value-function loss coeff. & 0.5 \\
+            Value clip param       & 5.0 \\
+            Gradient clipping      & 0.5 \\
+            Train batch size       & 6\,144 \\
+            SGD minibatch size     & 256 \\
+            SGD iterations per batch & 10 \\
+            \bottomrule
+        \end{tabularx}
+        \end{center}
+
+    \item \textbf{Model architecture presets:}
+
+        \begin{center}
+        \small
+        \begin{tabularx}{\textwidth}{l c c c c c}
+            \toprule
+            \textbf{Parameter} & \textbf{Quick} & \textbf{Standard} & \textbf{Memory Safe} & \textbf{Large} \\
+            \midrule
+            Hidden dim              & 128   & 512   & 256   & 768   \\
+            Attention heads         & 8     & 8     & 4     & 12    \\
+            Transformer layers      & 1     & 4     & 2     & 6     \\
+            Embedding dim           & 32    & 32    & 32    & 32    \\
+            LSTM hidden             & ---   & 512   & 256   & 768   \\
+            Use LSTM                & No    & No    & No    & No    \\
+            Train batch size        & 2\,048 & 6\,144 & 2\,048 & 16\,384 \\
+            SGD minibatch size      & 256   & 256   & 128   & 512   \\
+            Workers                 & 0     & 12    & 4     & 12    \\
+            Env/worker              & 1     & 4     & 2     & 4     \\
+            Total envs              & 1     & 48    & 8     & 48    \\
+            Total timesteps         & 1M    & 10M   & 10M   & 10M   \\
+            \bottomrule
+        \end{tabularx}
+        \end{center}
+
+    \item \textbf{Curriculum learning:}
+        Three stages with automatic promotion based on a rolling win-rate window (200~episodes, minimum 100 episodes before promotion):
+
+        \begin{center}
+        \small
+        \begin{tabularx}{0.9\textwidth}{l c c c}
+            \toprule
+            & \textbf{Easy} & \textbf{Medium} & \textbf{Hard} \\
+            \midrule
+            Opponent mix           & 100\% random & 50/50 random/heuristic & 100\% heuristic \\
+            Promotion threshold    & 85\% win rate & 75\% win rate & 101\% (terminal) \\
+            Min.\ samples          & 50 & 50 & 50 \\
+            \bottomrule
+        \end{tabularx}
+        \end{center}
+
+    \item \textbf{Hardware:}
+        Local workstation (NVIDIA RTX~5090 for \texttt{optimal} preset). 8 local Pok\'{e}mon Showdown server instances. MLflow tracking server for experiment logging.
+
+    \item \textbf{Anything special:}
+        \begin{itemize}
+            \item Distributed training via Ray with up to 12 rollout workers, each running 4 parallel environments.
+            \item Checkpoint resume support (\texttt{-{}-resume-checkpoint latest}) with MLflow run continuity.
+            \item Action-mask enforcement prevents the agent from selecting illegal moves/switches.
+            \item Observation sample recording and per-episode diagnostic stats (HP remaining, faint counts, action-mask density, fallback events) logged to MLflow.
+        \end{itemize}
+\end{itemize}
+
+% ======================================================================
+% SECTION 6
+% ======================================================================
+\section{Results (What happened?)}
+\begin{itemize}
+    \item \textbf{Current performance:}
+        \textbf{Easy stage:} Solved relatively early ($\approx$\,84\,000 steps), achieving the 85\% win-rate promotion threshold against fully random opponents.
+        \textbf{Medium stage:} Reaches $\approx$\,50\% win rate by $\approx$\,100\,000 steps but does not materially improve beyond that level even after $\sim$\,2.5M steps. This plateau is the primary performance bottleneck.
+
+    \item \textbf{Learning curve:}
+        Asymmetric across curriculum stages. Easy improves rapidly and converges. Medium shows an initial rise followed by a flat plateau at $\sim$50\% win rate. Value loss and policy entropy remain at high values throughout medium training, while policy loss stays low---indicating the value network struggles to accurately predict returns.
+
+    \item \textbf{Example behaviors:}
+        In the easy stage the agent learns to consistently beat random opponents. In the medium stage, against heuristic opponents (which consider type effectiveness and switch strategically), the agent wins roughly half the time---suggesting it has learned basic move selection but not yet advanced strategy such as predictive switching or multi-turn planning.
+\end{itemize}
+
+% ======================================================================
+% SECTION 7
+% ======================================================================
+\section{Problems You Encountered (and how you tried to fix them)}
+\begin{itemize}
+    \item \textbf{Medium-stage plateau at $\sim$50\% win rate:}
+        The agent stagnates against heuristic opponents. Hypotheses include: (1)~curriculum reward-scale transfer---easy-stage rewards ($\pm80$) may not transition cleanly to medium ($\pm100$); (2)~opponent mixture causing unstable gradients; (3)~missing positional encoding on transformer tokens; (4)~hash collisions in categorical embeddings degrading species/item/ability signal; (5)~LSTM disabled, so the agent lacks cross-turn memory for multi-turn moves and opponent modelling.
+
+    \item \textbf{High value loss and entropy:}
+        Throughout medium-stage training, value loss remains high and entropy does not decay, while policy loss is low. This suggests the value network is not learning accurate state-value estimates, which impairs GAE advantage estimation and slows policy improvement.
+
+    \item \textbf{LSTM / recurrent path blocked by RLlib:}
+        The LSTM component exists in the model code but is disabled (\texttt{use\_lm=False}) because RLlib's current connector path does not support recurrent state propagation in the production setup. Without cross-turn memory, the agent treats each turn independently.
+
+    \item \textbf{Validation pipeline incomplete:}
+        No automated gauntlet validation pipeline exists yet, making rigorous hyperparameter comparison difficult.
+
+    \item \textbf{Planned fixes:}
+        \begin{itemize}
+            \item Add positional encoding to transformer tokens.
+            \item Replace Adler-32 hash embeddings with dictionary-based lookups for species, items, and abilities.
+            \item Re-enable or redesign cross-turn memory (fix LSTM integration or use alternative mechanisms).
+            \item Restructure action masking to separate base-4 attacks from gimmick-enhanced attacks, with an explicit signal for the active Pok\'{e}mon's available gimmick.
+            \item Complete the gauntlet validation pipeline with fixed seeds, deterministic configuration, and standardized metric outputs.
+        \end{itemize}
+\end{itemize}
+
+% ======================================================================
+% SECTION 8
+% ======================================================================
+\section{How to Run Your Code}
+\begin{itemize}
+    \item \textbf{Install:}
+        \begin{itemize}
+            \item Requires \texttt{uv} package manager (not pip). Python~3.13.
+            \item \texttt{uv sync}
+        \end{itemize}
+
+    \item \textbf{Start simulators (required before training):}
+        \begin{itemize}
+            \item \texttt{./scripts/spin\_up\_multiple\_showdown.sh} \quad (8 servers on ports 8000--8007)
+        \end{itemize}
+
+    \item \textbf{Train command:}
+        \begin{itemize}
+            \item \texttt{uv run train\_battler.py -{}-preset quick} \quad (quick test, single env)
+            \item \texttt{uv run train\_battler.py -{}-preset standard} \quad (default)
+            \item \texttt{uv run train\_battler.py -{}-preset large} \quad (max resources)
+        \end{itemize}
+
+    \item \textbf{Resume from checkpoint:}
+        \begin{itemize}
+            \item \texttt{uv run train\_battler.py -{}-preset standard -{}-resume-checkpoint latest -{}-mlflow-run-id <RUN\_ID>}
+        \end{itemize}
+
+    \item \textbf{Stop simulators:}
+        \begin{itemize}
+            \item \texttt{./scripts/kill\_all\_showdown.sh}
+        \end{itemize}
+
+    \item \textbf{Lint / format:}
+        \begin{itemize}
+            \item \texttt{uv run ruff check .} \quad and \quad \texttt{uv run ruff format .}
+        \end{itemize}
+
+    \item \textbf{Where are the trained models saved?}
+        \texttt{checkpoints/} directory (gitignored). Experiment logs are tracked via MLflow (experiment name: \texttt{Pokemon\_RL\_Battler}).
+\end{itemize}
+
+% ======================================================================
+% SECTION 9
+% ======================================================================
+\section{Notes, Limitations, and Next Steps}
+\begin{itemize}
+    \item \textbf{Current milestone:}
+        Milestone~1 (Proof of Concept: fixed team vs.\ random opponents) is partially complete. Training infrastructure is functional but competency is not yet achieved.
+
+    \item \textbf{Limitations:}
+        \begin{itemize}
+            \item Agent has no cross-turn memory (LSTM disabled).
+            \item Categorical embeddings use hashing, which causes collisions and loses identity information.
+            \item No positional encoding on transformer tokens---the model cannot distinguish token positions structurally.
+            \item Validation and evaluation protocols are not yet standardized.
+            \item Only tested on Milestone~1 (fixed team vs.\ random). Team builder (Milestone~3) and full gauntlet (Milestone~4) are future work.
+        \end{itemize}
+
+    \item \textbf{Next steps:}
+        \begin{enumerate}
+            \item Complete the gauntlet validation pipeline (fixed seeds, deterministic eval, standardized metrics).
+            \item Run controlled plateau-breaking experiments: positional encoding, dictionary embeddings, LSTM re-enablement.
+            \item Achieve stable Milestone~1 competency (target: high win rate against heuristic opponents under the validation protocol).
+            \item Begin Milestone~2 (random-team battles) and Milestone~3 (team builder agent).
+        \end{enumerate}
+
+    \item \textbf{Data resources:}
+        BDSP trainer data (\texttt{data/BDSP Trainer Data - v1.1.csv}), gauntlet ordering (\texttt{data/bdsp\_gauntlet\_order.json}), and trainer team specifications (\texttt{data/bdsp\_trainers.json}) are available for structured opponent generation.
+\end{itemize}
+
+\end{document}

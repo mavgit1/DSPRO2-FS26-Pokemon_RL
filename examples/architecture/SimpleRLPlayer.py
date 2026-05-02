@@ -1,5 +1,5 @@
 import numpy as np
-from gymnasium.spaces import Space, Box
+from gymnasium.spaces import Box
 from poke_env.environment.singles_env import SinglesEnv
 from poke_env.battle import AbstractBattle
 from poke_env.environment.env import ObsType
