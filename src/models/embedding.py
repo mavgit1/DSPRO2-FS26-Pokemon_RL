@@ -287,9 +287,9 @@ def embed_battle(
     # -------------------------------------------------------------------------
     global_idx = 0
     
-    # Weather (9 dims)
-    if battle.weather:
-        weather_idx = _get_list_index(battle.weather, WEATHER_LIST)
+    # Weather (9 dims) — battle.weather is Dict[Weather, int], iterate keys
+    for weather in battle.weather:
+        weather_idx = _get_list_index(weather, WEATHER_LIST)
         if weather_idx >= 0:
             obs[0, global_idx + weather_idx] = 1.0
     global_idx += len(WEATHER_LIST)

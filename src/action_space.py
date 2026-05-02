@@ -74,13 +74,13 @@ def native_to_compressed_action(
                 return compressed
             return None
     if native_int in NATIVE_SWITCH_ACTIONS:
-        legal_switches = _legal_native_switch_actions(battle)
+        bench_native = _bench_native_actions(battle)
         try:
-            switch_idx = legal_switches.index(native_int)
+            bench_idx = bench_native.index(native_int)
         except ValueError:
             return None
-        if switch_idx < len(COMPRESSED_SWITCH_ACTIONS):
-            return COMPRESSED_SWITCH_ACTIONS.start + switch_idx
+        if bench_idx < len(COMPRESSED_SWITCH_ACTIONS):
+            return COMPRESSED_SWITCH_ACTIONS.start + bench_idx
     return None
 
 
@@ -102,12 +102,24 @@ def _compressed_gimmick_to_native(action: int, battle: AbstractBattle) -> np.int
     raise ValueError(f"No legal native gimmick for compressed action {action}")
 
 
+def _bench_native_actions(battle: AbstractBattle) -> List[int]:
+    """Native action indices for non-active team members in team order.
+
+    Matches the observation layout where bench tokens 2-6 contain
+    non-active team members in ``battle.team.values()`` order, so
+    compressed switch 8+k always maps to bench token 2+k.
+    """
+    team_list = list(battle.team.values())
+    active = battle.active_pokemon
+    return [i for i, mon in enumerate(team_list) if mon is not active]
+
+
 def _compressed_switch_to_native(action: int, battle: AbstractBattle) -> np.int64:
-    legal_switches = _legal_native_switch_actions(battle)
+    bench_native = _bench_native_actions(battle)
     switch_idx = int(action) - COMPRESSED_SWITCH_ACTIONS.start
-    if switch_idx < 0 or switch_idx >= len(legal_switches):
-        raise ValueError(f"No legal native switch for compressed action {action}")
-    return np.int64(legal_switches[switch_idx])
+    if switch_idx < 0 or switch_idx >= len(bench_native):
+        raise ValueError(f"No bench slot for compressed switch action {action}")
+    return np.int64(bench_native[switch_idx])
 
 
 def _legal_native_switch_actions(battle: AbstractBattle) -> List[int]:
