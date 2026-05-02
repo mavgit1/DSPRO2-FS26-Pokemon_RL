@@ -1,6 +1,4 @@
 import gymnasium as gym
-import json
-import time
 import numpy as np
 from typing import Dict, Any, Optional, List
 import uuid
@@ -18,6 +16,7 @@ from src.action_space import (
     COMPRESSED_ACTION_SPACE_N,
     NATIVE_ACTION_SPACE_N,
     compressed_to_native_action,
+    find_safe_native_action,
     is_compressed_switch_action,
 )
 from src.models.embedding import (
@@ -325,46 +324,6 @@ class PokemonBattleEnv(SinglesEnv):
         try:
             return SinglesEnv.order_to_action(order, battle, fake=fake, strict=True)
         except ValueError:
-            # #region agent log
-            try:
-                _b1 = getattr(self, "battle1", None)
-                _b2 = getattr(self, "battle2", None)
-                _which = (
-                    "battle1"
-                    if battle is _b1
-                    else ("battle2" if battle is _b2 else "unknown")
-                )
-                _n = int(getattr(self, "_dbg_order_to_action_fail_n", 0)) + 1
-                self._dbg_order_to_action_fail_n = _n
-                if _n <= 50:
-                    open(
-                        "/var/home/tristan/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_RL/.cursor/debug-a5a35e.log",
-                        "a",
-                        encoding="utf-8",
-                    ).write(
-                        json.dumps(
-                            {
-                                "sessionId": "a5a35e",
-                                "runId": "post-fix",
-                                "hypothesisId": "H1",
-                                "location": "PokemonBattleEnv.order_to_action:ValueError",
-                                "message": "strict_order_to_action_failed",
-                                "data": {
-                                    "which_battle": _which,
-                                    "n": _n,
-                                    "player_username": getattr(
-                                        battle, "player_username", None
-                                    ),
-                                    "strict_param": bool(strict),
-                                },
-                                "timestamp": int(time.time() * 1000),
-                            }
-                        )
-                        + "\n"
-                    )
-            except Exception:
-                pass
-            # #endregion
             if strict:
                 raise
 
@@ -373,39 +332,6 @@ class PokemonBattleEnv(SinglesEnv):
         for _ in range(max_retries):
             random_order = RandomPlayer.choose_random_singles_move(battle)
             try:
-                # #region agent log
-                try:
-                    _nfb = int(getattr(self, "_dbg_fallback_retry_n", 0)) + 1
-                    self._dbg_fallback_retry_n = _nfb
-                    if _nfb <= 30:
-                        _b1 = getattr(self, "battle1", None)
-                        _b2 = getattr(self, "battle2", None)
-                        _which = (
-                            "battle1"
-                            if battle is _b1
-                            else ("battle2" if battle is _b2 else "unknown")
-                        )
-                        open(
-                            "/var/home/tristan/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_RL/.cursor/debug-a5a35e.log",
-                            "a",
-                            encoding="utf-8",
-                        ).write(
-                            json.dumps(
-                                {
-                                    "sessionId": "a5a35e",
-                                    "runId": "post-fix",
-                                    "hypothesisId": "H1",
-                                    "location": "PokemonBattleEnv.order_to_action:fallback_retry",
-                                    "message": "fallback_retry_increment",
-                                    "data": {"which_battle": _which, "n": _nfb},
-                                    "timestamp": int(time.time() * 1000),
-                                }
-                            )
-                            + "\n"
-                        )
-                except Exception:
-                    pass
-                # #endregion
                 self._fallback_events_current_episode += 1
                 return SinglesEnv.order_to_action(
                     random_order, battle, fake=fake, strict=True
@@ -555,81 +481,22 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
                 self._episode_switch_actions += 1
             else:
                 self._episode_attack_actions += 1
-            native_action = compressed_to_native_action(action_int, self.env.battle1)
-            # #region agent log
+            # Convert compressed action to native; fall back to a safe
+            # action if conversion fails (invalid compressed action like
+            # gimmick in gen5 or switch beyond bench size).
             try:
-                b1 = self.env.battle1
-                if b1 is not None:
-                    emb = self.env.embed_battle(b1)
-                    m = np.asarray(emb["action_mask"], dtype=np.float32)
-                    mk = float(m[action_int]) if 0 <= action_int < len(m) else -1.0
-                    na_ok = True
-                    try:
-                        SinglesEnv.action_to_order(
-                            native_action, b1, fake=False, strict=True
-                        )
-                    except Exception:
-                        na_ok = False
-                    _step_n = int(getattr(self, "_dbg_wrap_step_n", 0)) + 1
-                    self._dbg_wrap_step_n = _step_n
-                    _bad = mk < 0.5 or not na_ok
-                    if _bad:
-                        _bn = int(getattr(self, "_dbg_bad_rl_action_n", 0)) + 1
-                        self._dbg_bad_rl_action_n = _bn
-                        if _bn <= 40:
-                            open(
-                                "/var/home/tristan/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_RL/.cursor/debug-a5a35e.log",
-                                "a",
-                                encoding="utf-8",
-                            ).write(
-                                json.dumps(
-                                    {
-                                        "sessionId": "a5a35e",
-                                        "runId": "post-fix",
-                                        "hypothesisId": "H2",
-                                        "location": "CurriculumSingleAgentWrapper.step",
-                                        "message": "rl_action_mask_or_native_mismatch",
-                                        "data": {
-                                            "action": action_int,
-                                            "mask_value": mk,
-                                            "native_verify_ok": na_ok,
-                                            "opponent": self._current_opponent_key,
-                                            "n": _bn,
-                                        },
-                                        "timestamp": int(time.time() * 1000),
-                                    }
-                                )
-                                + "\n"
-                            )
-                    if _step_n % 300 == 0:
-                        open(
-                            "/var/home/tristan/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_RL/.cursor/debug-a5a35e.log",
-                            "a",
-                            encoding="utf-8",
-                        ).write(
-                            json.dumps(
-                                {
-                                    "sessionId": "a5a35e",
-                                    "runId": "post-fix",
-                                    "hypothesisId": "H5",
-                                    "location": "CurriculumSingleAgentWrapper.step",
-                                    "message": "periodic_mask_health",
-                                    "data": {
-                                        "step_n": _step_n,
-                                        "mask_sum": float(np.sum(m)),
-                                        "mask_max": float(np.max(m)),
-                                        "opponent": self._current_opponent_key,
-                                        "last_action": action_int,
-                                        "last_mask": mk,
-                                    },
-                                    "timestamp": int(time.time() * 1000),
-                                }
-                            )
-                            + "\n"
-                        )
-            except Exception:
-                pass
-            # #endregion
+                native_action = compressed_to_native_action(
+                    action_int, self.env.battle1
+                )
+            except (ValueError, IndexError):
+                native_action = find_safe_native_action(self.env.battle1)
+            else:
+                try:
+                    SinglesEnv.action_to_order(
+                        native_action, self.env.battle1, fake=False, strict=True
+                    )
+                except Exception:
+                    native_action = find_safe_native_action(self.env.battle1)
         else:
             native_action = action
 

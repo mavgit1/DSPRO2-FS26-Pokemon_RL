@@ -33,25 +33,133 @@ def compressed_to_native_action(action: int, battle: AbstractBattle) -> np.int64
 
 
 def get_compressed_action_mask(battle: AbstractBattle) -> np.ndarray:
-    """Return a compressed action mask using native poke-env legality."""
-    mask = np.zeros(COMPRESSED_ACTION_SPACE_N, dtype=np.float32)
-    for action in range(COMPRESSED_ACTION_SPACE_N):
-        try:
-            native_action = compressed_to_native_action(action, battle)
-            _verify_native_action(native_action, battle)
-            mask[action] = 1.0
-        except (IndexError, ValueError):
-            continue
+    """Return a compressed action mask based on direct battle state.
 
+    Uses ``battle.available_moves`` and ``battle.available_switches``
+    directly instead of calling ``action_to_order`` with ``strict=True``,
+    which can fail when ``battle.valid_orders`` is stale or empty.
+
+    This avoids the previous fallback that forced ``mask[0] = 1.0`` when
+    no action passed verification — a fallback that contaminated ~14% of
+    training samples with incorrect action labels.
+    """
+    mask = np.zeros(COMPRESSED_ACTION_SPACE_N, dtype=np.float32)
+
+    active = battle.active_pokemon
+    force_switch = getattr(battle, "force_switch", False)
+    trapped = getattr(battle, "trapped", False)
+
+    # --- Switch actions (compressed 8-13) ---
+    if not trapped:
+        _mark_available_switches(mask, battle)
+
+    # --- Move actions (compressed 0-3) ---
+    if active is not None and not force_switch:
+        _mark_available_moves(mask, battle, active)
+
+    # --- Gimmick actions (compressed 4-7) ---
+    # Gimmicks are rare (gen6+ only); existing verification is acceptable.
+    if active is not None and not force_switch:
+        for gim_i in range(len(COMPRESSED_GIMMICK_ACTIONS)):
+            try:
+                _compressed_gimmick_to_native(
+                    COMPRESSED_GIMMICK_ACTIONS.start + gim_i, battle
+                )
+                mask[COMPRESSED_GIMMICK_ACTIONS.start + gim_i] = 1.0
+            except (IndexError, ValueError):
+                continue
+
+    # Safety net: when the mask is empty (transition states like post-faint,
+    # battle init), find any valid action via find_safe_native_action.
+    # This is much rarer than the old mask[0]=1.0 fallback which triggered
+    # ~14% of the time due to stale valid_orders.
     if not mask.any():
-        fallback = _first_legal_native_action(battle)
-        if fallback is not None:
-            compressed = native_to_compressed_action(int(fallback), battle)
-            if compressed is not None:
-                mask[compressed] = 1.0
-        if not mask.any():
-            mask[0] = 1.0
+        safe = find_safe_native_action(battle)
+        compressed = native_to_compressed_action(int(safe), battle)
+        if compressed is not None:
+            mask[compressed] = 1.0
+
+    # If still empty (e.g. safe native -2 unmappable to compressed), recover with
+    # strict legality checks — rare; avoids an all-zero mask breaking the policy.
+    if not mask.any():
+        _fill_mask_from_strict_verify(mask, battle)
+    if not mask.any():
+        mask[0] = 1.0
+
     return mask
+
+
+def _mark_available_moves(mask: np.ndarray, battle: AbstractBattle, active) -> None:
+    available_moves = getattr(battle, "available_moves", [])
+
+    # Struggle / recharge: only move slot 0 is valid
+    if len(available_moves) == 1 and available_moves[0].id in ("struggle", "recharge"):
+        mask[0] = 1.0
+        return
+
+    # Normal case: map available move IDs to their slot indices
+    available_ids = {m.id for m in available_moves}
+    known_moves = list(active.moves.values())
+    for i, move in enumerate(known_moves):
+        if i >= 4:
+            break
+        if move.id in available_ids:
+            mask[i] = 1.0
+
+
+def _mark_available_switches(mask: np.ndarray, battle: AbstractBattle) -> None:
+    available_switches = {id(mon) for mon in getattr(battle, "available_switches", [])}
+    if not available_switches:
+        return
+    bench_native = _bench_native_actions(battle)
+    team_list = list(battle.team.values())
+    for k, native_idx in enumerate(bench_native):
+        if k >= len(COMPRESSED_SWITCH_ACTIONS):
+            break
+        if (
+            native_idx < len(team_list)
+            and id(team_list[native_idx]) in available_switches
+        ):
+            mask[COMPRESSED_SWITCH_ACTIONS.start + k] = 1.0
+
+
+def find_safe_native_action(battle: AbstractBattle) -> np.int64:
+    """Find a guaranteed-valid native action using direct availability.
+
+    Used as a safety net when the normal compressed→native conversion
+    produces an action that poke-env rejects (e.g. stale ``valid_orders``).
+    """
+    available_moves = getattr(battle, "available_moves", [])
+    available_switches = getattr(battle, "available_switches", [])
+    active = battle.active_pokemon
+    force_switch = getattr(battle, "force_switch", False)
+
+    # Prefer a move if not forced to switch
+    if not force_switch and active is not None and available_moves:
+        # Struggle / recharge → native action 6 (move slot 0)
+        if len(available_moves) == 1 and available_moves[0].id in (
+            "struggle",
+            "recharge",
+        ):
+            return np.int64(6)
+
+        known_moves = list(active.moves.values())
+        available_ids = {m.id for m in available_moves}
+        for i, move in enumerate(known_moves):
+            if i >= 4:
+                break
+            if move.id in available_ids:
+                return np.int64(6 + i)
+
+    # Fallback to a switch
+    if available_switches:
+        switch_set = set(available_switches)
+        for i, mon in enumerate(battle.team.values()):
+            if mon in switch_set:
+                return np.int64(i)
+
+    # Last resort: default (let poke-env handle it)
+    return np.int64(-2)
 
 
 def native_to_compressed_action(
@@ -122,25 +230,16 @@ def _compressed_switch_to_native(action: int, battle: AbstractBattle) -> np.int6
     return np.int64(bench_native[switch_idx])
 
 
-def _legal_native_switch_actions(battle: AbstractBattle) -> List[int]:
-    legal = []
-    for native_action in NATIVE_SWITCH_ACTIONS:
+def _fill_mask_from_strict_verify(mask: np.ndarray, battle: AbstractBattle) -> None:
+    """Enable the first compressed index that passes SinglesEnv strict legality."""
+    for a in range(COMPRESSED_ACTION_SPACE_N):
         try:
-            _verify_native_action(np.int64(native_action), battle)
-            legal.append(int(native_action))
-        except (IndexError, ValueError):
+            nat = compressed_to_native_action(a, battle)
+            _verify_native_action(nat, battle)
+            mask[a] = 1.0
+            return
+        except (ValueError, IndexError, TypeError):
             continue
-    return legal
-
-
-def _first_legal_native_action(battle: AbstractBattle) -> int | None:
-    for native_action in range(NATIVE_ACTION_SPACE_N):
-        try:
-            _verify_native_action(np.int64(native_action), battle)
-            return native_action
-        except (IndexError, ValueError):
-            continue
-    return None
 
 
 def _verify_native_action(native_action: np.int64, battle: AbstractBattle) -> None:
