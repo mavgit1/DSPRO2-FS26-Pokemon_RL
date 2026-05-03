@@ -126,10 +126,32 @@ class PokemonTransformerModel(nn.Module):
             dropout=cfg["dropout"],
             batch_first=True,
             activation="gelu",
+            norm_first=True,
         )
         self.transformer = nn.TransformerEncoder(
             encoder_layer, num_layers=self.num_layers
         )
+
+        # -----------------------------------------------------------------
+        # Cross-team attention bias
+        # -----------------------------------------------------------------
+        # Learnable bias [num_layers, T, T] added to self-attention scores
+        # before softmax.  Initialized to encourage cross-team attention:
+        #   CLS (0)       -> opp_active (7)  +2.0
+        #   our_active (1)-> opp_active (7)  +2.0
+        #   opp_active (7)-> our_active (1)  +1.0
+        #   opp_active (7)-> bench (2-6)     +0.5  (switch awareness)
+        #   CLS (0)       -> opp_bench (8-12)+0.5  (team awareness)
+        # Everything else starts at 0 (learned freely).
+        attn_bias = torch.zeros(self.num_layers, self.num_tokens, self.num_tokens)
+        for _l in range(self.num_layers):
+            b = attn_bias[_l]
+            b[0, 7] = 2.0       # CLS -> opp_active
+            b[1, 7] = 2.0       # our_active -> opp_active
+            b[7, 1] = 1.0       # opp_active -> our_active
+            b[7, 2:7] = 0.5     # opp_active -> our bench
+            b[0, 8:13] = 0.5    # CLS -> opp bench
+        self.attn_bias = nn.Parameter(attn_bias)
 
         # -----------------------------------------------------------------
         # LSTM (optional) for cross-turn memory.
@@ -235,7 +257,12 @@ class PokemonTransformerModel(nn.Module):
         }
 
     def _transformer_forward(self, x: TensorType) -> TensorType:
-        return self.transformer(x)
+        """Run transformer with per-layer learnable attention bias."""
+        T = x.shape[1]
+        for i, layer in enumerate(self.transformer.layers):
+            bias = self.attn_bias[i, :T, :T]  # [T, T]
+            x = layer(x, src_mask=bias)
+        return x
 
     @staticmethod
     def _get_cls_token(x: TensorType) -> TensorType:

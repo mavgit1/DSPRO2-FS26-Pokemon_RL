@@ -21,7 +21,7 @@ class ModelConfig:
     # Transformer
     hidden_dim: int = 512
     num_heads: int = 8
-    num_transformer_layers: int = 4
+    num_transformer_layers: int = 2
     dropout: float = 0.1
     use_position_embeddings: bool = True
     use_role_embeddings: bool = True

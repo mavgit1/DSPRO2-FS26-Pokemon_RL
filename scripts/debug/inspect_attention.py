@@ -77,13 +77,22 @@ def load_model(checkpoint_dir: str):
 
     from src.models.battle_transformer import PokemonTransformerModel
 
+    # Infer number of layers from checkpoint keys
+    max_layer = 0
+    for k in cleaned.keys():
+        import re
+        m = re.search(r"transformer\.layers\.(\d+)\.", k)
+        if m:
+            max_layer = max(max_layer, int(m.group(1)))
+    num_layers_inferred = max_layer + 1
+
     model = PokemonTransformerModel(
         num_outputs=14,
         model_config={"custom_model_config": {
             "embedding_dim": 32,
             "hidden_dim": 512,
             "num_heads": 8,
-            "num_transformer_layers": 4,
+            "num_transformer_layers": num_layers_inferred,
         }},
         name="pokemon_transformer",
     )
@@ -173,9 +182,10 @@ def extract_attention(model, obs_dict):
 
 
 def extract_attention_clean(model, obs_dict):
-    """Simpler version: just extract attention then run the layer normally."""
+    """Extract per-layer attention weights including attn_bias."""
     x = model._embed_obs(obs_dict)
 
+    has_bias = hasattr(model, "attn_bias")
     layer_attns = {}
     for layer_i, layer in enumerate(model.transformer.layers):
         mha = layer.self_attn
@@ -184,13 +194,8 @@ def extract_attention_clean(model, obs_dict):
         num_heads = mha.num_heads
         head_dim = mha.head_dim
 
-        # Determine pre-norm vs post-norm
         norm_first = getattr(layer, "norm_first", False)
-
-        if norm_first:
-            x_norm = layer.norm1(x)
-        else:
-            x_norm = x
+        x_norm = layer.norm1(x) if norm_first else x
 
         # QKV
         if mha._qkv_same_embed_dim:
@@ -206,12 +211,21 @@ def extract_attention_clean(model, obs_dict):
 
         scale = 1.0 / math.sqrt(head_dim)
         scores = torch.matmul(q, k.transpose(-2, -1)) * scale
-        attn = torch.softmax(scores, dim=-1)  # [1, H, T, T]
+
+        # Add learnable cross-team bias
+        if has_bias:
+            bias = model.attn_bias[layer_i, :T, :T]  # [T, T]
+            scores = scores + bias.unsqueeze(0).unsqueeze(0)  # broadcast to [B, H, T, T]
+
+        attn = torch.softmax(scores, dim=-1)
         layer_attns[f"layer_{layer_i}"] = attn[0].detach().cpu().numpy()
 
-        # Run the layer normally to continue the forward pass
+        # Run the layer with bias to continue the forward pass correctly
         with torch.no_grad():
-            x = layer(x)
+            if has_bias:
+                x = layer(x, src_mask=model.attn_bias[layer_i, :T, :T])
+            else:
+                x = layer(x)
 
     return layer_attns
 
@@ -262,6 +276,8 @@ async def collect_observations(num_battles=3, port=8000):
 # ---------------------------------------------------------------------------
 
 def print_attn_bar(pct, width=40):
+    if pct != pct:  # NaN check
+        return "!" * width
     filled = int(pct / 100 * width)
     return "#" * filled + "-" * (width - filled)
 
@@ -293,6 +309,7 @@ def analyze(obs_samples, all_layer_attns):
         print(f"{'─'*76}")
 
         avg = attn.mean(axis=(0, 1))  # [T, T] mean over samples and heads
+        avg = np.nan_to_num(avg, nan=0.0)  # handle NaN from numerical issues
 
         # CLS token attention
         print(f"\n  CLS token (0) attention distribution:")
@@ -359,7 +376,7 @@ def main():
         from src.models.battle_transformer import PokemonTransformerModel
         model = PokemonTransformerModel(num_outputs=14, model_config={"custom_model_config": {
             "embedding_dim": 32, "hidden_dim": 512, "num_heads": 8,
-            "num_transformer_layers": 4,
+            "num_transformer_layers": 2,
         }}, name="m")
         model.eval()
     else:
