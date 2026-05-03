@@ -519,11 +519,15 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         server_configuration: ServerConfiguration,
         opponent_mix: Optional[Dict[str, float]] = None,
         opponent_team: Optional[str] = None,
+        model_config_dict: Optional[Dict] = None,
+        selfplay_weights_path: Optional[str] = None,
     ):
         super().__init__(env, opponent)
         self._battle_format = battle_format
         self._server_configuration = server_configuration
         self._opponent_team = opponent_team
+        self._model_config_dict = model_config_dict
+        self._selfplay_weights_path = selfplay_weights_path
         self._opponent_mix = self._normalize_opponent_mix(opponent_mix)
         self._opponent_pool: Dict[str, Any] = {}
         initial_key = self._opponent_key_from_instance(opponent)
@@ -564,6 +568,19 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         return random.choices(keys, weights=weights, k=1)[0]
 
     def _build_opponent(self, opponent_key: str):
+        if opponent_key == "self":
+            from src.training.self_play_player import SelfPlayPlayer
+
+            opponent_id = f"SP_{uuid.uuid4().hex[:6]}"
+            opponent_config = AccountConfiguration(opponent_id, None)
+            return SelfPlayPlayer(
+                model_config_dict=self._model_config_dict or {},
+                weights_path=self._selfplay_weights_path,
+                battle_format=self._battle_format,
+                account_configuration=opponent_config,
+                server_configuration=self._server_configuration,
+                team=self._opponent_team,
+            )
         opponent_class = (
             SimpleHeuristicsPlayer if opponent_key == "heuristic" else RandomPlayer
         )
@@ -578,6 +595,11 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
 
     @staticmethod
     def _opponent_key_from_instance(opponent: Any) -> str:
+        # Lazy import to avoid circular dependency at module load time.
+        from src.training.self_play_player import SelfPlayPlayer
+
+        if isinstance(opponent, SelfPlayPlayer):
+            return "self"
         if isinstance(opponent, SimpleHeuristicsPlayer):
             return "heuristic"
         return "random"
@@ -834,6 +856,8 @@ def create_env_creator(
     opponent_mix: Optional[Dict[str, float]] = None,
     player_team: Optional[str] = None,
     opponent_team: Optional[str] = None,
+    model_config_dict: Optional[Dict] = None,
+    selfplay_weights_path: Optional[str] = None,
 ):
     """
     Create an environment creator function for Ray RLlib.
@@ -922,6 +946,8 @@ def create_env_creator(
             server_configuration=server_config,
             opponent_mix=mix,
             opponent_team=o_team,
+            model_config_dict=model_config_dict,
+            selfplay_weights_path=selfplay_weights_path,
         )
 
     return env_creator

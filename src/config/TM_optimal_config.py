@@ -166,13 +166,29 @@ class CurriculumConfig:
     stages: List[CurriculumStageConfig] = field(
         default_factory=lambda: [
             CurriculumStageConfig(
-                name="dense_only",
-                promote_at_win_rate=1.01,
-                min_samples_for_promotion=50,
-                opponent_mix={"heuristic": 1.0},
+                name="self_play",
+                promote_at_win_rate=95.0,
+                min_samples_for_promotion=200,
+                opponent_mix={"self": 0.7, "heuristic": 0.3},
                 reward_config=RewardConfig(
-                    victory_reward=0.0,
-                    defeat_penalty=0.0,
+                    victory_reward=4.0,
+                    defeat_penalty=-4.0,
+                    hp_value_weight=1.0,
+                    fainted_value=4.0,
+                    fainted_penalty=-3.0,
+                    step_penalty=-0.01,
+                    matchup_reward_weight=5.0,
+                    action_quality_weight=2.0,
+                ),
+            ),
+            CurriculumStageConfig(
+                name="heuristic_50_50",
+                promote_at_win_rate=1.01,
+                min_samples_for_promotion=200,
+                opponent_mix={"self": 0.5, "heuristic": 0.5},
+                reward_config=RewardConfig(
+                    victory_reward=8.0,
+                    defeat_penalty=-8.0,
                     hp_value_weight=1.0,
                     fainted_value=4.0,
                     fainted_penalty=-3.0,
@@ -258,6 +274,9 @@ class TrainingConfig:
     ppo: PPOConfig = field(default_factory=PPOConfig)
     env: EnvironmentConfig = field(default_factory=EnvironmentConfig)
     reward: RewardConfig = field(default_factory=RewardConfig)
+
+    # Self-play
+    selfplay_weights_path: str = "checkpoints/selfplay_latest.pt"
     
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -265,6 +284,7 @@ class TrainingConfig:
             "checkpoint_dir": self.checkpoint_dir,
             "checkpoint_freq": self.checkpoint_freq,
             "num_gpus": self.num_gpus,
+            "selfplay_weights_path": self.selfplay_weights_path,
             "curriculum": self.curriculum.to_dict(),
             "validation": self.validation.to_dict(),
             "model": self.model.to_dict(),

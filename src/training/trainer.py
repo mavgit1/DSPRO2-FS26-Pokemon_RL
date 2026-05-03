@@ -569,8 +569,20 @@ class PokemonTrainer:
     def _save_checkpoint(self) -> Path:
         ckpt_path = self.checkpoint_mgr.save_checkpoint(self.algo, self.total_steps)
         self._last_checkpoint_step = self.total_steps
+        self._export_selfplay_weights()
         print(f"Checkpoint saved: {ckpt_path}")
         return ckpt_path
+
+    def _export_selfplay_weights(self) -> None:
+        """Export raw model state dict for self-play opponents to load."""
+        try:
+            module = self.algo.get_module("default_policy")
+            state_dict = module.model.state_dict()
+            path = Path(self.config.checkpoint_dir) / "selfplay_latest.pt"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            torch.save(state_dict, path)
+        except Exception as exc:
+            print(f"[WARN] Failed to export self-play weights: {exc}")
 
     def _manifest_for_validation_protocol(self, protocol: str) -> str | None:
         if protocol == "fixed_paired":
