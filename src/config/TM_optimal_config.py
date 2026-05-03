@@ -103,8 +103,8 @@ class RewardConfig:
     """Reward function configuration."""
 
     # Major events
-    victory_reward: float = 100.0
-    defeat_penalty: float = -100.0
+    victory_reward: float = 30.0
+    defeat_penalty: float = -30.0
 
     # HP-based rewards
     hp_value_weight: float = 1.0
@@ -115,6 +115,14 @@ class RewardConfig:
 
     # Progress rewards
     step_penalty: float = -0.02
+
+    # Type matchup shaping: rewards switching into favorable matchups.
+    # 0.0 = disabled.  ~0.5 gives a visible but not dominant signal.
+    matchup_reward_weight: float = 0.5
+
+    # Action quality: rewards picking effective moves + defensive awareness.
+    # 0.0 = disabled.  ~2.0 gives a strong action-level learning signal.
+    action_quality_weight: float = 2.0
 
 
 @dataclass
@@ -140,6 +148,8 @@ class CurriculumStageConfig:
                 "fainted_value": self.reward_config.fainted_value,
                 "fainted_penalty": self.reward_config.fainted_penalty,
                 "step_penalty": self.reward_config.step_penalty,
+                "matchup_reward_weight": self.reward_config.matchup_reward_weight,
+                "action_quality_weight": self.reward_config.action_quality_weight,
             },
         }
 
@@ -156,73 +166,19 @@ class CurriculumConfig:
     stages: List[CurriculumStageConfig] = field(
         default_factory=lambda: [
             CurriculumStageConfig(
-                name="innit",
-                promote_at_win_rate=1.01,
-                min_samples_for_promotion=50,
-                opponent_mix={"random": 0, "heuristic": 1},
-                reward_config=RewardConfig(
-                    victory_reward=30.0,
-                    defeat_penalty=-30.0,
-                    hp_value_weight=1.2,
-                    fainted_value=3.0,
-                    fainted_penalty=-2.0,
-                    step_penalty=-0.005,
-                ),
-            ),
-            CurriculumStageConfig(
-                name="easy",
-                promote_at_win_rate=0.75,
-                min_samples_for_promotion=50,
-                opponent_mix={"random": 0.65, "heuristic": 0.35},
-                reward_config=RewardConfig(
-                    victory_reward=100.0,
-                    defeat_penalty=-100.0,
-                    hp_value_weight=1.0,
-                    fainted_value=3.0,
-                    fainted_penalty=-3.0,
-                    step_penalty=-0.01,
-                ),
-            ),
-            CurriculumStageConfig(
-                name="medium",
-                promote_at_win_rate=0.75,
-                min_samples_for_promotion=50,
-                opponent_mix={"random": 0.4, "heuristic": 0.6},
-                reward_config=RewardConfig(
-                    victory_reward=100.0,
-                    defeat_penalty=-100.0,
-                    hp_value_weight=1.0,
-                    fainted_value=3.0,
-                    fainted_penalty=-3.0,
-                    step_penalty=-0.01,
-                ),
-            ),
-            CurriculumStageConfig(
-                name="advanced",
-                promote_at_win_rate=0.75,
-                min_samples_for_promotion=50,
-                opponent_mix={"random": 0.2, "heuristic": 0.8},
-                reward_config=RewardConfig(
-                    victory_reward=100.0,
-                    defeat_penalty=-100.0,
-                    hp_value_weight=1.0,
-                    fainted_value=3.0,
-                    fainted_penalty=-3.0,
-                    step_penalty=-0.01,
-                ),
-            ),
-            CurriculumStageConfig(
-                name="hard",
+                name="dense_only",
                 promote_at_win_rate=1.01,
                 min_samples_for_promotion=50,
                 opponent_mix={"heuristic": 1.0},
                 reward_config=RewardConfig(
-                    victory_reward=120.0,
-                    defeat_penalty=-120.0,
-                    hp_value_weight=0.8,
+                    victory_reward=0.0,
+                    defeat_penalty=0.0,
+                    hp_value_weight=1.0,
                     fainted_value=4.0,
                     fainted_penalty=-3.0,
-                    step_penalty=-0.02,
+                    step_penalty=-0.01,
+                    matchup_reward_weight=5.0,
+                    action_quality_weight=2.0,
                 ),
             ),
         ]
@@ -335,6 +291,8 @@ class TrainingConfig:
                 "fainted_value": self.reward.fainted_value,
                 "fainted_penalty": self.reward.fainted_penalty,
                 "step_penalty": self.reward.step_penalty,
+                "matchup_reward_weight": self.reward.matchup_reward_weight,
+                "action_quality_weight": self.reward.action_quality_weight,
             },
         }
 
