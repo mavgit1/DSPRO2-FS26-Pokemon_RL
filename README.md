@@ -152,3 +152,7 @@ uv remove <package_name>
 
 ### Hardware Configs
 Training configs are located in `src/config/TM_optimal_config.py`. Create or modify presets based on what your specific machine (CPU/GPU) can handle.
+
+### Opponent baselines *(2026-05-04)*
+
+Training samples opponents from curriculum **`opponent_mix`** keys (and optional `opponent_difficulty` for the initial opponent). Besides poke-env **`random`** (`RandomPlayer`, fully random legal actions) and **`heuristic`** (`SimpleHeuristicsPlayer`), the repo defines **`random_no_switch`**: random moves and gimmick variants only, with switches used only when the battle rules require them (e.g. faint replacement). Implementation: `src/envs/random_no_switch_player.py`; wiring: `src/envs/battle_env.py`. Observations encode opponent type in global features: **`random_no_switch` is canonicalized to `random` in `src/models/embedding.py`**, so the policy sees the same opponent-type signal as for `RandomPlayer`. 

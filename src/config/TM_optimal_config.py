@@ -59,21 +59,21 @@ class PPOConfig:
     lr: float = 3.0e-4
 
     # Discount and GAE
-    gamma: float = 0.99
+    gamma: float = 0.95
     lambda_: float = 0.95
 
     # PPO clipping
     clip_param: float = 0.2
 
     # Entropy bonus (exploration)
-    entropy_coeff: float = 0.005
+    entropy_coeff: float = 0.05
 
     # Value function
     vf_loss_coeff: float = 0.5
     vf_clip_param: float = 5.0
 
     # Gradient clipping
-    grad_clip: float = 0.5
+    grad_clip: float = 5.0
 
     # Batch sizes
     train_batch_size: int = 6144
@@ -103,31 +103,35 @@ class RewardConfig:
     """Reward function configuration."""
 
     # Major events
-    victory_reward: float = 30.0
-    defeat_penalty: float = -30.0
+    victory_reward: float = 10.0
+    defeat_penalty: float = -10.0
 
     # HP-based rewards
-    hp_value_weight: float = 1.0
+    hp_value_weight: float = 2.0
 
     # Fainting rewards
-    fainted_value: float = 3.0
-    fainted_penalty: float = -3.0
+    fainted_value: float = 5.0
+    fainted_penalty: float = -5.0
 
     # Progress rewards
-    step_penalty: float = -0.02
+    step_penalty: float = -0.005
 
-    # Type matchup shaping: rewards switching into favorable matchups.
-    # 0.0 = disabled.  ~0.5 gives a visible but not dominant signal.
-    matchup_reward_weight: float = 0.5
+    # Type matchup shaping: gentle nudge toward favorable matchups (0.2 ≪ terminal ±10).
+    matchup_reward_weight: float = 0.2
 
-    # Action quality: rewards picking effective moves + defensive awareness.
-    # 0.0 = disabled.  ~2.0 gives a strong action-level learning signal.
-    action_quality_weight: float = 2.0
+    # Action quality: per-step signal for picking effective moves (0.3 ≪ terminal ±10).
+    action_quality_weight: float = 0.3
 
 
 @dataclass
 class CurriculumStageConfig:
-    """Single curriculum stage settings."""
+    """Single curriculum stage settings.
+
+    ``opponent_mix`` weights use opponent keys consumed by ``battle_env``:
+    ``random`` (poke-env ``RandomPlayer``), ``random_no_switch`` (random among
+    moves only; no voluntary switches), ``heuristic``, ``self``. See README /
+    CLAUDE.md (2026-05-04).
+    """
 
     name: str
     promote_at_win_rate: float
@@ -166,35 +170,51 @@ class CurriculumConfig:
     stages: List[CurriculumStageConfig] = field(
         default_factory=lambda: [
             CurriculumStageConfig(
-                name="self_play",
-                promote_at_win_rate=95.0,
-                min_samples_for_promotion=200,
-                opponent_mix={"self": 0.7, "heuristic": 0.3},
+                name="random_warmup",
+                promote_at_win_rate=0.70,
+                min_samples_for_promotion=100,
+                opponent_mix={"random_no_switch": 1.0},
                 reward_config=RewardConfig(
-                    victory_reward=4.0,
-                    defeat_penalty=-4.0,
-                    hp_value_weight=1.0,
-                    fainted_value=4.0,
-                    fainted_penalty=-3.0,
-                    step_penalty=-0.01,
-                    matchup_reward_weight=5.0,
-                    action_quality_weight=2.0,
+                    victory_reward=10.0,
+                    defeat_penalty=-10.0,
+                    hp_value_weight=2.0,
+                    fainted_value=5.0,
+                    fainted_penalty=-5.0,
+                    step_penalty=-0.005,
+                    matchup_reward_weight=0.2,
+                    action_quality_weight=0.3,
                 ),
             ),
             CurriculumStageConfig(
-                name="heuristic_50_50",
+                name="self_play",
+                promote_at_win_rate=0.85,
+                min_samples_for_promotion=200,
+                opponent_mix={"self": 0.8, "random_no_switch": 0.2},
+                reward_config=RewardConfig(
+                    victory_reward=10.0,
+                    defeat_penalty=-10.0,
+                    hp_value_weight=2.0,
+                    fainted_value=5.0,
+                    fainted_penalty=-5.0,
+                    step_penalty=-0.005,
+                    matchup_reward_weight=0.2,
+                    action_quality_weight=0.3,
+                ),
+            ),
+            CurriculumStageConfig(
+                name="mixed",
                 promote_at_win_rate=1.01,
                 min_samples_for_promotion=200,
-                opponent_mix={"self": 0.5, "heuristic": 0.5},
+                opponent_mix={"heuristic": 0.5, "self": 0.3, "random_no_switch": 0.2},
                 reward_config=RewardConfig(
-                    victory_reward=8.0,
-                    defeat_penalty=-8.0,
-                    hp_value_weight=1.0,
-                    fainted_value=4.0,
-                    fainted_penalty=-3.0,
-                    step_penalty=-0.01,
-                    matchup_reward_weight=5.0,
-                    action_quality_weight=2.0,
+                    victory_reward=10.0,
+                    defeat_penalty=-10.0,
+                    hp_value_weight=2.0,
+                    fainted_value=5.0,
+                    fainted_penalty=-5.0,
+                    step_penalty=-0.005,
+                    matchup_reward_weight=0.2,
+                    action_quality_weight=0.3,
                 ),
             ),
         ]

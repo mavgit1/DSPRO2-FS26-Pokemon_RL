@@ -1,0 +1,10 @@
+\chapter{Challenge as a graph of battles}
+
+\section{Abstraction}
+Instead of the full RPG world, the challenge is a \textbf{directed graph} of battles: nodes are opponent teams (or trainer instances), edges are progression. Initially this reduces to an ordered list: the agent must win every battle in sequence; one loss restarts the run.
+
+\section{Resources between battles}
+Between nodes, HP and PP are restored except for Pok\'{e}mon that already fainted in earlier battles (Nuzlocke permadeath). The agent may rebuild its team between fights, except where the design forces multiple consecutive battles without team changes.
+
+\section{Information asymmetry (future)}
+Team-building and battling agents may receive \textbf{complete}, \textbf{partial}, or \textbf{no} information about upcoming opponents; this knob is for later milestones and curriculum design.

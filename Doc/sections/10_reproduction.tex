@@ -1,0 +1,44 @@
+\chapter{Reproducing training runs}
+
+\section{Dependencies}
+Python~3.13, \texttt{uv} as package manager. From the repository root:
+\begin{verbatim}
+uv sync
+\end{verbatim}
+
+\section{Environment variables (MLflow)}
+Copy \texttt{.env-example} to \texttt{.env} and set \texttt{MLFLOW\_TRACKING\_URI} and credentials. Values are not committed.
+
+\section{Pok\'{e}mon Showdown}
+Clone Showdown, \texttt{npm install}, configure \texttt{config/config.js}. Start local servers (example: eight instances on ports 8000--8007):
+\begin{verbatim}
+./scripts/spin_up_multiple_showdown.sh
+./scripts/kill_all_showdown.sh   # stop
+\end{verbatim}
+
+\section{Training commands}
+\begin{verbatim}
+uv run train_battler.py --preset quick
+uv run train_battler.py --preset standard
+uv run train_battler.py --preset memory_safe
+uv run train_battler.py --preset large
+\end{verbatim}
+\noindent Common optional flags (see \texttt{train\_battler.py}): \texttt{--timesteps}; \texttt{--num-servers}; \texttt{--start-port}; \texttt{--resume-checkpoint}; \texttt{--mlflow-run-id}; \texttt{--disable-scheduled-validation}; validation step overrides.
+
+\section{Preset note}
+\texttt{train\_battler.py} advertises \texttt{--preset optimal}, but \texttt{get\_config} in \texttt{TM\_optimal\_config.py} currently implements \texttt{quick}, \texttt{standard}, \texttt{memory\_safe}, and \texttt{large} only. Running \texttt{optimal} raises \texttt{ValueError} until an alias is added---use \texttt{standard} or \texttt{large} on high-end GPUs, or extend \texttt{get\_config}.
+
+\section{Resume}
+\begin{verbatim}
+uv run train_battler.py --preset standard --resume-checkpoint latest \
+  --mlflow-run-id <RUN_ID>
+\end{verbatim}
+
+\section{Linting}
+\begin{verbatim}
+uv run ruff check .
+uv run ruff format .
+\end{verbatim}
+
+\section{Artifacts}
+Checkpoints default to \texttt{checkpoints/} (Git-ignored). MLflow experiment name: \texttt{Pokemon\_RL\_Battler}.

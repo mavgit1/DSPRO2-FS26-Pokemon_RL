@@ -52,6 +52,10 @@ class SelfPlayPlayer(Player):
         self._last_mtime: float = 0.0
         self._load_count = 0
 
+        # Per-battle LSTM state cache for cross-turn memory.
+        # Keyed by battle_tag; values are {"h": Tensor, "c": Tensor}.
+        self._lstm_states: Dict[str, Dict[str, torch.Tensor]] = {}
+
         if weights_path:
             self._try_load_weights()
 
@@ -74,6 +78,7 @@ class SelfPlayPlayer(Player):
             )
             self.model.load_state_dict(state_dict, strict=True)
             self._last_mtime = mtime
+            self._lstm_states.clear()  # stale state incompatible with new weights
             self._load_count += 1
         except Exception:
             pass
@@ -84,6 +89,10 @@ class SelfPlayPlayer(Player):
 
     def choose_move(self, battle: AbstractBattle):
         self._try_load_weights()
+
+        # Prune LSTM cache for finished battles
+        if battle.won or battle.lost:
+            self._lstm_states.pop(battle.battle_tag, None)
 
         try:
             return self._inference_move(battle)
@@ -116,11 +125,18 @@ class SelfPlayPlayer(Player):
                     else:
                         lstm_obs[k] = v.unsqueeze(1)
 
-                state = {
-                    "h": torch.zeros(1, self.model.lstm_hidden),
-                    "c": torch.zeros(1, self.model.lstm_hidden),
-                }
-                features, _, mask = self.model.compute_features(lstm_obs, state)
+                # Look up cached LSTM state for this battle, or use zeros
+                tag = battle.battle_tag
+                state = self._lstm_states.get(tag, None)
+                if state is None:
+                    state = {
+                        "h": torch.zeros(1, self.model.lstm_hidden),
+                        "c": torch.zeros(1, self.model.lstm_hidden),
+                    }
+
+                features, new_state, mask = self.model.compute_features(lstm_obs, state)
+                # Cache updated state for next turn
+                self._lstm_states[tag] = new_state
                 features = features.squeeze(1)
             else:
                 features, _, mask = self.model.compute_features(obs_tensors)

@@ -581,9 +581,14 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
                 server_configuration=self._server_configuration,
                 team=self._opponent_team,
             )
-        opponent_class = (
-            SimpleHeuristicsPlayer if opponent_key == "heuristic" else RandomPlayer
-        )
+        if opponent_key == "heuristic":
+            opponent_class = SimpleHeuristicsPlayer
+        elif opponent_key == "random_no_switch":
+            from src.envs.random_no_switch_player import RandomNoSwitchPlayer
+
+            opponent_class = RandomNoSwitchPlayer
+        else:
+            opponent_class = RandomPlayer
         opponent_id = f"Opp_{uuid.uuid4().hex[:6]}"
         opponent_config = AccountConfiguration(opponent_id, None)
         return opponent_class(
@@ -602,6 +607,10 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             return "self"
         if isinstance(opponent, SimpleHeuristicsPlayer):
             return "heuristic"
+        from src.envs.random_no_switch_player import RandomNoSwitchPlayer
+
+        if isinstance(opponent, RandomNoSwitchPlayer):
+            return "random_no_switch"
         return "random"
 
     @staticmethod
@@ -867,8 +876,9 @@ def create_env_creator(
         server_host: Showdown server host
         server_port: Showdown server port
         reward_config: Reward configuration
-        opponent_difficulty: "heuristic"/"heuristics" or "random"
-        opponent_mix: Optional per-episode sampling mix, e.g. {"random": 0.7, "heuristic": 0.3}
+        opponent_difficulty: "heuristic"/"heuristics", "random", or "random_no_switch"
+        opponent_mix: Optional per-episode sampling mix, e.g.
+            {"random": 0.7, "heuristic": 0.3} or {"random_no_switch": 1.0}
         player_team: Optional fixed Showdown team text for the learning agent
         opponent_team: Optional fixed Showdown team text for the opponent
 
@@ -917,6 +927,11 @@ def create_env_creator(
         if difficulty in {"heuristic", "heuristics"}:
             opponent_class = SimpleHeuristicsPlayer
             opponent_id = f"hr_{uuid.uuid4().hex[:6]}"
+        elif difficulty == "random_no_switch":
+            from src.envs.random_no_switch_player import RandomNoSwitchPlayer
+
+            opponent_class = RandomNoSwitchPlayer
+            opponent_id = f"rns_{uuid.uuid4().hex[:6]}"
         else:
             opponent_class = RandomPlayer
         opponent_config = AccountConfiguration(opponent_id, None)

@@ -445,8 +445,8 @@ class PokemonTransformerModel(nn.Module):
             logits = logits - (1.0 - mask) * 1e8
         return logits, values
 
-    @staticmethod
     def _extract_state(
+        self,
         state: Optional[Dict[str, TensorType]],
         batch_size: int,
         device: torch.device,
@@ -466,14 +466,10 @@ class PokemonTransformerModel(nn.Module):
                     f"h.shape={tuple(h.shape)}, c.shape={tuple(c.shape)}."
                 )
             return h, c
-        # Missing state: synthesize zeros with the expected [B, H] layout.
-        # ``state`` should normally be provided by RLlib when stateful.
-        raise ValueError(
-            "Stateful PokemonTransformerModel called without STATE_IN. "
-            "RLlib's default connector pipeline populates this; if you are "
-            "calling the model directly, pass state={'h': zeros([B, H]), "
-            "'c': zeros([B, H])}."
-        )
+        # Missing state: return zeros instead of raising error
+        h = torch.zeros(batch_size, self.lstm_hidden, device=device)
+        c = torch.zeros(batch_size, self.lstm_hidden, device=device)
+        return h, c
 
 
 # =============================================================================

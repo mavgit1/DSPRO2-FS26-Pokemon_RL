@@ -1,0 +1,17 @@
+\chapter{Game environment and simulator}
+
+\section{No retail game client}
+The project does not drive a Nintendo console or emulator. Battles run in \textbf{Pok\'{e}mon Showdown}, an open-source Node.js battle simulator that implements official mechanics.
+
+\section{Python stack}
+\begin{itemize}
+  \item \textbf{poke-env} --- WebSocket client, battle state objects, helpers suited to RL.
+  \item \textbf{Gymnasium} --- a custom environment (\texttt{src/envs/battle\_env.py}) wraps poke-env.
+  \item \textbf{Ray RLlib} --- distributed PPO training with a custom torch RL module.
+\end{itemize}
+
+\section{Battle mechanics (summary)}
+ Singles are turn-based: each turn both sides choose a move (with possible mega/Z/Dynamax variants in supported formats) or switch. Speed and priority determine order. Types, STAB, abilities, items, and status all affect damage and win conditions. The battle ends when one side has no conscious Pok\'{e}mon. A type chart reference: \url{https://www.typecalendar.com/pokemon-type-chart.html}.
+
+\section{Mandatory trainers / BDSP}
+Long-term evaluation targets BDSP trainer ordering and teams (datasets under \texttt{data/}). Training defaults use Showdown random formats (see \texttt{EnvironmentConfig.battle\_format} in config) unless a fixed team is injected for experiments.

@@ -1,0 +1,13 @@
+\chapter{Open design questions}
+
+\section{Observation space}
+Which partial information should the policy see (bench HP, revealed moves, past turns)? How much preprocessing vs.\ raw Showdown state?
+
+\section{Architecture}
+Transformer width/depth vs.\ sample efficiency; when to add recurrence; how aggressively to compress actions.
+
+\section{Training procedure}
+Self-play ratio schedules; opponent mixing vs.\ staged thresholds; reward shaping vs.\ sparse terminal rewards; self-play weight export cadence.
+
+\section{Evaluation}
+Define success on the BDSP gauntlet vs.\ random battles; uncertainty in win-rate estimates; reporting model size and compute.

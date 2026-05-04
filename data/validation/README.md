@@ -2,6 +2,8 @@
 
 Tier 2 uses a fixed paired-team benchmark:
 
+> **Note (2026-05-04):** Training may use the `random_no_switch` baseline (see README). This Tier 2 protocol still uses poke-env `RandomPlayer` as described below.
+
 - Generate 20 `gen8randombattle` teams once.
 - Store them as 10 fixed pairs.
 - For each pair, run both swapped team directions against `RandomPlayer` and

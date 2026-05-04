@@ -413,6 +413,8 @@ def _canonical_opponent_type(value: Optional[str]) -> Optional[str]:
         return None
     if key == "heuristics":
         return "heuristic"
+    if key == "random_no_switch":
+        return "random"
     return key
 
 

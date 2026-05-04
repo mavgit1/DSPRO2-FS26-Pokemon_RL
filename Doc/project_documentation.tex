@@ -1,0 +1,66 @@
+% Build from this directory (two passes for TOC):
+%   latexmk -pdf project_documentation.tex
+%   pdflatex project_documentation.tex && pdflatex project_documentation.tex
+%
+% If pdflatex is not installed on the host (e.g. immutable OS), e.g.:
+%   podman run --rm -v "$PWD":/work:Z -w /work docker.io/texlive/texlive:latest \
+%     sh -c 'pdflatex -interaction=nonstopmode project_documentation.tex && pdflatex -interaction=nonstopmode project_documentation.tex'
+%
+% Note: temp/ is gitignored; narrative sources include repo-root temp.md and
+% temp/ai_docs/*.md (read via absolute paths during authoring).
+
+\documentclass[11pt,a4paper]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{setspace}
+\setstretch{1.12}
+
+\usepackage{xcolor}
+\definecolor{docblue}{RGB}{10,80,160}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\titleformat{\chapter}{\Large\bfseries\color{docblue}}{\thechapter.}{0.6em}{}
+\titleformat{\section}{\large\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\setlist[itemize]{leftmargin=*,nosep,topsep=4pt}
+
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+
+\title{Pok\'{e}mon Nuzlocke RL Battler\\[0.3em]
+\large Project documentation (draft)}
+\author{Tristan Muri, Marvin Hueber, Viacheslav Godovskii, Alex Liubov}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report consolidates project vision (\texttt{temp.md}), internal technical notes (\texttt{temp/ai\_docs/}, not versioned in Git), and the current repository implementation. A companion factsheet with tables tuned for the DSPRO2 hand-in remains in \texttt{RL\_Data\_Sheet.tex}. Numbers in the \emph{Implementation snapshot} and \emph{Technical deep dive} chapters follow \texttt{src/config/TM\_optimal\_config.py} and related Python modules unless explicitly labeled as historical narrative.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\input{sections/00_meta}
+\input{sections/01_intro}
+\input{sections/02_game_env}
+\input{sections/03_challenge_model}
+\input{sections/04_milestones}
+\input{sections/05_rl_setup}
+\input{sections/06_implementation_snapshot}
+\input{sections/07_results_roadmap}
+\input{sections/08_design_questions}
+\input{sections/09_technical_deep_dive}
+\input{sections/10_reproduction}
+
+\end{document}
