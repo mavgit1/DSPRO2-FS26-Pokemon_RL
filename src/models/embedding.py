@@ -56,6 +56,7 @@ GLOBAL_EXTRA_FEATURE_NAMES = [
     "opponent_random",
     "opponent_heuristic",
     "opponent_other",
+    "training_stage_index",
     "battle_turn_norm",
     "force_switch",
     "active_trapped",
@@ -256,6 +257,7 @@ def embed_pokemon(
 def embed_battle(
     battle: AbstractBattle,
     opponent_type: Optional[str] = None,
+    training_stage_index: Optional[int] = None,
 ) -> Dict[str, np.ndarray]:
     """
     Convert full battle state to transformer-ready embedding.
@@ -268,6 +270,7 @@ def embed_battle(
     Args:
         battle: AbstractBattle object from poke-env
         opponent_type: Optional selected opponent label for the episode.
+        training_stage_index: Optional curriculum stage index counter.
     
     Returns:
         Dict with:
@@ -317,7 +320,11 @@ def embed_battle(
 
     # Extra global context features. These fit in the existing spare token
     # capacity, so improves coverage without changing TOKEN_DIM.
-    extra_features = _global_extra_features(battle, opponent_type)
+    extra_features = _global_extra_features(
+        battle,
+        opponent_type,
+        training_stage_index=training_stage_index,
+    )
     available = max(0, TOKEN_DIM - global_idx)
     if available > 0:
         count = min(len(extra_features), available)
@@ -382,6 +389,7 @@ def embed_battle(
 def _global_extra_features(
     battle: AbstractBattle,
     opponent_type: Optional[str],
+    training_stage_index: Optional[int] = None,
 ) -> np.ndarray:
     features = np.zeros(len(GLOBAL_EXTRA_FEATURE_NAMES), dtype=np.float32)
     opponent_key = _canonical_opponent_type(opponent_type)
@@ -392,16 +400,17 @@ def _global_extra_features(
     elif opponent_key:
         features[2] = 1.0
 
-    features[3] = min(float(max(0, int(getattr(battle, "turn", 0)))) / 100.0, 1.0)
-    features[4] = 1.0 if bool(getattr(battle, "force_switch", False)) else 0.0
+    features[3] = float(max(0, int(training_stage_index or 0)))
+    features[4] = min(float(max(0, int(getattr(battle, "turn", 0)))) / 100.0, 1.0)
+    features[5] = 1.0 if bool(getattr(battle, "force_switch", False)) else 0.0
 
     active = getattr(battle, "active_pokemon", None)
-    features[5] = 1.0 if active is not None and bool(getattr(active, "trapped", False)) else 0.0
-    features[6] = min(float(len(getattr(battle, "available_moves", []) or [])) / 4.0, 1.0)
-    features[7] = min(float(len(getattr(battle, "available_switches", []) or [])) / 6.0, 1.0)
-    features[8] = 1.0 if bool(getattr(battle, "can_dynamax", False)) else 0.0
-    features[9] = 1.0 if bool(getattr(battle, "can_mega_evolve", False)) else 0.0
-    features[10] = 1.0 if bool(getattr(battle, "can_z_move", False)) else 0.0
+    features[6] = 1.0 if active is not None and bool(getattr(active, "trapped", False)) else 0.0
+    features[7] = min(float(len(getattr(battle, "available_moves", []) or [])) / 4.0, 1.0)
+    features[8] = min(float(len(getattr(battle, "available_switches", []) or [])) / 6.0, 1.0)
+    features[9] = 1.0 if bool(getattr(battle, "can_dynamax", False)) else 0.0
+    features[10] = 1.0 if bool(getattr(battle, "can_mega_evolve", False)) else 0.0
+    features[11] = 1.0 if bool(getattr(battle, "can_z_move", False)) else 0.0
     return features
 
 
@@ -457,12 +466,12 @@ def is_native_switch_action(action: int) -> bool:
 def estimate_win_probability(battle: AbstractBattle) -> float:
     """
     Estimate win probability using heuristics.
-    
+
     For better accuracy, use a trained value network instead.
-    
+
     Args:
         battle: AbstractBattle object
-    
+
     Returns:
         Float in [0, 1] representing estimated win probability
     """
@@ -470,33 +479,33 @@ def estimate_win_probability(battle: AbstractBattle) -> float:
         return 1.0
     if battle.lost:
         return 0.0
-    
+
     our_score = 0.0
     opp_score = 0.0
-    
+
     # Pokemon count (alive vs fainted)
     our_alive = sum(1 for m in battle.team.values() if not m.fainted)
     opp_alive = sum(1 for m in battle.opponent_team.values() if not m.fainted)
     our_score += our_alive * 15
     opp_score += opp_alive * 15
-    
+
     # HP totals
     for mon in battle.team.values():
         if not mon.fainted:
             our_score += mon.current_hp_fraction * 10
-    
+
     for mon in battle.opponent_team.values():
         if not mon.fainted:
             opp_score += mon.current_hp_fraction * 10
-    
+
     # Boosts on active Pokemon
     if battle.active_pokemon and battle.active_pokemon.boosts:
         for boost in battle.active_pokemon.boosts.values():
             our_score += boost * 2
-    
+
     # Normalize to probability
     total = our_score + opp_score
     if total <= 0:
         return 0.5
-    
+
     return our_score / total

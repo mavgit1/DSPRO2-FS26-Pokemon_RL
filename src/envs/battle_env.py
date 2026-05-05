@@ -113,6 +113,7 @@ class PokemonBattleEnv(SinglesEnv):
         self._cleanup_interval_steps = 256
         self._fallback_events_current_episode = 0
         self._opponent_context: Optional[str] = None
+        self._training_stage_context: int = 0
 
         super().__init__(**kwargs)
 
@@ -131,11 +132,19 @@ class PokemonBattleEnv(SinglesEnv):
             Dict with obs, species, items, abilities, action_mask
         """
         # Not recursive, just calls the embed_battle function from the embedding.py file.
-        return embed_battle(battle, opponent_type=self._opponent_context)
+        return embed_battle(
+            battle,
+            opponent_type=self._opponent_context,
+            training_stage_index=self._training_stage_context,
+        )
 
     def set_opponent_context(self, opponent_type: Optional[str]) -> None:
         """Attach selected opponent metadata to future observations."""
         self._opponent_context = opponent_type
+
+    def set_training_stage_context(self, stage_index: int) -> None:
+        """Attach curriculum/training stage index to future observations."""
+        self._training_stage_context = max(0, int(stage_index))
 
     def calc_reward(self, battle: AbstractBattle) -> float:
         """Calculate reward based on battle state."""
@@ -542,6 +551,9 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         self._opponent_pool[initial_key] = opponent
         if hasattr(self.env, "set_opponent_context"):
             self.env.set_opponent_context(initial_key)
+        if hasattr(self.env, "set_training_stage_context"):
+            self.env.set_training_stage_context(0)
+        self._stage_counter = 0
 
     @staticmethod
     def _normalize_opponent_mix(
@@ -748,6 +760,9 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             self.set_opponent_mix(stage_payload["opponent_mix"])
         if "reward_config" in stage_payload:
             self.set_reward_config(RewardConfig(**stage_payload["reward_config"]))
+        self._stage_counter += 1
+        if hasattr(self.env, "set_training_stage_context"):
+            self.env.set_training_stage_context(self._stage_counter)
 
     def pop_recent_outcomes(self) -> List[int]:
         if hasattr(self.env, "pop_recent_outcomes"):
@@ -937,6 +952,8 @@ def create_env_creator(
         else:
             opponent_class = RandomPlayer
         opponent_config = AccountConfiguration(opponent_id, None)
+        env_opponent_id = f"{opponent_id}_e"
+        env_opponent_config = AccountConfiguration(env_opponent_id, None)
         opponent = opponent_class(
             battle_format=fmt,
             account_configuration=opponent_config,
@@ -950,6 +967,7 @@ def create_env_creator(
             reward_config=rc,
             battle_format=fmt,
             account_configuration1=AccountConfiguration(player_id, None),
+            account_configuration2=env_opponent_config,
             server_configuration=server_config,
             strict=False,
             team=p_team,

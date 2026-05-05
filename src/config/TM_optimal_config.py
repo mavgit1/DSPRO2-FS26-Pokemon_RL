@@ -19,10 +19,10 @@ class ModelConfig:
     embedding_dim: int = 32
 
     # Transformer
-    hidden_dim: int = 512
-    num_heads: int = 8
-    num_transformer_layers: int = 1
-    dropout: float = 0.15
+    hidden_dim: int = 256
+    num_heads: int = 4
+    num_transformer_layers: int = 2
+    dropout: float = 0.05
     use_position_embeddings: bool = True
     use_role_embeddings: bool = True
 
@@ -56,17 +56,17 @@ class PPOConfig:
     """Standard PPO hyperparameters."""
 
     # Learning
-    lr: float = 3.0e-4
+    lr: float = 5e-4
 
     # Discount and GAE
-    gamma: float = 0.95
-    lambda_: float = 0.95
+    gamma: float = 0.97
+    lambda_: float = 0.92
 
     # PPO clipping
-    clip_param: float = 0.2
+    clip_param: float = 0.15
 
     # Entropy bonus (exploration)
-    entropy_coeff: float = 0.2
+    entropy_coeff: float = 0.05
 
     # Value function
     vf_loss_coeff: float = 0.5
@@ -76,9 +76,9 @@ class PPOConfig:
     grad_clip: float = 5.0
 
     # Batch sizes
-    train_batch_size: int = 6144
-    sgd_minibatch_size: int = 256
-    num_sgd_iter: int = 10          
+    train_batch_size: int = 4096
+    sgd_minibatch_size: int = 512
+    num_sgd_iter: int = 8          
 
 
 @dataclass
@@ -99,8 +99,14 @@ class EnvironmentConfig:
     num_servers: int = 8
 
     # Parallelism
-    num_workers: int = 12
-    num_envs_per_worker: int = 4
+    # Number of RLlib rollout workers (processes) collecting experience.
+    # Scale up until CPU cores or Showdown servers are saturated; increasing this
+    # usually improves sample throughput but also increases RAM usage.
+    num_workers: int = 24
+    # Number of battle environments run concurrently inside each worker.
+    # Effective parallel envs ~= num_workers * num_envs_per_worker. Increase this
+    # when workers are underutilized; reduce it if memory pressure or env lag appears.
+    num_envs_per_worker: int = 8
 
 
 @dataclass
@@ -168,58 +174,74 @@ class CurriculumConfig:
     """Curriculum configuration with per-stage payloads."""
 
     enabled: bool = True
-    rolling_window_episodes: int = 200
-    min_episodes_before_promotion: int = 20_000
+    rolling_window_episodes: int = 300
+    min_episodes_before_promotion: int = 3_000
     allow_demotion: bool = False
     reward_rollback_on_demotion: bool = False
     stages: List[CurriculumStageConfig] = field(
         default_factory=lambda: [
             CurriculumStageConfig(
-                name="random_warmup",
-                promote_at_win_rate=0.70,
-                min_samples_for_promotion=100,
-                opponent_mix={"random_no_switch": 1.0},
+                name="moves_only_warmup",
+                promote_at_win_rate=0.65,
+                min_samples_for_promotion=200,
+                opponent_mix={"random": 1.0},
+                reward_config=RewardConfig(
+                    victory_reward=8.0,
+                    defeat_penalty=-10.0,
+                    hp_value_weight=3.0,      
+                    fainted_value=6.0,
+                    fainted_penalty=-6.0,
+                    step_penalty=-0.01,        
+                    matchup_reward_weight=0.1, 
+                    action_quality_weight=0.4,
+                ),
+            ),
+            CurriculumStageConfig(
+                name="random_with_switches",
+                promote_at_win_rate=0.72,
+                min_samples_for_promotion=200,
+                opponent_mix={"random_no_switch": 0.7, "random": 0.3},
                 reward_config=RewardConfig(
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
-                    hp_value_weight=2.0,
-                    fainted_value=5.0,
-                    fainted_penalty=-5.0,
-                    step_penalty=-0.005,
-                    matchup_reward_weight=0.2,
-                    action_quality_weight=0.3,
+                    hp_value_weight=3.0,      
+                    fainted_value=6.0,
+                    fainted_penalty=-6.0,
+                    step_penalty=-0.01,        
+                    matchup_reward_weight=0.1, 
+                    action_quality_weight=0.4,
                 ),
             ),
             CurriculumStageConfig(
                 name="self_play",
-                promote_at_win_rate=0.85,
-                min_samples_for_promotion=200,
-                opponent_mix={"self": 0.8, "random_no_switch": 0.2},
+                promote_at_win_rate=0.8,
+                min_samples_for_promotion=300,
+                opponent_mix={"self": 0.7, "random": 0.2, "random_no_switch": 0.1},
                 reward_config=RewardConfig(
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
-                    hp_value_weight=2.0,
-                    fainted_value=5.0,
-                    fainted_penalty=-5.0,
-                    step_penalty=-0.005,
-                    matchup_reward_weight=0.2,
-                    action_quality_weight=0.3,
+                    hp_value_weight=3.0,      
+                    fainted_value=6.0,
+                    fainted_penalty=-6.0,
+                    step_penalty=-0.01,        
+                    matchup_reward_weight=0.1, 
+                    action_quality_weight=0.4,
                 ),
             ),
             CurriculumStageConfig(
-                name="mixed",
+                name="mixed_final",
                 promote_at_win_rate=1.01,
-                min_samples_for_promotion=200,
+                min_samples_for_promotion=300,
                 opponent_mix={"heuristic": 0.5, "self": 0.3, "random_no_switch": 0.2},
                 reward_config=RewardConfig(
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
-                    hp_value_weight=2.0,
-                    fainted_value=5.0,
-                    fainted_penalty=-5.0,
-                    step_penalty=-0.005,
-                    matchup_reward_weight=0.2,
-                    action_quality_weight=0.3,
+                    hp_value_weight=3.0,      
+                    fainted_value=6.0,
+                    fainted_penalty=-6.0,
+                    step_penalty=-0.01,        
+                    matchup_reward_weight=0.1, 
+                    action_quality_weight=0.4,
                 ),
             ),
         ]
