@@ -1,0 +1,112 @@
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{\numberline {1}Introduction}{4}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Problem Statement}{4}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Stakeholder Context}{4}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Objectives \& Success Metrics}{4}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Project Scope}{5}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Document Structure}{5}{section.1.5}%
+\contentsline {chapter}{\numberline {2}Game Environment \& Battle Mechanics}{6}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Pok\'{e}mon Battles---Overview}{6}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Turn Structure}{6}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Pok\'{e}mon Anatomy}{6}{subsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}Damage \& Typing}{6}{subsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.1.4}Winning \& Losing}{7}{subsection.2.1.4}%
+\contentsline {section}{\numberline {2.2}Pok\'{e}mon Showdown Simulator}{7}{section.2.2}%
+\contentsline {section}{\numberline {2.3}poke-env Python Library}{7}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Pok\'{e}mon Brilliant Diamond Context}{7}{section.2.4}%
+\contentsline {chapter}{\numberline {3}Challenge Model \& Data Provenance}{8}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Challenge Definition}{8}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Resource Management Between Battles}{8}{subsection.3.1.1}%
+\contentsline {section}{\numberline {3.2}Milestone Roadmap}{8}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Data Provenance}{8}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}BDSP Trainer Dataset}{9}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Vocabulary Files}{9}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Validation Team Manifests}{9}{subsection.3.3.3}%
+\contentsline {section}{\numberline {3.4}Data Preprocessing Pipeline}{9}{section.3.4}%
+\contentsline {chapter}{\numberline {4}Reinforcement Learning Framework}{11}{chapter.4}%
+\contentsline {section}{\numberline {4.1}MDP Formulation}{11}{section.4.1}%
+\contentsline {section}{\numberline {4.2}PPO Algorithm}{11}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Reward Design}{11}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Curriculum-Stage Reward Variants}{12}{subsection.4.3.1}%
+\contentsline {section}{\numberline {4.4}Curriculum Learning}{12}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Self-Play Mechanism}{13}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Opponent Types}{13}{section.4.6}%
+\contentsline {chapter}{\numberline {5}System Architecture}{14}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Overview}{14}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Observation Space}{14}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Token Layout}{14}{subsection.5.2.1}%
+\contentsline {section}{\numberline {5.3}Embedding Layers}{14}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}From Hashes to Dictionaries}{15}{subsection.5.3.1}%
+\contentsline {section}{\numberline {5.4}Position \& Role Embeddings}{15}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Transformer Encoder}{15}{section.5.5}%
+\contentsline {subsection}{\numberline {5.5.1}Cross-Team Attention Bias}{15}{subsection.5.5.1}%
+\contentsline {section}{\numberline {5.6}Action Space}{16}{section.5.6}%
+\contentsline {subsection}{\numberline {5.6.1}Action Masking}{16}{subsection.5.6.1}%
+\contentsline {section}{\numberline {5.7}LSTM Memory}{16}{section.5.7}%
+\contentsline {section}{\numberline {5.8}Policy \& Value Heads}{17}{section.5.8}%
+\contentsline {section}{\numberline {5.9}Model Size}{17}{section.5.9}%
+\contentsline {chapter}{\numberline {6}Training Infrastructure \& Experiment Tracking}{18}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Distributed Training Architecture}{18}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Hardware}{18}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Configuration Presets}{18}{section.6.3}%
+\contentsline {section}{\numberline {6.4}PPO Hyperparameters}{19}{section.6.4}%
+\contentsline {section}{\numberline {6.5}MLflow Experiment Tracking}{19}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Checkpoint Management}{19}{section.6.6}%
+\contentsline {section}{\numberline {6.7}Validation Pipeline}{19}{section.6.7}%
+\contentsline {section}{\numberline {6.8}Training Throughput}{20}{section.6.8}%
+\contentsline {chapter}{\numberline {7}Experiments \& Iterative Development}{21}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Phase 1: Baseline Establishment}{21}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Phase 2: Validation Infrastructure}{21}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Phase 3: Vocabulary \& ID Migration}{22}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Phase 4: Logging \& Metrics Standardisation}{22}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Phase 5: Embedding Audit \& Global Features}{22}{section.7.5}%
+\contentsline {section}{\numberline {7.6}Phase 6: Position \& Role Embeddings}{23}{section.7.6}%
+\contentsline {section}{\numberline {7.7}Phase 7: Compressed Action Space}{23}{section.7.7}%
+\contentsline {section}{\numberline {7.8}Phase 8: LSTM Memory Fix}{23}{section.7.8}%
+\contentsline {section}{\numberline {7.9}Observation Pipeline Investigation}{24}{section.7.9}%
+\contentsline {section}{\numberline {7.10}Attention Collapse Analysis}{24}{section.7.10}%
+\contentsline {section}{\numberline {7.11}Pre-norm \& Architecture Experiments}{25}{section.7.11}%
+\contentsline {section}{\numberline {7.12}Configuration Updates \& Loss Analysis}{25}{section.7.12}%
+\contentsline {chapter}{\numberline {8}Results \& Analysis}{27}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Curriculum Stage Results}{27}{section.8.1}%
+\contentsline {subsection}{\numberline {8.1.1}Stage 1: Random Warmup}{27}{subsection.8.1.1}%
+\contentsline {subsection}{\numberline {8.1.2}Stage 2: Self-Play}{27}{subsection.8.1.2}%
+\contentsline {subsection}{\numberline {8.1.3}Stage 3: Mixed Opponents}{27}{subsection.8.1.3}%
+\contentsline {section}{\numberline {8.2}Validation Checkpoint Results}{27}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Loss Metrics Analysis}{27}{section.8.3}%
+\contentsline {section}{\numberline {8.4}Attention Analysis}{28}{section.8.4}%
+\contentsline {section}{\numberline {8.5}Key Insight: Architecture vs.\ Reward Signal}{28}{section.8.5}%
+\contentsline {section}{\numberline {8.6}Honest Assessment}{28}{section.8.6}%
+\contentsline {chapter}{\numberline {9}Risk, Ethics \& Considerations}{30}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Risk Assessment}{30}{section.9.1}%
+\contentsline {subsection}{\numberline {9.1.1}Technical Risks}{30}{subsection.9.1.1}%
+\contentsline {subsection}{\numberline {9.1.2}Timeline Risks}{30}{subsection.9.1.2}%
+\contentsline {section}{\numberline {9.2}Ethical Considerations}{30}{section.9.2}%
+\contentsline {subsection}{\numberline {9.2.1}Domain Context}{30}{subsection.9.2.1}%
+\contentsline {subsection}{\numberline {9.2.2}Software Licences}{30}{subsection.9.2.2}%
+\contentsline {subsection}{\numberline {9.2.3}EU AI Act Classification}{31}{subsection.9.2.3}%
+\contentsline {section}{\numberline {9.3}Human-in-the-Loop Considerations}{31}{section.9.3}%
+\contentsline {section}{\numberline {9.4}Limitations}{31}{section.9.4}%
+\contentsline {chapter}{\numberline {10}Conclusions \& Next Steps}{32}{chapter.10}%
+\contentsline {section}{\numberline {10.1}Summary of Achievements}{32}{section.10.1}%
+\contentsline {section}{\numberline {10.2}Lessons Learned}{32}{section.10.2}%
+\contentsline {section}{\numberline {10.3}What Did Not Work}{32}{section.10.3}%
+\contentsline {section}{\numberline {10.4}Actionable Next Steps}{33}{section.10.4}%
+\contentsline {section}{\numberline {10.5}Milestone Outlook}{33}{section.10.5}%
+\contentsline {chapter}{\numberline {11}Reproduction Guide}{34}{chapter.11}%
+\contentsline {section}{\numberline {11.1}Prerequisites}{34}{section.11.1}%
+\contentsline {section}{\numberline {11.2}Installation}{34}{section.11.2}%
+\contentsline {section}{\numberline {11.3}Starting the Simulator}{34}{section.11.3}%
+\contentsline {section}{\numberline {11.4}Training Commands}{34}{section.11.4}%
+\contentsline {section}{\numberline {11.5}Resuming from Checkpoint}{35}{section.11.5}%
+\contentsline {section}{\numberline {11.6}Validation}{35}{section.11.6}%
+\contentsline {section}{\numberline {11.7}Linting \& Formatting}{35}{section.11.7}%
+\contentsline {section}{\numberline {11.8}Artifacts}{35}{section.11.8}%
+\contentsline {section}{\numberline {11.9}Troubleshooting}{36}{section.11.9}%
+\contentsline {chapter}{\numberline {A}Full Observation Space Specification}{37}{chapter.A}%
+\contentsline {section}{\numberline {A.1}Token Overview}{37}{section.A.1}%
+\contentsline {section}{\numberline {A.2}Per-Pok\'{e}mon Token (160 dimensions)}{37}{section.A.2}%
+\contentsline {section}{\numberline {A.3}Global Token (164 dimensions)}{37}{section.A.3}%
+\contentsline {section}{\numberline {A.4}Categorical ID Vectors}{38}{section.A.4}%
+\contentsline {section}{\numberline {A.5}Action Mask}{38}{section.A.5}%
+\contentsline {section}{\numberline {A.6}Action Space Mapping}{38}{section.A.6}%

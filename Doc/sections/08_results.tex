@@ -1,0 +1,188 @@
+% ─── Chapter 8: Results & Analysis ─────────────────────────────────
+\chapter{Results \& Analysis}
+\label{ch:results}
+
+This chapter synthesises the experimental outcomes reported in
+Chapter~\ref{ch:experiments} into an overall assessment of training performance.
+
+\section{Curriculum Stage Results}
+
+\subsection{Stage 1: Random Warmup}
+
+The agent reliably solves the easy stage---achieving the promotion threshold
+(70\,\% win rate) against the \texttt{RandomNoSwitchPlayer} opponent---within
+approximately 84\,000~training steps.  This confirms that the training
+pipeline, observation encoding, and basic model architecture function
+correctly.
+
+% TODO: Insert MLflow win rate curve for easy stage showing rapid convergence
+% to >70% win rate.  Mark the promotion point.
+
+\subsection{Stage 2: Self-Play}
+
+% TODO: Update this section with self-play training results once available.
+% Include: win rate progression during self-play stage, comparison with
+% non-self-play baseline, any observed oscillation or instability in
+% self-play dynamics, and whether self-play helped break the plateau.
+% Placeholder talking points:
+% - Self-play introduces a natural curriculum where difficulty increases
+%   as the agent improves.
+% - The SelfPlayPlayer hot-reloads weights from the latest checkpoint,
+%   so opponents are always close to the agent's current skill level.
+% - Potential issue: oscillation if the agent learns to exploit its own
+%   weaknesses, then those weaknesses disappear in the next update.
+
+\subsection{Stage 3: Mixed Opponents}
+
+Against the mixed opponent pool (50\,\% heuristic, 30\,\% self-play, 20\,\%
+random), the agent reaches approximately 50\,\% overall win rate but does not
+improve beyond this level even after 2.5~million steps.  The win rate breaks
+down as:
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{l c}
+  \toprule
+  \textbf{Opponent} & \textbf{Win Rate} \\
+  \midrule
+  Random      & $\sim$95\,\% \\
+  Heuristic   & $\sim$5\,\% \\
+  Self-play   & Varies (see above) \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The 50\,\% overall rate is an artefact of the opponent mixture: the agent wins
+almost all random-opponent games and loses almost all heuristic-opponent games.
+
+% TODO: Insert MLflow chart showing win rate separated by opponent type over
+% training steps.  The random curve should be high and stable; the heuristic
+% curve should be near zero throughout.
+
+\section{Validation Checkpoint Results}
+
+Fixed-paired validation at key checkpoints:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{r c c c}
+  \toprule
+  \textbf{Checkpoint} & \textbf{Overall} & \textbf{Vs.\ Random} & \textbf{Vs.\ Heuristic} \\
+  \midrule
+  Step 51\,200   & 37.5\,\% & 75\,\%  & 0\,\%  \\
+  Step 200K      & 45\,\%   & 90\,\%  & 0\,\%  \\
+  Final (2.5M)   & 50\,\%   & 95\,\%  & 5\,\%  \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+% TODO: Insert MLflow validation comparison chart across checkpoints.
+% Show per-opponent-type bars or lines.
+
+The progression shows consistent improvement against random opponents but
+negligible progress against heuristic ones, confirming that the learned
+strategy does not generalise to more competent play.
+
+\section{Loss Metrics Analysis}
+
+A consistent loss signature has been observed across multiple training runs
+during the medium/mixed stage:
+
+\begin{itemize}
+  \item \textbf{Policy loss:} Near zero and flat.  The policy network is not
+        making meaningful gradient updates---it has converged to a local
+        optimum that beats random opponents but not heuristic ones.
+  \item \textbf{Value loss:} High and noisy.  The value network cannot
+        accurately predict expected returns, resulting in poor GAE advantage
+        estimates.
+  \item \textbf{Entropy:} Remains high ($>$1.5 nats).  The policy does not
+        converge to a confident action distribution, suggesting it has not
+        identified a reliable strategy.
+  \item \textbf{Explained variance:} Negative ($-0.003$).  The value
+        function's predictions are worse than simply outputting the mean
+        return.
+\end{itemize}
+
+% TODO: Insert MLflow loss curves (policy loss, value loss, entropy)
+% over the full training run.  Annotate with curriculum stage transitions.
+
+\section{Attention Analysis}
+
+After the architectural improvements described in Chapter~\ref{ch:experiments},
+the final single-layer transformer with cross-team attention bias produces
+healthy attention patterns:
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{l r}
+  \toprule
+  \textbf{Attention Pair} & \textbf{Weight} \\
+  \midrule
+  CLS $\to$ Opponent active     & 37.5--62.5\,\% \\
+  Our active $\to$ Opponent active & 48.9\,\% \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+This is a significant improvement over the 4-layer baseline, where opponent
+attention collapsed to 3\,\% by layer~1.  The model is now clearly
+``looking at'' the opponent.  However, this improved attention has not
+translated into improved win rates against heuristic opponents.
+
+% TODO: Insert attention heatmap comparison:
+% Left: 4-layer baseline (collapsed attention)
+% Right: 1L + attention bias (structured, opponent-aware attention)
+
+\section{Key Insight: Architecture vs.\ Reward Signal}
+
+The central finding from the experimental programme is:
+
+\begin{keyinsight}
+\textbf{Architecture is no longer the bottleneck.}  The model can see the
+opponent, distinguish tokens by position and role, use stable vocabulary
+embeddings, and operate in a compressed action space.  The remaining obstacle
+is the \textbf{reward signal}: the current reward components do not
+sufficiently incentivise the agent to develop strategic behaviour against
+competent opponents.  The value function fails to learn (negative explained
+variance), preventing policy improvement through PPO's advantage estimation.
+\end{keyinsight}
+
+This redirects the optimisation focus from architecture tuning to reward
+design, potentially including:
+\begin{itemize}
+  \item Auxiliary tasks (e.g.\ predicting opponent moves, predicting battle
+        outcome from intermediate states).
+  \item More granular shaped rewards that capture tactical elements (e.g.\
+        setting up favourable type matchups, preserving key Pok\'{e}mon).
+  \item Reward scaling or normalisation to improve value-function learning.
+\end{itemize}
+
+\section{Honest Assessment}
+
+At the time of writing, the agent demonstrates:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{What works} & \textbf{What does not} \\
+  \midrule
+  Training pipeline runs end-to-end &
+    Agent cannot beat heuristic opponents consistently \\
+  Easy stage solved reliably &
+    Value function fails to learn (negative explained variance) \\
+  Observation bugs found and fixed &
+    Reward signal does not incentivise strategic play \\
+  Attention collapse diagnosed and resolved &
+    No automated gauntlet validation yet \\
+  Distributed infrastructure stable at 48 envs &
+    LSTM not validated end-to-end in training \\
+  MLflow tracking produces complete metrics &
+    Milestone~1 competency not demonstrated \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The engineering foundation is solid.  The remaining challenge is a core ML
+problem: designing a reward function that produces a learnable value landscape
+for a complex, sparse-reward environment.

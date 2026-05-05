@@ -1,0 +1,258 @@
+% ─── Chapter 5: System Architecture ───────────────────────────────
+\chapter{System Architecture}
+\label{ch:architecture}
+
+\section{Overview}
+
+The system consists of three major components: (1)~a \textbf{custom Gymnasium
+environment} wrapping \texttt{poke-env} and Pok\'{e}mon Showdown, (2)~a
+\textbf{transformer-based neural network} that processes battle observations
+and outputs action logits plus a state-value estimate, and (3)~a
+\textbf{distributed training pipeline} built on Ray RLlib.  This chapter
+details the first two; the training infrastructure is covered in
+Chapter~\ref{ch:infrastructure}.
+
+\section{Observation Space}
+
+The observation is a dictionary with five keys:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l l X}
+  \toprule
+  \textbf{Key} & \textbf{Shape / Dtype} & \textbf{Content} \\
+  \midrule
+  \texttt{obs}          & $(13,\,164)$ float32 &
+    Token matrix: 1~global token + 6~own-team tokens + 6~opponent-team
+    tokens.  Each token encodes presence flags, HP, base stats, types,
+    status, moves, and more (see Appendix~\ref{ch:appendix_obs}). \\
+  \texttt{species}      & $(13,)$ int32 &
+    Species ID per token (dictionary lookup, vocabulary size 1\,151). \\
+  \texttt{items}        & $(13,)$ int32 &
+    Held-item ID per token (vocabulary size 1\,110). \\
+  \texttt{abilities}    & $(13,)$ int32 &
+    Ability ID per token (vocabulary size 216). \\
+  \texttt{action\_mask} & $(14,)$ float32 &
+    Binary mask: 1.0 for valid actions, 0.0 for invalid. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Token Layout}
+
+The 13 tokens are organised as follows:
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{c l l}
+  \toprule
+  \textbf{Index} & \textbf{Role} & \textbf{Content} \\
+  \midrule
+  0        & Global      & Weather, terrain, side conditions, battle extras \\
+  1        & Our active  & Active Pok\'{e}mon on the agent's side \\
+  2--6     & Our bench   & Remaining team Pok\'{e}mon \\
+  7        & Opp.\ active & Active opponent Pok\'{e}mon \\
+  8--12    & Opp.\ bench  & Remaining opponent team \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Each Pok\'{e}mon token is 164~dimensions.  The full per-token feature
+breakdown is provided in Appendix~\ref{ch:appendix_obs}.
+
+\section{Embedding Layers}
+
+High-cardinality categorical entities are mapped to learned embeddings:
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{l r r}
+  \toprule
+  \textbf{Entity} & \textbf{Vocabulary Size} & \textbf{Embedding Dim} \\
+  \midrule
+  Species   & 1\,151 & 32 \\
+  Items     & 1\,110 & 32 \\
+  Abilities & 216    & 32 \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Padding index~0 represents absent entities (e.g.\ a bench slot with no
+Pok\'{e}mon).  Each token's base 164-dim vector is concatenated with three
+32-dim embedding vectors ($3 \times 32 = 96$), yielding 260~dimensions total.
+A linear projection followed by LayerNorm maps this to the transformer's hidden
+dimension (512 by default).
+
+\subsection{From Hashes to Dictionaries}
+
+Earlier versions used Adler-32 hashing with modulo 20\,000 to compress entity
+strings into integer IDs.  This caused approximately 7.5\,\% collision rate
+among 1\,800 unique strings.  The current system uses stable dictionary
+lookups generated from Showdown's data files, eliminating collisions entirely
+and ensuring that each entity receives a unique embedding.
+
+\section{Position \& Role Embeddings}
+
+The transformer processes a set of 13 tokens.  Without positional information,
+self-attention is permutation-invariant---the model cannot distinguish between
+active and bench Pok\'{e}mon.  Two sets of learnable embeddings address this:
+
+\begin{itemize}
+  \item \textbf{Position embeddings:} One learned vector per token position
+        (13~positions $\to$ hidden dim).  Added after input projection.
+  \item \textbf{Role embeddings:} Five coarse roles---CLS (global), our
+        active, our bench, opponent active, opponent bench.  Shared across
+        positions within the same role.
+\end{itemize}
+
+Both are added to the projected token vectors before the transformer encoder.
+
+\section{Transformer Encoder}
+
+The core of the policy network is a standard \texttt{nn.TransformerEncoder}
+with the following configuration:
+
+\begin{center}
+\small
+\begin{tabularx}{0.6\textwidth}{l r}
+  \toprule
+  \textbf{Parameter} & \textbf{Value} \\
+  \midrule
+  Hidden dimension     & 512 \\
+  Attention heads      & 8 \\
+  Transformer layers   & 1 \\
+  Feedforward expansion & $\times 4$ (2\,048) \\
+  Activation           & GELU \\
+  Dropout              & 0.1 \\
+  Normalisation        & Pre-norm (LayerNorm before attention/FFN) \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The decision to use a single transformer layer was driven by an attention
+collapse analysis (see Chapter~\ref{ch:experiments}), which showed that deeper
+post-norm transformers suffered from gradient vanishing in layers 2--3,
+effectively reducing model depth to two functional layers.
+
+\subsection{Cross-Team Attention Bias}
+
+A learnable \textbf{attention bias} is added to the self-attention scores to
+encourage the model to attend to the opponent's active Pok\'{e}mon---a
+critical source of tactical information:
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{l l r}
+  \toprule
+  \textbf{From} & \textbf{To} & \textbf{Bias} \\
+  \midrule
+  CLS (0)         & Opp.\ active (7)  & $+2.0$ \\
+  Our active (1)  & Opp.\ active (7)  & $+2.0$ \\
+  Opp.\ active (7) & Our active (1)   & $+1.0$ \\
+  Opp.\ active (7) & Our bench (2--6) & $+0.5$ \\
+  CLS (0)         & Opp.\ bench (8--12) & $+0.5$ \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+This bias was introduced after analysis showed that the default transformer
+progressively lost opponent attention in deeper layers.  With a single layer
+and this bias, the model allocates 37--63\,\% of CLS attention to the
+opponent's active Pok\'{e}mon.
+
+% TODO: Insert MLflow screenshot or generated figure showing attention
+% heatmap for the 1-layer model with cross-team bias.  This should show
+% the attention distribution from CLS and our_active to all 13 tokens.
+
+\section{Action Space}
+\label{sec:action_space}
+
+The agent operates in a \textbf{compressed action space} of 14~discrete
+actions:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{c l l l}
+  \toprule
+  \textbf{Index} & \textbf{Category} & \textbf{Compressed} & \textbf{Native Mapping} \\
+  \midrule
+  0--3  & Regular moves & Use move 1--4    & Direct (or first legal variant) \\
+  4--7  & Gimmick moves & Gimmick + move 1--4 & Auto-selects: Mega $\to$ Z $\to$ Dynamax \\
+  8--13 & Switches      & Switch to slot 1--6 & Mapped to party slot index \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The native \texttt{poke-env} space has 22~actions (6~switches + 4~regular
+moves + 12~gimmick variants).  Compression to 14 actions was motivated by:
+
+\begin{itemize}
+  \item \textbf{Reduced branching factor:} 14 vs.\ 22 simplifies exploration.
+  \item \textbf{Logical grouping:} Moves first, then gimmicks, then switches
+        provides a consistent structure the model can learn.
+  \item \textbf{Gimmick auto-selection:} Rather than requiring the agent to
+        learn separate Mega/Z/Dynamax variants, the compressed space presents
+        a single ``gimmick'' action that resolves to whichever gimmick is
+        legally available.
+\end{itemize}
+
+\subsection{Action Masking}
+
+At each step, the environment provides an \texttt{action\_mask} of shape
+$(14,)$ indicating which actions are legal.  The model applies this mask by
+setting invalid-action logits to $-10^{8}$ before the softmax:
+
+\[
+  \pi(a \mid s) = \frac{\exp(\text{logit}_a) \cdot \mathbb{1}[\text{mask}_a = 1]}
+                       {\sum_{a'} \exp(\text{logit}_{a'}) \cdot \mathbb{1}[\text{mask}_{a'} = 1]}
+\]
+
+This ensures the agent never selects an illegal action, regardless of its
+learned policy.  The mask accounts for fainted Pok\'{e}mon (cannot switch to
+them), unavailable moves (no PP, disabled), and the absence of gimmick
+conditions (e.g.\ Dynamax not available).
+
+\section{LSTM Memory}
+
+An optional \textbf{single-layer LSTM} (hidden size 512) can process the CLS
+token sequence across turns within a battle, providing cross-turn temporal
+memory:
+
+\begin{itemize}
+  \item \textbf{Input:} CLS token embedding from the transformer at each turn.
+  \item \textbf{State:} Hidden state $h_t$ and cell state $c_t$ are carried
+        across turns, reset at episode boundaries.
+  \item \textbf{Purpose:} Enable the agent to remember previous turns (e.g.\
+        which moves the opponent has used, whether Protect was used recently)
+        rather than treating each turn independently.
+\end{itemize}
+
+The LSTM is enabled in the model code and processes both single-step and
+sequence batches.  However, RLlib's connector path for recurrent state
+propagation required additional engineering (see Phase~8 in
+Chapter~\ref{ch:experiments}).
+
+\section{Policy \& Value Heads}
+
+Both heads share the transformer trunk (and LSTM, if active).  The CLS token
+output serves as the shared representation:
+
+\begin{itemize}
+  \item \textbf{Policy head:} $\text{hidden} \to \text{Linear}(512, 256) \to
+        \text{GELU} \to \text{Linear}(256, 14)$.  Output is action logits,
+        masked before softmax.
+  \item \textbf{Value head:} $\text{hidden} \to \text{Linear}(512, 256) \to
+        \text{GELU} \to \text{Linear}(256, 1)$.  Outputs scalar state-value
+        estimate $V(s)$.
+\end{itemize}
+
+\section{Model Size}
+
+The default (\texttt{standard}) configuration produces approximately
+\textbf{10--15\,million parameters}.  Preset variations are detailed in
+Chapter~\ref{ch:infrastructure}.
+
+% TODO: Insert a figure showing the full model architecture as a block
+% diagram: Input (obs dict) -> Embeddings -> Projection + Pos/Role ->
+% Transformer (1L) -> [LSTM] -> Policy/Value heads.  Can be generated
+% with draw.io, TikZ, or similar.

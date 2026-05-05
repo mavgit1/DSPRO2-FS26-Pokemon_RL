@@ -1,0 +1,150 @@
+% ─── Chapter 3: Challenge Model & Data Provenance ──────────────────
+\chapter{Challenge Model \& Data Provenance}
+\label{ch:challenge}
+
+\section{Challenge Definition}
+
+Instead of playing through the entire Pok\'{e}mon game world, the project
+focuses on \textbf{battle sequences}.  The challenge is modelled as a graph of
+battles: each node represents a battle against a specific trainer team, and
+edges represent progression.
+
+In the simplest form---currently implemented---the challenge is a linear list
+of opponents.  The agent must beat all trainers in order, without losing.  If
+the agent loses a battle, the run ends and restarts from the beginning.
+
+\subsection{Resource Management Between Battles}
+
+After each battle, the agent's resources are \emph{partially} restored:
+
+\begin{itemize}
+  \item HP and status conditions are fully healed.
+  \item Power Points (PP, move usage limits) are restored.
+  \item \textbf{Fainted Pok\'{e}mon remain lost} (Nuzlocke rule).
+\end{itemize}
+
+Usually, the agent may build a new team before each fight.  There are
+exceptions where the agent must battle through a sequence of opponents (up to
+five) before being allowed to change teams again.  The amount of information
+available to the team builder---complete, partial, or none---serves as a knob
+for testing agent competency.
+
+\section{Milestone Roadmap}
+
+Due to the large scope of the project, four progressive milestones have been
+defined.  For each milestone, a model is trained from scratch and evaluated
+against the gauntlet to validate competency.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{c l X}
+  \toprule
+  \textbf{\#} & \textbf{Milestone} & \textbf{Goal} \\
+  \midrule
+  1 & Proof of Concept &
+    The agent uses a \emph{fixed team} (6 Pok\'{e}mon, reused every battle)
+    against \emph{random opponents}.  Tests whether the model can learn to
+    use a known team against unseen opponents. \\
+  2 & Random Battles &
+    Both the agent and opponent use \emph{randomly generated teams}.  Tests
+    competency under high entropy, where each battle is novel. \\
+  3 & Team Building &
+    Model~1 learns to compose optimal teams given opponent information;
+    Model~2 learns to battle with those teams.  The team builder must
+    construct a team that can beat at least five different opponents. \\
+  4 & Gauntlet Master &
+    Full gauntlet completion under Nuzlocke constraints.  The ultimate
+    objective. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\textbf{Current status:} Milestone~1 is in progress.  The training
+infrastructure is fully functional and multiple architectural improvements have
+been validated (see Chapter~\ref{ch:experiments}), but gauntlet-level
+competency has not yet been demonstrated.
+
+\section{Data Provenance}
+
+All data used in this project is derived from publicly available sources or
+generated programmatically.  No personal data is involved.
+
+\subsection{BDSP Trainer Dataset}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l l X}
+  \toprule
+  \textbf{File} & \textbf{Format} & \textbf{Content} \\
+  \midrule
+  \texttt{data/BDSP Trainer Data - v1.1.csv} & CSV &
+    Complete roster of 297 BDSP trainers with Pok\'{e}mon species, levels,
+    movesets, held items, and abilities. \\
+  \texttt{data/bdsp\_gauntlet\_order.json} & JSON &
+    Ordered list of 706 trainers defining the gauntlet sequence, sorted by
+    ascending difficulty (level, team size).  Includes metadata about
+    breakpoints and battle counts. \\
+  \texttt{data/bdsp\_trainers.json} & JSON &
+    Trainer team specifications in Showdown-compatible format.  Used to
+    instantiate specific opponents during training and evaluation. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Vocabulary Files}
+
+Categorical entities (species, items, abilities) are mapped to integer IDs via
+stable dictionary lookups stored in JSON:
+
+\begin{center}
+\small
+\begin{tabularx}{0.8\textwidth}{l r l}
+  \toprule
+  \textbf{Entity} & \textbf{Vocabulary Size} & \textbf{Source} \\
+  \midrule
+  Species  & 1\,151 & All Gen\,8 species \\
+  Items    & 1\,110 & All available held items \\
+  Abilities & 216   & All available abilities \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+These vocabularies were generated programmatically from Pok\'{e}mon Showdown's
+data files and validated for complete coverage over the BDSP trainer dataset
+and validation manifests (zero unknown entities).
+
+\subsection{Validation Team Manifests}
+
+For reproducible evaluation, a set of frozen team configurations is maintained:
+
+\begin{itemize}
+  \item \texttt{data/validation/gen8\_random\_battle\_team\_pairs.json}:
+        20 teams organised as 10 swapped pairs, yielding 40 battles per
+        evaluation run.
+  \item \texttt{data/validation/gen8\_random\_battle\_mirror\_teams.json}:
+        Mirror-matchup teams for symmetric evaluation.
+\end{itemize}
+
+These teams are evaluated against both \texttt{RandomPlayer} and
+\texttt{SimpleHeuristicsPlayer} opponents, providing a fixed benchmark for
+comparing checkpoints.
+
+\section{Data Preprocessing Pipeline}
+
+Raw data undergoes the following transformations before reaching the agent:
+
+\begin{enumerate}
+  \item \textbf{Trainer data loading:} CSV is parsed into an internal
+        representation; team JSON files are loaded and converted to
+        Showdown-format team strings.
+  \item \textbf{Team generation:} For random battles, teams are sampled from
+        the Gen\,8 random battle pool with seed control for reproducibility.
+  \item \textbf{Observation construction:} Each turn, the raw battle state
+        from \texttt{poke-env} is encoded into a fixed-size tensor
+        ($13 \times 164$ floats) plus categorical ID vectors for species,
+        items, and abilities.  The full encoding pipeline is detailed in
+        Chapter~\ref{ch:architecture} and Appendix~\ref{ch:appendix_obs}.
+  \item \textbf{Action mapping:} The agent's compressed 14-action output is
+        mapped to native \texttt{poke-env} \texttt{BattleOrder} objects at
+        runtime (see Section~\ref{sec:action_space}).
+\end{enumerate}

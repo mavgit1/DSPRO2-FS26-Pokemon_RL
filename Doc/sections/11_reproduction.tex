@@ -1,0 +1,145 @@
+% ─── Chapter 11: Reproduction Guide ────────────────────────────────
+\chapter{Reproduction Guide}
+\label{ch:reproduction}
+
+This chapter provides step-by-step instructions for reproducing the training
+environment, running experiments, and evaluating checkpoints.
+
+\section{Prerequisites}
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{l l}
+  \toprule
+  \textbf{Requirement} & \textbf{Version / Notes} \\
+  \midrule
+  Python      & 3.13 (specified in \texttt{.python-version}) \\
+  \texttt{uv} & Latest (package manager, replaces pip) \\
+  Node.js     & Required for Pok\'{e}mon Showdown \\
+  NVIDIA GPU  & Recommended (RTX 3090+ for \texttt{standard} preset) \\
+  RAM         & 16\,GB minimum, 64\,GB recommended for 48 envs \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Installation}
+
+\begin{lstlisting}[language=bash]
+# Clone the repository
+git clone https://github.com/mavgit1/DSPRO2-FS26-Pokemon_RL.git
+cd DSPRO2-FS26-Pokemon_RL
+
+# Install dependencies (uses uv, not pip)
+uv sync
+\end{lstlisting}
+
+\section{Starting the Simulator}
+
+Pok\'{e}mon Showdown servers must be running before training.  The project
+provides scripts to manage 8~parallel instances:
+
+\begin{lstlisting}[language=bash]
+# Start 8 Showdown servers on ports 8000-8007
+./scripts/spin_up_multiple_showdown.sh
+
+# Stop all servers when done
+./scripts/kill_all_showdown.sh
+\end{lstlisting}
+
+\section{Training Commands}
+
+\begin{lstlisting}[language=bash]
+# Quick test run (single env, ~150K steps)
+uv run train_battler.py --preset quick
+
+# Standard training (48 envs, 10M steps)
+uv run train_battler.py --preset standard
+
+# Full resources (RTX 5090)
+uv run train_battler.py --preset optimal
+
+# Reduced RAM usage
+uv run train_battler.py --preset memory_safe
+
+# Maximum model size
+uv run train_battler.py --preset large
+\end{lstlisting}
+
+\section{Resuming from Checkpoint}
+
+Training can be interrupted and resumed without losing progress:
+
+\begin{lstlisting}[language=bash]
+# Resume from the latest checkpoint in the same MLflow run
+uv run train_battler.py --preset standard \
+  --resume-checkpoint latest \
+  --mlflow-run-id <RUN_ID>
+\end{lstlisting}
+
+The \texttt{<RUN\_ID>} can be found in the MLflow UI.  If omitted, a new run
+is created.
+
+\section{Validation}
+
+\begin{lstlisting}[language=bash]
+# Validate a specific checkpoint against fixed teams
+python scripts/validate_checkpoint.py \
+  --checkpoint-path checkpoints/step_XXXX \
+  --protocol fixed_paired
+
+# Validate against BDSP trainers
+python scripts/validate_bdsp_trainers.py \
+  --checkpoint-path checkpoints/step_XXXX
+\end{lstlisting}
+
+Validation results are logged to MLflow with per-opponent-type breakdowns.
+
+\section{Linting \& Formatting}
+
+\begin{lstlisting}[language=bash]
+uv run ruff check .
+uv run ruff format .
+\end{lstlisting}
+
+\section{Artifacts}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{Location} & \textbf{Content} \\
+  \midrule
+  \texttt{checkpoints/}     & Saved model checkpoints and self-play weights
+                              (\texttt{selfplay\_latest.pt}).  Gitignored. \\
+  \texttt{mlruns/}          & MLflow experiment artifacts and metrics. \\
+  \texttt{data/}            & BDSP trainer data, gauntlet order, vocabularies,
+                              validation team manifests. \\
+  \texttt{data/validation/} & Frozen team JSON files for reproducible
+                              evaluation. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Troubleshooting}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{Issue} & \textbf{Solution} \\
+  \midrule
+  Showdown connection errors &
+    Verify servers are running: \texttt{curl localhost:8000}.  Restart with
+    the spin-up script. \\
+  Out of memory &
+    Reduce \texttt{num\_workers} or use the \texttt{memory\_safe} preset.
+    Monitor with \texttt{htop}. \\
+  Slow training &
+    Check GPU utilisation with \texttt{nvidia-smi}.  Ensure CUDA is
+    available and the correct preset is selected. \\
+  MLflow not logging &
+    Verify \texttt{.env} contains valid MLflow credentials.  Check that
+    the MLflow server is reachable. \\
+  \bottomrule
+\end{tabularx}
+\end{center}

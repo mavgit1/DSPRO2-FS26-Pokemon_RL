@@ -1,79 +1,141 @@
-\documentclass[11pt, a4paper]{article}
+% Build from Doc/ directory (two passes for TOC):
+%   pdflatex main.tex && pdflatex main.tex
+%
+% Or with latexmk:
+%   latexmk -pdf main.tex
+%
+% If pdflatex is not installed on the host (e.g. immutable OS):
+%   podman run --rm -v "$PWD":/work:Z -w /work docker.io/texlive/texlive:latest \
+%     sh -c 'pdflatex -interaction=nonstopmode main.tex && pdflatex -interaction=nonstopmode main.tex'
 
-% --- Packages ---
-\usepackage[utf8]{inputenc}
+\documentclass[11pt,a4paper]{report}
+
+% ── Encoding & Typography ──────────────────────────────────────────
 \usepackage[T1]{fontenc}
-\usepackage{geometry}
-\geometry{margin=0.8in, top=0.5in}
-\usepackage[table]{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% ── Page Layout ────────────────────────────────────────────────────
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{setspace}
+\setstretch{1.12}
+
+% ── Colors ─────────────────────────────────────────────────────────
+\usepackage{xcolor}
+\definecolor{primaryBlue}{RGB}{10,80,160}
+\definecolor{lightGray}{RGB}{245,245,245}
+\definecolor{darkGray}{RGB}{80,80,80}
+
+% ── Graphics & Floats ─────────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+
+% ── Tables ─────────────────────────────────────────────────────────
+\usepackage{booktabs}
 \usepackage{tabularx}
+\usepackage{array}
+\usepackage{longtable}
+
+% ── Lists ──────────────────────────────────────────────────────────
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=*,noitemsep,topsep=4pt}
+\setlist[enumerate]{leftmargin=*,noitemsep,topsep=4pt}
+
+% ── Section Styling ────────────────────────────────────────────────
 \usepackage{titlesec}
-\usepackage{graphicx} % Required for the logo
+\titleformat{\chapter}
+  {\LARGE\bfseries\color{primaryBlue}}
+  {\thechapter.}{0.6em}{}
+\titleformat{\section}
+  {\large\bfseries\color{primaryBlue}}
+  {\thesection}{0.5em}{}
+\titleformat{\subsection}
+  {\normalsize\bfseries}
+  {\thesubsection}{0.5em}{}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
 
-% --- Custom Definitions ---
-\titleformat{\section}{\large\bfseries\color{blue}}{}{0em}{}
-\renewcommand{\arraystretch}{1.8} 
+% ── Code Listings ──────────────────────────────────────────────────
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{lightGray},
+  rulecolor=\color{primaryBlue!30},
+  keywordstyle=\color{primaryBlue},
+  commentstyle=\color{darkGray},
+  showstringspaces=false,
+}
 
+% ── Boxes ──────────────────────────────────────────────────────────
+\usepackage[most]{tcolorbox}
+\newtcolorbox{infobox}{
+  colback=lightGray,
+  colframe=primaryBlue,
+  boxrule=0.5pt,
+  arc=4pt,
+  left=12pt, right=12pt, top=8pt, bottom=8pt,
+  fonttitle=\bfseries\color{primaryBlue},
+}
+\newtcolorbox{keyinsight}{
+  colback=primaryBlue!5,
+  colframe=primaryBlue!60,
+  boxrule=0.4pt,
+  arc=3pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries\color{primaryBlue},
+  title=Key Insight,
+}
+
+% ── Links ──────────────────────────────────────────────────────────
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+
+% ── Metadata ───────────────────────────────────────────────────────
+\title{Reinforcement Learning for a Pok\'{e}mon Nuzlocke Challenge\\[0.3em]
+\large DSPRO2 Final Report}
+\author{Tristan Muri \and Marvin Hueber \and Viacheslav Godovskii \and Alex Liubov}
+\date{Spring Semester 2026}
+
+% ═══════════════════════════════════════════════════════════════════
 \begin{document}
 
-% --- Header with Logo and Title ---
-\begin{minipage}{0.7\textwidth}
-    {\huge \bfseries DSPRO1/2 AI Project Canvas} \\[0.2cm]
-    {\large Spring 2026}
-\end{minipage}
-\begin{minipage}{0.25\textwidth}
-    \raggedleft
-    % Ensure your logo file is named 'hslu-logo' or change the name below
-    \includegraphics[width=5cm]{hslu_logo.png} 
-\end{minipage}
+\maketitle
 
-\vspace{0.5cm}
-\rule{\textwidth}{1pt}
-\vspace{0.5cm}
+\begin{abstract}
+This report documents the development of a reinforcement learning agent trained to complete a
+Pok\'{e}mon Nuzlocke challenge---a sequential battle gauntlet where fainted Pok\'{e}mon are
+permanently lost and a single defeat ends the run.  The system uses PPO (Proximal Policy
+Optimization) with a transformer-based policy network, trained through curriculum learning against
+progressively stronger opponents.  We describe the full engineering lifecycle: environment
+integration with the Pok\'{e}mon Showdown battle simulator, observation pipeline design,
+model architecture, distributed training infrastructure, systematic debugging of the observation
+and reward pipeline, and an honest analysis of training results.  The report demonstrates an
+end-to-end, reproducible machine learning workflow aligned with MLOps best practices, including
+experiment tracking via MLflow, checkpoint management, and a validation suite.
+\end{abstract}
 
-\section*{Project Information}
-\begin{tabularx}{\textwidth}{l X}
-    \textbf{Project Name:} & \textcolor{gray}{[Insert your project title here]} \\
-    \textbf{Team Members:} & \textcolor{gray}{[Insert names here]} \\
-\end{tabularx}
+\tableofcontents
+\newpage
 
-\section*{Strategic Planning Tool}
-\begin{table}[h!]
-    \centering
-    \small
-    \begin{tabularx}{\textwidth}{|X|X|}
-        \hline
-        \textbf{Box 1: Problem \& Stakeholders} \newline 
-        \textcolor{red}{\scriptsize Identify the specific user and the decision this AI informs. Define one main outcome rather than vague aspirations[cite: 2360].} & 
-        \textbf{Box 2: Context \& Project Type} \newline 
-        \textcolor{red}{\scriptsize Classify as Research (truth-seeking), Tech Development (usable prototype), or Product work (user value).} \\ \hline
-        
-        \textbf{Box 3: Describe the Data} \newline 
-        \textcolor{red}{\scriptsize Specify source (internal/external), formats (structured/unstructured), and quality dimensions (completeness, accuracy, timeliness).} & 
-        \textbf{Box 4: ML Approach} \newline 
-        \textcolor{red}{\scriptsize Select method family: Supervised (Classification/Regression), Unsupervised (Clustering), RL, or GenAI. Justify why it fits the data[cite: 507].} \\ \hline
-        
-        \textbf{Box 5: ML Pipeline (DSPRO2)} \newline 
-        \textcolor{red}{\scriptsize Map the end-to-end flow: Collection $\rightarrow$ Preparation $\rightarrow$ Model Training $\rightarrow$ Evaluation $\rightarrow$ Deployment.} & 
-        \textbf{Box 6: Success Definition} \newline 
-        \textcolor{red}{\scriptsize Pick one technical task metric (e.g., F1-score, MAE) and one stakeholder KPI (e.g., time saved, revenue).} \\ \hline
-        
-        \textbf{Box 7: Risks \& Guardrails} \newline 
-        \textcolor{red}{\scriptsize Assess risk level (EU AI Act). Address potential bias or privacy issues and define human-in-the-loop oversight.} & 
-        \textbf{Box 8: Infrastructure (DSPRO2)} \newline 
-        \textcolor{red}{\scriptsize Strategy: Cloud (scalability/speed) vs. On-Premises (control/governance). Justify based on workload.} \\ \hline
-        
-        \textbf{Box 9: Costs \& Timeline (DSPRO2)} \newline 
-        \textcolor{red}{\scriptsize Estimate GPU compute, storage, and data labeling costs[cite: 2506]. Provide a rough timeline (e.g., 6--12 months).} & 
-        \textbf{Box 10: Team \& Next Steps (DSPRO2)} \newline 
-        \textcolor{red}{\scriptsize Assign roles (Project Owner, Domain Expert, ML Engineer)[cite: 2395]. Define the first concrete action to begin execution.} \\ \hline
-    \end{tabularx}
-\end{table}
+% ── Chapters ───────────────────────────────────────────────────────
+\input{sections/01_introduction}
+\input{sections/02_game_environment}
+\input{sections/03_challenge_data}
+\input{sections/04_rl_framework}
+\input{sections/05_architecture}
+\input{sections/06_infrastructure}
+\input{sections/07_experiments}
+\input{sections/08_results}
+\input{sections/09_risk_ethics}
+\input{sections/10_conclusions}
+\input{sections/11_reproduction}
 
-\section*{Submission Checklist}
-\begin{itemize}
-    \item \textbf{DSPRO1 Submission:} Requires Boxes 1--4, 6, and 7 completed. Focus on project scoping and data provenance.
-    \item \textbf{DSPRO2 Submission:} Full 10-box completion required. Focus on implementation strategy and technical pipeline.
-\end{itemize}
+% ── Appendix ───────────────────────────────────────────────────────
+\appendix
+\input{sections/appendix_observation}
 
 \end{document}

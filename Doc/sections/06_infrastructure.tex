@@ -1,0 +1,178 @@
+% ─── Chapter 6: Training Infrastructure & Experiment Tracking ─────
+\chapter{Training Infrastructure \& Experiment Tracking}
+\label{ch:infrastructure}
+
+\section{Distributed Training Architecture}
+
+Training is orchestrated by Ray RLlib, which distributes rollout collection
+across multiple workers and performs SGD updates on a central learner:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{Component} & \textbf{Role} \\
+  \midrule
+  Main process   & Configures training, manages curriculum callbacks,
+                   drives the training loop. \\
+  GPU learner     & Performs PPO SGD updates on collected batches.
+                   Uses PyTorch backend. \\
+  Rollout workers & Each runs multiple environments, collects trajectories,
+                   and sends batches to the learner. \\
+  Showdown servers & 8 local Node.js instances on ports 8000--8007,
+                     each hosting parallel battles. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The default (\texttt{standard}) configuration uses 12~workers with 4
+environments per worker, yielding \textbf{48~parallel battles}.  Each Showdown
+server hosts approximately 6~concurrent battles.
+
+\section{Hardware}
+
+\begin{center}
+\small
+\begin{tabularx}{0.8\textwidth}{l l}
+  \toprule
+  \textbf{Resource} & \textbf{Specification} \\
+  \midrule
+  GPU         & NVIDIA RTX 5090 (\texttt{optimal} preset) \\
+  RAM         & $\sim$56\,GB peak with 48 environments \\
+  CPU         & Multi-core (workers run on CPU threads) \\
+  Storage     & Local SSD for checkpoints and MLflow artifacts \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Memory management is critical: the project previously observed RAM growth from
+8\,GB to 52\,GB over 5~hours due to stale entries in environment caches.  This
+was mitigated with periodic cleanup and memory-leak monitoring.
+
+\section{Configuration Presets}
+
+Five hardware presets control model size, parallelism, and training duration:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l c c c c}
+  \toprule
+  \textbf{Parameter} & \textbf{Quick} & \textbf{Standard} & \textbf{Memory Safe} & \textbf{Large} \\
+  \midrule
+  Hidden dim              & 128   & 512   & 256   & 768   \\
+  Attention heads         & 8     & 8     & 4     & 12    \\
+  Transformer layers      & 1     & 1     & 1     & 6     \\
+  Embedding dim           & 32    & 32    & 32    & 32    \\
+  LSTM hidden             & ---   & 512   & 256   & 768   \\
+  Use LSTM                & No    & Yes   & No    & Yes   \\
+  Train batch size        & 4\,096  & 6\,144  & 2\,048  & 16\,384 \\
+  SGD minibatch size      & 256   & 256   & 128   & 512   \\
+  Workers                 & 0     & 12    & 4     & 12    \\
+  Env/worker              & 1     & 4     & 2     & 4     \\
+  Total envs              & 1     & 48    & 8     & 48    \\
+  Total timesteps         & 150K  & 10M   & 10M   & 10M   \\
+  Approx.\ params         & $\sim$1M & $\sim$10M & $\sim$4M & $\sim$42M \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The \texttt{quick} preset is used for smoke tests and debugging.  The
+\texttt{standard} preset is the default for training runs.  The
+\texttt{optimal} preset (not shown) matches \texttt{standard} but targets the
+RTX~5090 specifically.
+
+\section{PPO Hyperparameters}
+
+Default hyperparameters across all presets (unless overridden):
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{l r}
+  \toprule
+  \textbf{Parameter} & \textbf{Value} \\
+  \midrule
+  Learning rate              & $3 \times 10^{-4}$ \\
+  Discount ($\gamma$)        & 0.95 \\
+  GAE lambda ($\lambda$)     & 0.95 \\
+  Clip range ($\epsilon$)    & 0.2 \\
+  Entropy coefficient        & 0.05 \\
+  Value-function loss coeff. & 0.5 \\
+  Value clip param           & 5.0 \\
+  Gradient clipping          & 5.0 \\
+  SGD iterations per batch   & 10 \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\section{MLflow Experiment Tracking}
+
+All training runs are logged to an \textbf{MLflow} tracking server under the
+experiment name \texttt{Pokemon\_RL\_Battler}.  The following categories of
+data are recorded:
+
+\begin{itemize}
+  \item \textbf{Configuration snapshot:} Full training config, model config,
+        curriculum config, and hardware preset---stored as MLflow parameters.
+  \item \textbf{Training metrics:} Policy loss, value loss, entropy,
+        KL divergence, win rate, episode length, per-stage statistics---logged
+        every training iteration.
+  \item \textbf{Validation metrics:} Win rates against fixed opponents
+        (random, heuristic), per-opponent-type breakdowns, fallback event
+        counts---logged at scheduled evaluation intervals.
+  \item \textbf{Diagnostic metrics:} Action-mask density, observation sample
+        recordings, HP remaining distributions, faint counts per episode.
+  \item \textbf{System metrics:} CPU/RAM/GPU utilisation, memory leak counters.
+\end{itemize}
+
+Metrics use nested keys (e.g.\
+\texttt{validation/fixed\_paired/win\_rate\_vs\_heuristic}) to support
+structured comparison in the MLflow UI.
+
+% TODO: Insert MLflow screenshot showing the experiment comparison view
+% with multiple runs.  Highlight win rate curves, loss curves, and
+% the ability to compare configuration differences between runs.
+
+\section{Checkpoint Management}
+
+\begin{itemize}
+  \item \textbf{Frequency:} Checkpoints saved every 500\,000 training steps.
+  \item \textbf{Retention:} Up to 5~checkpoints retained (oldest automatically
+        deleted).
+  \item \textbf{Self-play export:} At each checkpoint, model weights are also
+        exported to \texttt{checkpoints/selfplay\_latest.pt} for use by
+        \texttt{SelfPlayPlayer} instances.
+  \item \textbf{Resume:} Training can be resumed from the latest checkpoint
+        using \texttt{-{}-resume-checkpoint latest}, preserving MLflow run
+        continuity via \texttt{-{}-mlflow-run-id <RUN\_ID>}.
+\end{itemize}
+
+\section{Validation Pipeline}
+
+Scheduled evaluation runs against fixed opponent configurations:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{Protocol} & \textbf{Description} \\
+  \midrule
+  Smoke test     & Quick sanity check: 10 episodes against random opponent. \\
+  Fixed paired   & 20~frozen teams $\times$ 2~opponents (random + heuristic) =
+                   40~battles per evaluation run.  Primary comparison metric. \\
+  Mirror         & Both sides use the same team; tests raw battling skill
+                   without team advantage. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Validation is triggered at regular intervals (every 100\,000 steps) during
+training and can also be run manually against any checkpoint via
+\texttt{scripts/validate\_checkpoint.py}.  Results are logged to MLflow with
+per-opponent-type breakdowns.
+
+\section{Training Throughput}
+
+Observed throughput on the \texttt{standard} preset:
+$\sim$800~environment samples per second (target: 1\,000+).  The primary
+bottleneck is action-mask computation, which accounts for approximately 82\,\%
+of per-step wall time (2.3\,ms masking vs.\ 0.5\,ms forward pass).

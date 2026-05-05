@@ -1,0 +1,220 @@
+% ─── Chapter 4: Reinforcement Learning Framework ──────────────────
+\chapter{Reinforcement Learning Framework}
+\label{ch:rl_framework}
+
+\section{MDP Formulation}
+
+The Pok\'{e}mon battle environment is modelled as a Markov Decision Process
+(MDP) with the following components:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{Component} & \textbf{Definition} \\
+  \midrule
+  State ($s$)       & Dictionary observation: token matrix $(13 \times 164)$,
+                      species/item/ability ID vectors $(13,)$ each, action
+                      mask $(14,)$.  Full specification in
+                      Chapter~\ref{ch:architecture}. \\
+  Action ($a$)       & Discrete choice from 14 possible actions (4 moves,
+                      4 gimmick-enhanced moves, 6 switches), filtered by the
+                      action mask to only legal options. \\
+  Reward ($r$)       & Shaped reward computed each step from HP changes,
+                      fainting events, and a terminal outcome bonus/penalty.
+                      Detailed in Section~\ref{sec:reward_design}. \\
+  Transition         & Deterministic given both players' actions;
+                      stochasticity arises from the opponent's policy and
+                      damage variance in the simulator. \\
+  Discount ($\gamma$) & 0.95 (slightly reduced from the standard 0.99 to
+                       emphasise nearer-term outcomes in the battle horizon). \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+An episode corresponds to a single battle.  It terminates when one side has no
+remaining conscious Pok\'{e}mon (win or loss).  There is no explicit time limit
+or truncation.
+
+\section{PPO Algorithm}
+
+The agent is trained with \textbf{Proximal Policy Optimization} (PPO), an
+on-policy actor-critic algorithm that balances sample efficiency with training
+stability through a clipped surrogate objective.  PPO was chosen for the
+following reasons:
+
+\begin{itemize}
+  \item \textbf{Stability:} The clipped objective prevents destructively large
+        policy updates, which is critical when learning in a sparse-reward,
+        high-variance environment.
+  \item \textbf{Distributed rollouts:} PPO naturally integrates with Ray
+        RLlib's distributed rollout architecture, enabling many parallel
+        battles.
+  \item \textbf{Action masking:} PPO's categorical distribution can be
+        combined with action masking (setting invalid-action logits to a large
+        negative value) without modifying the algorithm itself.
+\end{itemize}
+
+The policy network (actor) outputs a categorical distribution over the 14
+actions, and the value network (critic) outputs a scalar state-value estimate
+$V(s)$.  Both share a common transformer trunk (see
+Chapter~\ref{ch:architecture}).
+
+\section{Reward Design}
+\label{sec:reward_design}
+
+The reward function combines several components to provide dense learning signal
+while preserving the primacy of winning:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l r X}
+  \toprule
+  \textbf{Component} & \textbf{Default} & \textbf{Description} \\
+  \midrule
+  Victory reward     & $+10.0$  & Agent wins the battle (terminal step). \\
+  Defeat penalty     & $-10.0$  & Agent loses the battle (terminal step). \\
+  HP differential    & $\times 2.0$ &
+    $(\text{our\_team\_HP} - \text{opp\_team\_HP}) \times w$ as a shaped
+    step reward.  Positive when the agent is ahead, negative when behind. \\
+  Opponent fainted   & $+5.0$   & Per opponent Pok\'{e}mon knocked out. \\
+  Own fainted        & $-5.0$   & Per agent Pok\'{e}mon that faints. \\
+  Step penalty       & $-0.005$ & Per step, encourages battle efficiency
+                                    (fewer turns). \\
+  Matchup quality    & $\times 0.2$ &
+    $+1.0$ if a super-effective move is available, $-0.5$ if only resisted
+    moves, $-1.0$ if immune.  Rewards good type-readiness. \\
+  Action quality     & $\times 0.3$ &
+    Penalty for clearly suboptimal moves; bonus for resisting the opponent's
+    best move. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The reward is computed each step by \texttt{poke-env}'s
+\texttt{reward\_computing\_helper}, parameterised by the active
+\texttt{RewardConfig}.  At the terminal step, explicit outcome rewards are
+applied on top.
+
+\subsection{Curriculum-Stage Reward Variants}
+
+Reward parameters are adjusted across curriculum stages to reflect increasing
+difficulty:
+
+\begin{center}
+\small
+\begin{tabularx}{0.95\textwidth}{l c c c}
+  \toprule
+  \textbf{Parameter} & \textbf{Stage 1: Warmup} & \textbf{Stage 2: Self-Play} & \textbf{Stage 3: Mixed} \\
+  \midrule
+  Victory / Defeat       & $\pm 10$ & $\pm 10$ & $\pm 10$ \\
+  HP weight              & 2.0      & 2.0      & 2.0      \\
+  Opponent fainted       & $+5.0$   & $+5.0$   & $+5.0$   \\
+  Own fainted penalty    & $-5.0$   & $-5.0$   & $-5.0$   \\
+  Step penalty           & $-0.005$ & $-0.005$ & $-0.005$ \\
+  Matchup weight         & 0.2      & 0.2      & 0.2      \\
+  Action quality weight  & 0.3      & 0.3      & 0.3      \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Curriculum Learning}
+\label{sec:curriculum}
+
+Due to the complexity of the full challenge, training follows a \textbf{curriculum
+learning} approach where the agent is first exposed to easy opponents and
+gradually faces stronger ones.  Curriculum stages are defined as:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l c c c}
+  \toprule
+  & \textbf{Stage 1: Random Warmup} & \textbf{Stage 2: Self-Play} & \textbf{Stage 3: Mixed} \\
+  \midrule
+  Opponent mix &
+    100\,\% \texttt{random\_no\_switch} &
+    80\,\% self-play / 20\,\% \texttt{random\_no\_switch} &
+    50\,\% heuristic / 30\,\% self-play / 20\,\% \texttt{random\_no\_switch} \\[4pt]
+  Promotion threshold &
+    70\,\% win rate &
+    85\,\% win rate &
+    101\,\% (terminal) \\[4pt]
+  Min.\ episodes &
+    100 &
+    100 &
+    100 \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\textbf{Stage progression:}
+\begin{itemize}
+  \item \textbf{Random Warmup:} The agent plays against a random-move opponent
+        that never voluntarily switches.  This provides a low-variance signal
+        for learning basic move selection and type effectiveness.
+  \item \textbf{Self-Play:} The agent mostly plays against copies of itself
+        (with periodically updated weights), supplemented by random opponents.
+        Self-play creates a curriculum of gradually increasing difficulty as
+        the agent improves.
+  \item \textbf{Mixed:} The agent faces the strongest opponent mix, including
+        the heuristic AI (\texttt{SimpleHeuristicsPlayer}) which considers type
+        effectiveness and switches strategically.  This stage does not
+        promote---it represents the final training regime.
+\end{itemize}
+
+Promotion decisions use a rolling window of the last 200 episodes (minimum 50
+samples required before promotion is considered).
+
+\section{Self-Play Mechanism}
+\label{sec:self_play}
+
+Self-play is implemented through a \texttt{SelfPlayPlayer} class that:
+
+\begin{enumerate}
+  \item Loads the latest model weights from
+        \texttt{checkpoints/selfplay\_latest.pt} on first use.
+  \item Re-checks the weights file each turn, enabling automatic updates
+        when new checkpoints are saved.
+  \item Maintains per-battle LSTM state for temporal memory.
+  \item Converts the agent's compressed 14-action output to native
+        \texttt{poke-env} \texttt{BattleOrder} objects.
+  \item Falls back to \texttt{RandomPlayer} behaviour on inference errors.
+\end{enumerate}
+
+At each checkpoint, the training pipeline exports the current model weights to
+the self-play weights path, making them immediately available to all
+\texttt{SelfPlayPlayer} instances across workers.  This creates a natural
+curriculum where the agent continuously adapts to an opponent of increasing
+skill.
+
+% TODO: Add talking point about self-play training results once available.
+% Specifically: win rate curves for self-play stage, comparison with
+% non-self-play training, and any observed oscillation or instability.
+
+\section{Opponent Types}
+
+The environment supports four opponent categories:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l l X}
+  \toprule
+  \textbf{Key} & \textbf{Player Class} & \textbf{Behaviour} \\
+  \midrule
+  \texttt{random\_no\_switch} & \texttt{RandomNoSwitchPlayer} &
+    Uniform random among legal \emph{move} orders; switches only when forced
+    (no moves available or forced by simulator). \\
+  \texttt{random} & \texttt{RandomPlayer} &
+    Uniform random over all legal orders (moves \emph{and} switches). \\
+  \texttt{heuristic} & \texttt{SimpleHeuristicsPlayer} &
+    Rule-based AI: considers type effectiveness, switches when at a
+    disadvantage. \\
+  \texttt{self} & \texttt{SelfPlayPlayer} &
+    Uses the training model's weights for inference with hot-reload support. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+In the embedding layer, \texttt{random\_no\_switch} is mapped to the same
+bucket as \texttt{random} for the opponent-type feature, avoiding distribution
+shift at the observation level when mixing or swapping baselines.

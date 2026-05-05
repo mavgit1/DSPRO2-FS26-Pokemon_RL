@@ -1,0 +1,134 @@
+% ─── Chapter 9: Risk, Ethics & Considerations ─────────────────────
+\chapter{Risk, Ethics \& Considerations}
+\label{ch:risk}
+
+\section{Risk Assessment}
+
+\subsection{Technical Risks}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l c X}
+  \toprule
+  \textbf{Risk} & \textbf{Impact} & \textbf{Mitigation} \\
+  \midrule
+  Medium-stage plateau &
+    High &
+    Systematic debugging through controlled experiments (positional
+    encoding, embeddings, reward shaping).  Multiple architectural
+    improvements have already been validated. \\
+  Memory leaks &
+    Medium &
+    Observed RAM growth from 8\,GB to 52\,GB over 5~hours.  Mitigated with
+    periodic cleanup, memory-leak counters, and the \texttt{memory\_safe}
+    preset for limited hardware. \\
+  RLlib API instability &
+    Medium &
+    The LSTM integration required workarounds for RLlib's connector path.
+    Custom \texttt{RLModule} and \texttt{EnvRunner} implementations provide
+    a stable interface. \\
+  Reward hacking &
+    Low &
+    Multi-component reward with matchup and action-quality signals reduces
+    the risk of the agent exploiting a single reward channel. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Timeline Risks}
+
+The critical path depends on resolving the medium-stage plateau.  If the
+reward signal redesign does not produce improvement within 2--3 experimental
+iterations, the timeline for Milestone~1 completion could extend by an
+additional 2--4~weeks.  This risk is accepted given the exploratory nature of
+the project.
+
+\section{Ethical Considerations}
+
+\subsection{Domain Context}
+
+This project operates entirely within the domain of \textbf{game AI}.  The
+agent plays Pok\'{e}mon battles against simulated opponents in a controlled
+environment.  There are no ethical concerns related to:
+
+\begin{itemize}
+  \item \textbf{Personal data:} No personal or sensitive data is collected,
+        stored, or processed.  All data consists of game mechanics, trainer
+        rosters, and battle states.
+  \item \textbf{Harmful applications:} The trained model cannot be repurposed
+        for harmful real-world applications.  It is specialised for a
+        turn-based game with a fixed action space.
+  \item \textbf{Bias or fairness:} The opponent populations are programmatically
+        defined.  There are no human subjects, user-facing decisions, or
+        societal impacts.
+\end{itemize}
+
+\subsection{Software Licences}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l l}
+  \toprule
+  \textbf{Component} & \textbf{Licence} \\
+  \midrule
+  Pok\'{e}mon Showdown & AGPL-3.0 (open source, self-hosted) \\
+  \texttt{poke-env}      & MIT \\
+  Ray / RLlib           & Apache-2.0 \\
+  PyTorch               & BSD-3-Clause \\
+  MLflow                & Apache-2.0 \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+All dependencies are open-source.  The project does not redistribute
+copyrighted Pok\'{e}mon assets; it uses the Showdown simulator's built-in data
+under fair use for research and educational purposes.
+
+\subsection{EU AI Act Classification}
+
+Under the EU AI Act, this system falls into the \textbf{minimal risk}
+category.  It is a research prototype for a game environment with no
+interaction with natural persons, no biometric data, no critical
+infrastructure, and no social scoring.  No conformity assessment is required.
+
+\section{Human-in-the-Loop Considerations}
+
+Although the training loop is automated, several critical decisions require
+human judgement:
+
+\begin{itemize}
+  \item \textbf{Checkpoint selection:} A human reviews MLflow dashboards to
+        select the best checkpoint for gauntlet evaluation, rather than
+        automatically selecting by training win rate (which can be misleading).
+  \item \textbf{Curriculum stage overrides:} If a training run stagnates, a
+        human may manually adjust the curriculum stage, opponent mix, or
+        promotion thresholds.
+  \item \textbf{Hyperparameter tuning:} Learning rate, entropy coefficient,
+        and reward weights are set based on human interpretation of training
+        curves---not automated tuning.
+  \item \textbf{Experiment design:} The sequence of architectural changes
+        (positional encoding, embeddings, action compression) was guided by
+        human analysis of failure modes, not random search.
+\end{itemize}
+
+This human oversight is essential because the environment is complex enough
+that automated optimisation could converge to local optima that do not
+generalise to the gauntlet.
+
+\section{Limitations}
+
+\begin{itemize}
+  \item The agent has been tested only on Milestone~1 (fixed team vs.\ random
+        opponents).  Team builder integration (Milestone~3) and full gauntlet
+        completion (Milestone~4) remain future work.
+  \item Cross-turn memory via LSTM has been implemented but not yet validated
+        end-to-end in a full training run.
+  \item The system operates in the Gen\,8 random-battle format.  Transfer to
+        other Pok\'{e}mon generations or formats would require observation-space
+        adjustments.
+  \item All training and evaluation use local hardware (no cloud deployment).
+  \item The heuristic opponent (\texttt{SimpleHeuristicsPlayer}) is a
+        rule-based baseline, not a strong competitive AI.  Success against it
+        does not guarantee competence against human players or more
+        sophisticated agents.
+\end{itemize}

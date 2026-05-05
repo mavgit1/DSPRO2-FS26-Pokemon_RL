@@ -1,0 +1,119 @@
+% ─── Chapter 1: Introduction ───────────────────────────────────────
+\chapter{Introduction}
+
+\section{Problem Statement}
+
+The goal of this project is to develop an AI agent capable of completing a
+\emph{Pok\'{e}mon Nuzlocke challenge} using deep reinforcement learning.
+The chosen game is \emph{Pok\'{e}mon Brilliant Diamond} (BDSP), and the agent
+must defeat all mandatory trainers without losing---subject to constraints that
+transform standard battles into a complex sequential decision-making problem
+under uncertainty with irreversible consequences.
+
+A Nuzlocke challenge is a self-imposed difficulty rule set widely adopted by the
+Pok\'{e}mon community.  Its core constraints are:
+
+\begin{itemize}
+  \item \textbf{First-catch rule:} Only the first Pok\'{e}mon encountered in
+        each new location may be captured.
+  \item \textbf{Permadeath:} If a Pok\'{e}mon faints during battle, it is
+        considered permanently lost and cannot be used again.
+  \item \textbf{Run failure:} If the player loses a battle with no usable
+        Pok\'{e}mon remaining, the entire run ends and must restart.
+\end{itemize}
+
+These rules introduce permanent consequences and limited resources, turning a
+turn-based strategy game into a problem that requires long-horizon planning,
+risk assessment, and resource management---all qualities that make it a
+compelling testbed for reinforcement learning.
+
+\section{Stakeholder Context}
+
+This project is carried out as part of the \textbf{DSPRO2} course at the
+Hochschule Luzern (HSLU) during the Spring 2026 semester.  Beyond fulfilling
+academic requirements, the project serves as a \emph{reusable experimental
+benchmark} for evaluating reinforcement learning algorithms on generalisation,
+robustness, and risk-aware decision-making.
+
+The primary stakeholders are:
+
+\begin{itemize}
+  \item \textbf{Course supervisors:} Expect a professional-grade report
+        demonstrating an end-to-end ML workflow, experiment tracking, honest
+        validation, and actionable conclusions.
+  \item \textbf{Project team:} Uses the system as a portfolio-quality technical
+        artifact proving the ability to move from prototype to a
+        production-ready mindset.
+  \item \textbf{RL research community:} The Nuzlocke benchmark, if
+        successful, provides a challenging, well-defined testbed for
+        comparing RL approaches on tasks with sparse rewards, partial
+        observability, and irreversible actions.
+\end{itemize}
+
+\section{Objectives \& Success Metrics}
+
+The overarching objective is to train an AI agent that successfully completes a
+Nuzlocke gauntlet---a predefined sequence of battles against trainer teams from
+Pok\'{e}mon Brilliant Diamond.
+
+Success is measured by the following metrics:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{Metric} & \textbf{Description} \\
+  \midrule
+  Gauntlet completion rate  & Fraction of runs where the agent beats all
+                             trainers in the correct sequence. \\
+  Progression depth         & Average number of battles completed before
+                             failure. \\
+  Remaining resources       & HP and Pok\'{e}mon still available upon
+                             gauntlet completion. \\
+  Generalisation            & Performance on unseen gauntlet orderings or
+                             opponent teams without further training. \\
+  Model efficiency          & Minimum model size (parameters) needed to reach
+                             a given competency level. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Near-term success is defined as achieving a stable win rate above 50\,\%
+against heuristic opponents in the medium curriculum stage (see
+Chapter~\ref{ch:rl_framework}).
+
+\section{Project Scope}
+
+The project focuses exclusively on \textbf{battle decision-making}:
+
+\begin{itemize}
+  \item Move selection and Pok\'{e}mon switching during battles.
+  \item Team composition (in later milestones).
+  \item Sequential gauntlet management with Nuzlocke constraints.
+\end{itemize}
+
+The following are \textbf{explicitly excluded}:
+
+\begin{itemize}
+  \item Game-world exploration and traversal.
+  \item Interaction with an actual game client---the system operates entirely
+        through the Pok\'{e}mon Showdown battle simulator.
+  \item Multiplayer or competitive battling against human players.
+\end{itemize}
+
+\section{Document Structure}
+
+This report is organised as follows.  Chapter~\ref{ch:game_env} provides
+background on Pok\'{e}mon battle mechanics and the simulation environment.
+Chapter~\ref{ch:challenge} formalises the challenge model, data provenance,
+and milestone roadmap.  Chapter~\ref{ch:rl_framework} describes the
+reinforcement learning formulation, PPO algorithm, reward design, and
+curriculum learning setup.  Chapter~\ref{ch:architecture} details the system
+architecture---observation pipeline, model, action space, and self-play
+mechanism.  Chapter~\ref{ch:infrastructure} covers the distributed training
+infrastructure and experiment tracking.  Chapter~\ref{ch:experiments} presents
+the iterative development process through multiple experimental phases.
+Chapter~\ref{ch:results} analyses training results.  Chapter~\ref{ch:risk}
+discusses risk, ethical, and human-in-the-loop considerations.
+Chapter~\ref{ch:conclusions} concludes with lessons learned and next steps.
+Chapter~\ref{ch:reproduction} provides a complete reproduction guide.
