@@ -464,6 +464,7 @@ class PokemonBattleEnv(SinglesEnv):
 
         return {
             "outcome": float(outcome),
+            "opponent_type": self._opponent_context,
             "terminal_our_hp_remaining": float(our_hp),
             "terminal_opp_hp_remaining": float(opp_hp),
             "terminal_faint_diff": float(opp_fainted - our_fainted),
@@ -777,11 +778,11 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         action_stats = self._recent_action_stats[:]
         self._recent_action_stats.clear()
 
-        count = min(len(env_stats), len(action_stats))
         merged = []
-        for idx in range(count):
-            item = dict(env_stats[idx])
-            item.update(action_stats[idx])
+        for idx, es in enumerate(env_stats):
+            item = dict(es)
+            if idx < len(action_stats):
+                item.update(action_stats[idx])
             merged.append(item)
         return merged
 

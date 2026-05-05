@@ -244,6 +244,10 @@ class PokemonTrainer:
                     episode_stats = collect_recent_episode_stats(self.algo)
                     metrics.update(aggregate_episode_metrics(outcomes, episode_stats))
 
+                    # Export self-play weights every iteration so the opponent
+                    # stays fresh (instead of only every 150k checkpoint).
+                    self._export_selfplay_weights()
+
                     # Curriculum updates (training-only, binary outcomes).
                     if self.curriculum:
                         stage_changed = self.curriculum.update(outcomes)

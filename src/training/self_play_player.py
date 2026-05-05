@@ -143,8 +143,10 @@ class SelfPlayPlayer(Player):
 
             logits, _ = self.model.heads_from_features(features, mask)
 
-        # 4. Argmax -> compressed action
-        action = int(logits.argmax(dim=-1).item())
+        # 4. Sample from softmax distribution (temperature < 1.0 = sharper)
+        temperature = 0.8
+        probs = torch.softmax(logits / temperature, dim=-1)
+        action = int(torch.multinomial(probs, 1).item())
 
         # 5. Convert to BattleOrder
         return self._action_to_order(action, battle)

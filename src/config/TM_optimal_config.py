@@ -193,14 +193,14 @@ class CurriculumConfig:
                     fainted_penalty=-6.0,
                     step_penalty=-0.01,        
                     matchup_reward_weight=0.1, 
-                    action_quality_weight=0.4,
+                    action_quality_weight=0.3,
                 ),
             ),
             CurriculumStageConfig(
                 name="random_with_switches",
                 promote_at_win_rate=0.72,
                 min_samples_for_promotion=200,
-                opponent_mix={"random_no_switch": 0.7, "random": 0.3},
+                opponent_mix={"random_no_switch": 0.6, "random": 0.4},
                 reward_config=RewardConfig(
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
@@ -209,7 +209,7 @@ class CurriculumConfig:
                     fainted_penalty=-6.0,
                     step_penalty=-0.01,        
                     matchup_reward_weight=0.1, 
-                    action_quality_weight=0.4,
+                    action_quality_weight=0.3,
                 ),
             ),
             CurriculumStageConfig(

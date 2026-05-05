@@ -1,0 +1,55 @@
+Xerneas @ Power Herb 
+Ability: Fairy Aura  
+Level: 65  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- focusblast  
+- geomancy  
+- psyshock  
+- moonblast  
+
+Araquanid (F) @ Heavy-Duty Boots  
+Ability: Water Bubble  
+Level: 80  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- liquidation  
+- toxic 
+- leechlife  
+- stickyweb  
+
+Vespiquen (F) @ Heavy-Duty Boots  
+Ability: Pressure  
+Level: 98  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- uturn  
+- roost  
+- toxic  
+- airslash  
+
+Jirachi @ Leftovers  
+Ability: Serene Grace  
+Level: 78  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- toxic  
+- ironhead  
+- stealthrock  
+- firepunch  
+
+Weezing (Weezing-Galar) (M) @ Black Sludge  
+Ability: Levitate  
+Level: 85  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- willowisp  
+- strangesteam  
+- fireblast  
+- defog  
+
+Dracovish @ Choice Band  
+Ability: Strong Jaw  
+Level: 77  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- crunch  
+- lowkick  
+- fishiousrend  
+- psychicfangs
