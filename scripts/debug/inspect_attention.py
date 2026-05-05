@@ -290,7 +290,7 @@ def analyze(obs_samples, all_layer_attns):
     print(f"{'='*76}")
 
     # Token presence
-    print(f"\nToken presence:")
+    print("\nToken presence:")
     for t in range(13):
         present = sum(1 for o in obs_samples if o["obs"][t, 0] > 0.5)
         fainted = sum(1 for o in obs_samples if o["obs"][t, 2] > 0.5)
@@ -312,25 +312,25 @@ def analyze(obs_samples, all_layer_attns):
         avg = np.nan_to_num(avg, nan=0.0)  # handle NaN from numerical issues
 
         # CLS token attention
-        print(f"\n  CLS token (0) attention distribution:")
+        print("\n  CLS token (0) attention distribution:")
         for t in range(T):
             pct = avg[0, t] * 100
             print(f"    {t:2d} {TOKEN_NAMES[t]:14s}: {pct:7.3f}%  {print_attn_bar(pct)}")
 
         # Our active token attention
-        print(f"\n  Our active (1) attention distribution:")
+        print("\n  Our active (1) attention distribution:")
         for t in range(T):
             pct = avg[1, t] * 100
             print(f"    {t:2d} {TOKEN_NAMES[t]:14s}: {pct:7.3f}%  {print_attn_bar(pct)}")
 
         # Opp active token attention
-        print(f"\n  Opp active (7) attention distribution:")
+        print("\n  Opp active (7) attention distribution:")
         for t in range(T):
             pct = avg[7, t] * 100
             print(f"    {t:2d} {TOKEN_NAMES[t]:14s}: {pct:7.3f}%  {print_attn_bar(pct)}")
 
         # Per-head analysis for CLS token
-        print(f"\n  Per-head CLS (token 0) attention to key tokens:")
+        print("\n  Per-head CLS (token 0) attention to key tokens:")
         print(f"  {'Head':>6s}  {'our_active':>11s}  {'bench_avg':>9s}  {'opp_active':>10s}  {'opp_bench':>9s}  {'self':>6s}  {'global':>7s}")
         for h in range(H):
             h_avg = attn[:, h, 0, :].mean(axis=0)  # [T]
@@ -348,7 +348,7 @@ def analyze(obs_samples, all_layer_attns):
             print(f"  {h:6d}  {'  '.join(parts)}")
 
         # Entropy
-        print(f"\n  Attention entropy (lower = more focused):")
+        print("\n  Attention entropy (lower = more focused):")
         max_ent = np.log(T)
         for q_tok, label in [(0, "CLS"), (1, "Our active"), (7, "Opp active")]:
             eps = 1e-10

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from src.models.vocab import vocab_sizes
 
@@ -21,8 +21,8 @@ class ModelConfig:
     # Transformer
     hidden_dim: int = 512
     num_heads: int = 8
-    num_transformer_layers: int = 1
-    dropout: float = 0.1
+    num_transformer_layers: int = 2
+    dropout: float = 0.15
     use_position_embeddings: bool = True
     use_role_embeddings: bool = True
 
@@ -66,11 +66,11 @@ class PPOConfig:
     clip_param: float = 0.2
 
     # Entropy bonus (exploration)
-    entropy_coeff: float = 0.05
+    entropy_coeff: float = 0.2
 
     # Value function
     vf_loss_coeff: float = 0.5
-    vf_clip_param: float = 5.0
+    vf_clip_param: float = 10.0
 
     # Gradient clipping
     grad_clip: float = 5.0
@@ -86,7 +86,12 @@ class EnvironmentConfig:
     """Environment configuration."""
 
     # Battle settings
-    battle_format: str = "gen5randombattle"
+    battle_format: str = "gen8randombattlenogimmicks"
+
+    # Fixed player team (Showdown format text file). When set, the RL agent
+    # always uses this team and the battle format is auto-switched to the
+    # corresponding custom-game variant (e.g. gen5randombattle → gen5customgame).
+    player_team_path: Optional[str] = "data/teams/player_team.txt"
 
     # Server settings
     showdown_host: str = "localhost"
@@ -164,7 +169,7 @@ class CurriculumConfig:
 
     enabled: bool = True
     rolling_window_episodes: int = 200
-    min_episodes_before_promotion: int = 100
+    min_episodes_before_promotion: int = 20_000
     allow_demotion: bool = False
     reward_rollback_on_demotion: bool = False
     stages: List[CurriculumStageConfig] = field(
@@ -266,11 +271,11 @@ class TrainingConfig:
     """Main training configuration."""
     
     # Duration
-    total_timesteps: int = 10_000_000
+    total_timesteps: int = 3_000_000
     
     # Checkpointing
     checkpoint_dir: str = "checkpoints"
-    checkpoint_freq: int = 250_000      # Save every N timesteps
+    checkpoint_freq: int = 150_000      # Save every N timesteps
     keep_checkpoints_num: int = 5
     
     # Logging
@@ -321,6 +326,7 @@ class TrainingConfig:
             },
             "env": {
                 "battle_format": self.env.battle_format,
+                "player_team_path": self.env.player_team_path,
                 "num_workers": self.env.num_workers,
                 "num_envs_per_worker": self.env.num_envs_per_worker,
             },

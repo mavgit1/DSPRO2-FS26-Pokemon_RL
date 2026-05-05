@@ -99,6 +99,15 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--player-team",
+        type=Path,
+        default=None,
+        help=(
+            "Path to a Showdown-format team file for the RL agent. "
+            "When set, mirror protocol uses this team for both sides."
+        ),
+    )
+    parser.add_argument(
         "--mlflow",
         action="store_true",
         help="Log validation metrics and report artifact to MLflow.",
@@ -145,6 +154,7 @@ def main() -> int:
             team_manifest=str(args.team_manifest) if args.team_manifest else None,
             battle_format=args.battle_format,
             use_lstm=args.use_lstm,
+            player_team_path=str(args.player_team) if args.player_team else None,
         )
     except (
         ConnectionError,

@@ -571,7 +571,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         if opponent_key == "self":
             from src.training.self_play_player import SelfPlayPlayer
 
-            opponent_id = f"SP_{uuid.uuid4().hex[:6]}"
+            opponent_id = f"self_{uuid.uuid4().hex[:6]}"
             opponent_config = AccountConfiguration(opponent_id, None)
             return SelfPlayPlayer(
                 model_config_dict=self._model_config_dict or {},
@@ -583,13 +583,15 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             )
         if opponent_key == "heuristic":
             opponent_class = SimpleHeuristicsPlayer
+            opponent_id = f"hrs_{uuid.uuid4().hex[:6]}"
         elif opponent_key == "random_no_switch":
             from src.envs.random_no_switch_player import RandomNoSwitchPlayer
 
             opponent_class = RandomNoSwitchPlayer
+            opponent_id = f"rndns_{uuid.uuid4().hex[:6]}"
         else:
             opponent_class = RandomPlayer
-        opponent_id = f"Opp_{uuid.uuid4().hex[:6]}"
+            opponent_id = f"rnd_{uuid.uuid4().hex[:6]}"
         opponent_config = AccountConfiguration(opponent_id, None)
         return opponent_class(
             battle_format=self._battle_format,
@@ -926,12 +928,12 @@ def create_env_creator(
         opponent_id = f"rnd_{uuid.uuid4().hex[:6]}"
         if difficulty in {"heuristic", "heuristics"}:
             opponent_class = SimpleHeuristicsPlayer
-            opponent_id = f"hr_{uuid.uuid4().hex[:6]}"
+            opponent_id = f"hrs_{uuid.uuid4().hex[:6]}"
         elif difficulty == "random_no_switch":
             from src.envs.random_no_switch_player import RandomNoSwitchPlayer
 
             opponent_class = RandomNoSwitchPlayer
-            opponent_id = f"rns_{uuid.uuid4().hex[:6]}"
+            opponent_id = f"rndns_{uuid.uuid4().hex[:6]}"
         else:
             opponent_class = RandomPlayer
         opponent_config = AccountConfiguration(opponent_id, None)

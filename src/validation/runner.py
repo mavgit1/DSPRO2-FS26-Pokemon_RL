@@ -54,6 +54,7 @@ def run_validation(
     team_manifest: str | None = None,
     battle_format: str | None = None,
     use_lstm: bool = False,
+    player_team_path: str | None = None,
 ) -> Dict[str, Any]:
     """Restore a checkpoint and run a validation protocol."""
     if protocol.name not in {"smoke", "fixed_paired", "mirror"}:
@@ -64,6 +65,12 @@ def run_validation(
     _seed_everything(seed)
     config = build_validation_config(preset)
     config.model.use_lstm = use_lstm
+
+    # Load fixed player team if provided.
+    player_team: str | None = None
+    if player_team_path:
+        player_team = Path(player_team_path).expanduser().resolve().read_text(encoding="utf-8").strip()
+
     if battle_format:
         config.env.battle_format = battle_format
     checkpoint_path = resolve_resume_checkpoint(checkpoint, config.checkpoint_dir)
@@ -109,16 +116,31 @@ def run_validation(
             _restore_checkpoint_for_validation(algo, checkpoint_path)
 
         if protocol.name in {"fixed_paired", "mirror"}:
-            if not team_manifest:
-                raise ValueError(f"--team-manifest is required for {protocol.name}.")
-            manifest = load_team_manifest(team_manifest)
-            execution_format = manifest.get("metadata", {}).get("execution_format")
-            if isinstance(execution_format, str) and execution_format:
+            if protocol.name == "mirror" and player_team:
+                # Fixed-team mirror: same team for both sides, against
+                # random and heuristic opponents.
+                from src.validation.teams import fixed_team_mirror_specs
+                execution_format = config.env.battle_format.replace(
+                    "randombattle", "customgame"
+                )
                 config.env.battle_format = execution_format
-            if protocol.name == "fixed_paired":
-                battle_specs = fixed_pair_battle_specs(manifest)
+                battle_specs = fixed_team_mirror_specs(player_team)
             else:
-                battle_specs = mirror_battle_specs(manifest)
+                if not team_manifest:
+                    raise ValueError(f"--team-manifest is required for {protocol.name}.")
+                manifest = load_team_manifest(team_manifest)
+                execution_format = manifest.get("metadata", {}).get("execution_format")
+                if isinstance(execution_format, str) and execution_format:
+                    config.env.battle_format = execution_format
+                if protocol.name == "fixed_paired":
+                    battle_specs = fixed_pair_battle_specs(manifest)
+                    # Override RL team with fixed player team if set.
+                    if player_team:
+                        for spec in battle_specs:
+                            spec["rl_team"] = player_team
+                            spec["rl_team_id"] = "player_team"
+                else:
+                    battle_specs = mirror_battle_specs(manifest)
             results = _run_battle_specs(
                 algo=algo,
                 config=config,
@@ -127,10 +149,16 @@ def run_validation(
                 max_steps_per_battle=max_steps_per_battle,
             )
         else:
+            # Auto-switch to customgame when a player team is set.
+            if player_team:
+                config.env.battle_format = config.env.battle_format.replace(
+                    "randombattle", "customgame"
+                )
             env = _build_validation_env(
                 config=config,
                 opponent_type=protocol.opponent,
                 start_port=start_port,
+                player_team=player_team,
             )
             results = _run_episodes(
                 algo=algo,

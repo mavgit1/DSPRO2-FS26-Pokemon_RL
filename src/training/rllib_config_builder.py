@@ -1,5 +1,6 @@
 import gymnasium as gym
 import torch
+from pathlib import Path
 from typing import Optional
 from ray.rllib.algorithms.ppo import PPOConfig
 from ray.rllib.core.rl_module.rl_module import RLModuleSpec
@@ -11,20 +12,54 @@ from src.envs.battle_env import create_env_creator, get_observation_space
 
 POKEMON_BATTLE_ENV_NAME = "pokemon_battle"
 
+
+def _load_player_team(team_path: str) -> str:
+    """Load a Showdown-format team from a text file."""
+    path = Path(team_path).expanduser().resolve()
+    if not path.exists():
+        raise FileNotFoundError(f"Player team file not found: {path}")
+    return path.read_text(encoding="utf-8").strip()
+
+
+def _custom_game_format(battle_format: str) -> str:
+    """Convert a randombattle format to its customgame equivalent.
+
+    ``gen5randombattle`` → ``gen5customgame``
+    ``gen8randombattle`` → ``gen8customgame``
+
+    Raises ValueError if the format doesn't contain 'randombattle'.
+    """
+    if "randombattle" not in battle_format:
+        raise ValueError(
+            f"Cannot auto-convert battle format '{battle_format}' to customgame. "
+            "Set battle_format to a '*randombattle' variant, or manually set it "
+            "to the correct '*customgame' format."
+        )
+    return battle_format.replace("randombattle", "customgame")
+
+
 def register_environments(
     config: TrainingConfig,
     num_servers: int,
     start_port: int,
     initial_stage: Optional[CurriculumStageConfig],
 ) -> None:
+    # Load fixed player team if configured.
+    player_team: Optional[str] = None
+    battle_format = config.env.battle_format
+    if config.env.player_team_path:
+        player_team = _load_player_team(config.env.player_team_path)
+        battle_format = _custom_game_format(battle_format)
+
     env_creator = create_env_creator(
-        battle_format=config.env.battle_format,
+        battle_format=battle_format,
         server_host=config.env.showdown_host,
         server_port=start_port,
         reward_config=(initial_stage.reward_config if initial_stage else config.reward),
         opponent_mix=(initial_stage.opponent_mix if initial_stage else None),
         model_config_dict=config.model.to_dict(),
         selfplay_weights_path=config.selfplay_weights_path,
+        player_team=player_team,
     )
     register_env(POKEMON_BATTLE_ENV_NAME, env_creator)
 

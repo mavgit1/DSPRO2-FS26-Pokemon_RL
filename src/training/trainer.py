@@ -191,6 +191,18 @@ class PokemonTrainer:
                 flat_params: Dict[str, Any] = {}
                 flatten_for_mlflow("", self.config.to_dict(), flat_params)
                 mlflow.log_params(flat_params)
+
+                # Log player team as a text artifact so it's visible in the run.
+                if self.config.env.player_team_path:
+                    team_path = Path(self.config.env.player_team_path)
+                    if team_path.exists():
+                        mlflow.log_text(
+                            team_path.read_text(encoding="utf-8"),
+                            artifact_file="player_team.txt",
+                        )
+                        mlflow.set_tag(
+                            "player_team_file", str(team_path)
+                        )
             else:
                 mlflow.set_tag("resumed", "true")
                 if resume_path:
@@ -625,6 +637,11 @@ class PokemonTrainer:
             team_manifest = self._manifest_for_validation_protocol(protocol)
             if team_manifest:
                 command.extend(["--team-manifest", team_manifest])
+
+            if self.config.env.player_team_path:
+                command.extend(
+                    ["--player-team", self.config.env.player_team_path]
+                )
 
             if self.config.model.use_lstm:
                 command.append("--use-lstm")

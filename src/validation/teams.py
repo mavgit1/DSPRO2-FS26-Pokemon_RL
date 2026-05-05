@@ -140,6 +140,26 @@ def mirror_battle_specs(manifest: Dict[str, Any]) -> List[Dict[str, Any]]:
     return specs
 
 
+def fixed_team_mirror_specs(
+    team_showdown: str, episodes_per_opponent: int = 20
+) -> List[Dict[str, Any]]:
+    """Battle specs for a fixed-team mirror: same team on both sides."""
+    specs: List[Dict[str, Any]] = []
+    for opponent_type in ("random", "heuristic"):
+        for i in range(episodes_per_opponent):
+            specs.append(
+                {
+                    "pair_id": f"fixed_mirror_{opponent_type}_{i}",
+                    "opponent_type": opponent_type,
+                    "rl_team_id": "player_team",
+                    "opponent_team_id": "player_team",
+                    "rl_team": team_showdown,
+                    "opponent_team": team_showdown,
+                }
+            )
+    return specs
+
+
 def structured_team_from_showdown(showdown: str) -> List[Dict[str, Any]]:
     """Parse Showdown team text into inspectable structured metadata."""
     builder = ConstantTeambuilder(showdown)
