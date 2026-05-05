@@ -146,3 +146,15 @@ When switching, check if incoming mon has better defensive matchup than outgoing
 
 1. **Step G** (imitation learning) — bypasses reward shaping entirely
 2. Action quality refinements — low priority, reward shaping alone isn't enough
+
+
+# TO FIX!:
+Logging is fucked again win rate against heuristic and self is not being logged properly.
+
+Playing against self has way too high win rate. Diagnose and fix opposing self.
+
+Current stage 3 is way easier than 2. But is probably based on the weak self play.
+
+Increase validation battle number too noisy of a signal
+
+Current config seems good for some reason.
