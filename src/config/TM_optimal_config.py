@@ -214,8 +214,8 @@ class CurriculumConfig:
             ),
             CurriculumStageConfig(
                 name="self_play",
-                promote_at_win_rate=0.8,
-                min_samples_for_promotion=300,
+                promote_at_win_rate=0.6,
+                min_samples_for_promotion=3000,
                 opponent_mix={"self": 0.7, "random": 0.1, "random_no_switch": 0.2},
                 reward_config=RewardConfig(
                     victory_reward=10.0,
@@ -293,7 +293,7 @@ class TrainingConfig:
     """Main training configuration."""
     
     # Duration
-    total_timesteps: int = 3_000_000
+    total_timesteps: int = 10_000_000
     
     # Checkpointing
     checkpoint_dir: str = "checkpoints"
