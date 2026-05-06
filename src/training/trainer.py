@@ -1,8 +1,6 @@
 import json
 import os
 import random
-import subprocess
-import sys
 import time
 from collections import deque
 from pathlib import Path
@@ -337,11 +335,9 @@ class PokemonTrainer:
                             f"Iter {self.iteration} | Steps: {self.total_steps:,} | Reward: {reward_mean:.2f} | Time: {elapsed:.2f}h"
                         )
 
-                    # Scheduled validation saves a checkpoint first, then evaluates it.
+                    # Scheduled validation runs in-process against the live algo.
                     if self.should_validate():
-                        ckpt_path = self._save_checkpoint()
                         self._run_scheduled_validation(
-                            checkpoint_path=ckpt_path,
                             mlflow_run_id=current_run.info.run_id
                             if current_run
                             else None,
@@ -642,77 +638,81 @@ class PokemonTrainer:
             return self.config.validation.mirror_manifest
         return None
 
-    # Just calls the validate_checkpoint.py script. Use the script directly if you want manual validation.
+    # In-process validation using the live algo — no subprocess overhead.
     def _run_scheduled_validation(
-        self, checkpoint_path: Path, mlflow_run_id: str | None
+        self, checkpoint_path: Path | None = None, mlflow_run_id: str | None = None
     ) -> None:
-        """Run configured validation protocols against a saved checkpoint."""
+        """Run configured validation protocols in-process against the live algo."""
+        from src.validation.protocols import get_protocol
+        from src.validation.reporting import (
+            format_validation_summary,
+            log_validation_to_mlflow,
+            write_validation_report,
+        )
+        from src.validation.runner import run_inprocess_validation
+
         validation = self.config.validation
         output_dir = Path("logs/validation") / f"step_{self.total_steps}"
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        for protocol in validation.protocols:
-            command = [
-                sys.executable,
-                "scripts/validate_checkpoint.py",
-                "--checkpoint",
-                str(checkpoint_path),
-                "--protocol",
-                protocol,
-                "--preset",
-                self.preset,
-                "--num-servers",
-                str(validation.num_servers),
-                "--start-port",
-                str(self.start_port),
-                "--max-steps-per-battle",
-                str(validation.max_steps_per_battle),
-                "--seed",
-                str(validation.seed),
-                "--output-json",
-                str(output_dir / f"{protocol}_validation_report.json"),
-            ]
+        player_team: str | None = None
+        if self.config.env.player_team_path:
+            team_path = Path(self.config.env.player_team_path)
+            if team_path.exists():
+                player_team = team_path.read_text(encoding="utf-8").strip()
 
-            team_manifest = self._manifest_for_validation_protocol(protocol)
-            if team_manifest:
-                command.extend(["--team-manifest", team_manifest])
-
-            if self.config.env.player_team_path:
-                command.extend(["--player-team", self.config.env.player_team_path])
-
-            if self.config.model.use_lstm:
-                command.append("--use-lstm")
-
-            if mlflow_run_id:
-                command.extend(
-                    [
-                        "--mlflow",
-                        "--mlflow-run-id",
-                        mlflow_run_id,
-                        "--mlflow-step",
-                        str(self.total_steps),
-                        "--metric-prefix",
-                        f"validation/{protocol}",
-                        "--experiment-name",
-                        self.mlflow_experiment_name,
-                    ]
-                )
-
+        for protocol_name in validation.protocols:
             print(
-                f"Running scheduled validation '{protocol}' at step {self.total_steps:,}",
+                f"\nRunning validation '{protocol_name}' at step {self.total_steps:,}",
                 flush=True,
             )
             try:
-                subprocess.run(command, check=True)
-            except subprocess.CalledProcessError as exc:
-                message = (
-                    f"Scheduled validation '{protocol}' failed with exit code "
-                    f"{exc.returncode}."
+                protocol = get_protocol(protocol_name)
+
+                # Override benchmark defaults with config values if applicable.
+                if protocol_name == "benchmark":
+                    protocol = get_protocol(
+                        "benchmark",
+                        episodes=validation.benchmark_episodes_per_opponent,
+                    )
+
+                report = run_inprocess_validation(
+                    algo=self.algo,
+                    config=self.config,
+                    protocol=protocol,
+                    start_port=self.start_port,
+                    max_steps_per_battle=validation.max_steps_per_battle,
+                    seed=validation.seed,
+                    player_team=player_team,
                 )
+            except Exception as exc:
+                message = f"Validation '{protocol_name}' failed: {exc}"
                 if validation.continue_on_failure:
-                    print(f"{message} Continuing training.")
+                    print(f"[WARN] {message} Continuing training.")
                     continue
                 raise RuntimeError(message) from exc
+
+            # Write JSON report.
+            report_path = output_dir / f"{protocol_name}_validation_report.json"
+            write_validation_report(report, report_path)
+
+            # Print console summary.
+            summary = format_validation_summary(report, step=self.total_steps)
+            print(summary, flush=True)
+
+            # Log to MLflow under the training run.
+            if mlflow_run_id:
+                try:
+                    log_validation_to_mlflow(
+                        report=report,
+                        metrics=report["metrics"],
+                        experiment_name=self.mlflow_experiment_name,
+                        run_id=mlflow_run_id,
+                        step=self.total_steps,
+                        metric_prefix=f"validation/{protocol_name}",
+                    )
+                except Exception as exc:
+                    print(f"[WARN] MLflow logging for '{protocol_name}' failed: {exc}")
 
         self._last_validation_step = self.total_steps
 

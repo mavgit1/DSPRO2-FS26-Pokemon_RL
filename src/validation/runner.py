@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 import numpy as np
 import ray
 import torch
+import torch.nn.functional as F
 from ray.rllib.core.columns import Columns
 
 from src.config.TM_optimal_config import TrainingConfig, get_config
@@ -18,6 +19,7 @@ from src.validation.metrics import (
     BattleResult,
     aggregate_validation_metrics,
     build_validation_diagnostics,
+    compute_benchmark_metrics,
 )
 from src.validation.protocols import ValidationProtocol
 from src.validation.teams import (
@@ -57,11 +59,6 @@ def run_validation(
     player_team_path: str | None = None,
 ) -> Dict[str, Any]:
     """Restore a checkpoint and run a validation protocol."""
-    if protocol.name not in {"smoke", "fixed_paired", "mirror"}:
-        raise NotImplementedError(
-            f"Protocol '{protocol.name}' is planned but not implemented yet."
-        )
-
     _seed_everything(seed)
     config = build_validation_config(preset)
     config.model.use_lstm = use_lstm
@@ -69,7 +66,13 @@ def run_validation(
     # Load fixed player team if provided.
     player_team: str | None = None
     if player_team_path:
-        player_team = Path(player_team_path).expanduser().resolve().read_text(encoding="utf-8").strip()
+        player_team = (
+            Path(player_team_path)
+            .expanduser()
+            .resolve()
+            .read_text(encoding="utf-8")
+            .strip()
+        )
 
     if battle_format:
         config.env.battle_format = battle_format
@@ -115,11 +118,26 @@ def run_validation(
             ).build_algo()
             _restore_checkpoint_for_validation(algo, checkpoint_path)
 
-        if protocol.name in {"fixed_paired", "mirror"}:
+        if protocol.name == "benchmark":
+            if player_team:
+                config.env.battle_format = config.env.battle_format.replace(
+                    "randombattle", "customgame"
+                )
+            results = _run_benchmark(
+                algo=algo,
+                config=config,
+                opponents=protocol.opponents,
+                episodes_per_opponent=protocol.episodes_per_opponent,
+                start_port=start_port,
+                max_steps_per_battle=max_steps_per_battle,
+                player_team=player_team,
+            )
+        elif protocol.name in {"fixed_paired", "mirror"}:
             if protocol.name == "mirror" and player_team:
                 # Fixed-team mirror: same team for both sides, against
                 # random and heuristic opponents.
                 from src.validation.teams import fixed_team_mirror_specs
+
                 execution_format = config.env.battle_format.replace(
                     "randombattle", "customgame"
                 )
@@ -127,7 +145,9 @@ def run_validation(
                 battle_specs = fixed_team_mirror_specs(player_team)
             else:
                 if not team_manifest:
-                    raise ValueError(f"--team-manifest is required for {protocol.name}.")
+                    raise ValueError(
+                        f"--team-manifest is required for {protocol.name}."
+                    )
                 manifest = load_team_manifest(team_manifest)
                 execution_format = manifest.get("metadata", {}).get("execution_format")
                 if isinstance(execution_format, str) and execution_format:
@@ -174,6 +194,8 @@ def run_validation(
         ray.shutdown()
 
     metrics = aggregate_validation_metrics(results)
+    if protocol.name == "benchmark":
+        metrics.update(compute_benchmark_metrics(results))
     return {
         "metadata": {
             "protocol": protocol.name,
@@ -244,6 +266,7 @@ def _build_validation_env(
     start_port: int,
     player_team: str | None = None,
     opponent_team: str | None = None,
+    model_config_dict: Dict[str, Any] | None = None,
 ):
     env_creator = create_env_creator(
         battle_format=config.env.battle_format,
@@ -269,12 +292,53 @@ def _build_validation_env(
     )
 
 
+def _run_benchmark(
+    algo,
+    config: TrainingConfig,
+    opponents: List[str],
+    episodes_per_opponent: int,
+    start_port: int,
+    max_steps_per_battle: int,
+    player_team: str | None = None,
+    explore: bool = False,
+) -> List[BattleResult]:
+    """Run N episodes per opponent tier sequentially and return all results."""
+    all_results: List[BattleResult] = []
+    episode_idx = 0
+
+    for opp in opponents:
+        print(f"Benchmark vs {opp}: {episodes_per_opponent} episodes", flush=True)
+        env = _build_validation_env(
+            config=config,
+            opponent_type=opp,
+            start_port=start_port,
+            player_team=player_team,
+        )
+        try:
+            for _ in range(episodes_per_opponent):
+                result = _run_one_episode(
+                    algo=algo,
+                    env=env,
+                    episode_idx=episode_idx,
+                    opponent_type=opp,
+                    max_steps_per_battle=max_steps_per_battle,
+                    explore=explore,
+                )
+                all_results.append(result)
+                episode_idx += 1
+        finally:
+            env.close()
+
+    return all_results
+
+
 def _run_battle_specs(
     algo,
     config: TrainingConfig,
     battle_specs: List[Dict[str, Any]],
     start_port: int,
     max_steps_per_battle: int,
+    explore: bool = False,
 ) -> List[BattleResult]:
     results: List[BattleResult] = []
     for episode_idx, spec in enumerate(battle_specs):
@@ -301,6 +365,7 @@ def _run_battle_specs(
                 pair_id=spec["pair_id"],
                 rl_team_id=spec["rl_team_id"],
                 opponent_team_id=spec["opponent_team_id"],
+                explore=explore,
             )
             results.append(result)
         finally:
@@ -314,6 +379,7 @@ def _run_episodes(
     env,
     protocol: ValidationProtocol,
     max_steps_per_battle: int,
+    explore: bool = False,
 ) -> List[BattleResult]:
     results: List[BattleResult] = []
     for episode_idx in range(protocol.episodes):
@@ -324,6 +390,7 @@ def _run_episodes(
                 episode_idx=episode_idx,
                 opponent_type=protocol.opponent,
                 max_steps_per_battle=max_steps_per_battle,
+                explore=explore,
             )
         )
 
@@ -339,6 +406,7 @@ def _run_one_episode(
     pair_id: str | None = None,
     rl_team_id: str | None = None,
     opponent_team_id: str | None = None,
+    explore: bool = False,
 ) -> BattleResult:
     obs, _info = env.reset()
     total_reward = 0.0
@@ -348,7 +416,9 @@ def _run_one_episode(
     recurrent_state = None
 
     while not terminated and not truncated and steps < max_steps_per_battle:
-        action, recurrent_state = _compute_action(algo, obs, recurrent_state)
+        action, recurrent_state = _compute_action(
+            algo, obs, recurrent_state, explore=explore
+        )
         obs, reward, terminated, truncated, _info = env.step(action)
         total_reward += float(reward)
         steps += 1
@@ -378,15 +448,16 @@ def _compute_action(
     algo,
     obs: Dict[str, Any],
     recurrent_state: Dict[str, torch.Tensor] | None = None,
+    explore: bool = False,
 ) -> tuple[np.int64, Dict[str, torch.Tensor] | None]:
     module = _get_module(algo)
     if _module_is_stateful(module):
-        return _compute_recurrent_action(module, obs, recurrent_state)
+        return _compute_recurrent_action(module, obs, recurrent_state, explore=explore)
 
     compute_single_action = getattr(algo, "compute_single_action", None)
     if callable(compute_single_action):
         try:
-            action = compute_single_action(obs, explore=False)
+            action = compute_single_action(obs, explore=explore)
             if isinstance(action, tuple):
                 action = action[0]
             return np.int64(action), None
@@ -401,6 +472,19 @@ def _compute_action(
         else:
             output = module._forward_inference(batch)
     logits = output[Columns.ACTION_DIST_INPUTS]
+
+    if explore:
+        action_mask = obs.get("action_mask")
+        mask_tensor = (
+            torch.as_tensor(action_mask, dtype=torch.float32).unsqueeze(0)
+            if action_mask is not None
+            else None
+        )
+        return (
+            np.int64(_sample_masked_action(logits, mask_tensor).item()),
+            None,
+        )
+
     return np.int64(torch.argmax(logits, dim=-1).item()), None
 
 
@@ -408,6 +492,7 @@ def _compute_recurrent_action(
     module,
     obs: Dict[str, Any],
     recurrent_state: Dict[str, torch.Tensor] | None,
+    explore: bool = False,
 ) -> tuple[np.int64, Dict[str, torch.Tensor]]:
     """Run direct validation inference for a stateful RLModule.
 
@@ -430,11 +515,39 @@ def _compute_recurrent_action(
             output = module._forward_inference(batch)
 
     logits = output[Columns.ACTION_DIST_INPUTS]
-    action = np.int64(torch.argmax(logits, dim=-1).item())
+
+    if explore:
+        action_mask = obs.get("action_mask")
+        mask_tensor = (
+            torch.as_tensor(action_mask, dtype=torch.float32).unsqueeze(0).unsqueeze(1)
+            if action_mask is not None
+            else None
+        )
+        action = np.int64(_sample_masked_action(logits, mask_tensor).item())
+    else:
+        action = np.int64(torch.argmax(logits, dim=-1).item())
+
     next_state = {
         key: value.detach() for key, value in output[Columns.STATE_OUT].items()
     }
     return action, next_state
+
+
+def _sample_masked_action(
+    logits: torch.Tensor,
+    action_mask: torch.Tensor | None = None,
+    temperature: float = 1.0,
+) -> torch.Tensor:
+    """Sample from masked softmax over logits.
+
+    When ``action_mask`` is provided, invalid actions get -inf before the
+    softmax.  Returns a single action index as a 0-d tensor.
+    """
+    if action_mask is not None:
+        logits = logits.clone()
+        logits[action_mask == 0] = float("-inf")
+    probs = F.softmax(logits / temperature, dim=-1)
+    return torch.multinomial(probs.view(-1), 1)
 
 
 def _get_module(algo):
@@ -511,3 +624,75 @@ def _episode_outcome(
     if truncated or not terminated:
         return -1
     return -1
+
+
+def run_inprocess_validation(
+    algo,
+    config: TrainingConfig,
+    protocol: ValidationProtocol,
+    start_port: int,
+    max_steps_per_battle: int,
+    seed: int = 42,
+    player_team: str | None = None,
+    explore: bool = False,
+) -> Dict[str, Any]:
+    """Run a validation protocol using a live algo object (no subprocess/Ray init).
+
+    Returns the same dict shape as ``run_validation()`` for compatibility.
+    """
+    _seed_everything(seed)
+
+    player_team_resolved = player_team
+    if player_team_resolved:
+        config.env.battle_format = config.env.battle_format.replace(
+            "randombattle", "customgame"
+        )
+
+    if protocol.name == "benchmark":
+        results = _run_benchmark(
+            algo=algo,
+            config=config,
+            opponents=protocol.opponents,
+            episodes_per_opponent=protocol.episodes_per_opponent,
+            start_port=start_port,
+            max_steps_per_battle=max_steps_per_battle,
+            player_team=player_team_resolved,
+            explore=explore,
+        )
+    else:
+        env = _build_validation_env(
+            config=config,
+            opponent_type=protocol.opponent,
+            start_port=start_port,
+            player_team=player_team_resolved,
+        )
+        try:
+            results = _run_episodes(
+                algo=algo,
+                env=env,
+                protocol=protocol,
+                max_steps_per_battle=max_steps_per_battle,
+                explore=explore,
+            )
+        finally:
+            env.close()
+
+    metrics = aggregate_validation_metrics(results)
+    if protocol.name == "benchmark":
+        metrics.update(compute_benchmark_metrics(results))
+
+    return {
+        "metadata": {
+            "protocol": protocol.name,
+            "checkpoint": "inprocess",
+            "preset": "live",
+            "opponent": protocol.opponent,
+            "team_manifest": None,
+            "battle_format": config.env.battle_format,
+            "seed": seed,
+            "max_steps_per_battle": max_steps_per_battle,
+        },
+        "metrics": metrics,
+        "diagnostics": build_validation_diagnostics(results),
+        "episodes": [result.to_dict() for result in results],
+    }

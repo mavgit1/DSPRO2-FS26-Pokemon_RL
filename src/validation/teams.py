@@ -76,7 +76,9 @@ def validate_mirror_manifest(manifest: Dict[str, Any]) -> None:
         if not isinstance(showdown, str) or not showdown.strip():
             raise ValueError(f"Mirror team {team_id} needs non-empty Showdown text.")
         if not isinstance(structured, list) or len(structured) != 6:
-            raise ValueError(f"Mirror team {team_id} needs structured pokemon metadata.")
+            raise ValueError(
+                f"Mirror team {team_id} needs structured pokemon metadata."
+            )
 
 
 def team_lookup(manifest: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:

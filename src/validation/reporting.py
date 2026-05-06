@@ -5,6 +5,8 @@ from typing import Any, Dict
 
 import mlflow
 
+from src.validation.metrics import _canonical_opponent_type, wilson_score_interval
+
 
 def write_validation_report(report: Dict[str, Any], output_path: Path) -> Path:
     """Write a validation report to disk."""
@@ -31,7 +33,9 @@ def log_validation_to_mlflow(
 
     with mlflow.start_run(**start_kwargs) as run:
         if run_id:
-            mlflow.set_tag("last_validation_protocol", str(report["metadata"]["protocol"]))
+            mlflow.set_tag(
+                "last_validation_protocol", str(report["metadata"]["protocol"])
+            )
             if step is not None:
                 mlflow.set_tag("last_validation_step", str(step))
         else:
@@ -53,7 +57,9 @@ def log_validation_to_mlflow(
         return run.info.run_id
 
 
-def _prefix_metrics(metrics: Dict[str, float], metric_prefix: str | None) -> Dict[str, float]:
+def _prefix_metrics(
+    metrics: Dict[str, float], metric_prefix: str | None
+) -> Dict[str, float]:
     if not metric_prefix:
         return metrics
 
@@ -72,3 +78,68 @@ def _artifact_path(report: Dict[str, Any], step: int | None) -> str:
     if step is None:
         return f"validation/{protocol}"
     return f"validation/{protocol}/step_{step}"
+
+
+def format_validation_summary(report: Dict[str, Any], step: int | None = None) -> str:
+    """Format a validation report into a human-readable console summary.
+
+    Includes per-opponent win rate bars, confidence intervals for benchmark
+    protocol, and composite skill/consistency scores.
+    """
+    metrics = report.get("metrics", {})
+    protocol = report.get("metadata", {}).get("protocol", "unknown")
+    episodes = report.get("episodes", [])
+
+    lines: list[str] = []
+    lines.append("=" * 62)
+    step_label = f" (step {step:,})" if step is not None else ""
+    lines.append(f"  VALIDATION SUMMARY — {protocol}{step_label}")
+    lines.append("=" * 62)
+
+    # Group episodes by opponent type.
+    by_opponent: Dict[str, list[Dict[str, Any]]] = {}
+    for ep in episodes:
+        opp = _canonical_opponent_type(ep.get("opponent_type"))
+        if opp:
+            by_opponent.setdefault(opp, []).append(ep)
+
+    bar_width = 20
+    for opp in sorted(by_opponent):
+        group = by_opponent[opp]
+        n = len(group)
+        wins = sum(1 for ep in group if ep.get("outcome") == 1)
+        wr = wins / n if n else 0.0
+
+        lower, upper = wilson_score_interval(wins, n)
+        filled = int(wr * bar_width)
+        bar = "#" * filled + "-" * (bar_width - filled)
+        label = f"vs {opp}"
+        lines.append(
+            f"  {label:<22s} WR={wr:6.1%} ({n:3d} eps) "
+            f"[{bar}] [{lower:.0%}–{upper:.0%}]"
+        )
+
+    # Overall stats.
+    total = len(episodes)
+    total_wins = sum(1 for ep in episodes if ep.get("outcome") == 1)
+    overall_wr = total_wins / total if total else 0.0
+    total_steps = sum(ep.get("steps", 0) for ep in episodes)
+    avg_len = total_steps / total if total else 0.0
+    avg_reward = (
+        sum(ep.get("total_reward", 0.0) for ep in episodes) / total if total else 0.0
+    )
+
+    lines.append("-" * 62)
+    lines.append(f"  {'Overall WR':<22s} {overall_wr:6.1%} ({total} eps)")
+    lines.append(f"  {'Avg battle length':<22s} {avg_len:.1f} steps")
+    lines.append(f"  {'Avg reward':<22s} {avg_reward:.2f}")
+
+    # Benchmark-specific composite scores.
+    if protocol == "benchmark":
+        skill = metrics.get("benchmark/skill_score", 0.0)
+        consistency = metrics.get("benchmark/consistency", 0.0)
+        lines.append(f"  {'Skill score':<22s} {skill:.3f}")
+        lines.append(f"  {'Consistency':<22s} {consistency:.1%}")
+
+    lines.append("=" * 62)
+    return "\n".join(lines)

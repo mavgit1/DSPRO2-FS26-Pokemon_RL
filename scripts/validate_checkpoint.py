@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
@@ -14,6 +13,7 @@ if str(ROOT) not in sys.path:
 
 from src.validation.protocols import get_protocol  # noqa: E402
 from src.validation.reporting import (  # noqa: E402
+    format_validation_summary,
     log_validation_to_mlflow,
     write_validation_report,
 )
@@ -33,8 +33,8 @@ def main() -> int:
     )
     parser.add_argument(
         "--protocol",
-        choices=["smoke", "fixed_paired", "mirror", "gauntlet_first_loss"],
-        default="smoke",
+        choices=["smoke", "fixed_paired", "mirror", "benchmark"],
+        default="benchmark",
         help="Validation protocol to run.",
     )
     parser.add_argument(
@@ -108,6 +108,11 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--explore",
+        action="store_true",
+        help="Use stochastic action selection instead of greedy argmax.",
+    )
+    parser.add_argument(
         "--mlflow",
         action="store_true",
         help="Log validation metrics and report artifact to MLflow.",
@@ -178,14 +183,10 @@ def main() -> int:
             metric_prefix=args.metric_prefix,
         )
 
-    print("=" * 60)
-    print("CHECKPOINT VALIDATION COMPLETE")
-    print("=" * 60)
-    print(f"Report: {report_path}")
+    print(format_validation_summary(report, step=args.mlflow_step))
+    print(f"Report saved: {report_path}")
     if run_id:
         print(f"MLflow run id: {run_id}")
-    print(json.dumps(report["metrics"], indent=2))
-    print("=" * 60)
 
     return 0
 

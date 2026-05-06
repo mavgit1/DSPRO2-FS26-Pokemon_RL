@@ -267,15 +267,17 @@ class ValidationScheduleConfig:
 
     enabled: bool = True
     freq_steps: int = 200_000
-    protocols: List[str] = field(
-        default_factory=lambda: ["smoke", "fixed_paired", "mirror"]
-    )
+    protocols: List[str] = field(default_factory=lambda: ["benchmark"])
     fixed_pair_manifest: str = "data/validation/gen8_random_battle_team_pairs.json"
     mirror_manifest: str = "data/validation/gen8_random_battle_mirror_teams.json"
     max_steps_per_battle: int = 500
     seed: int = 42
     num_servers: int = 1
     continue_on_failure: bool = True
+    benchmark_episodes_per_opponent: int = 50
+    benchmark_opponents: List[str] = field(
+        default_factory=lambda: ["random", "random_no_switch", "heuristic"]
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -288,6 +290,8 @@ class ValidationScheduleConfig:
             "seed": self.seed,
             "num_servers": self.num_servers,
             "continue_on_failure": self.continue_on_failure,
+            "benchmark_episodes_per_opponent": self.benchmark_episodes_per_opponent,
+            "benchmark_opponents": list(self.benchmark_opponents),
         }
 
 

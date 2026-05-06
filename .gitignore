@@ -22,3 +22,7 @@ pokemon-showdown/
 # OS specific
 .DS_Store
 scripts/clean_ray_training_cache.sh
+
+.mlflow/*
+mlruns/*
+temp/
