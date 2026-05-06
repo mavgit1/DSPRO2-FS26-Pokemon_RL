@@ -19,8 +19,8 @@ class ModelConfig:
     embedding_dim: int = 32
 
     # Transformer
-    hidden_dim: int = 256
-    num_heads: int = 4
+    hidden_dim: int = 512
+    num_heads: int = 8
     num_transformer_layers: int = 1
     dropout: float = 0.05
     use_position_embeddings: bool = True
@@ -60,7 +60,7 @@ class PPOConfig:
 
     # Discount and GAE
     gamma: float = 0.97
-    lambda_: float = 0.92
+    lambda_: float = 0.88
 
     # PPO clipping
     clip_param: float = 0.15
@@ -70,7 +70,7 @@ class PPOConfig:
 
     # Value function
     vf_loss_coeff: float = 0.5
-    vf_clip_param: float = 10.0
+    vf_clip_param: float = 3.0
 
     # Gradient clipping
     grad_clip: float = 5.0
@@ -136,6 +136,10 @@ class RewardConfig:
     # Action quality: per-step signal for picking effective moves (0.3 ≪ terminal ±10).
     action_quality_weight: float = 0.3
 
+    # Global reward scale: multiplies all rewards before returning to the agent.
+    # Scales returns from ~[-15, +15] to ~[-1.5, +1.5], making value regression easier.
+    reward_scale: float = 0.1
+
 
 @dataclass
 class CurriculumStageConfig:
@@ -168,6 +172,7 @@ class CurriculumStageConfig:
                 "step_penalty": self.reward_config.step_penalty,
                 "matchup_reward_weight": self.reward_config.matchup_reward_weight,
                 "action_quality_weight": self.reward_config.action_quality_weight,
+                "reward_scale": self.reward_config.reward_scale,
             },
         }
 
@@ -371,6 +376,7 @@ class TrainingConfig:
                 "step_penalty": self.reward.step_penalty,
                 "matchup_reward_weight": self.reward.matchup_reward_weight,
                 "action_quality_weight": self.reward.action_quality_weight,
+                "reward_scale": self.reward.reward_scale,
             },
         }
 

@@ -233,7 +233,7 @@ class PokemonBattleEnv(SinglesEnv):
 
         reward = current_value - self._reward_buffer[battle]
         self._reward_buffer[battle] = current_value
-        return reward
+        return reward * self.reward_config.reward_scale
 
     @staticmethod
     def _compute_matchup_quality(battle: AbstractBattle) -> float:
