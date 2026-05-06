@@ -332,7 +332,10 @@ class PokemonBattleEnv(SinglesEnv):
                             if m_type is None:
                                 continue
                             m_cat = getattr(m, "category", None)
-                            if m_cat is not None and getattr(m_cat, "name", "") == "STATUS":
+                            if (
+                                m_cat is not None
+                                and getattr(m_cat, "name", "") == "STATUS"
+                            ):
                                 continue
                             try:
                                 eff = m_type.damage_multiplier(*opp_types)
@@ -342,7 +345,7 @@ class PokemonBattleEnv(SinglesEnv):
 
                         # Penalty proportional to how far from best
                         if best_eff > 0:
-                            score -= (best_eff - chosen_eff)
+                            score -= best_eff - chosen_eff
                     # Status move: no penalty, no bonus (score += 0)
 
         # --- Defensive component ---
@@ -797,6 +800,16 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             max_samples:
         ]
         return samples
+
+    def pop_selfplay_diagnostics(self) -> Dict[str, Any]:
+        """Collect diagnostics from the self-play opponent, if present."""
+        if "self" not in self._opponent_pool:
+            return {}
+        sp = self._opponent_pool["self"]
+        pop_fn = getattr(sp, "pop_diagnostics", None)
+        if callable(pop_fn):
+            return pop_fn()
+        return {}
 
     def get_memory_counters(self) -> Dict[str, float]:
         out = {

@@ -56,6 +56,20 @@ class SelfPlayPlayer(Player):
         # Keyed by battle_tag; values are {"h": Tensor, "c": Tensor}.
         self._lstm_states: Dict[str, Dict[str, torch.Tensor]] = {}
 
+        # Per-turn diagnostics accumulator.
+        self._diag: Dict[str, Any] = {
+            "weight_load_count": 0,
+            "fallback_count": 0,
+            "action_mapping_fallback_count": 0,
+            "action_histogram": {},
+            "top_prob_sum": 0.0,
+            "top_prob_count": 0,
+            "entropy_sum": 0.0,
+            "entropy_count": 0,
+            "valid_action_count_sum": 0,
+            "valid_action_count_count": 0,
+        }
+
         if weights_path:
             self._try_load_weights()
 
@@ -73,15 +87,14 @@ class SelfPlayPlayer(Player):
             mtime = path.stat().st_mtime
             if mtime == self._last_mtime:
                 return
-            state_dict = torch.load(
-                path, map_location="cpu", weights_only=True
-            )
+            state_dict = torch.load(path, map_location="cpu", weights_only=True)
             self.model.load_state_dict(state_dict, strict=True)
             self._last_mtime = mtime
             self._lstm_states.clear()  # stale state incompatible with new weights
             self._load_count += 1
-        except Exception:
-            pass
+            self._diag["weight_load_count"] += 1
+        except Exception as exc:
+            print(f"[SelfPlayPlayer] FAILED to load weights from {path}: {exc!r}")
 
     # ------------------------------------------------------------------
     # Inference
@@ -97,11 +110,12 @@ class SelfPlayPlayer(Player):
         try:
             return self._inference_move(battle)
         except Exception:
+            self._diag["fallback_count"] += 1
             return RandomPlayer.choose_random_singles_move(battle)
 
     def _inference_move(self, battle: AbstractBattle):
         # 1. Embed battle -> obs dict
-        obs = embed_battle(battle, opponent_type=None)
+        obs = embed_battle(battle, opponent_type="self")
         action_mask = get_compressed_action_mask(battle)
         obs["action_mask"] = action_mask
 
@@ -110,8 +124,12 @@ class SelfPlayPlayer(Player):
             "obs": torch.as_tensor(obs["obs"], dtype=torch.float32).unsqueeze(0),
             "species": torch.as_tensor(obs["species"], dtype=torch.long).unsqueeze(0),
             "items": torch.as_tensor(obs["items"], dtype=torch.long).unsqueeze(0),
-            "abilities": torch.as_tensor(obs["abilities"], dtype=torch.long).unsqueeze(0),
-            "action_mask": torch.as_tensor(action_mask, dtype=torch.float32).unsqueeze(0),
+            "abilities": torch.as_tensor(obs["abilities"], dtype=torch.long).unsqueeze(
+                0
+            ),
+            "action_mask": torch.as_tensor(action_mask, dtype=torch.float32).unsqueeze(
+                0
+            ),
         }
 
         # 3. Forward pass through the model trunk + heads
@@ -148,6 +166,23 @@ class SelfPlayPlayer(Player):
         probs = torch.softmax(logits / temperature, dim=-1)
         action = int(torch.multinomial(probs, 1).item())
 
+        # Record diagnostics
+        valid_count = int(action_mask.sum())
+        top_prob = float(probs.max().item())
+        # Compute entropy over full distribution
+        log_probs = torch.log_softmax(logits / temperature, dim=-1)
+        entropy = float(-(probs * log_probs).sum().item())
+
+        self._diag["top_prob_sum"] += top_prob
+        self._diag["top_prob_count"] += 1
+        self._diag["entropy_sum"] += entropy
+        self._diag["entropy_count"] += 1
+        self._diag["valid_action_count_sum"] += valid_count
+        self._diag["valid_action_count_count"] += 1
+        self._diag["action_histogram"][action] = (
+            self._diag["action_histogram"].get(action, 0) + 1
+        )
+
         # 5. Convert to BattleOrder
         return self._action_to_order(action, battle)
 
@@ -183,4 +218,31 @@ class SelfPlayPlayer(Player):
                 return self.create_order(bench[switch_idx])
 
         # Fallback
+        self._diag["action_mapping_fallback_count"] += 1
         return RandomPlayer.choose_random_singles_move(battle)
+
+    # ------------------------------------------------------------------
+    # Diagnostics
+    # ------------------------------------------------------------------
+
+    def pop_diagnostics(self) -> Dict[str, Any]:
+        """Return and clear accumulated per-turn diagnostics."""
+        diag = dict(self._diag)
+        # Deep-copy the histogram so the reset doesn't affect the returned dict.
+        diag["action_histogram"] = dict(self._diag["action_histogram"])
+        # Reset accumulator.
+        self._diag.update(
+            {
+                "weight_load_count": 0,
+                "fallback_count": 0,
+                "action_mapping_fallback_count": 0,
+                "action_histogram": {},
+                "top_prob_sum": 0.0,
+                "top_prob_count": 0,
+                "entropy_sum": 0.0,
+                "entropy_count": 0,
+                "valid_action_count_sum": 0,
+                "valid_action_count_count": 0,
+            }
+        )
+        return diag

@@ -1,5 +1,6 @@
 import gymnasium as gym
 import torch
+import os
 from pathlib import Path
 from typing import Optional
 from ray.rllib.algorithms.ppo import PPOConfig
@@ -51,6 +52,10 @@ def register_environments(
         player_team = _load_player_team(config.env.player_team_path)
         battle_format = _custom_game_format(battle_format)
 
+    # Resolve selfplay weights path to absolute — Ray workers run from a temp
+    # directory and can't find relative paths like "checkpoints/selfplay_latest.pt".
+    selfplay_abs = os.path.abspath(config.selfplay_weights_path)
+
     env_creator = create_env_creator(
         battle_format=battle_format,
         server_host=config.env.showdown_host,
@@ -58,7 +63,7 @@ def register_environments(
         reward_config=(initial_stage.reward_config if initial_stage else config.reward),
         opponent_mix=(initial_stage.opponent_mix if initial_stage else None),
         model_config_dict=config.model.to_dict(),
-        selfplay_weights_path=config.selfplay_weights_path,
+        selfplay_weights_path=selfplay_abs,
         player_team=player_team,
     )
     register_env(POKEMON_BATTLE_ENV_NAME, env_creator)

@@ -160,7 +160,9 @@ def collect_recent_episode_stats(algo: Any) -> List[Dict[str, float]]:
     return stats
 
 
-def collect_recent_observation_samples(algo: Any, max_samples_per_env: int = 3) -> List[Dict[str, Any]]:
+def collect_recent_observation_samples(
+    algo: Any, max_samples_per_env: int = 3
+) -> List[Dict[str, Any]]:
     nested = _foreach_vector_env(
         algo,
         "pop_recent_observation_samples",
@@ -211,3 +213,63 @@ def apply_curriculum_stage(algo: Any, stage: CurriculumStageConfig) -> None:
         (payload,),
         fallback=None,
     )
+
+
+def collect_selfplay_diagnostics(algo: Any) -> Dict[str, Any]:
+    """Collect and aggregate self-play diagnostics from all workers."""
+    nested = _foreach_vector_env(algo, "pop_selfplay_diagnostics", fallback={})
+    if not nested:
+        return {}
+
+    # Aggregate across workers: sum counts, average rates.
+    agg: Dict[str, float] = {
+        "weight_load_count": 0.0,
+        "fallback_count": 0.0,
+        "action_mapping_fallback_count": 0.0,
+        "top_prob_sum": 0.0,
+        "top_prob_count": 0.0,
+        "entropy_sum": 0.0,
+        "entropy_count": 0.0,
+        "valid_action_count_sum": 0.0,
+        "valid_action_count_count": 0.0,
+    }
+    total_turns = 0.0
+    n_workers = 0
+
+    for env_item in _nested_per_env_batches(nested):
+        if not isinstance(env_item, dict):
+            continue
+        n_workers += 1
+        for key in agg:
+            agg[key] += float(env_item.get(key, 0))
+        # Count total turns from histogram.
+        hist = env_item.get("action_histogram", {})
+        if isinstance(hist, dict):
+            total_turns += float(sum(hist.values()))
+
+    if total_turns == 0 and agg["top_prob_count"] == 0:
+        return {}
+
+    result: Dict[str, float] = {}
+    prob_count = max(agg["top_prob_count"], 1.0)
+    entropy_count = max(agg["entropy_count"], 1.0)
+    valid_count = max(agg["valid_action_count_count"], 1.0)
+
+    result["selfplay/weight_loads"] = agg["weight_load_count"]
+    result["selfplay/fallback_count"] = agg["fallback_count"]
+    result["selfplay/action_mapping_fallback_count"] = agg[
+        "action_mapping_fallback_count"
+    ]
+    result["selfplay/avg_top_prob"] = agg["top_prob_sum"] / prob_count
+    result["selfplay/avg_entropy"] = agg["entropy_sum"] / entropy_count
+    result["selfplay/avg_valid_actions"] = agg["valid_action_count_sum"] / valid_count
+    result["selfplay/total_turns"] = total_turns
+    result["selfplay/n_workers"] = float(n_workers)
+
+    total_decisions = max(total_turns, 1.0)
+    result["selfplay/fallback_rate"] = agg["fallback_count"] / total_decisions
+    result["selfplay/mapping_fallback_rate"] = (
+        agg["action_mapping_fallback_count"] / total_decisions
+    )
+
+    return result

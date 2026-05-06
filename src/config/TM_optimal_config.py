@@ -91,7 +91,7 @@ class EnvironmentConfig:
     # Fixed player team (Showdown format text file). When set, the RL agent
     # always uses this team and the battle format is auto-switched to the
     # corresponding custom-game variant (e.g. gen5randombattle → gen5customgame).
-    player_team_path: Optional[str] = "data/teams/player_team.txt"
+    player_team_path: Optional[str] = "data/teams/player_team_2.txt"
 
     # Server settings
     showdown_host: str = "localhost"
@@ -181,10 +181,10 @@ class CurriculumConfig:
     stages: List[CurriculumStageConfig] = field(
         default_factory=lambda: [
             CurriculumStageConfig(
-                name="moves_only_warmup",
+                name="moves_and_switches_warmup",
                 promote_at_win_rate=0.65,
                 min_samples_for_promotion=200,
-                opponent_mix={"random": 1.0},
+                opponent_mix={"random": 0.4, "random_no_switch": 0.3, "self": 0.3},
                 reward_config=RewardConfig(
                     victory_reward=8.0,
                     defeat_penalty=-10.0,
@@ -197,7 +197,7 @@ class CurriculumConfig:
                 ),
             ),
             CurriculumStageConfig(
-                name="random_with_switches",
+                name="random_more_moves",
                 promote_at_win_rate=0.72,
                 min_samples_for_promotion=200,
                 opponent_mix={"random_no_switch": 0.6, "random": 0.4},
@@ -216,7 +216,7 @@ class CurriculumConfig:
                 name="self_play",
                 promote_at_win_rate=0.8,
                 min_samples_for_promotion=300,
-                opponent_mix={"self": 0.7, "random": 0.2, "random_no_switch": 0.1},
+                opponent_mix={"self": 0.7, "random": 0.1, "random_no_switch": 0.2},
                 reward_config=RewardConfig(
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
@@ -263,7 +263,7 @@ class ValidationScheduleConfig:
     """Scheduled checkpoint validation during training."""
 
     enabled: bool = True
-    freq_steps: int = 100_000
+    freq_steps: int = 200_000
     protocols: List[str] = field(
         default_factory=lambda: ["smoke", "fixed_paired", "mirror"]
     )

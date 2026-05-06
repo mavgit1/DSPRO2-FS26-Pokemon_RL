@@ -26,6 +26,7 @@ from src.training.env_bridge import (
     collect_recent_observation_samples,
     collect_recent_episode_stats,
     collect_recent_outcomes,
+    collect_selfplay_diagnostics,
 )
 from src.training.metrics import (
     aggregate_episode_metrics,
@@ -118,6 +119,7 @@ class PokemonTrainer:
         self._diag_samples_saved = 0
         self._diag_pruned_total = 0
         self._diag_records: list[Dict[str, Any]] = []
+        self._selfplay_diag_path = Path("logs/selfplay_diagnostics.log")
 
     # Main training loop.
     def train(self) -> None:
@@ -200,9 +202,7 @@ class PokemonTrainer:
                             team_path.read_text(encoding="utf-8"),
                             artifact_file="player_team.txt",
                         )
-                        mlflow.set_tag(
-                            "player_team_file", str(team_path)
-                        )
+                        mlflow.set_tag("player_team_file", str(team_path))
             else:
                 mlflow.set_tag("resumed", "true")
                 if resume_path:
@@ -247,6 +247,10 @@ class PokemonTrainer:
                     # Export self-play weights every iteration so the opponent
                     # stays fresh (instead of only every 150k checkpoint).
                     self._export_selfplay_weights()
+
+                    # Collect and log self-play diagnostics.
+                    sp_metrics = self._collect_and_log_selfplay_diagnostics()
+                    metrics.update(sp_metrics)
 
                     # Curriculum updates (training-only, binary outcomes).
                     if self.curriculum:
@@ -594,11 +598,38 @@ class PokemonTrainer:
         try:
             module = self.algo.get_module("default_policy")
             state_dict = module.model.state_dict()
-            path = Path(self.config.checkpoint_dir) / "selfplay_latest.pt"
+            path = Path(os.path.abspath(self.config.selfplay_weights_path))
             path.parent.mkdir(parents=True, exist_ok=True)
             torch.save(state_dict, path)
         except Exception as exc:
             print(f"[WARN] Failed to export self-play weights: {exc}")
+
+    def _collect_and_log_selfplay_diagnostics(self) -> Dict[str, float]:
+        """Collect self-play diagnostics from workers, log to file + return for MLflow."""
+        sp_metrics = collect_selfplay_diagnostics(self.algo)
+
+        # Log weight file state.
+        weights_path = Path(os.path.abspath(self.config.selfplay_weights_path))
+        sp_metrics["selfplay/weights_file_exists"] = float(weights_path.exists())
+        if weights_path.exists():
+            stat = weights_path.stat()
+            sp_metrics["selfplay/weights_file_size_bytes"] = float(stat.st_size)
+            sp_metrics["selfplay/weights_file_mtime"] = stat.st_mtime
+
+        # Append to log file.
+        self._selfplay_diag_path.parent.mkdir(parents=True, exist_ok=True)
+        log_line = (
+            f"[iter={self.iteration} steps={self.total_steps}] "
+            + " | ".join(f"{k}={v:.4f}" for k, v in sorted(sp_metrics.items()))
+            + "\n"
+        )
+        try:
+            with open(self._selfplay_diag_path, "a", encoding="utf-8") as f:
+                f.write(log_line)
+        except Exception:
+            pass
+
+        return sp_metrics
 
     def _manifest_for_validation_protocol(self, protocol: str) -> str | None:
         if protocol == "fixed_paired":
@@ -643,9 +674,7 @@ class PokemonTrainer:
                 command.extend(["--team-manifest", team_manifest])
 
             if self.config.env.player_team_path:
-                command.extend(
-                    ["--player-team", self.config.env.player_team_path]
-                )
+                command.extend(["--player-team", self.config.env.player_team_path])
 
             if self.config.model.use_lstm:
                 command.append("--use-lstm")
