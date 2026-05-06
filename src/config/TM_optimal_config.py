@@ -206,7 +206,7 @@ class CurriculumConfig:
             ),
             CurriculumStageConfig(
                 name="random_more_moves",
-                promote_at_win_rate=0.6,
+                promote_at_win_rate=0.2,
                 min_samples_for_promotion=5000,
                 opponent_mix={"self": 0.7, "random": 0.1, "random_no_switch": 0.2},
                 reward_config=RewardConfig(
