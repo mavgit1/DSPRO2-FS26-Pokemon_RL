@@ -19,51 +19,49 @@ import argparse
 import mlflow
 from dotenv import load_dotenv, find_dotenv
 
+
 def main():
     load_dotenv(find_dotenv())
-    
+
     parser = argparse.ArgumentParser(
         description="Train Pokemon RL agent",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    
+
     # Configuration
     parser.add_argument(
         "--preset",
         type=str,
         default="standard",
         choices=["quick", "standard", "memory_safe", "optimal", "large"],
-        help="Configuration preset (default: standard)"
+        help="Configuration preset (default: standard)",
     )
-    
+
     # Timesteps
     parser.add_argument(
-        "--timesteps",
-        type=int,
-        default=None,
-        help="Override total timesteps"
+        "--timesteps", type=int, default=None, help="Override total timesteps"
     )
-    
+
     # Servers
     parser.add_argument(
         "--num-servers",
         type=int,
         default=8,
-        help="Number of Showdown servers (default: 8, must match running servers)"
+        help="Number of Showdown servers (default: 8, must match running servers)",
     )
-    
+
     parser.add_argument(
         "--start-port",
         type=int,
         default=8000,
-        help="Starting port for Showdown servers (default: 8000)"
+        help="Starting port for Showdown servers (default: 8000)",
     )
-    
+
     # Debug
     parser.add_argument(
         "--debug",
         action="store_true",
-        help="Enable debug logging (Note: standard logging replaced by MLflow/prints)"
+        help="Enable debug logging (Note: standard logging replaced by MLflow/prints)",
     )
 
     parser.add_argument(
@@ -81,6 +79,16 @@ def main():
         type=str,
         default=None,
         help="MLflow run ID to continue logging into the same run.",
+    )
+
+    parser.add_argument(
+        "--mlflow-experiment",
+        type=str,
+        default=None,
+        help=(
+            "Override MLflow experiment name for a new run (ignored when "
+            "--mlflow-run-id is set)."
+        ),
     )
 
     parser.add_argument(
@@ -102,21 +110,23 @@ def main():
         default=None,
         help="Override scheduled validation battle truncation length.",
     )
-    
+
     args = parser.parse_args()
-    
+
     # Set log level / notify about debug
     if args.debug:
-        print("[DEBUG] Debug flag passed. (Note: Standard python logging is disabled in favor of MLflow).")
-    
-    # Initialize MLflow experiment
-    mlflow.set_experiment("Pokemon_RL_Battler")
-    
+        print(
+            "[DEBUG] Debug flag passed. (Note: Standard python logging is disabled in favor of MLflow)."
+        )
+
     # Import and run. Change this to own config file if you want.
-    from src.config.TM_optimal_config import get_config
+    from src.config.TM_optimal_config import (
+        get_config,
+        resolve_mlflow_experiment_for_training,
+    )
 
     from src.training.trainer import PokemonTrainer
-    
+
     print("=" * 60)
     print("Pokemon RL Training")
     print("=" * 60)
@@ -142,6 +152,14 @@ def main():
     if args.validation_max_steps_per_battle is not None:
         config.validation.max_steps_per_battle = args.validation_max_steps_per_battle
 
+    mlflow_experiment_name = resolve_mlflow_experiment_for_training(
+        config,
+        resume_run_id=args.mlflow_run_id,
+        cli_override=args.mlflow_experiment,
+    )
+    mlflow.set_experiment(mlflow_experiment_name)
+    print(f"MLflow experiment: {mlflow_experiment_name}")
+
     trainer = PokemonTrainer(
         config=config,
         preset=args.preset,
@@ -149,6 +167,7 @@ def main():
         start_port=args.start_port,
         resume_checkpoint=args.resume_checkpoint,
         mlflow_run_id=args.mlflow_run_id,
+        mlflow_experiment_name=mlflow_experiment_name,
     )
     trainer.train()
 

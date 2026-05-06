@@ -9,7 +9,7 @@ _VOCAB_SIZES = vocab_sizes()
 @dataclass
 class ModelConfig:
     """Model architecture configuration."""
-    
+
     # Embedding dimensions
     num_tokens: int = 13
     token_dim: int = 164
@@ -30,7 +30,7 @@ class ModelConfig:
     lstm_hidden: int = 512
     use_lstm: bool = True
     max_seq_len: int = 32
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "num_tokens": self.num_tokens,
@@ -78,7 +78,7 @@ class PPOConfig:
     # Batch sizes
     train_batch_size: int = 4096
     sgd_minibatch_size: int = 512
-    num_sgd_iter: int = 8          
+    num_sgd_iter: int = 8
 
 
 @dataclass
@@ -92,6 +92,9 @@ class EnvironmentConfig:
     # always uses this team and the battle format is auto-switched to the
     # corresponding custom-game variant (e.g. gen5randombattle → gen5customgame).
     player_team_path: Optional[str] = "data/teams/player_team_2.txt"
+
+    # MLflow experiment name when player_team_path is set (fixed-team training).
+    mlflow_experiment_fixed_team: str = "Pokemon_RL_Battler_FixedTeam"
 
     # Server settings
     showdown_host: str = "localhost"
@@ -188,43 +191,43 @@ class CurriculumConfig:
                 reward_config=RewardConfig(
                     victory_reward=8.0,
                     defeat_penalty=-10.0,
-                    hp_value_weight=3.0,      
+                    hp_value_weight=3.0,
                     fainted_value=6.0,
                     fainted_penalty=-6.0,
-                    step_penalty=-0.01,        
-                    matchup_reward_weight=0.1, 
+                    step_penalty=-0.01,
+                    matchup_reward_weight=0.1,
                     action_quality_weight=0.3,
                 ),
             ),
             CurriculumStageConfig(
                 name="random_more_moves",
-                promote_at_win_rate=0.72,
-                min_samples_for_promotion=200,
-                opponent_mix={"random_no_switch": 0.6, "random": 0.4},
+                promote_at_win_rate=0.6,
+                min_samples_for_promotion=5000,
+                opponent_mix={"self": 0.7, "random": 0.1, "random_no_switch": 0.2},
                 reward_config=RewardConfig(
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
-                    hp_value_weight=3.0,      
+                    hp_value_weight=3.0,
                     fainted_value=6.0,
                     fainted_penalty=-6.0,
-                    step_penalty=-0.01,        
-                    matchup_reward_weight=0.1, 
+                    step_penalty=-0.01,
+                    matchup_reward_weight=0.1,
                     action_quality_weight=0.3,
                 ),
             ),
             CurriculumStageConfig(
                 name="self_play",
-                promote_at_win_rate=0.6,
-                min_samples_for_promotion=3000,
-                opponent_mix={"self": 0.7, "random": 0.1, "random_no_switch": 0.2},
+                promote_at_win_rate=0.7,
+                min_samples_for_promotion=200,
+                opponent_mix={"random_no_switch": 0.6, "random": 0.4},
                 reward_config=RewardConfig(
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
-                    hp_value_weight=3.0,      
+                    hp_value_weight=3.0,
                     fainted_value=6.0,
                     fainted_penalty=-6.0,
-                    step_penalty=-0.01,        
-                    matchup_reward_weight=0.1, 
+                    step_penalty=-0.01,
+                    matchup_reward_weight=0.1,
                     action_quality_weight=0.4,
                 ),
             ),
@@ -236,11 +239,11 @@ class CurriculumConfig:
                 reward_config=RewardConfig(
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
-                    hp_value_weight=3.0,      
+                    hp_value_weight=3.0,
                     fainted_value=6.0,
                     fainted_penalty=-6.0,
-                    step_penalty=-0.01,        
-                    matchup_reward_weight=0.1, 
+                    step_penalty=-0.01,
+                    matchup_reward_weight=0.1,
                     action_quality_weight=0.4,
                 ),
             ),
@@ -291,31 +294,33 @@ class ValidationScheduleConfig:
 @dataclass
 class TrainingConfig:
     """Main training configuration."""
-    
+
     # Duration
     total_timesteps: int = 10_000_000
-    
+
     # Checkpointing
     checkpoint_dir: str = "checkpoints"
-    checkpoint_freq: int = 150_000      # Save every N timesteps
+    checkpoint_freq: int = 150_000  # Save every N timesteps
     keep_checkpoints_num: int = 5
-    
+
     # Logging
     log_dir: str = "logs"
-    print_freq: int = 100_000           # Print every N timesteps
-    
+    print_freq: int = 100_000  # Print every N timesteps
+
     # Hardware
     num_gpus: float = 1.0
     num_gpus_per_worker: float = 0.0
-    
+
     # Curriculum
     curriculum: CurriculumConfig = field(default_factory=CurriculumConfig)
-    
+
     # Evaluation
     evaluation_interval: int = 100_000
     evaluation_duration: int = 100
-    validation: ValidationScheduleConfig = field(default_factory=ValidationScheduleConfig)
-    
+    validation: ValidationScheduleConfig = field(
+        default_factory=ValidationScheduleConfig
+    )
+
     # Sub-configs
     model: ModelConfig = field(default_factory=ModelConfig)
     ppo: PPOConfig = field(default_factory=PPOConfig)
@@ -324,7 +329,7 @@ class TrainingConfig:
 
     # Self-play
     selfplay_weights_path: str = "checkpoints/selfplay_latest.pt"
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "total_timesteps": self.total_timesteps,
@@ -349,6 +354,7 @@ class TrainingConfig:
             "env": {
                 "battle_format": self.env.battle_format,
                 "player_team_path": self.env.player_team_path,
+                "mlflow_experiment_fixed_team": self.env.mlflow_experiment_fixed_team,
                 "num_workers": self.env.num_workers,
                 "num_envs_per_worker": self.env.num_envs_per_worker,
             },
@@ -365,13 +371,42 @@ class TrainingConfig:
         }
 
 
+DEFAULT_MLFLOW_EXPERIMENT = "Pokemon_RL_Battler"
+
+
+def resolve_mlflow_experiment_name(config: TrainingConfig) -> str:
+    """MLflow experiment for training when starting a new run (no run_id resume)."""
+    if config.env.player_team_path:
+        return config.env.mlflow_experiment_fixed_team
+    return DEFAULT_MLFLOW_EXPERIMENT
+
+
+def resolve_mlflow_experiment_for_training(
+    config: TrainingConfig,
+    resume_run_id: Optional[str] = None,
+    cli_override: Optional[str] = None,
+) -> str:
+    """Active MLflow experiment: resumed run's experiment, CLI override, or config-derived."""
+    if resume_run_id:
+        from mlflow.tracking import MlflowClient
+
+        client = MlflowClient()
+        run = client.get_run(resume_run_id)
+        exp = client.get_experiment(run.info.experiment_id)
+        return exp.name
+    if cli_override:
+        return cli_override
+    return resolve_mlflow_experiment_name(config)
+
+
 # =============================================================================
 # PRESETS
 # =============================================================================
 
+
 def get_config(preset: str = "standard") -> TrainingConfig:
     """Get a configuration preset."""
-    
+
     presets = {
         "quick": TrainingConfig(
             total_timesteps=150_000,
@@ -388,11 +423,9 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                 train_batch_size=4096,
             ),
         ),
-        
         "standard": TrainingConfig(
             # Uses all defaults
         ),
-
         "memory_safe": TrainingConfig(
             env=EnvironmentConfig(
                 num_workers=4,
@@ -410,7 +443,6 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                 sgd_minibatch_size=128,
             ),
         ),
-        
         "large": TrainingConfig(
             env=EnvironmentConfig(
                 num_workers=12,
@@ -428,8 +460,8 @@ def get_config(preset: str = "standard") -> TrainingConfig:
             ),
         ),
     }
-    
+
     if preset not in presets:
         raise ValueError(f"Unknown preset: {preset}. Available: {list(presets.keys())}")
-    
+
     return presets[preset]

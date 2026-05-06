@@ -17,6 +17,7 @@ from src.config.TM_optimal_config import (
     CurriculumStageConfig,
     TrainingConfig,
     get_config,
+    resolve_mlflow_experiment_for_training,
 )
 from src.training.checkpointing import CheckpointManager
 from src.training.curriculum import CurriculumManager
@@ -63,6 +64,7 @@ class PokemonTrainer:
         start_port: int = 8000,
         resume_checkpoint: Optional[str] = None,
         mlflow_run_id: Optional[str] = None,
+        mlflow_experiment_name: str = "Pokemon_RL_Battler",
     ):
         """
         Initialize trainer.
@@ -74,6 +76,7 @@ class PokemonTrainer:
             start_port: Starting port for servers
             resume_checkpoint: Optional RLlib checkpoint path to restore from
             mlflow_run_id: Optional MLflow run ID to continue logging in the same run
+            mlflow_experiment_name: Experiment name for scheduled validation subprocess alignment
         """
         # Load config
         self.config = config or get_config(preset)
@@ -84,6 +87,7 @@ class PokemonTrainer:
         self.start_port = start_port
         self.resume_checkpoint = resume_checkpoint
         self.mlflow_run_id = mlflow_run_id
+        self.mlflow_experiment_name = mlflow_experiment_name
 
         # Initialize components
         self.curriculum = None
@@ -690,7 +694,7 @@ class PokemonTrainer:
                         "--metric-prefix",
                         f"validation/{protocol}",
                         "--experiment-name",
-                        "Pokemon_RL_Battler",
+                        self.mlflow_experiment_name,
                     ]
                 )
 
@@ -746,6 +750,11 @@ def train(
     if total_timesteps:
         config.total_timesteps = total_timesteps
 
+    mlflow_experiment_name = resolve_mlflow_experiment_for_training(
+        config, resume_run_id=mlflow_run_id
+    )
+    mlflow.set_experiment(mlflow_experiment_name)
+
     trainer = PokemonTrainer(
         config=config,
         preset=preset,
@@ -753,6 +762,7 @@ def train(
         start_port=start_port,
         resume_checkpoint=resume_checkpoint,
         mlflow_run_id=mlflow_run_id,
+        mlflow_experiment_name=mlflow_experiment_name,
     )
 
     trainer.train()
