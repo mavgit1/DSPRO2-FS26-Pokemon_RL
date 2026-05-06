@@ -257,11 +257,26 @@ class PokemonTransformerModel(nn.Module):
         }
 
     def _transformer_forward(self, x: TensorType) -> TensorType:
-        """Run transformer with per-layer learnable attention bias."""
+        """Run transformer with per-layer learnable attention bias.
+
+        Uses manual norm-first decomposition instead of
+        ``layer(x, src_mask=bias)`` to avoid a PyTorch 2.10 NaN bug in the
+        fused encoder-layer forward path when a float additive mask is passed.
+        """
         T = x.shape[1]
         for i, layer in enumerate(self.transformer.layers):
             bias = self.attn_bias[i, :T, :T]  # [T, T]
-            x = layer(x, src_mask=bias)
+            # norm-first: x = x + SA(norm1(x)); x = x + FF(norm2(x))
+            x_norm = layer.norm1(x)
+            sa_out, _ = layer.self_attn(
+                x_norm, x_norm, x_norm, attn_mask=bias, need_weights=False
+            )
+            x = x + layer.dropout1(sa_out)
+            x_norm2 = layer.norm2(x)
+            ff_out = layer.linear2(
+                layer.dropout(layer.activation(layer.linear1(x_norm2)))
+            )
+            x = x + layer.dropout2(ff_out)
         return x
 
     @staticmethod
