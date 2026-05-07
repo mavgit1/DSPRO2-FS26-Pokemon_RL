@@ -8,6 +8,7 @@ dependencies = [
     "gymnasium<1.2.3",
     "mlflow>=3.10.1",
     "numpy>=2.4.3",
+    "optuna>=4.8.0",
     "poke-env>=0.12.0",
     "python-dotenv>=1.2.2",
     "ray[rllib]>=2.54.0",
