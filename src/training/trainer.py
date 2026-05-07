@@ -122,10 +122,11 @@ class PokemonTrainer:
         self._diag_pruned_total = 0
         self._diag_records: list[Dict[str, Any]] = []
         self._selfplay_diag_path = Path("logs/selfplay_diagnostics.log")
+        self._last_metrics: Dict[str, float] = {}
 
     # Main training loop.
-    def train(self) -> None:
-        """Run the training loop."""
+    def train(self) -> Dict[str, float]:
+        """Run the training loop. Returns final iteration metrics."""
         seed = 42
         random.seed(seed)
         np.random.seed(seed)
@@ -335,6 +336,9 @@ class PokemonTrainer:
                             f"Iter {self.iteration} | Steps: {self.total_steps:,} | Reward: {reward_mean:.2f} | Time: {elapsed:.2f}h"
                         )
 
+                    # Store iteration metrics before validation may augment them.
+                    self._last_metrics = metrics
+
                     # Scheduled validation runs in-process against the live algo.
                     if self.should_validate():
                         self._run_scheduled_validation(
@@ -373,6 +377,8 @@ class PokemonTrainer:
                 if self.algo is not None:
                     self.algo.stop()
                 ray.shutdown()
+
+        return self._last_metrics
 
     def _validate_curriculum_config(self) -> None:
         if not self.curriculum:
@@ -646,8 +652,8 @@ class PokemonTrainer:
         from src.validation.protocols import get_protocol
         from src.validation.reporting import (
             format_validation_summary,
-            log_validation_to_mlflow,
             write_validation_report,
+            _prefix_metrics,
         )
         from src.validation.runner import run_inprocess_validation
 
@@ -700,19 +706,28 @@ class PokemonTrainer:
             summary = format_validation_summary(report, step=self.total_steps)
             print(summary, flush=True)
 
-            # Log to MLflow under the training run.
-            if mlflow_run_id:
-                try:
-                    log_validation_to_mlflow(
-                        report=report,
-                        metrics=report["metrics"],
-                        experiment_name=self.mlflow_experiment_name,
-                        run_id=mlflow_run_id,
-                        step=self.total_steps,
-                        metric_prefix=f"validation/{protocol_name}",
+            # Merge validation metrics into last_metrics for callers (e.g. hparam sweep).
+            self._last_metrics.update(report["metrics"])
+
+            # Log to the already-active MLflow run (opened by train()).
+            # We cannot call log_validation_to_mlflow() here because it opens
+            # its own mlflow.start_run(run_id=...) which conflicts with the
+            # active run context.
+            try:
+                prefixed = _prefix_metrics(
+                    report["metrics"], f"validation/{protocol_name}"
+                )
+                mlflow.log_metrics(prefixed, step=int(self.total_steps))
+                report_path_artifact = (
+                    output_dir / f"{protocol_name}_validation_report.json"
+                )
+                if report_path_artifact.exists():
+                    mlflow.log_artifact(
+                        str(report_path_artifact),
+                        artifact_path=f"validation/{protocol_name}/step_{self.total_steps}",
                     )
-                except Exception as exc:
-                    print(f"[WARN] MLflow logging for '{protocol_name}' failed: {exc}")
+            except Exception as exc:
+                print(f"[WARN] MLflow logging for '{protocol_name}' failed: {exc}")
 
         self._last_validation_step = self.total_steps
 
