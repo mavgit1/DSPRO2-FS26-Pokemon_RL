@@ -30,6 +30,7 @@ if str(ROOT) not in sys.path:
 from src.config.TM_optimal_config import (
     CurriculumConfig,
     CurriculumStageConfig,
+    RewardConfig,
     TrainingConfig,
     get_config,
 )
@@ -42,6 +43,9 @@ def create_trial_config(
     """Sample hyperparameters and build a TrainingConfig for this trial."""
     config = get_config(base_preset)
     config.total_timesteps = timesteps
+
+    # --- No fixed team (random battles) ---
+    config.env.player_team_path = None
 
     # --- PPO / Learning ---
     config.ppo.lr = trial.suggest_float("lr", 1e-4, 1e-3, log=True)
@@ -64,6 +68,13 @@ def create_trial_config(
     )
 
     # --- Fixed single-stage curriculum (no promotion) ---
+    # Stage reward_config must match the sampled values — rllib_config_builder
+    # uses stage.reward_config (not config.reward) when a curriculum is active.
+    stage_reward = RewardConfig(
+        reward_scale=config.reward.reward_scale,
+        matchup_reward_weight=config.reward.matchup_reward_weight,
+        action_quality_weight=config.reward.action_quality_weight,
+    )
     config.curriculum = CurriculumConfig(
         enabled=True,
         stages=[
@@ -76,6 +87,7 @@ def create_trial_config(
                     "random_no_switch": 0.4,
                     "heuristic": 0.4,
                 },
+                reward_config=stage_reward,
             )
         ],
     )
@@ -134,8 +146,7 @@ def objective(
         print(f"[ERROR] Trial {trial.number} failed: {exc}")
         raise optuna.TrialPruned() from exc
     finally:
-        # Ensure the MLflow run opened by trainer.train() is closed before
-        # the next trial tries to start a new one.
+        # Ensure the MLflow run opened by trainer.train() is closed.
         try:
             mlflow.end_run()
         except Exception:
@@ -144,14 +155,17 @@ def objective(
     elapsed = time.time() - trial_start
     skill_score = final_metrics.get("benchmark/skill_score", 0.0)
 
-    # Log to MLflow in the current trial run.
-    try:
-        trial_params["hparam/skill_score"] = skill_score
-        trial_params["hparam/elapsed_sec"] = elapsed
-        trial_params.update(final_metrics)
-        mlflow.log_metrics(trial_params)
-    except Exception:
-        pass
+    # Log summary to the SAME MLflow run (re-open by ID).
+    run_id = getattr(trainer, "_last_mlflow_run_id", None)
+    if run_id:
+        try:
+            with mlflow.start_run(run_id=run_id):
+                trial_params["hparam/skill_score"] = skill_score
+                trial_params["hparam/elapsed_sec"] = elapsed
+                trial_params.update(final_metrics)
+                mlflow.log_metrics(trial_params)
+        except Exception as exc:
+            print(f"[WARN] Failed to log summary to MLflow run {run_id}: {exc}")
 
     print(
         f"\nTRIAL {trial.number} DONE | "

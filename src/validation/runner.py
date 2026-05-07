@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import random
 import socket
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -267,11 +268,15 @@ def _build_validation_env(
     player_team: str | None = None,
     opponent_team: str | None = None,
     model_config_dict: Dict[str, Any] | None = None,
+    port_override: int | None = None,
 ):
+    """Create a validation env.  *port_override* pins this env to a single
+    Showdown server port (used for parallel benchmark execution)."""
+    port = port_override if port_override is not None else start_port
     env_creator = create_env_creator(
         battle_format=config.env.battle_format,
         server_host=config.env.showdown_host,
-        server_port=start_port,
+        server_port=port,
         reward_config=config.reward,
         opponent_difficulty=opponent_type,
         opponent_mix={opponent_type: 1.0},
@@ -280,9 +285,9 @@ def _build_validation_env(
     )
     return env_creator(
         {
-            "server_port": start_port,
+            "server_port": port,
             "num_servers": 1,
-            "start_port": start_port,
+            "start_port": port,
             "num_envs_per_worker": 1,
             "opponent_difficulty": opponent_type,
             "opponent_mix": {opponent_type: 1.0},
@@ -292,6 +297,31 @@ def _build_validation_env(
     )
 
 
+def _run_chunk_on_env(
+    algo,
+    env,
+    episode_offset: int,
+    opponent_type: str,
+    max_steps_per_battle: int,
+    count: int,
+    explore: bool = False,
+) -> List[BattleResult]:
+    """Run *count* episodes sequentially on a single env (called from one thread)."""
+    results: List[BattleResult] = []
+    for i in range(count):
+        results.append(
+            _run_one_episode(
+                algo=algo,
+                env=env,
+                episode_idx=episode_offset + i,
+                opponent_type=opponent_type,
+                max_steps_per_battle=max_steps_per_battle,
+                explore=explore,
+            )
+        )
+    return results
+
+
 def _run_benchmark(
     algo,
     config: TrainingConfig,
@@ -299,35 +329,72 @@ def _run_benchmark(
     episodes_per_opponent: int,
     start_port: int,
     max_steps_per_battle: int,
+    num_servers: int = 1,
     player_team: str | None = None,
     explore: bool = False,
 ) -> List[BattleResult]:
-    """Run N episodes per opponent tier sequentially and return all results."""
+    """Run N episodes per opponent tier, split across *num_servers* ports.
+
+    Episodes are chunked so each env processes its share sequentially
+    (no concurrent access to the same env), while all envs run in parallel.
+    """
     all_results: List[BattleResult] = []
     episode_idx = 0
 
     for opp in opponents:
-        print(f"Benchmark vs {opp}: {episodes_per_opponent} episodes", flush=True)
-        env = _build_validation_env(
-            config=config,
-            opponent_type=opp,
-            start_port=start_port,
-            player_team=player_team,
+        n = num_servers if num_servers > 1 else 1
+        print(
+            f"Benchmark vs {opp}: {episodes_per_opponent} episodes "
+            f"({n} server{'s' if n > 1 else ''})",
+            flush=True,
         )
+
+        # Create one env per server port.
+        envs: List = []
+        for i in range(n):
+            port = start_port + i
+            env = _build_validation_env(
+                config=config,
+                opponent_type=opp,
+                start_port=start_port,
+                player_team=player_team,
+                port_override=port,
+            )
+            envs.append(env)
+
         try:
-            for _ in range(episodes_per_opponent):
-                result = _run_one_episode(
-                    algo=algo,
-                    env=env,
-                    episode_idx=episode_idx,
-                    opponent_type=opp,
-                    max_steps_per_battle=max_steps_per_battle,
-                    explore=explore,
-                )
-                all_results.append(result)
-                episode_idx += 1
+            # Split episodes into chunks, one per env.
+            chunk_size = -(-episodes_per_opponent // n)  # ceil division
+            futures = []
+            with ThreadPoolExecutor(max_workers=n) as pool:
+                for env_i, env in enumerate(envs):
+                    start = env_i * chunk_size
+                    end = min(start + chunk_size, episodes_per_opponent)
+                    if start >= episodes_per_opponent:
+                        break
+                    futures.append(
+                        pool.submit(
+                            _run_chunk_on_env,
+                            algo, env,
+                            episode_idx + start,  # episode_offset
+                            opp,
+                            max_steps_per_battle,
+                            end - start,  # count
+                            explore,
+                        )
+                    )
+                for f in as_completed(futures):
+                    all_results.extend(f.result())
         finally:
-            env.close()
+            for env in envs:
+                try:
+                    env.close()
+                except Exception:
+                    pass
+
+        episode_idx += episodes_per_opponent
+
+    return all_results
 
     return all_results
 
@@ -635,6 +702,7 @@ def run_inprocess_validation(
     seed: int = 42,
     player_team: str | None = None,
     explore: bool = False,
+    num_servers: int = 1,
 ) -> Dict[str, Any]:
     """Run a validation protocol using a live algo object (no subprocess/Ray init).
 
@@ -656,6 +724,7 @@ def run_inprocess_validation(
             episodes_per_opponent=protocol.episodes_per_opponent,
             start_port=start_port,
             max_steps_per_battle=max_steps_per_battle,
+            num_servers=num_servers,
             player_team=player_team_resolved,
             explore=explore,
         )

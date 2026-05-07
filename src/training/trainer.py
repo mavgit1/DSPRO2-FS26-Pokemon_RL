@@ -189,6 +189,7 @@ class PokemonTrainer:
         with mlflow.start_run(run_id=self.mlflow_run_id):
             current_run = mlflow.active_run()
             if current_run is not None:
+                self._last_mlflow_run_id = current_run.info.run_id
                 print(f"MLflow run id: {current_run.info.run_id}")
 
             # For resumed MLflow runs, avoid re-logging params that may already exist.
@@ -690,6 +691,7 @@ class PokemonTrainer:
                     max_steps_per_battle=validation.max_steps_per_battle,
                     seed=validation.seed,
                     player_team=player_team,
+                    num_servers=self.num_servers,
                 )
             except Exception as exc:
                 message = f"Validation '{protocol_name}' failed: {exc}"

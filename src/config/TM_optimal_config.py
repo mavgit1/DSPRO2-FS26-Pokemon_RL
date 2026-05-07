@@ -91,7 +91,7 @@ class EnvironmentConfig:
     # Fixed player team (Showdown format text file). When set, the RL agent
     # always uses this team and the battle format is auto-switched to the
     # corresponding custom-game variant (e.g. gen5randombattle → gen5customgame).
-    player_team_path: Optional[str] = "data/teams/player_team_2.txt"
+    player_team_path: Optional[str] = None
 
     # MLflow experiment name when player_team_path is set (fixed-team training).
     mlflow_experiment_fixed_team: str = "Pokemon_RL_Battler_FixedTeam"
