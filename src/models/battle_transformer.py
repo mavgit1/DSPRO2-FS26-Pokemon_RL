@@ -14,7 +14,7 @@ _VOCAB_SIZES = vocab_sizes()
 
 
 # =============================================================================
-# MODEL CONFIG
+# MODEL CONFIG, doesnt actually matter since overwritten by the config file
 # =============================================================================
 
 DEFAULT_MODEL_CONFIG = {

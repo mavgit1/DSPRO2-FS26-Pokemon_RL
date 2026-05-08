@@ -21,14 +21,14 @@ class ModelConfig:
     # Transformer
     hidden_dim: int = 512
     num_heads: int = 8
-    num_transformer_layers: int = 1
-    dropout: float = 0.05
+    num_transformer_layers: int = 2
+    dropout: float = 0.15
     use_position_embeddings: bool = True
     use_role_embeddings: bool = True
 
     # LSTM (for memory across turns)
     lstm_hidden: int = 512
-    use_lstm: bool = True
+    use_lstm: bool = False
     max_seq_len: int = 32
 
     def to_dict(self) -> Dict[str, Any]:
@@ -56,21 +56,21 @@ class PPOConfig:
     """Standard PPO hyperparameters."""
 
     # Learning
-    lr: float = 5e-4
+    lr: float = 0.0001
 
     # Discount and GAE
-    gamma: float = 0.97
-    lambda_: float = 0.88
+    gamma: float = 0.96
+    lambda_: float = 0.95
 
     # PPO clipping
-    clip_param: float = 0.15
+    clip_param: float = 0.2
 
     # Entropy bonus (exploration)
     entropy_coeff: float = 0.05
 
     # Value function
     vf_loss_coeff: float = 0.5
-    vf_clip_param: float = 3.0
+    vf_clip_param: float = 4.85
 
     # Gradient clipping
     grad_clip: float = 5.0
@@ -114,7 +114,10 @@ class EnvironmentConfig:
 
 @dataclass
 class RewardConfig:
-    """Reward function configuration."""
+    """
+    Reward function configuration.
+    Will be overwritten by the curriculum config if it is set and used.
+    """
 
     # Major events
     victory_reward: float = 10.0
@@ -138,7 +141,7 @@ class RewardConfig:
 
     # Global reward scale: multiplies all rewards before returning to the agent.
     # Scales returns from ~[-15, +15] to ~[-1.5, +1.5], making value regression easier.
-    reward_scale: float = 0.1
+    reward_scale: float = 0.05
 
 
 @dataclass
@@ -200,8 +203,8 @@ class CurriculumConfig:
                     fainted_value=6.0,
                     fainted_penalty=-6.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.1,
-                    action_quality_weight=0.3,
+                    matchup_reward_weight=0.45,
+                    action_quality_weight=0.2,
                 ),
             ),
             CurriculumStageConfig(
@@ -216,8 +219,8 @@ class CurriculumConfig:
                     fainted_value=6.0,
                     fainted_penalty=-6.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.1,
-                    action_quality_weight=0.3,
+                    matchup_reward_weight=0.45,
+                    action_quality_weight=0.2,
                 ),
             ),
             CurriculumStageConfig(
@@ -232,15 +235,15 @@ class CurriculumConfig:
                     fainted_value=6.0,
                     fainted_penalty=-6.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.1,
-                    action_quality_weight=0.4,
+                    matchup_reward_weight=0.45,
+                    action_quality_weight=0.2,
                 ),
             ),
             CurriculumStageConfig(
                 name="mixed_final",
                 promote_at_win_rate=1.01,
                 min_samples_for_promotion=300,
-                opponent_mix={"heuristic": 0.5, "self": 0.3, "random_no_switch": 0.2},
+                opponent_mix={"heuristic": 0.5, "self": 0.4, "random_no_switch": 0.1},
                 reward_config=RewardConfig(
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
@@ -248,8 +251,8 @@ class CurriculumConfig:
                     fainted_value=6.0,
                     fainted_penalty=-6.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.1,
-                    action_quality_weight=0.4,
+                    matchup_reward_weight=0.45,
+                    action_quality_weight=0.2,
                 ),
             ),
         ]
