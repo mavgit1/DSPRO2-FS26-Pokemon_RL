@@ -250,6 +250,7 @@ class PokemonTrainer:
 
                     # Export self-play weights every iteration so the opponent
                     # stays fresh (instead of only every 150k checkpoint).
+                    # TODO: this is not how it should be done. So make proper self-play later.
                     self._export_selfplay_weights()
 
                     # Collect and log self-play diagnostics.

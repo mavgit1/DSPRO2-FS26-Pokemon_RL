@@ -21,15 +21,15 @@ class ModelConfig:
     # Transformer
     hidden_dim: int = 512
     num_heads: int = 8
-    num_transformer_layers: int = 1
-    dropout: float = 0.05
+    num_transformer_layers: int = 2
+    dropout: float = 0.0068
     use_position_embeddings: bool = True
     use_role_embeddings: bool = True
 
     # LSTM (for memory across turns)
     lstm_hidden: int = 512
     use_lstm: bool = True
-    max_seq_len: int = 32
+    max_seq_len: int = 13
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -56,27 +56,28 @@ class PPOConfig:
     """Standard PPO hyperparameters."""
 
     # Learning
-    lr: float = 5e-4
+    lr: float = 0.0002
 
     # Discount and GAE
     gamma: float = 0.97
-    lambda_: float = 0.88
+    lambda_: float = 0.87
 
     # PPO clipping
-    clip_param: float = 0.15
+    clip_param: float = 0.08
 
     # Entropy bonus (exploration)
-    entropy_coeff: float = 0.05
+    entropy_coeff: float = 0.013
 
     # Value function
     vf_loss_coeff: float = 0.5
-    vf_clip_param: float = 3.0
+    vf_clip_param: float = 4.85
 
     # Gradient clipping
     grad_clip: float = 5.0
 
     # Batch sizes
     train_batch_size: int = 4096
+    # TODO: test this with different values.
     sgd_minibatch_size: int = 512
     num_sgd_iter: int = 8
 
@@ -91,7 +92,9 @@ class EnvironmentConfig:
     # Fixed player team (Showdown format text file). When set, the RL agent
     # always uses this team and the battle format is auto-switched to the
     # corresponding custom-game variant (e.g. gen5randombattle → gen5customgame).
-    player_team_path: Optional[str] = None
+    # you can use data/teams/player_team_2.txt as an example.
+    # or for no team, set to None.
+    player_team_path: Optional[str] = "data/teams/player_team_2.txt"
 
     # MLflow experiment name when player_team_path is set (fixed-team training).
     mlflow_experiment_fixed_team: str = "Pokemon_RL_Battler_FixedTeam"
@@ -114,7 +117,10 @@ class EnvironmentConfig:
 
 @dataclass
 class RewardConfig:
-    """Reward function configuration."""
+    """
+    Reward function configuration.
+    Will be overwritten by the curriculum config if it is set and used.
+    """
 
     # Major events
     victory_reward: float = 10.0
@@ -138,7 +144,7 @@ class RewardConfig:
 
     # Global reward scale: multiplies all rewards before returning to the agent.
     # Scales returns from ~[-15, +15] to ~[-1.5, +1.5], making value regression easier.
-    reward_scale: float = 0.1
+    reward_scale: float = 0.05
 
 
 @dataclass
@@ -197,11 +203,11 @@ class CurriculumConfig:
                     victory_reward=8.0,
                     defeat_penalty=-10.0,
                     hp_value_weight=3.0,
-                    fainted_value=6.0,
-                    fainted_penalty=-6.0,
+                    fainted_value=5.0,
+                    fainted_penalty=-5.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.1,
-                    action_quality_weight=0.3,
+                    matchup_reward_weight=0.15,
+                    action_quality_weight=0.25,
                 ),
             ),
             CurriculumStageConfig(
@@ -213,11 +219,11 @@ class CurriculumConfig:
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
                     hp_value_weight=3.0,
-                    fainted_value=6.0,
-                    fainted_penalty=-6.0,
+                    fainted_value=5.0,
+                    fainted_penalty=-5.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.1,
-                    action_quality_weight=0.3,
+                    matchup_reward_weight=0.15,
+                    action_quality_weight=0.25,
                 ),
             ),
             CurriculumStageConfig(
@@ -232,24 +238,24 @@ class CurriculumConfig:
                     fainted_value=6.0,
                     fainted_penalty=-6.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.1,
-                    action_quality_weight=0.4,
+                    matchup_reward_weight=0.15,
+                    action_quality_weight=0.2,
                 ),
             ),
             CurriculumStageConfig(
                 name="mixed_final",
                 promote_at_win_rate=1.01,
                 min_samples_for_promotion=300,
-                opponent_mix={"heuristic": 0.5, "self": 0.3, "random_no_switch": 0.2},
+                opponent_mix={"heuristic": 0.5, "self": 0.4, "random_no_switch": 0.1},
                 reward_config=RewardConfig(
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
                     hp_value_weight=3.0,
-                    fainted_value=6.0,
-                    fainted_penalty=-6.0,
+                    fainted_value=5.0,
+                    fainted_penalty=-5.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.1,
-                    action_quality_weight=0.4,
+                    matchup_reward_weight=0.15,
+                    action_quality_weight=0.25,
                 ),
             ),
         ]
