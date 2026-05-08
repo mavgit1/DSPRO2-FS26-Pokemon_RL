@@ -87,6 +87,7 @@ class EnvironmentConfig:
     """Environment configuration."""
 
     # Battle settings
+    # If you dont have custom formats set up, use gen8randombattle if set use gen8customgamenogimmicks.
     battle_format: str = "gen8randombattlenogimmicks"
 
     # Fixed player team (Showdown format text file). When set, the RL agent
