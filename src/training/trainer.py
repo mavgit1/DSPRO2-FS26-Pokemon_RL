@@ -1,8 +1,6 @@
 import json
 import os
 import random
-import subprocess
-import sys
 import time
 from collections import deque
 from pathlib import Path
@@ -17,6 +15,7 @@ from src.config.TM_optimal_config import (
     CurriculumStageConfig,
     TrainingConfig,
     get_config,
+    resolve_mlflow_experiment_for_training,
 )
 from src.training.checkpointing import CheckpointManager
 from src.training.curriculum import CurriculumManager
@@ -26,6 +25,7 @@ from src.training.env_bridge import (
     collect_recent_observation_samples,
     collect_recent_episode_stats,
     collect_recent_outcomes,
+    collect_selfplay_diagnostics,
 )
 from src.training.metrics import (
     aggregate_episode_metrics,
@@ -62,6 +62,7 @@ class PokemonTrainer:
         start_port: int = 8000,
         resume_checkpoint: Optional[str] = None,
         mlflow_run_id: Optional[str] = None,
+        mlflow_experiment_name: str = "Pokemon_RL_Battler",
     ):
         """
         Initialize trainer.
@@ -73,6 +74,7 @@ class PokemonTrainer:
             start_port: Starting port for servers
             resume_checkpoint: Optional RLlib checkpoint path to restore from
             mlflow_run_id: Optional MLflow run ID to continue logging in the same run
+            mlflow_experiment_name: Experiment name for scheduled validation subprocess alignment
         """
         # Load config
         self.config = config or get_config(preset)
@@ -83,6 +85,7 @@ class PokemonTrainer:
         self.start_port = start_port
         self.resume_checkpoint = resume_checkpoint
         self.mlflow_run_id = mlflow_run_id
+        self.mlflow_experiment_name = mlflow_experiment_name
 
         # Initialize components
         self.curriculum = None
@@ -118,10 +121,12 @@ class PokemonTrainer:
         self._diag_samples_saved = 0
         self._diag_pruned_total = 0
         self._diag_records: list[Dict[str, Any]] = []
+        self._selfplay_diag_path = Path("logs/selfplay_diagnostics.log")
+        self._last_metrics: Dict[str, float] = {}
 
     # Main training loop.
-    def train(self) -> None:
-        """Run the training loop."""
+    def train(self) -> Dict[str, float]:
+        """Run the training loop. Returns final iteration metrics."""
         seed = 42
         random.seed(seed)
         np.random.seed(seed)
@@ -184,6 +189,7 @@ class PokemonTrainer:
         with mlflow.start_run(run_id=self.mlflow_run_id):
             current_run = mlflow.active_run()
             if current_run is not None:
+                self._last_mlflow_run_id = current_run.info.run_id
                 print(f"MLflow run id: {current_run.info.run_id}")
 
             # For resumed MLflow runs, avoid re-logging params that may already exist.
@@ -191,6 +197,16 @@ class PokemonTrainer:
                 flat_params: Dict[str, Any] = {}
                 flatten_for_mlflow("", self.config.to_dict(), flat_params)
                 mlflow.log_params(flat_params)
+
+                # Log player team as a text artifact so it's visible in the run.
+                if self.config.env.player_team_path:
+                    team_path = Path(self.config.env.player_team_path)
+                    if team_path.exists():
+                        mlflow.log_text(
+                            team_path.read_text(encoding="utf-8"),
+                            artifact_file="player_team.txt",
+                        )
+                        mlflow.set_tag("player_team_file", str(team_path))
             else:
                 mlflow.set_tag("resumed", "true")
                 if resume_path:
@@ -231,6 +247,14 @@ class PokemonTrainer:
                     outcomes = collect_recent_outcomes(self.algo)
                     episode_stats = collect_recent_episode_stats(self.algo)
                     metrics.update(aggregate_episode_metrics(outcomes, episode_stats))
+
+                    # Export self-play weights every iteration so the opponent
+                    # stays fresh (instead of only every 150k checkpoint).
+                    self._export_selfplay_weights()
+
+                    # Collect and log self-play diagnostics.
+                    sp_metrics = self._collect_and_log_selfplay_diagnostics()
+                    metrics.update(sp_metrics)
 
                     # Curriculum updates (training-only, binary outcomes).
                     if self.curriculum:
@@ -313,11 +337,12 @@ class PokemonTrainer:
                             f"Iter {self.iteration} | Steps: {self.total_steps:,} | Reward: {reward_mean:.2f} | Time: {elapsed:.2f}h"
                         )
 
-                    # Scheduled validation saves a checkpoint first, then evaluates it.
+                    # Store iteration metrics before validation may augment them.
+                    self._last_metrics = metrics
+
+                    # Scheduled validation runs in-process against the live algo.
                     if self.should_validate():
-                        ckpt_path = self._save_checkpoint()
                         self._run_scheduled_validation(
-                            checkpoint_path=ckpt_path,
                             mlflow_run_id=current_run.info.run_id
                             if current_run
                             else None,
@@ -353,6 +378,8 @@ class PokemonTrainer:
                 if self.algo is not None:
                     self.algo.stop()
                 ray.shutdown()
+
+        return self._last_metrics
 
     def _validate_curriculum_config(self) -> None:
         if not self.curriculum:
@@ -569,8 +596,47 @@ class PokemonTrainer:
     def _save_checkpoint(self) -> Path:
         ckpt_path = self.checkpoint_mgr.save_checkpoint(self.algo, self.total_steps)
         self._last_checkpoint_step = self.total_steps
+        self._export_selfplay_weights()
         print(f"Checkpoint saved: {ckpt_path}")
         return ckpt_path
+
+    def _export_selfplay_weights(self) -> None:
+        """Export raw model state dict for self-play opponents to load."""
+        try:
+            module = self.algo.get_module("default_policy")
+            state_dict = module.model.state_dict()
+            path = Path(os.path.abspath(self.config.selfplay_weights_path))
+            path.parent.mkdir(parents=True, exist_ok=True)
+            torch.save(state_dict, path)
+        except Exception as exc:
+            print(f"[WARN] Failed to export self-play weights: {exc}")
+
+    def _collect_and_log_selfplay_diagnostics(self) -> Dict[str, float]:
+        """Collect self-play diagnostics from workers, log to file + return for MLflow."""
+        sp_metrics = collect_selfplay_diagnostics(self.algo)
+
+        # Log weight file state.
+        weights_path = Path(os.path.abspath(self.config.selfplay_weights_path))
+        sp_metrics["selfplay/weights_file_exists"] = float(weights_path.exists())
+        if weights_path.exists():
+            stat = weights_path.stat()
+            sp_metrics["selfplay/weights_file_size_bytes"] = float(stat.st_size)
+            sp_metrics["selfplay/weights_file_mtime"] = stat.st_mtime
+
+        # Append to log file.
+        self._selfplay_diag_path.parent.mkdir(parents=True, exist_ok=True)
+        log_line = (
+            f"[iter={self.iteration} steps={self.total_steps}] "
+            + " | ".join(f"{k}={v:.4f}" for k, v in sorted(sp_metrics.items()))
+            + "\n"
+        )
+        try:
+            with open(self._selfplay_diag_path, "a", encoding="utf-8") as f:
+                f.write(log_line)
+        except Exception:
+            pass
+
+        return sp_metrics
 
     def _manifest_for_validation_protocol(self, protocol: str) -> str | None:
         if protocol == "fixed_paired":
@@ -579,74 +645,91 @@ class PokemonTrainer:
             return self.config.validation.mirror_manifest
         return None
 
-    # Just calls the validate_checkpoint.py script. Use the script directly if you want manual validation.
+    # In-process validation using the live algo — no subprocess overhead.
     def _run_scheduled_validation(
-        self, checkpoint_path: Path, mlflow_run_id: str | None
+        self, checkpoint_path: Path | None = None, mlflow_run_id: str | None = None
     ) -> None:
-        """Run configured validation protocols against a saved checkpoint."""
+        """Run configured validation protocols in-process against the live algo."""
+        from src.validation.protocols import get_protocol
+        from src.validation.reporting import (
+            format_validation_summary,
+            write_validation_report,
+            _prefix_metrics,
+        )
+        from src.validation.runner import run_inprocess_validation
+
         validation = self.config.validation
         output_dir = Path("logs/validation") / f"step_{self.total_steps}"
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        for protocol in validation.protocols:
-            command = [
-                sys.executable,
-                "scripts/validate_checkpoint.py",
-                "--checkpoint",
-                str(checkpoint_path),
-                "--protocol",
-                protocol,
-                "--preset",
-                self.preset,
-                "--num-servers",
-                str(validation.num_servers),
-                "--start-port",
-                str(self.start_port),
-                "--max-steps-per-battle",
-                str(validation.max_steps_per_battle),
-                "--seed",
-                str(validation.seed),
-                "--output-json",
-                str(output_dir / f"{protocol}_validation_report.json"),
-            ]
+        player_team: str | None = None
+        if self.config.env.player_team_path:
+            team_path = Path(self.config.env.player_team_path)
+            if team_path.exists():
+                player_team = team_path.read_text(encoding="utf-8").strip()
 
-            team_manifest = self._manifest_for_validation_protocol(protocol)
-            if team_manifest:
-                command.extend(["--team-manifest", team_manifest])
-
-            if self.config.model.use_lstm:
-                command.append("--use-lstm")
-
-            if mlflow_run_id:
-                command.extend(
-                    [
-                        "--mlflow",
-                        "--mlflow-run-id",
-                        mlflow_run_id,
-                        "--mlflow-step",
-                        str(self.total_steps),
-                        "--metric-prefix",
-                        f"validation/{protocol}",
-                        "--experiment-name",
-                        "Pokemon_RL_Battler",
-                    ]
-                )
-
+        for protocol_name in validation.protocols:
             print(
-                f"Running scheduled validation '{protocol}' at step {self.total_steps:,}",
+                f"\nRunning validation '{protocol_name}' at step {self.total_steps:,}",
                 flush=True,
             )
             try:
-                subprocess.run(command, check=True)
-            except subprocess.CalledProcessError as exc:
-                message = (
-                    f"Scheduled validation '{protocol}' failed with exit code "
-                    f"{exc.returncode}."
+                protocol = get_protocol(protocol_name)
+
+                # Override benchmark defaults with config values if applicable.
+                if protocol_name == "benchmark":
+                    protocol = get_protocol(
+                        "benchmark",
+                        episodes=validation.benchmark_episodes_per_opponent,
+                    )
+
+                report = run_inprocess_validation(
+                    algo=self.algo,
+                    config=self.config,
+                    protocol=protocol,
+                    start_port=self.start_port,
+                    max_steps_per_battle=validation.max_steps_per_battle,
+                    seed=validation.seed,
+                    player_team=player_team,
+                    num_servers=self.num_servers,
                 )
+            except Exception as exc:
+                message = f"Validation '{protocol_name}' failed: {exc}"
                 if validation.continue_on_failure:
-                    print(f"{message} Continuing training.")
+                    print(f"[WARN] {message} Continuing training.")
                     continue
                 raise RuntimeError(message) from exc
+
+            # Write JSON report.
+            report_path = output_dir / f"{protocol_name}_validation_report.json"
+            write_validation_report(report, report_path)
+
+            # Print console summary.
+            summary = format_validation_summary(report, step=self.total_steps)
+            print(summary, flush=True)
+
+            # Merge validation metrics into last_metrics for callers (e.g. hparam sweep).
+            self._last_metrics.update(report["metrics"])
+
+            # Log to the already-active MLflow run (opened by train()).
+            # We cannot call log_validation_to_mlflow() here because it opens
+            # its own mlflow.start_run(run_id=...) which conflicts with the
+            # active run context.
+            try:
+                prefixed = _prefix_metrics(
+                    report["metrics"], f"validation/{protocol_name}"
+                )
+                mlflow.log_metrics(prefixed, step=int(self.total_steps))
+                report_path_artifact = (
+                    output_dir / f"{protocol_name}_validation_report.json"
+                )
+                if report_path_artifact.exists():
+                    mlflow.log_artifact(
+                        str(report_path_artifact),
+                        artifact_path=f"validation/{protocol_name}/step_{self.total_steps}",
+                    )
+            except Exception as exc:
+                print(f"[WARN] MLflow logging for '{protocol_name}' failed: {exc}")
 
         self._last_validation_step = self.total_steps
 
@@ -684,6 +767,11 @@ def train(
     if total_timesteps:
         config.total_timesteps = total_timesteps
 
+    mlflow_experiment_name = resolve_mlflow_experiment_for_training(
+        config, resume_run_id=mlflow_run_id
+    )
+    mlflow.set_experiment(mlflow_experiment_name)
+
     trainer = PokemonTrainer(
         config=config,
         preset=preset,
@@ -691,6 +779,7 @@ def train(
         start_port=start_port,
         resume_checkpoint=resume_checkpoint,
         mlflow_run_id=mlflow_run_id,
+        mlflow_experiment_name=mlflow_experiment_name,
     )
 
     trainer.train()

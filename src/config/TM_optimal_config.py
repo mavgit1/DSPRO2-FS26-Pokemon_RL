@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from src.models.vocab import vocab_sizes
 
@@ -9,7 +9,7 @@ _VOCAB_SIZES = vocab_sizes()
 @dataclass
 class ModelConfig:
     """Model architecture configuration."""
-    
+
     # Embedding dimensions
     num_tokens: int = 13
     token_dim: int = 164
@@ -21,8 +21,8 @@ class ModelConfig:
     # Transformer
     hidden_dim: int = 512
     num_heads: int = 8
-    num_transformer_layers: int = 4
-    dropout: float = 0.1
+    num_transformer_layers: int = 1
+    dropout: float = 0.05
     use_position_embeddings: bool = True
     use_role_embeddings: bool = True
 
@@ -30,7 +30,7 @@ class ModelConfig:
     lstm_hidden: int = 512
     use_lstm: bool = True
     max_seq_len: int = 32
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "num_tokens": self.num_tokens,
@@ -56,29 +56,29 @@ class PPOConfig:
     """Standard PPO hyperparameters."""
 
     # Learning
-    lr: float = 3.0e-4
+    lr: float = 5e-4
 
     # Discount and GAE
-    gamma: float = 0.99
-    lambda_: float = 0.95
+    gamma: float = 0.97
+    lambda_: float = 0.88
 
     # PPO clipping
-    clip_param: float = 0.2
+    clip_param: float = 0.15
 
     # Entropy bonus (exploration)
-    entropy_coeff: float = 0.005
+    entropy_coeff: float = 0.05
 
     # Value function
     vf_loss_coeff: float = 0.5
-    vf_clip_param: float = 5.0
+    vf_clip_param: float = 3.0
 
     # Gradient clipping
-    grad_clip: float = 0.5
+    grad_clip: float = 5.0
 
     # Batch sizes
-    train_batch_size: int = 6144
-    sgd_minibatch_size: int = 256
-    num_sgd_iter: int = 10          
+    train_batch_size: int = 4096
+    sgd_minibatch_size: int = 512
+    num_sgd_iter: int = 8
 
 
 @dataclass
@@ -86,7 +86,15 @@ class EnvironmentConfig:
     """Environment configuration."""
 
     # Battle settings
-    battle_format: str = "gen5randombattle"
+    battle_format: str = "gen8randombattlenogimmicks"
+
+    # Fixed player team (Showdown format text file). When set, the RL agent
+    # always uses this team and the battle format is auto-switched to the
+    # corresponding custom-game variant (e.g. gen5randombattle → gen5customgame).
+    player_team_path: Optional[str] = None
+
+    # MLflow experiment name when player_team_path is set (fixed-team training).
+    mlflow_experiment_fixed_team: str = "Pokemon_RL_Battler_FixedTeam"
 
     # Server settings
     showdown_host: str = "localhost"
@@ -94,8 +102,14 @@ class EnvironmentConfig:
     num_servers: int = 8
 
     # Parallelism
-    num_workers: int = 12
-    num_envs_per_worker: int = 4
+    # Number of RLlib rollout workers (processes) collecting experience.
+    # Scale up until CPU cores or Showdown servers are saturated; increasing this
+    # usually improves sample throughput but also increases RAM usage.
+    num_workers: int = 24
+    # Number of battle environments run concurrently inside each worker.
+    # Effective parallel envs ~= num_workers * num_envs_per_worker. Increase this
+    # when workers are underutilized; reduce it if memory pressure or env lag appears.
+    num_envs_per_worker: int = 8
 
 
 @dataclass
@@ -103,23 +117,39 @@ class RewardConfig:
     """Reward function configuration."""
 
     # Major events
-    victory_reward: float = 100.0
-    defeat_penalty: float = -100.0
+    victory_reward: float = 10.0
+    defeat_penalty: float = -10.0
 
     # HP-based rewards
-    hp_value_weight: float = 1.0
+    hp_value_weight: float = 2.0
 
     # Fainting rewards
-    fainted_value: float = 3.0
-    fainted_penalty: float = -3.0
+    fainted_value: float = 5.0
+    fainted_penalty: float = -5.0
 
     # Progress rewards
-    step_penalty: float = -0.02
+    step_penalty: float = -0.005
+
+    # Type matchup shaping: gentle nudge toward favorable matchups (0.2 ≪ terminal ±10).
+    matchup_reward_weight: float = 0.2
+
+    # Action quality: per-step signal for picking effective moves (0.3 ≪ terminal ±10).
+    action_quality_weight: float = 0.3
+
+    # Global reward scale: multiplies all rewards before returning to the agent.
+    # Scales returns from ~[-15, +15] to ~[-1.5, +1.5], making value regression easier.
+    reward_scale: float = 0.1
 
 
 @dataclass
 class CurriculumStageConfig:
-    """Single curriculum stage settings."""
+    """Single curriculum stage settings.
+
+    ``opponent_mix`` weights use opponent keys consumed by ``battle_env``:
+    ``random`` (poke-env ``RandomPlayer``), ``random_no_switch`` (random among
+    moves only; no voluntary switches), ``heuristic``, ``self``. See README /
+    CLAUDE.md (2026-05-04).
+    """
 
     name: str
     promote_at_win_rate: float
@@ -140,6 +170,9 @@ class CurriculumStageConfig:
                 "fainted_value": self.reward_config.fainted_value,
                 "fainted_penalty": self.reward_config.fainted_penalty,
                 "step_penalty": self.reward_config.step_penalty,
+                "matchup_reward_weight": self.reward_config.matchup_reward_weight,
+                "action_quality_weight": self.reward_config.action_quality_weight,
+                "reward_scale": self.reward_config.reward_scale,
             },
         }
 
@@ -149,80 +182,74 @@ class CurriculumConfig:
     """Curriculum configuration with per-stage payloads."""
 
     enabled: bool = True
-    rolling_window_episodes: int = 200
-    min_episodes_before_promotion: int = 100
+    rolling_window_episodes: int = 300
+    min_episodes_before_promotion: int = 3_000
     allow_demotion: bool = False
     reward_rollback_on_demotion: bool = False
     stages: List[CurriculumStageConfig] = field(
         default_factory=lambda: [
             CurriculumStageConfig(
-                name="innit",
+                name="moves_and_switches_warmup",
+                promote_at_win_rate=0.65,
+                min_samples_for_promotion=200,
+                opponent_mix={"random": 0.4, "random_no_switch": 0.3, "self": 0.3},
+                reward_config=RewardConfig(
+                    victory_reward=8.0,
+                    defeat_penalty=-10.0,
+                    hp_value_weight=3.0,
+                    fainted_value=6.0,
+                    fainted_penalty=-6.0,
+                    step_penalty=-0.01,
+                    matchup_reward_weight=0.1,
+                    action_quality_weight=0.3,
+                ),
+            ),
+            CurriculumStageConfig(
+                name="random_more_moves",
+                promote_at_win_rate=0.2,
+                min_samples_for_promotion=5000,
+                opponent_mix={"self": 0.7, "random": 0.1, "random_no_switch": 0.2},
+                reward_config=RewardConfig(
+                    victory_reward=10.0,
+                    defeat_penalty=-10.0,
+                    hp_value_weight=3.0,
+                    fainted_value=6.0,
+                    fainted_penalty=-6.0,
+                    step_penalty=-0.01,
+                    matchup_reward_weight=0.1,
+                    action_quality_weight=0.3,
+                ),
+            ),
+            CurriculumStageConfig(
+                name="self_play",
+                promote_at_win_rate=0.7,
+                min_samples_for_promotion=200,
+                opponent_mix={"random_no_switch": 0.6, "random": 0.4},
+                reward_config=RewardConfig(
+                    victory_reward=10.0,
+                    defeat_penalty=-10.0,
+                    hp_value_weight=3.0,
+                    fainted_value=6.0,
+                    fainted_penalty=-6.0,
+                    step_penalty=-0.01,
+                    matchup_reward_weight=0.1,
+                    action_quality_weight=0.4,
+                ),
+            ),
+            CurriculumStageConfig(
+                name="mixed_final",
                 promote_at_win_rate=1.01,
-                min_samples_for_promotion=50,
-                opponent_mix={"random": 0, "heuristic": 1},
+                min_samples_for_promotion=300,
+                opponent_mix={"heuristic": 0.5, "self": 0.3, "random_no_switch": 0.2},
                 reward_config=RewardConfig(
-                    victory_reward=30.0,
-                    defeat_penalty=-30.0,
-                    hp_value_weight=1.2,
-                    fainted_value=3.0,
-                    fainted_penalty=-2.0,
-                    step_penalty=-0.005,
-                ),
-            ),
-            CurriculumStageConfig(
-                name="easy",
-                promote_at_win_rate=0.75,
-                min_samples_for_promotion=50,
-                opponent_mix={"random": 0.65, "heuristic": 0.35},
-                reward_config=RewardConfig(
-                    victory_reward=100.0,
-                    defeat_penalty=-100.0,
-                    hp_value_weight=1.0,
-                    fainted_value=3.0,
-                    fainted_penalty=-3.0,
+                    victory_reward=10.0,
+                    defeat_penalty=-10.0,
+                    hp_value_weight=3.0,
+                    fainted_value=6.0,
+                    fainted_penalty=-6.0,
                     step_penalty=-0.01,
-                ),
-            ),
-            CurriculumStageConfig(
-                name="medium",
-                promote_at_win_rate=0.75,
-                min_samples_for_promotion=50,
-                opponent_mix={"random": 0.4, "heuristic": 0.6},
-                reward_config=RewardConfig(
-                    victory_reward=100.0,
-                    defeat_penalty=-100.0,
-                    hp_value_weight=1.0,
-                    fainted_value=3.0,
-                    fainted_penalty=-3.0,
-                    step_penalty=-0.01,
-                ),
-            ),
-            CurriculumStageConfig(
-                name="advanced",
-                promote_at_win_rate=0.75,
-                min_samples_for_promotion=50,
-                opponent_mix={"random": 0.2, "heuristic": 0.8},
-                reward_config=RewardConfig(
-                    victory_reward=100.0,
-                    defeat_penalty=-100.0,
-                    hp_value_weight=1.0,
-                    fainted_value=3.0,
-                    fainted_penalty=-3.0,
-                    step_penalty=-0.01,
-                ),
-            ),
-            CurriculumStageConfig(
-                name="hard",
-                promote_at_win_rate=1.01,
-                min_samples_for_promotion=50,
-                opponent_mix={"heuristic": 1.0},
-                reward_config=RewardConfig(
-                    victory_reward=120.0,
-                    defeat_penalty=-120.0,
-                    hp_value_weight=0.8,
-                    fainted_value=4.0,
-                    fainted_penalty=-3.0,
-                    step_penalty=-0.02,
+                    matchup_reward_weight=0.1,
+                    action_quality_weight=0.4,
                 ),
             ),
         ]
@@ -244,16 +271,18 @@ class ValidationScheduleConfig:
     """Scheduled checkpoint validation during training."""
 
     enabled: bool = True
-    freq_steps: int = 100_000
-    protocols: List[str] = field(
-        default_factory=lambda: ["smoke", "fixed_paired", "mirror"]
-    )
+    freq_steps: int = 200_000
+    protocols: List[str] = field(default_factory=lambda: ["benchmark"])
     fixed_pair_manifest: str = "data/validation/gen8_random_battle_team_pairs.json"
     mirror_manifest: str = "data/validation/gen8_random_battle_mirror_teams.json"
     max_steps_per_battle: int = 500
     seed: int = 42
     num_servers: int = 1
     continue_on_failure: bool = True
+    benchmark_episodes_per_opponent: int = 50
+    benchmark_opponents: List[str] = field(
+        default_factory=lambda: ["random", "random_no_switch", "heuristic"]
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -266,49 +295,57 @@ class ValidationScheduleConfig:
             "seed": self.seed,
             "num_servers": self.num_servers,
             "continue_on_failure": self.continue_on_failure,
+            "benchmark_episodes_per_opponent": self.benchmark_episodes_per_opponent,
+            "benchmark_opponents": list(self.benchmark_opponents),
         }
 
 
 @dataclass
 class TrainingConfig:
     """Main training configuration."""
-    
+
     # Duration
     total_timesteps: int = 10_000_000
-    
+
     # Checkpointing
     checkpoint_dir: str = "checkpoints"
-    checkpoint_freq: int = 250_000      # Save every N timesteps
+    checkpoint_freq: int = 150_000  # Save every N timesteps
     keep_checkpoints_num: int = 5
-    
+
     # Logging
     log_dir: str = "logs"
-    print_freq: int = 100_000           # Print every N timesteps
-    
+    print_freq: int = 100_000  # Print every N timesteps
+
     # Hardware
     num_gpus: float = 1.0
     num_gpus_per_worker: float = 0.0
-    
+
     # Curriculum
     curriculum: CurriculumConfig = field(default_factory=CurriculumConfig)
-    
+
     # Evaluation
     evaluation_interval: int = 100_000
     evaluation_duration: int = 100
-    validation: ValidationScheduleConfig = field(default_factory=ValidationScheduleConfig)
-    
+    validation: ValidationScheduleConfig = field(
+        default_factory=ValidationScheduleConfig
+    )
+
     # Sub-configs
     model: ModelConfig = field(default_factory=ModelConfig)
     ppo: PPOConfig = field(default_factory=PPOConfig)
     env: EnvironmentConfig = field(default_factory=EnvironmentConfig)
     reward: RewardConfig = field(default_factory=RewardConfig)
-    
+
+    # Self-play
+    selfplay_weights_path: str = "checkpoints/selfplay_latest.pt"
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "total_timesteps": self.total_timesteps,
             "checkpoint_dir": self.checkpoint_dir,
             "checkpoint_freq": self.checkpoint_freq,
             "num_gpus": self.num_gpus,
+            "selfplay_weights_path": self.selfplay_weights_path,
             "curriculum": self.curriculum.to_dict(),
             "validation": self.validation.to_dict(),
             "model": self.model.to_dict(),
@@ -325,6 +362,8 @@ class TrainingConfig:
             },
             "env": {
                 "battle_format": self.env.battle_format,
+                "player_team_path": self.env.player_team_path,
+                "mlflow_experiment_fixed_team": self.env.mlflow_experiment_fixed_team,
                 "num_workers": self.env.num_workers,
                 "num_envs_per_worker": self.env.num_envs_per_worker,
             },
@@ -335,17 +374,49 @@ class TrainingConfig:
                 "fainted_value": self.reward.fainted_value,
                 "fainted_penalty": self.reward.fainted_penalty,
                 "step_penalty": self.reward.step_penalty,
+                "matchup_reward_weight": self.reward.matchup_reward_weight,
+                "action_quality_weight": self.reward.action_quality_weight,
+                "reward_scale": self.reward.reward_scale,
             },
         }
+
+
+DEFAULT_MLFLOW_EXPERIMENT = "Pokemon_RL_Battler"
+
+
+def resolve_mlflow_experiment_name(config: TrainingConfig) -> str:
+    """MLflow experiment for training when starting a new run (no run_id resume)."""
+    if config.env.player_team_path:
+        return config.env.mlflow_experiment_fixed_team
+    return DEFAULT_MLFLOW_EXPERIMENT
+
+
+def resolve_mlflow_experiment_for_training(
+    config: TrainingConfig,
+    resume_run_id: Optional[str] = None,
+    cli_override: Optional[str] = None,
+) -> str:
+    """Active MLflow experiment: resumed run's experiment, CLI override, or config-derived."""
+    if resume_run_id:
+        from mlflow.tracking import MlflowClient
+
+        client = MlflowClient()
+        run = client.get_run(resume_run_id)
+        exp = client.get_experiment(run.info.experiment_id)
+        return exp.name
+    if cli_override:
+        return cli_override
+    return resolve_mlflow_experiment_name(config)
 
 
 # =============================================================================
 # PRESETS
 # =============================================================================
 
+
 def get_config(preset: str = "standard") -> TrainingConfig:
     """Get a configuration preset."""
-    
+
     presets = {
         "quick": TrainingConfig(
             total_timesteps=150_000,
@@ -362,11 +433,9 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                 train_batch_size=4096,
             ),
         ),
-        
         "standard": TrainingConfig(
             # Uses all defaults
         ),
-
         "memory_safe": TrainingConfig(
             env=EnvironmentConfig(
                 num_workers=4,
@@ -384,7 +453,6 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                 sgd_minibatch_size=128,
             ),
         ),
-        
         "large": TrainingConfig(
             env=EnvironmentConfig(
                 num_workers=12,
@@ -402,8 +470,8 @@ def get_config(preset: str = "standard") -> TrainingConfig:
             ),
         ),
     }
-    
+
     if preset not in presets:
         raise ValueError(f"Unknown preset: {preset}. Available: {list(presets.keys())}")
-    
+
     return presets[preset]

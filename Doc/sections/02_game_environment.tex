@@ -1,0 +1,150 @@
+% ─── Chapter 2: Game Environment & Battle Mechanics ────────────────
+\chapter{Game Environment \& Battle Mechanics}
+\label{ch:game_env}
+
+\section{Pok\'{e}mon Battles---Overview}
+
+Pok\'{e}mon battles are turn-based strategy matches.  Each player brings a team
+of up to six Pok\'{e}mon, but usually only one is active at a time (singles
+format).  The objective is to reduce all opposing Pok\'{e}mon to zero HP
+(fainted).
+
+\subsection{Turn Structure}
+
+At the start of each turn, both players simultaneously choose a hidden action:
+
+\begin{itemize}
+  \item \textbf{Attack:} Use one of the active Pok\'{e}mon's four available
+        moves.
+  \item \textbf{Switch:} Replace the active Pok\'{e}mon with another from the
+        bench.  Switching happens instantly before any moves are executed.
+\end{itemize}
+
+If both players choose to attack, execution order is determined by:
+
+\begin{enumerate}
+  \item \textbf{Move priority:} Certain moves (e.g.\ Quick Attack, Protect)
+        always go first regardless of speed.
+  \item \textbf{Speed stat:} Among equal-priority moves, the faster
+        Pok\'{e}mon acts first.
+\end{enumerate}
+
+\subsection{Pok\'{e}mon Anatomy}
+
+Each Pok\'{e}mon possesses:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{Attribute} & \textbf{Description} \\
+  \midrule
+  Types (1--2)        & Determine offensive strengths/weaknesses and
+                        defensive resistances. \\
+  Four moves          & Damaging attacks or status-altering moves with
+                        varying power, accuracy, and effects. \\
+  Ability             & A passive effect that influences the battle
+                        (e.g.\ Intimidate lowers the opponent's Attack on
+                        entry). \\
+  Held item           & A consumable or passive item that boosts stats,
+                        heals, or triggers effects. \\
+  Base stats (6)      & HP, Attack, Defense, Sp.\ Atk, Sp.\ Def, Speed ---
+                        determine overall power and role. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Damage \& Typing}
+
+Damage is calculated from Attack vs.\ Defence stats, modified by type
+interactions:
+
+\begin{center}
+\small
+\begin{tabularx}{0.8\textwidth}{l l}
+  \toprule
+  \textbf{Modifier} & \textbf{Multiplier} \\
+  \midrule
+  STAB (Same-Type Attack Bonus) & $\times 1.5$ \\
+  Super Effective               & $\times 2.0$ \\
+  Resisted                      & $\times 0.5$ \\
+  Immune                        & $\times 0.0$ \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+These modifiers stack multiplicatively, so a doubly super-effective STAB move
+deals $1.5 \times 2.0 \times 2.0 = 6\times$ base damage.  Understanding type
+matchups is therefore central to competent play.
+
+% TODO: Insert type matchup chart image here.
+% Capture from: https://www.typecalendar.com/pokemon-type-chart.html
+% or generate a standard 18x18 type chart as a figure.
+
+\subsection{Winning \& Losing}
+
+When a Pok\'{e}mon's HP reaches zero, it faints.  The owning player must send
+out their next available Pok\'{e}mon.  The battle ends when one side has no
+remaining conscious Pok\'{e}mon.  In the Nuzlocke variant, fainted Pok\'{e}mon
+are permanently unavailable for subsequent battles.
+
+\section{Pok\'{e}mon Showdown Simulator}
+
+The project does not interact with an actual game client.  Instead, it uses
+\textbf{Pok\'{e}mon Showdown}---an open-source battle simulator that
+implements official Pok\'{e}mon battle mechanics with high fidelity.  The
+simulator runs as a local Node.js server, enabling fast, programmatic battle
+execution.
+
+Key properties:
+
+\begin{itemize}
+  \item Supports multiple generations (the project uses \textbf{Gen\,8} /
+        \texttt{gen8randombattle} format).
+  \item Runs as a WebSocket server, accepting connections from automated
+        clients.
+  \item Handles all battle mechanics internally: damage rolls, stat stages,
+        weather, terrain, status conditions, abilities, and items.
+  \item Provides structured protocol messages describing battle state changes
+        each turn.
+\end{itemize}
+
+For distributed training, \textbf{eight parallel Showdown instances} are spun
+up on ports 8000--8007 (see Chapter~\ref{ch:infrastructure}).
+
+\section{poke-env Python Library}
+
+\texttt{poke-env} provides the Python interface to Pok\'{e}mon Showdown:
+
+\begin{itemize}
+  \item A structured API for interacting with battles (reading state,
+        choosing actions).
+  \item Battle state objects that expose team composition, active Pok\'{e}mon,
+        moves, HP, status effects, weather, and more.
+  \item Built-in player classes including \texttt{RandomPlayer} (uniform
+        random over legal orders) and \texttt{SimpleHeuristicsPlayer}
+        (rule-based AI considering type effectiveness and switching).
+  \item Integration utilities for reinforcement learning environments.
+\end{itemize}
+
+The project extends \texttt{poke-env} with a custom player class
+(\texttt{RandomNoSwitchPlayer}) that samples uniformly among legal \emph{move}
+orders and never voluntarily switches---useful as a baseline opponent that
+forces the agent to learn move selection before switching strategy.
+
+\section{Pok\'{e}mon Brilliant Diamond Context}
+
+The target game is Pok\'{e}mon Brilliant Diamond (BDSP), a remake of the
+Generation~4 titles.  The choice is motivated by:
+
+\begin{itemize}
+  \item A well-documented set of mandatory trainer battles.
+  \item Available datasets of trainer teams with exact Pok\'{e}mon, levels,
+        movesets, and items (see Chapter~\ref{ch:challenge}).
+  \item Gen\,8 mechanics in Showdown provide a close match to BDSP's battle
+        system.
+\end{itemize}
+
+The gauntlet---the ordered sequence of battles the agent must
+complete---comprises 706 trainers extracted from BDSP gameplay data, ordered
+by ascending difficulty (level, team size).

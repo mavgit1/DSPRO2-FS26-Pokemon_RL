@@ -126,10 +126,34 @@ class PokemonTransformerModel(nn.Module):
             dropout=cfg["dropout"],
             batch_first=True,
             activation="gelu",
+            norm_first=True,
         )
         self.transformer = nn.TransformerEncoder(
-            encoder_layer, num_layers=self.num_layers
+            encoder_layer,
+            num_layers=self.num_layers,
+            enable_nested_tensor=False,
         )
+
+        # -----------------------------------------------------------------
+        # Cross-team attention bias
+        # -----------------------------------------------------------------
+        # Learnable bias [num_layers, T, T] added to self-attention scores
+        # before softmax.  Initialized to encourage cross-team attention:
+        #   CLS (0)       -> opp_active (7)  +2.0
+        #   our_active (1)-> opp_active (7)  +2.0
+        #   opp_active (7)-> our_active (1)  +1.0
+        #   opp_active (7)-> bench (2-6)     +0.5  (switch awareness)
+        #   CLS (0)       -> opp_bench (8-12)+0.5  (team awareness)
+        # Everything else starts at 0 (learned freely).
+        attn_bias = torch.zeros(self.num_layers, self.num_tokens, self.num_tokens)
+        for _l in range(self.num_layers):
+            b = attn_bias[_l]
+            b[0, 7] = 2.0       # CLS -> opp_active
+            b[1, 7] = 2.0       # our_active -> opp_active
+            b[7, 1] = 1.0       # opp_active -> our_active
+            b[7, 2:7] = 0.5     # opp_active -> our bench
+            b[0, 8:13] = 0.5    # CLS -> opp bench
+        self.attn_bias = nn.Parameter(attn_bias)
 
         # -----------------------------------------------------------------
         # LSTM (optional) for cross-turn memory.
@@ -235,7 +259,27 @@ class PokemonTransformerModel(nn.Module):
         }
 
     def _transformer_forward(self, x: TensorType) -> TensorType:
-        return self.transformer(x)
+        """Run transformer with per-layer learnable attention bias.
+
+        Uses manual norm-first decomposition instead of
+        ``layer(x, src_mask=bias)`` to avoid a PyTorch 2.10 NaN bug in the
+        fused encoder-layer forward path when a float additive mask is passed.
+        """
+        T = x.shape[1]
+        for i, layer in enumerate(self.transformer.layers):
+            bias = self.attn_bias[i, :T, :T]  # [T, T]
+            # norm-first: x = x + SA(norm1(x)); x = x + FF(norm2(x))
+            x_norm = layer.norm1(x)
+            sa_out, _ = layer.self_attn(
+                x_norm, x_norm, x_norm, attn_mask=bias, need_weights=False
+            )
+            x = x + layer.dropout1(sa_out)
+            x_norm2 = layer.norm2(x)
+            ff_out = layer.linear2(
+                layer.dropout(layer.activation(layer.linear1(x_norm2)))
+            )
+            x = x + layer.dropout2(ff_out)
+        return x
 
     @staticmethod
     def _get_cls_token(x: TensorType) -> TensorType:
@@ -418,8 +462,8 @@ class PokemonTransformerModel(nn.Module):
             logits = logits - (1.0 - mask) * 1e8
         return logits, values
 
-    @staticmethod
     def _extract_state(
+        self,
         state: Optional[Dict[str, TensorType]],
         batch_size: int,
         device: torch.device,
@@ -439,14 +483,10 @@ class PokemonTransformerModel(nn.Module):
                     f"h.shape={tuple(h.shape)}, c.shape={tuple(c.shape)}."
                 )
             return h, c
-        # Missing state: synthesize zeros with the expected [B, H] layout.
-        # ``state`` should normally be provided by RLlib when stateful.
-        raise ValueError(
-            "Stateful PokemonTransformerModel called without STATE_IN. "
-            "RLlib's default connector pipeline populates this; if you are "
-            "calling the model directly, pass state={'h': zeros([B, H]), "
-            "'c': zeros([B, H])}."
-        )
+        # Missing state: return zeros instead of raising error
+        h = torch.zeros(batch_size, self.lstm_hidden, device=device)
+        c = torch.zeros(batch_size, self.lstm_hidden, device=device)
+        return h, c
 
 
 # =============================================================================

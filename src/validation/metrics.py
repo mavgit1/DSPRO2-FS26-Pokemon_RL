@@ -1,6 +1,7 @@
 from dataclasses import asdict, dataclass
+import math
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 
 @dataclass
@@ -53,8 +54,12 @@ def aggregate_validation_metrics(results: List[BattleResult]) -> Dict[str, float
         "validation/fallback_events_per_step": float(fallback_events / total_steps),
     }
     if total_actions > 0:
-        metrics["validation/attack_action_ratio"] = float(attack_actions / total_actions)
-        metrics["validation/switch_action_ratio"] = float(switch_actions / total_actions)
+        metrics["validation/attack_action_ratio"] = float(
+            attack_actions / total_actions
+        )
+        metrics["validation/switch_action_ratio"] = float(
+            switch_actions / total_actions
+        )
 
     by_opponent: Dict[str, List[BattleResult]] = {}
     missing_opponent_type_count = 0
@@ -121,6 +126,88 @@ def build_validation_diagnostics(results: List[BattleResult]) -> Dict[str, Any]:
             "top_episodes": fallback_episodes[:10],
         },
     }
+
+
+def wilson_score_interval(
+    wins: int, total: int, z: float = 1.96
+) -> Tuple[float, float]:
+    """95% Wilson score confidence interval for a binomial proportion.
+
+    Returns (lower, upper) bounds in [0, 1].
+    """
+    if total == 0:
+        return 0.0, 0.0
+    p_hat = wins / total
+    n = total
+    denom = 1.0 + z * z / n
+    centre = p_hat + z * z / (2.0 * n)
+    spread = z * math.sqrt(p_hat * (1.0 - p_hat) / n + z * z / (4.0 * n * n))
+    lower = max(0.0, (centre - spread) / denom)
+    upper = min(1.0, (centre + spread) / denom)
+    return lower, upper
+
+
+_SKILL_WEIGHTS: Dict[str, float] = {
+    "random": 1.0,
+    "random_no_switch": 1.5,
+    "heuristic": 2.0,
+}
+
+
+def compute_benchmark_metrics(results: List[BattleResult]) -> Dict[str, float]:
+    """Compute benchmark metrics with per-opponent CIs and composite scores.
+
+    Returns flat MLflow-safe scalars including:
+    - ``benchmark/win_rate_vs_<opponent>`` per opponent
+    - ``benchmark/ci_lower_vs_<opponent>`` / ``ci_upper_vs_<opponent>``
+    - ``benchmark/skill_score`` — weighted average across opponent tiers
+    - ``benchmark/consistency`` — fraction of tiers with WR > 0.5
+    """
+    metrics: Dict[str, float] = {}
+
+    by_opponent: Dict[str, List[BattleResult]] = {}
+    for result in results:
+        key = _canonical_opponent_type(result.opponent_type)
+        if key:
+            by_opponent.setdefault(key, []).append(result)
+
+    weighted_sum = 0.0
+    weight_total = 0.0
+    tiers_above_half = 0
+
+    for opponent, opponent_results in by_opponent.items():
+        n = len(opponent_results)
+        wins = sum(1 for r in opponent_results if r.outcome == 1)
+        wr = wins / n if n else 0.0
+        lower, upper = wilson_score_interval(wins, n)
+
+        metrics[f"benchmark/win_rate_vs_{opponent}"] = wr
+        metrics[f"benchmark/ci_lower_vs_{opponent}"] = lower
+        metrics[f"benchmark/ci_upper_vs_{opponent}"] = upper
+        metrics[f"benchmark/episodes_vs_{opponent}"] = float(n)
+
+        weight = _SKILL_WEIGHTS.get(opponent, 1.0)
+        weighted_sum += wr * weight
+        weight_total += weight
+        if wr > 0.5:
+            tiers_above_half += 1
+
+    total_opponents = len(by_opponent)
+    metrics["benchmark/skill_score"] = (
+        weighted_sum / weight_total if weight_total > 0 else 0.0
+    )
+    metrics["benchmark/consistency"] = (
+        tiers_above_half / total_opponents if total_opponents > 0 else 0.0
+    )
+    metrics["benchmark/total_episodes"] = float(len(results))
+    metrics["benchmark/total_wins"] = float(sum(1 for r in results if r.outcome == 1))
+    metrics["benchmark/overall_win_rate"] = (
+        float(sum(1 for r in results if r.outcome == 1) / len(results))
+        if results
+        else 0.0
+    )
+
+    return metrics
 
 
 def _group_summaries(

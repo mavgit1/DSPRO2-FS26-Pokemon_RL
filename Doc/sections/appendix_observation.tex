@@ -1,0 +1,198 @@
+% ─── Appendix: Full Observation Space Specification ───────────────
+\chapter{Full Observation Space Specification}
+\label{ch:appendix_obs}
+
+This appendix provides the complete breakdown of the observation tensor
+construction.  The observation is a dictionary with five keys
+(Chapter~\ref{ch:architecture}), of which \texttt{obs} is the largest.
+
+\section{Token Overview}
+
+The \texttt{obs} tensor has shape $(13, 164)$---13~tokens of 164~dimensions
+each.
+
+\begin{center}
+\small
+\begin{tabularx}{0.6\textwidth}{c l l}
+  \toprule
+  \textbf{Index} & \textbf{Role} & \textbf{Type} \\
+  \midrule
+  0        & Global state        & Special \\
+  1        & Our active Pok\'{e}mon  & Pok\'{e}mon \\
+  2--6     & Our bench            & Pok\'{e}mon \\
+  7        & Opp.\ active Pok\'{e}mon & Pok\'{e}mon \\
+  8--12    & Opp.\ bench          & Pok\'{e}mon \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Per-Pok\'{e}mon Token (160 dimensions)}
+
+Each Pok\'{e}mon token (indices 1--12) is structured as follows:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l r l X}
+  \toprule
+  \textbf{Feature Group} & \textbf{Dims} & \textbf{Encoding} & \textbf{Details} \\
+  \midrule
+  Presence flags    & 3  & Binary &
+    \texttt{is\_present}, \texttt{is\_active}, \texttt{is\_fainted}. \\
+  HP fraction       & 1  & Continuous $[0,1]$ &
+    \texttt{current\_hp / max\_hp}. \\
+  Base stats        & 6  & Continuous $[0,1]$ &
+    HP, Attack, Defense, Sp.\ Atk, Sp.\ Def, Speed normalised by 200. \\
+  Types             & 20 & Multi-hot &
+    18 types + 2 padding (one-hot per type slot). \\
+  Status condition  & 7  & One-hot &
+    None, Burn, Poison, Toxic, Paralysis, Sleep, Freeze. \\
+  Volatile effects  & 9  & Multi-hot &
+    Tracked battle effects (e.g.\ confusion, flinch, protection). \\
+  Stat boosts       & 7  & Continuous $[-1,1]$ &
+    Atk, Def, SpA, SpD, Spe, Accuracy, Evasion.  Normalised from $[-6,+6]$. \\
+  Item/Ability flags & 2 & Binary &
+    \texttt{has\_item}, \texttt{has\_ability}. \\
+  Weight            & 1  & Continuous &
+    Pok\'{e}mon weight normalised by 100. \\
+  Moves             & 104 & Structured &
+    4~moves $\times$ 26~features each (see below). \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\textbf{Per-move features} (26 dimensions each, 4~moves = 104~dims):
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l r l X}
+  \toprule
+  \textbf{Feature} & \textbf{Dims} & \textbf{Encoding} & \textbf{Details} \\
+  \midrule
+  Move present     & 1  & Binary   & 1 if move slot is occupied. \\
+  Base power       & 1  & Continuous & Normalised by 100.  Zero for status moves. \\
+  Accuracy         & 1  & Continuous & Raw accuracy (0--1). \\
+  Category         & 3  & One-hot  & Physical, Special, Status. \\
+  Move type        & 20 & One-hot  & 18 types + 2 padding. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Global Token (164 dimensions)}
+
+Token~0 (the global state token) uses a different layout:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l r l X}
+  \toprule
+  \textbf{Feature Group} & \textbf{Dims} & \textbf{Encoding} & \textbf{Details} \\
+  \midrule
+  Weather           & 9  & Multi-hot &
+    Deserialized from battle weather dict (after bug fix). \\
+  Terrain / Fields  & 15 & Multi-hot &
+    Active terrain and field effects. \\
+  Our side conditions  & 38 & Multi-hot &
+    Hazards, screens, tailwind, etc.\ on the agent's side. \\
+  Opp.\ side conditions & 38 & Multi-hot &
+    Same for the opponent's side. \\
+  Extra features    & 11 & Mixed &
+    See below. \\
+  Padding           & 53 & Zeros &
+    Pads to match Pok\'{e}mon token length (164 dims). \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\textbf{Extra features} (11 dimensions):
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l r X}
+  \toprule
+  \textbf{Feature} & \textbf{Dims} & \textbf{Description} \\
+  \midrule
+  Opponent type     & 3  & One-hot: \texttt{opponent\_random},
+                           \texttt{opponent\_heuristic},
+                           \texttt{opponent\_other}. \\
+  Battle turn       & 1  & Normalised: $\min(\text{turn} / 100, 1.0)$. \\
+  Force switch      & 1  & Binary: agent is forced to switch. \\
+  Active trapped    & 1  & Binary: active Pok\'{e}mon cannot switch. \\
+  Available moves   & 1  & Normalised: $\text{count} / 4.0$. \\
+  Available switches & 1 & Normalised: $\text{count} / 6.0$. \\
+  Can Dynamax       & 1  & Binary. \\
+  Can Mega Evolve   & 1  & Binary. \\
+  Can Z-Move        & 1  & Binary. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Categorical ID Vectors}
+
+Three additional tensors provide integer IDs for vocabulary-embedded entities:
+
+\begin{center}
+\small
+\begin{tabularx}{0.8\textwidth}{l c c l}
+  \toprule
+  \textbf{Key} & \textbf{Shape} & \textbf{Range} & \textbf{Padding} \\
+  \midrule
+  \texttt{species}   & $(13,)$ int32 & $[0, 1150]$ & 0 = absent \\
+  \texttt{items}     & $(13,)$ int32 & $[0, 1109]$ & 0 = absent \\
+  \texttt{abilities} & $(13,)$ int32 & $[0, 215]$  & 0 = absent \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The global token (index~0) always has ID~0 (padding) for all three vectors.
+
+\section{Action Mask}
+
+\begin{center}
+\small
+\begin{tabularx}{0.8\textwidth}{l c l}
+  \toprule
+  \textbf{Key} & \textbf{Shape} & \textbf{Values} \\
+  \midrule
+  \texttt{action\_mask} & $(14,)$ float32 & 1.0 = valid, 0.0 = invalid \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Mask layout by index:
+\begin{itemize}
+  \item Indices 0--3: Regular moves 1--4.  Invalid if move slot empty, no PP,
+        or move disabled.
+  \item Indices 4--7: Gimmick-enhanced moves 1--4.  Invalid if no gimmick
+        available (no Dynamax, Mega stone, or Z-crystal).
+  \item Indices 8--13: Switch to party slot 1--6.  Invalid if the Pok\'{e}mon
+        is fainted or already active.
+\end{itemize}
+
+\section{Action Space Mapping}
+
+The following table maps each compressed action index to its native
+\texttt{poke-env} resolution:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{c l l l}
+  \toprule
+  \textbf{Index} & \textbf{Category} & \textbf{Compressed Action} & \textbf{Native Resolution} \\
+  \midrule
+  0  & Move   & Use move 1 & \texttt{BattleOrder(Move[0])} \\
+  1  & Move   & Use move 2 & \texttt{BattleOrder(Move[1])} \\
+  2  & Move   & Use move 3 & \texttt{BattleOrder(Move[2])} \\
+  3  & Move   & Use move 4 & \texttt{BattleOrder(Move[3])} \\
+  4  & Gimmick & Gimmick + move 1 & First legal: Mega $\to$ Z $\to$ Dynamax \\
+  5  & Gimmick & Gimmick + move 2 & First legal: Mega $\to$ Z $\to$ Dynamax \\
+  6  & Gimmick & Gimmick + move 3 & First legal: Mega $\to$ Z $\to$ Dynamax \\
+  7  & Gimmick & Gimmick + move 4 & First legal: Mega $\to$ Z $\to$ Dynamax \\
+  8  & Switch & Switch to slot 1 & \texttt{BattleOrder(Pokemon[0])} \\
+  9  & Switch & Switch to slot 2 & \texttt{BattleOrder(Pokemon[1])} \\
+  10 & Switch & Switch to slot 3 & \texttt{BattleOrder(Pokemon[2])} \\
+  11 & Switch & Switch to slot 4 & \texttt{BattleOrder(Pokemon[3])} \\
+  12 & Switch & Switch to slot 5 & \texttt{BattleOrder(Pokemon[4])} \\
+  13 & Switch & Switch to slot 6 & \texttt{BattleOrder(Pokemon[5])} \\
+  \bottomrule
+\end{tabularx}
+\end{center}

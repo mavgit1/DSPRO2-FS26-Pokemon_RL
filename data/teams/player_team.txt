@@ -1,0 +1,55 @@
+Cherrim (F) @ Choice Scarf  
+Ability: Flower Gift  
+Level: 94  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- healingwish  
+- energyball  
+- pollenpuff  
+- petaldance  
+
+Lugia @ Heavy-Duty Boots  
+Ability: Multiscale  
+Level: 73  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- toxic  
+- airslash  
+- roost  
+- substitute  
+
+Carracosta (F) @ White Herb  
+Ability: Swift Swim  
+Level: 83  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- hydropump  
+- aquajet  
+- shellsmash  
+- stoneedge  
+
+Conkeldurr (F) @ Flame Orb  
+Ability: Guts  
+Level: 78  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- knockoff  
+- closecombat  
+- facade  
+- machpunch  
+
+Sirfetch’d (F) @ Life Orb  
+Ability: Scrappy  
+Level: 83  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- knockoff  
+- swordsdance  
+- bravebird  
+- closecombat  
+
+Corviknight (M) @ Leftovers  
+Ability: Mirror Armor  
+Level: 78  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- bodypress  
+- defog  
+- bravebird  
+- roost

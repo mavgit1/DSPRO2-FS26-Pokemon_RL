@@ -1,9 +1,9 @@
-from dataclasses import dataclass
-from typing import Literal
+from dataclasses import dataclass, field
+from typing import List, Literal
 
 
-ProtocolName = Literal["smoke", "fixed_paired", "mirror", "gauntlet_first_loss"]
-OpponentName = Literal["random", "heuristic"]
+ProtocolName = Literal["smoke", "fixed_paired", "mirror", "benchmark"]
+OpponentName = Literal["random", "random_no_switch", "heuristic"]
 
 
 @dataclass(frozen=True)
@@ -14,6 +14,8 @@ class ValidationProtocol:
     episodes: int
     opponent: OpponentName
     requires_mlflow: bool = False
+    opponents: List[OpponentName] = field(default_factory=list)
+    episodes_per_opponent: int = 50
 
 
 def get_protocol(name: ProtocolName, episodes: int | None = None) -> ValidationProtocol:
@@ -42,12 +44,16 @@ def get_protocol(name: ProtocolName, episodes: int | None = None) -> ValidationP
             requires_mlflow=True,
         )
 
-    if name == "gauntlet_first_loss":
+    if name == "benchmark":
+        opponents: List[OpponentName] = ["random", "random_no_switch", "heuristic"]
+        eps_per = episodes or 50
         return ValidationProtocol(
             name=name,
-            episodes=episodes or 1,
-            opponent="heuristic",
+            episodes=len(opponents) * eps_per,
+            opponent="random",
             requires_mlflow=True,
+            opponents=opponents,
+            episodes_per_opponent=eps_per,
         )
 
     raise ValueError(f"Unsupported validation protocol: {name}")

@@ -1,6 +1,4 @@
 import gymnasium as gym
-import json
-import time
 import numpy as np
 from typing import Dict, Any, Optional, List
 import uuid
@@ -18,6 +16,7 @@ from src.action_space import (
     COMPRESSED_ACTION_SPACE_N,
     NATIVE_ACTION_SPACE_N,
     compressed_to_native_action,
+    find_safe_native_action,
     is_compressed_switch_action,
 )
 from src.models.embedding import (
@@ -103,6 +102,7 @@ class PokemonBattleEnv(SinglesEnv):
                       server_configuration, strict, etc.)
         """
         self.reward_config = reward_config or RewardConfig()
+        self._last_compressed_action: int = -1
         self._recent_outcomes: List[int] = []
         self._recent_episode_stats: List[Dict[str, float]] = []
         self._battle_step_stats: Dict[str, Dict[str, float]] = {}
@@ -113,6 +113,7 @@ class PokemonBattleEnv(SinglesEnv):
         self._cleanup_interval_steps = 256
         self._fallback_events_current_episode = 0
         self._opponent_context: Optional[str] = None
+        self._training_stage_context: int = 0
 
         super().__init__(**kwargs)
 
@@ -131,11 +132,19 @@ class PokemonBattleEnv(SinglesEnv):
             Dict with obs, species, items, abilities, action_mask
         """
         # Not recursive, just calls the embed_battle function from the embedding.py file.
-        return embed_battle(battle, opponent_type=self._opponent_context)
+        return embed_battle(
+            battle,
+            opponent_type=self._opponent_context,
+            training_stage_index=self._training_stage_context,
+        )
 
     def set_opponent_context(self, opponent_type: Optional[str]) -> None:
         """Attach selected opponent metadata to future observations."""
         self._opponent_context = opponent_type
+
+    def set_training_stage_context(self, stage_index: int) -> None:
+        """Attach curriculum/training stage index to future observations."""
+        self._training_stage_context = max(0, int(stage_index))
 
     def calc_reward(self, battle: AbstractBattle) -> float:
         """Calculate reward based on battle state."""
@@ -180,7 +189,7 @@ class PokemonBattleEnv(SinglesEnv):
         return self._compute_configured_delta_reward(battle)
 
     def _compute_configured_delta_reward(self, battle: AbstractBattle) -> float:
-        """Poke-env style delta reward with asymmetric terminal values."""
+        """Poke-env style delta reward with matchup shaping."""
         if battle not in self._reward_buffer:
             self._reward_buffer[battle] = 0.0
 
@@ -192,7 +201,7 @@ class PokemonBattleEnv(SinglesEnv):
         for mon in battle.team.values():
             current_value += mon.current_hp_fraction * hp_value
             if mon.fainted:
-                current_value -= fainted_value
+                current_value += self.reward_config.fainted_penalty
 
         current_value += (number_of_pokemons - len(battle.team)) * hp_value
 
@@ -203,6 +212,20 @@ class PokemonBattleEnv(SinglesEnv):
 
         current_value -= (number_of_pokemons - len(battle.opponent_team)) * hp_value
 
+        # Type matchup shaping: reward favorable active matchups
+        if self.reward_config.matchup_reward_weight > 0:
+            current_value += (
+                self._compute_matchup_quality(battle)
+                * self.reward_config.matchup_reward_weight
+            )
+
+        # Action quality: reward picking effective moves + defensive awareness
+        if self.reward_config.action_quality_weight > 0:
+            current_value += (
+                self._compute_action_quality(battle)
+                * self.reward_config.action_quality_weight
+            )
+
         if battle.won:
             current_value += self.reward_config.victory_reward
         elif battle.lost:
@@ -210,7 +233,148 @@ class PokemonBattleEnv(SinglesEnv):
 
         reward = current_value - self._reward_buffer[battle]
         self._reward_buffer[battle] = current_value
-        return reward
+        return reward * self.reward_config.reward_scale
+
+    @staticmethod
+    def _compute_matchup_quality(battle: AbstractBattle) -> float:
+        """Score the type effectiveness of our active's best move vs opponent active.
+
+        Returns a value in [-1.0, 1.0]:
+          +1.0 = super-effective move available
+           0.0 = neutral or no data
+          -0.5 = only resisted moves
+          -1.0 = opponent immune to all our moves
+        """
+        our = battle.active_pokemon
+        opp = battle.opponent_active_pokemon
+        if our is None or opp is None:
+            return 0.0
+
+        opp_types = opp.types
+        if not opp_types:
+            return 0.0
+
+        best = 0.0
+        any_offensive = False
+        for move in our.moves.values():
+            move_type = getattr(move, "type", None)
+            if move_type is None:
+                continue
+            # Only consider damaging moves (physical/special)
+            category = getattr(move, "category", None)
+            if category is not None and getattr(category, "name", "") == "STATUS":
+                continue
+            try:
+                mult = move_type.damage_multiplier(*opp_types)
+            except Exception:
+                continue
+            any_offensive = True
+            best = max(best, mult)
+
+        if not any_offensive:
+            return 0.0
+
+        if best >= 2.0:
+            return 1.0
+        elif best >= 1.0:
+            return 0.0
+        elif best > 0.0:
+            return -0.5
+        else:
+            return -1.0
+
+    def _compute_action_quality(self, battle: AbstractBattle) -> float:
+        """Score the quality of the last action taken.
+
+        Offensive (action-level): penalizes picking a sub-optimal damaging move.
+        Defensive (state-level): rewards when our active resists opponent's best move.
+
+        Returns a value roughly in [-1.5, 1.0].
+        """
+        our = battle.active_pokemon
+        opp = battle.opponent_active_pokemon
+        if our is None or opp is None:
+            return 0.0
+
+        score = 0.0
+
+        # --- Offensive component ---
+        action = self._last_compressed_action
+        is_move_action = 0 <= action <= 7  # moves (0-3) or gimmick moves (4-7)
+        if is_move_action:
+            move_slot = action if action < 4 else action - 4
+            known_moves = list(our.moves.values())
+
+            if move_slot < len(known_moves):
+                opp_types = opp.types
+                if opp_types:
+                    chosen_move = known_moves[move_slot]
+                    chosen_cat = getattr(chosen_move, "category", None)
+                    chosen_is_status = (
+                        chosen_cat is not None
+                        and getattr(chosen_cat, "name", "") == "STATUS"
+                    )
+
+                    if not chosen_is_status:
+                        # Compute effectiveness of chosen move
+                        chosen_type = getattr(chosen_move, "type", None)
+                        chosen_eff = 0.0
+                        if chosen_type is not None:
+                            try:
+                                chosen_eff = chosen_type.damage_multiplier(*opp_types)
+                            except Exception:
+                                chosen_eff = 1.0
+
+                        # Find best effectiveness among all damaging moves
+                        best_eff = 0.0
+                        for m in known_moves:
+                            m_type = getattr(m, "type", None)
+                            if m_type is None:
+                                continue
+                            m_cat = getattr(m, "category", None)
+                            if (
+                                m_cat is not None
+                                and getattr(m_cat, "name", "") == "STATUS"
+                            ):
+                                continue
+                            try:
+                                eff = m_type.damage_multiplier(*opp_types)
+                            except Exception:
+                                continue
+                            best_eff = max(best_eff, eff)
+
+                        # Penalty proportional to how far from best
+                        if best_eff > 0:
+                            score -= best_eff - chosen_eff
+                    # Status move: no penalty, no bonus (score += 0)
+
+        # --- Defensive component ---
+        opp_moves = getattr(opp, "moves", None)
+        if opp_moves:
+            our_types = our.types
+            if our_types:
+                best_opp_eff = 0.0
+                for m in opp_moves.values():
+                    m_type = getattr(m, "type", None)
+                    if m_type is None:
+                        continue
+                    m_cat = getattr(m, "category", None)
+                    if m_cat is not None and getattr(m_cat, "name", "") == "STATUS":
+                        continue
+                    try:
+                        eff = m_type.damage_multiplier(*our_types)
+                    except Exception:
+                        continue
+                    best_opp_eff = max(best_opp_eff, eff)
+
+                if best_opp_eff == 0.0:
+                    # Immune to opponent's best damaging move
+                    score += 1.0
+                elif best_opp_eff <= 0.5:
+                    # Resists opponent's best move
+                    score += 0.5
+
+        return score
 
     def set_reward_config(self, reward_config: RewardConfig) -> None:
         """Update reward configuration at runtime."""
@@ -303,6 +467,7 @@ class PokemonBattleEnv(SinglesEnv):
 
         return {
             "outcome": float(outcome),
+            "opponent_type": self._opponent_context,
             "terminal_our_hp_remaining": float(our_hp),
             "terminal_opp_hp_remaining": float(opp_hp),
             "terminal_faint_diff": float(opp_fainted - our_fainted),
@@ -325,46 +490,6 @@ class PokemonBattleEnv(SinglesEnv):
         try:
             return SinglesEnv.order_to_action(order, battle, fake=fake, strict=True)
         except ValueError:
-            # #region agent log
-            try:
-                _b1 = getattr(self, "battle1", None)
-                _b2 = getattr(self, "battle2", None)
-                _which = (
-                    "battle1"
-                    if battle is _b1
-                    else ("battle2" if battle is _b2 else "unknown")
-                )
-                _n = int(getattr(self, "_dbg_order_to_action_fail_n", 0)) + 1
-                self._dbg_order_to_action_fail_n = _n
-                if _n <= 50:
-                    open(
-                        "/var/home/tristan/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_RL/.cursor/debug-a5a35e.log",
-                        "a",
-                        encoding="utf-8",
-                    ).write(
-                        json.dumps(
-                            {
-                                "sessionId": "a5a35e",
-                                "runId": "post-fix",
-                                "hypothesisId": "H1",
-                                "location": "PokemonBattleEnv.order_to_action:ValueError",
-                                "message": "strict_order_to_action_failed",
-                                "data": {
-                                    "which_battle": _which,
-                                    "n": _n,
-                                    "player_username": getattr(
-                                        battle, "player_username", None
-                                    ),
-                                    "strict_param": bool(strict),
-                                },
-                                "timestamp": int(time.time() * 1000),
-                            }
-                        )
-                        + "\n"
-                    )
-            except Exception:
-                pass
-            # #endregion
             if strict:
                 raise
 
@@ -373,39 +498,6 @@ class PokemonBattleEnv(SinglesEnv):
         for _ in range(max_retries):
             random_order = RandomPlayer.choose_random_singles_move(battle)
             try:
-                # #region agent log
-                try:
-                    _nfb = int(getattr(self, "_dbg_fallback_retry_n", 0)) + 1
-                    self._dbg_fallback_retry_n = _nfb
-                    if _nfb <= 30:
-                        _b1 = getattr(self, "battle1", None)
-                        _b2 = getattr(self, "battle2", None)
-                        _which = (
-                            "battle1"
-                            if battle is _b1
-                            else ("battle2" if battle is _b2 else "unknown")
-                        )
-                        open(
-                            "/var/home/tristan/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_RL/.cursor/debug-a5a35e.log",
-                            "a",
-                            encoding="utf-8",
-                        ).write(
-                            json.dumps(
-                                {
-                                    "sessionId": "a5a35e",
-                                    "runId": "post-fix",
-                                    "hypothesisId": "H1",
-                                    "location": "PokemonBattleEnv.order_to_action:fallback_retry",
-                                    "message": "fallback_retry_increment",
-                                    "data": {"which_battle": _which, "n": _nfb},
-                                    "timestamp": int(time.time() * 1000),
-                                }
-                            )
-                            + "\n"
-                        )
-                except Exception:
-                    pass
-                # #endregion
                 self._fallback_events_current_episode += 1
                 return SinglesEnv.order_to_action(
                     random_order, battle, fake=fake, strict=True
@@ -440,11 +532,15 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         server_configuration: ServerConfiguration,
         opponent_mix: Optional[Dict[str, float]] = None,
         opponent_team: Optional[str] = None,
+        model_config_dict: Optional[Dict] = None,
+        selfplay_weights_path: Optional[str] = None,
     ):
         super().__init__(env, opponent)
         self._battle_format = battle_format
         self._server_configuration = server_configuration
         self._opponent_team = opponent_team
+        self._model_config_dict = model_config_dict
+        self._selfplay_weights_path = selfplay_weights_path
         self._opponent_mix = self._normalize_opponent_mix(opponent_mix)
         self._opponent_pool: Dict[str, Any] = {}
         initial_key = self._opponent_key_from_instance(opponent)
@@ -459,6 +555,9 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         self._opponent_pool[initial_key] = opponent
         if hasattr(self.env, "set_opponent_context"):
             self.env.set_opponent_context(initial_key)
+        if hasattr(self.env, "set_training_stage_context"):
+            self.env.set_training_stage_context(0)
+        self._stage_counter = 0
 
     @staticmethod
     def _normalize_opponent_mix(
@@ -485,10 +584,30 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         return random.choices(keys, weights=weights, k=1)[0]
 
     def _build_opponent(self, opponent_key: str):
-        opponent_class = (
-            SimpleHeuristicsPlayer if opponent_key == "heuristic" else RandomPlayer
-        )
-        opponent_id = f"Opp_{uuid.uuid4().hex[:6]}"
+        if opponent_key == "self":
+            from src.training.self_play_player import SelfPlayPlayer
+
+            opponent_id = f"self_{uuid.uuid4().hex[:6]}"
+            opponent_config = AccountConfiguration(opponent_id, None)
+            return SelfPlayPlayer(
+                model_config_dict=self._model_config_dict or {},
+                weights_path=self._selfplay_weights_path,
+                battle_format=self._battle_format,
+                account_configuration=opponent_config,
+                server_configuration=self._server_configuration,
+                team=self._opponent_team,
+            )
+        if opponent_key == "heuristic":
+            opponent_class = SimpleHeuristicsPlayer
+            opponent_id = f"hrs_{uuid.uuid4().hex[:6]}"
+        elif opponent_key == "random_no_switch":
+            from src.envs.random_no_switch_player import RandomNoSwitchPlayer
+
+            opponent_class = RandomNoSwitchPlayer
+            opponent_id = f"rndns_{uuid.uuid4().hex[:6]}"
+        else:
+            opponent_class = RandomPlayer
+            opponent_id = f"rnd_{uuid.uuid4().hex[:6]}"
         opponent_config = AccountConfiguration(opponent_id, None)
         return opponent_class(
             battle_format=self._battle_format,
@@ -499,8 +618,17 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
 
     @staticmethod
     def _opponent_key_from_instance(opponent: Any) -> str:
+        # Lazy import to avoid circular dependency at module load time.
+        from src.training.self_play_player import SelfPlayPlayer
+
+        if isinstance(opponent, SelfPlayPlayer):
+            return "self"
         if isinstance(opponent, SimpleHeuristicsPlayer):
             return "heuristic"
+        from src.envs.random_no_switch_player import RandomNoSwitchPlayer
+
+        if isinstance(opponent, RandomNoSwitchPlayer):
+            return "random_no_switch"
         return "random"
 
     @staticmethod
@@ -538,6 +666,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         self._episode_total_actions = 0
         self._episode_switch_actions = 0
         self._episode_attack_actions = 0
+        self.env._last_compressed_action = -1
         if hasattr(self.env, "reset_tracking_state"):
             self.env.reset_tracking_state()
         if hasattr(self.env, "consume_fallback_events"):
@@ -550,86 +679,25 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
     def step(self, action):
         if action is not None:
             action_int = int(action)
+            self.env._last_compressed_action = action_int
             self._episode_total_actions += 1
             if is_compressed_switch_action(action_int):
                 self._episode_switch_actions += 1
             else:
                 self._episode_attack_actions += 1
-            native_action = compressed_to_native_action(action_int, self.env.battle1)
-            # #region agent log
             try:
-                b1 = self.env.battle1
-                if b1 is not None:
-                    emb = self.env.embed_battle(b1)
-                    m = np.asarray(emb["action_mask"], dtype=np.float32)
-                    mk = float(m[action_int]) if 0 <= action_int < len(m) else -1.0
-                    na_ok = True
-                    try:
-                        SinglesEnv.action_to_order(
-                            native_action, b1, fake=False, strict=True
-                        )
-                    except Exception:
-                        na_ok = False
-                    _step_n = int(getattr(self, "_dbg_wrap_step_n", 0)) + 1
-                    self._dbg_wrap_step_n = _step_n
-                    _bad = mk < 0.5 or not na_ok
-                    if _bad:
-                        _bn = int(getattr(self, "_dbg_bad_rl_action_n", 0)) + 1
-                        self._dbg_bad_rl_action_n = _bn
-                        if _bn <= 40:
-                            open(
-                                "/var/home/tristan/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_RL/.cursor/debug-a5a35e.log",
-                                "a",
-                                encoding="utf-8",
-                            ).write(
-                                json.dumps(
-                                    {
-                                        "sessionId": "a5a35e",
-                                        "runId": "post-fix",
-                                        "hypothesisId": "H2",
-                                        "location": "CurriculumSingleAgentWrapper.step",
-                                        "message": "rl_action_mask_or_native_mismatch",
-                                        "data": {
-                                            "action": action_int,
-                                            "mask_value": mk,
-                                            "native_verify_ok": na_ok,
-                                            "opponent": self._current_opponent_key,
-                                            "n": _bn,
-                                        },
-                                        "timestamp": int(time.time() * 1000),
-                                    }
-                                )
-                                + "\n"
-                            )
-                    if _step_n % 300 == 0:
-                        open(
-                            "/var/home/tristan/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_RL/.cursor/debug-a5a35e.log",
-                            "a",
-                            encoding="utf-8",
-                        ).write(
-                            json.dumps(
-                                {
-                                    "sessionId": "a5a35e",
-                                    "runId": "post-fix",
-                                    "hypothesisId": "H5",
-                                    "location": "CurriculumSingleAgentWrapper.step",
-                                    "message": "periodic_mask_health",
-                                    "data": {
-                                        "step_n": _step_n,
-                                        "mask_sum": float(np.sum(m)),
-                                        "mask_max": float(np.max(m)),
-                                        "opponent": self._current_opponent_key,
-                                        "last_action": action_int,
-                                        "last_mask": mk,
-                                    },
-                                    "timestamp": int(time.time() * 1000),
-                                }
-                            )
-                            + "\n"
-                        )
-            except Exception:
-                pass
-            # #endregion
+                native_action = compressed_to_native_action(
+                    action_int, self.env.battle1
+                )
+            except (ValueError, IndexError):
+                native_action = find_safe_native_action(self.env.battle1)
+            else:
+                try:
+                    SinglesEnv.action_to_order(
+                        native_action, self.env.battle1, fake=False, strict=True
+                    )
+                except Exception:
+                    native_action = find_safe_native_action(self.env.battle1)
         else:
             native_action = action
 
@@ -696,6 +764,9 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             self.set_opponent_mix(stage_payload["opponent_mix"])
         if "reward_config" in stage_payload:
             self.set_reward_config(RewardConfig(**stage_payload["reward_config"]))
+        self._stage_counter += 1
+        if hasattr(self.env, "set_training_stage_context"):
+            self.env.set_training_stage_context(self._stage_counter)
 
     def pop_recent_outcomes(self) -> List[int]:
         if hasattr(self.env, "pop_recent_outcomes"):
@@ -710,11 +781,11 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         action_stats = self._recent_action_stats[:]
         self._recent_action_stats.clear()
 
-        count = min(len(env_stats), len(action_stats))
         merged = []
-        for idx in range(count):
-            item = dict(env_stats[idx])
-            item.update(action_stats[idx])
+        for idx, es in enumerate(env_stats):
+            item = dict(es)
+            if idx < len(action_stats):
+                item.update(action_stats[idx])
             merged.append(item)
         return merged
 
@@ -729,6 +800,16 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             max_samples:
         ]
         return samples
+
+    def pop_selfplay_diagnostics(self) -> Dict[str, Any]:
+        """Collect diagnostics from the self-play opponent, if present."""
+        if "self" not in self._opponent_pool:
+            return {}
+        sp = self._opponent_pool["self"]
+        pop_fn = getattr(sp, "pop_diagnostics", None)
+        if callable(pop_fn):
+            return pop_fn()
+        return {}
 
     def get_memory_counters(self) -> Dict[str, float]:
         out = {
@@ -815,6 +896,8 @@ def create_env_creator(
     opponent_mix: Optional[Dict[str, float]] = None,
     player_team: Optional[str] = None,
     opponent_team: Optional[str] = None,
+    model_config_dict: Optional[Dict] = None,
+    selfplay_weights_path: Optional[str] = None,
 ):
     """
     Create an environment creator function for Ray RLlib.
@@ -824,8 +907,9 @@ def create_env_creator(
         server_host: Showdown server host
         server_port: Showdown server port
         reward_config: Reward configuration
-        opponent_difficulty: "heuristic"/"heuristics" or "random"
-        opponent_mix: Optional per-episode sampling mix, e.g. {"random": 0.7, "heuristic": 0.3}
+        opponent_difficulty: "heuristic"/"heuristics", "random", or "random_no_switch"
+        opponent_mix: Optional per-episode sampling mix, e.g.
+            {"random": 0.7, "heuristic": 0.3} or {"random_no_switch": 1.0}
         player_team: Optional fixed Showdown team text for the learning agent
         opponent_team: Optional fixed Showdown team text for the opponent
 
@@ -873,10 +957,17 @@ def create_env_creator(
         opponent_id = f"rnd_{uuid.uuid4().hex[:6]}"
         if difficulty in {"heuristic", "heuristics"}:
             opponent_class = SimpleHeuristicsPlayer
-            opponent_id = f"hr_{uuid.uuid4().hex[:6]}"
+            opponent_id = f"hrs_{uuid.uuid4().hex[:6]}"
+        elif difficulty == "random_no_switch":
+            from src.envs.random_no_switch_player import RandomNoSwitchPlayer
+
+            opponent_class = RandomNoSwitchPlayer
+            opponent_id = f"rndns_{uuid.uuid4().hex[:6]}"
         else:
             opponent_class = RandomPlayer
         opponent_config = AccountConfiguration(opponent_id, None)
+        env_opponent_id = f"{opponent_id}_e"
+        env_opponent_config = AccountConfiguration(env_opponent_id, None)
         opponent = opponent_class(
             battle_format=fmt,
             account_configuration=opponent_config,
@@ -890,6 +981,7 @@ def create_env_creator(
             reward_config=rc,
             battle_format=fmt,
             account_configuration1=AccountConfiguration(player_id, None),
+            account_configuration2=env_opponent_config,
             server_configuration=server_config,
             strict=False,
             team=p_team,
@@ -903,6 +995,8 @@ def create_env_creator(
             server_configuration=server_config,
             opponent_mix=mix,
             opponent_team=o_team,
+            model_config_dict=model_config_dict,
+            selfplay_weights_path=selfplay_weights_path,
         )
 
     return env_creator
