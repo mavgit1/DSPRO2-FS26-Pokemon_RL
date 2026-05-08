@@ -22,14 +22,14 @@ class ModelConfig:
     hidden_dim: int = 512
     num_heads: int = 8
     num_transformer_layers: int = 2
-    dropout: float = 0.15
+    dropout: float = 0.0068
     use_position_embeddings: bool = True
     use_role_embeddings: bool = True
 
     # LSTM (for memory across turns)
     lstm_hidden: int = 512
-    use_lstm: bool = False
-    max_seq_len: int = 32
+    use_lstm: bool = True
+    max_seq_len: int = 13
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -56,17 +56,17 @@ class PPOConfig:
     """Standard PPO hyperparameters."""
 
     # Learning
-    lr: float = 0.0001
+    lr: float = 0.0002
 
     # Discount and GAE
-    gamma: float = 0.96
-    lambda_: float = 0.95
+    gamma: float = 0.97
+    lambda_: float = 0.87
 
     # PPO clipping
-    clip_param: float = 0.2
+    clip_param: float = 0.08
 
     # Entropy bonus (exploration)
-    entropy_coeff: float = 0.05
+    entropy_coeff: float = 0.013
 
     # Value function
     vf_loss_coeff: float = 0.5
@@ -77,6 +77,7 @@ class PPOConfig:
 
     # Batch sizes
     train_batch_size: int = 4096
+    # TODO: test this with different values.
     sgd_minibatch_size: int = 512
     num_sgd_iter: int = 8
 
@@ -91,7 +92,9 @@ class EnvironmentConfig:
     # Fixed player team (Showdown format text file). When set, the RL agent
     # always uses this team and the battle format is auto-switched to the
     # corresponding custom-game variant (e.g. gen5randombattle → gen5customgame).
-    player_team_path: Optional[str] = None
+    # you can use data/teams/player_team_2.txt as an example.
+    # or for no team, set to None.
+    player_team_path: Optional[str] = "data/teams/player_team_2.txt"
 
     # MLflow experiment name when player_team_path is set (fixed-team training).
     mlflow_experiment_fixed_team: str = "Pokemon_RL_Battler_FixedTeam"
@@ -200,11 +203,11 @@ class CurriculumConfig:
                     victory_reward=8.0,
                     defeat_penalty=-10.0,
                     hp_value_weight=3.0,
-                    fainted_value=6.0,
-                    fainted_penalty=-6.0,
+                    fainted_value=5.0,
+                    fainted_penalty=-5.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.45,
-                    action_quality_weight=0.2,
+                    matchup_reward_weight=0.15,
+                    action_quality_weight=0.25,
                 ),
             ),
             CurriculumStageConfig(
@@ -216,11 +219,11 @@ class CurriculumConfig:
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
                     hp_value_weight=3.0,
-                    fainted_value=6.0,
-                    fainted_penalty=-6.0,
+                    fainted_value=5.0,
+                    fainted_penalty=-5.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.45,
-                    action_quality_weight=0.2,
+                    matchup_reward_weight=0.15,
+                    action_quality_weight=0.25,
                 ),
             ),
             CurriculumStageConfig(
@@ -235,7 +238,7 @@ class CurriculumConfig:
                     fainted_value=6.0,
                     fainted_penalty=-6.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.45,
+                    matchup_reward_weight=0.15,
                     action_quality_weight=0.2,
                 ),
             ),
@@ -248,11 +251,11 @@ class CurriculumConfig:
                     victory_reward=10.0,
                     defeat_penalty=-10.0,
                     hp_value_weight=3.0,
-                    fainted_value=6.0,
-                    fainted_penalty=-6.0,
+                    fainted_value=5.0,
+                    fainted_penalty=-5.0,
                     step_penalty=-0.01,
-                    matchup_reward_weight=0.45,
-                    action_quality_weight=0.2,
+                    matchup_reward_weight=0.15,
+                    action_quality_weight=0.25,
                 ),
             ),
         ]
