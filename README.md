@@ -1,167 +1,163 @@
-# DSPRO2: Pokémon RL Battler
+# TODO: Achieve >15% Win Rate vs Heuristic Opponents
 
-## Dev Environment Setup
+## Current State (2026-05-03)
 
-Follow these steps exactly to set up your local development environment. You will need Node.js (for the Showdown server) and Python (for the RL agent).
+**Architecture:** 1-layer pre-norm transformer + learnable attention bias + LSTM
+**Best result:** 10% win rate vs heuristic (sporadic), 65-85% vs random
+**MLflow run:** `tasteful-fox-365` / `4fbec274deda4e2bb859ca52496291d8`
 
-### Step 1: Install `nvm` and Node.js
+### What we've tried
 
-The Pokémon Showdown server runs on Node.js. We use `nvm` (Node Version Manager) to ensure everyone is on the same version.
 
-1. **Install `nvm`** (Mac/Linux):
-  ```bash
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
-  ```
-   *(Note: Restart your terminal after installing --> close and reopen VSCode).*
-2. **Install and use Node v22.12.0**:
-  ```bash
-   nvm install 22.12.0
-   nvm use 22.12.0
-  ```
+| Experiment                                    | CLS→opp_active | vs_heuristic | Verdict                                       |
+| --------------------------------------------- | -------------- | ------------ | --------------------------------------------- |
+| 4-layer post-norm (baseline)                  | 12.5%          | 7.5%         | Attention collapse in layers 2-3              |
+| 2-layer pre-norm                              | 0.0%           | 0%           | Worse — pre-norm didn't help                  |
+| 2L pre-norm + attn bias                       | 12.5%          | 0%           | Fixed layer 0, layer 1 still collapsed        |
+| 1L + attn bias                                | 37.5%          | 0-5%         | Best attention, still no wins                 |
+| 1L + attn bias + matchup reward               | 62.5%          | 0%           | Strongest attention ever, still no wins       |
+| **1L + attn bias + matchup + action quality** | **?**          | **0-10%**    | Sporadic 10% peaks, no consistent improvement |
 
-### Step 2: Install `uv` and Python Dependencies
 
-This project uses [uv](https://docs.astral.sh/uv/) to manage Python 3.13 and all dependencies automatically. No manual `venv` activation is required.
+### Core finding
 
-1. **Install `uv`** (if you don't have it):
-  ```bash
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-  ```
-2. **Install dependencies**:
-  From the root of this project, run:
-   *This creates a local `.venv` and installs the exact versions from `uv.lock` --> the file where all version dependencies are stored.*
-
-### Step 3: Environment Variables & MLflow
-
-We use MLflow to track training runs. 
-
-1. Copy the example environment file:
-  ```bash
-   cp .env-example .env
-  ```
-2. Open `.env` and fill in the MLflow credentials (ask a team member for the details):
-  ```ini
-   MLFLOW_TRACKING_URI="https://mlflow-server-url.com"
-   MLFLOW_TRACKING_USERNAME="Username"
-   MLFLOW_TRACKING_PASSWORD="Password"
-  ```
-
-### Step 4: Set Up the Pokémon Showdown Server
-
-The RL agent needs local servers to battle against.
-
-1. Clone the server and install its dependencies:
-  ```bash
-   git clone https://github.com/smogon/pokemon-showdown.git
-   cd pokemon-showdown
-   npm install
-   cp config/config-example.js config/config.js
-   cd ..
-  ```
-   *(Note: If you encounter server throttling issues during training, check `pokemon-showdown/config/config.js` to adjust rate limits).*
+**Reward shaping (matchup + action quality) does not move the heuristic win rate.** The model
+attends to the opponent but cannot translate that into winning play. The bottleneck is
+fundamental — the policy cannot learn the multi-turn strategic reasoning needed to beat a
+heuristic with reward shaping alone. 5.2M steps of training confirmed no improving trend.
 
 ---
 
-## Running the Project
+## Completed
 
-### 1. Start the Showdown Servers
+### Step 1: Cross-team attention bias (DONE)
 
-Before training, you need to spin up the local Showdown instances. We have scripts to handle this:
+- Learnable `attn_bias [num_layers, 13, 13]` initialized with +2.0 for cross-team pairs
+- Result: CLS→opp_active went from 0% → 37.5% → 62.5%
 
-- **Setup Project first (also start 8 servers):**
-  ```bash
-  ./scripts/setup_training.sh
-  ./scripts/setup_customformats.sh
-  ```
-- **Stop all servers:**
-  ```bash
-  ./scripts/kill_all_showdown.sh
-  ```
-- **Start multiple servers after having set up once**
-  ```bash
-  ./scripts/spin_up_multiple_showdown.sh
-  ```
+### Step 3: Type matchup reward shaping (DONE)
 
-### 2. Start Training
+- `_compute_matchup_quality()` scores best move type effectiveness vs opponent active
+- Weight increased from 0.5 → 5.0 in curriculum stage
+- Result: attention improved but heuristic win rate unchanged
 
-Use `uv run` to execute scripts within the correct environment. The main entry point is `train_battler.py`.
+### Step A: Increase matchup reward weight (DONE)
 
-```bash
-uv run train_battler.py --preset quick
-```
+- Set `matchup_reward_weight=5.0` in curriculum stage
+- No meaningful impact on heuristic win rate
 
-Also run from time to time
+### Step B: Action-level move effectiveness reward (DONE)
 
-```bash
-uv cache clean
-```
+- `_compute_action_quality()` added to `PokemonBattleEnv` with offensive + defensive components
+- Offensive: penalizes picking sub-optimal damaging moves (chosen vs best effectiveness)
+- Defensive: rewards when our active resists (+0.5) or is immune (+1.0) to opponent's best known move
+- Wired into `_compute_configured_delta_reward()` via `action_quality_weight=2.0`
+- Config: `RewardConfig.action_quality_weight`, propagated through `CurriculumStageConfig.to_dict()`
 
-*You can pass different presets (e.g., `standard`, `optimal`, `large`) defined in `src/config/TM_optimal_config.py` depending on your hardware capabilities.*
+### Step C: Defensive matchup reward (DONE)
 
-### 3. Resume Interrupted Training
+- Integrated into `_compute_action_quality()` defensive component
 
-If training is interrupted, you can continue from a saved RLlib checkpoint and keep logging into the same MLflow run.
+### Step D: Train longer (DONE — no improvement)
 
-1. Find the MLflow run ID you want to continue (from your MLflow UI).
-2. Restart training with:
-  ```bash
-   uv run train_battler.py \
-     --preset optimal \
-     --resume-checkpoint latest \
-     --mlflow-run-id <MLFLOW_RUN_ID>
-  ```
-
-Notes:
-
-- `--resume-checkpoint latest` picks the newest checkpoint under `checkpoint_dir` (default: `checkpoints`).
-- You can also pass a specific checkpoint path:
-  ```bash
-  uv run train_battler.py \
-    --preset optimal \
-    --resume-checkpoint "/absolute/path/to/checkpoints/step_1500000/checkpoint_000000" \
-    --mlflow-run-id <MLFLOW_RUN_ID>
-  ```
-- Resume both model + logs by using both flags together.
-- If you provide only `--resume-checkpoint`, model state resumes but MLflow creates a new run.
-- If you provide only `--mlflow-run-id`, logging continues in that run but training starts from a fresh model.
+- Ran standard preset for 5.2M steps (stopped early — no trend)
+- Validation every 100k steps with smoke/fixed_paired/mirror protocols
+- vs random: stable 65-90% throughout
+- vs heuristic: 0-10% with no upward trend, sporadic 10% peaks at 314k and 3.66M
+- **Verdict: more training does not help. The reward signal is insufficient.**
 
 ---
 
-## Project Structure
+## Experiment: Action Quality Reward Training Results
 
-- `**train_battler.py**`: The main entry point for kicking off training.
-- `**src/**`: Core Python library.
-  - `**config/**`: Training, hardware, and reward configurations.
-  - `**envs/**`: Custom Gymnasium environments mapping RL to Pokémon Showdown (`battle_env.py`).
-  - `**models/**`: Custom neural network architectures (e.g., `battle_transformer.py`).
-  - `**teams/**`: AI-generated and static Pokémon teams for training.
-  - `**training/**`: Training orchestration and helper modules.
-    - `**trainer.py**`: Orchestration entrypoint (`PokemonTrainer`) that wires the training lifecycle.
-    - `**rllib_config_builder.py**`: RLlib PPO and environment registration builders.
-    - `**env_bridge.py**`: Worker/env bridge for curriculum payloads and env-emitted metrics.
-    - `**callbacks.py**`: Curriculum stage progression and checkpoint management helpers.
-    - `**resume.py**`: Checkpoint resume path resolution and step extraction.
-    - `**metrics/**`: Metric extraction/aggregation helpers (`ppo`, `episode`, `runtime`, flattening).
-    - `**monitoring/**`: Runtime system telemetry collectors (CPU/RAM/GPU).
-- `**scripts/**`: Executable bash scripts (server management, etc.).
-- `**examples/**`: Sandboxed scripts, notebooks, and reference players (e.g., `MaxDamagePlayer.py`).
-- `**data/**`: Datasets (e.g., BDSP Trainer Data CSVs).
+**Config:** standard preset, 100% heuristic opponents, `matchup_reward_weight=5.0`, `action_quality_weight=2.0`
+**Steps trained:** ~5.2M (of planned 10M, stopped early)
+
+### Heuristic win rate over time (fixed_paired / mirror, 20 games each)
+
+
+| Step  | vs Random | vs Heuristic (FP) | vs Heuristic (Mirror) |
+| ----- | --------- | ----------------- | --------------------- |
+| 105k  | 70-90%    | 5%                | 0%                    |
+| 209k  | 75-80%    | 0%                | 0%                    |
+| 314k  | 70-85%    | **10%**           | 0%                    |
+| 419k  | 85-90%    | 0%                | 0%                    |
+| 524k  | 80-85%    | 5%                | 0%                    |
+| 628k  | 60-70%    | 0%                | 5%                    |
+| 733k  | 70-85%    | 5%                | 0%                    |
+| 838k  | 60-70%    | 5%                | 0%                    |
+| 943k  | 85-95%    | 0%                | 5%                    |
+| 1.05M | 45-70%    | 0%                | 0%                    |
+| 1.15M | 65-75%    | **10%**           | 0%                    |
+| 1.26M | 70-80%    | 0%                | 0%                    |
+| 1.36M | 75%       | 0%                | 0%                    |
+| 1.47M | 75-85%    | 5%                | 0%                    |
+| 1.57M | 85-90%    | 0%                | 0%                    |
+| 1.68M | 80-85%    | 0%                | 5%                    |
+| 1.78M | 80%       | 5%                | 0%                    |
+| 1.89M | 70%       | 0%                | 5%                    |
+| 1.99M | 55-80%    | 0%                | 0%                    |
+| 2.3M  | 65%       | 0%                | 5%                    |
+| 2.4M  | 85%       | 0%                | 5%                    |
+| 2.5M  | 80%       | 0%                | 0%                    |
+| 2.6M  | 75%       | 0%                | 5%                    |
+| 2.7M  | 80%       | 0%                | 0%                    |
+| 2.8M  | 65%       | 5%                | 0%                    |
+| 2.9M  | 75%       | 5%                | 0%                    |
+| 3.0M  | 65%       | 0%                | 5%                    |
+| 3.1M  | 70%       | 0%                | **10%**               |
+| 3.2M  | 70%       | 0%                | 5%                    |
+| 3.5M  | 55%       | 5%                | 5%                    |
+| 3.7M  | 75-80%    | **10%**           | **10%**               |
+| 3.9M  | 90-95%    | 5%                | 0%                    |
+| 4.1M  | 60%       | 0%                | 0%                    |
+| 4.3M  | 70%       | 5%                | 0%                    |
+| 4.4M  | 70%       | 0%                | 0%                    |
+| 4.8M  | 65%       | 0%                | **10%**               |
+| 5.0M  | 70%       | 5%                | 0%                    |
+| 5.2M  | 60%       | 0%                | 0%                    |
+
+
+### Conclusion
+
+**Reward shaping is not the bottleneck.** The action quality reward gives the model direct
+signal about which move to pick, but heuristic win rate stays at 0-10% with no trend over
+5.2M steps. The model can attend to the opponent and knows which moves are effective, but
+cannot chain that into multi-turn winning strategies.
 
 ---
 
-## Development Guide
+## Next Steps (Priority Order)
 
-### Managing Dependencies
+### Step G: Imitation learning from heuristic (HIGH PRIORITY)
 
-If you need to add or remove Python libraries, use `uv`:
+**Why:** The heuristic player knows how to win. Instead of discovering winning strategies
+through reward, directly learn from expert demonstrations.
 
-```bash
-uv add <package_name>
-uv remove <package_name>
-```
+**What to do:**
 
-**Important:** Always commit `uv.lock` and `pyproject.toml` after making dependency changes so the rest of the team stays in sync!
+- Collect battle logs from heuristic vs heuristic games
+- Add behavioral cloning loss on the CLS token output
+- Or use DAgger-style online imitation
 
-### All Configs
+### Action quality refinements (LOW PRIORITY — reward shaping alone is insufficient)
 
-Training configs are located in `src/config/TM_optimal_config.py`. Create or modify presets based on what your specific machine (CPU/GPU) can handle.
+#### Priority-aware SE exemption
+
+If the chosen move has higher priority than the best-SE move, don't penalize.
+
+#### STAB bonus awareness
+
+Compare real damage (`base_power * effectiveness * 1.5(if STAB)`) not just type multiplier.
+
+#### Switch-to-resist bonus
+
+When switching, check if incoming mon has better defensive matchup than outgoing.
+
+---
+
+# TO FIX!:
+
+Curriculum is very bad
+
+look at random vs random with complete information
