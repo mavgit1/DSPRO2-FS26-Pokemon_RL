@@ -1,8 +1,6 @@
 from src.action_space import (
-    COMPRESSED_ACTION_SPACE_N,
     NATIVE_ACTION_SPACE_N,
-    compressed_to_native_action,
-    get_compressed_action_mask,
+    is_native_switch_action,
 )
 
 from src.models.embedding import (
@@ -25,6 +23,10 @@ from src.envs.battle_env import (
 )
 
 __all__ = [
+    # Action Space
+    "NATIVE_ACTION_SPACE_N",
+    "is_native_switch_action",
+    
     # Embedding
     "embed_battle",
     "embed_pokemon",
@@ -36,10 +38,7 @@ __all__ = [
     "SPECIES_VOCAB_SIZE",
     "ITEM_VOCAB_SIZE",
     "ABILITY_VOCAB_SIZE",
-    "COMPRESSED_ACTION_SPACE_N",
-    "NATIVE_ACTION_SPACE_N",
-    "compressed_to_native_action",
-    "get_compressed_action_mask",
+    
     # Environment
     "PokemonBattleEnv",
     "create_env_creator",
