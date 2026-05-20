@@ -9,15 +9,11 @@ import torch
 
 from poke_env.battle.abstract_battle import AbstractBattle
 from poke_env.player import Player, RandomPlayer
+from poke_env.environment.singles_env import SinglesEnv
 
-from src.action_space import (
-    COMPRESSED_ACTION_SPACE_N,
-    COMPRESSED_MOVE_ACTIONS,
-    COMPRESSED_SWITCH_ACTIONS,
-    get_compressed_action_mask,
-)
+from src.action_space import NATIVE_ACTION_SPACE_N
 from src.models.battle_transformer import PokemonTransformerModel
-from src.models.embedding import embed_battle
+from src.models.embedding import embed_battle, get_action_mask
 
 
 class SelfPlayPlayer(Player):
@@ -42,7 +38,7 @@ class SelfPlayPlayer(Player):
             model_config_dict = {"custom_model_config": model_config_dict}
 
         self.model = PokemonTransformerModel(
-            num_outputs=COMPRESSED_ACTION_SPACE_N,
+            num_outputs=NATIVE_ACTION_SPACE_N,
             model_config=model_config_dict,
             name="self_play",
         )
@@ -116,7 +112,7 @@ class SelfPlayPlayer(Player):
     def _inference_move(self, battle: AbstractBattle):
         # 1. Embed battle -> obs dict
         obs = embed_battle(battle, opponent_type="self")
-        action_mask = get_compressed_action_mask(battle)
+        action_mask = get_action_mask(battle)
         obs["action_mask"] = action_mask
 
         # 2. Convert to tensors with batch dim [1, ...]
@@ -183,43 +179,12 @@ class SelfPlayPlayer(Player):
             self._diag["action_histogram"].get(action, 0) + 1
         )
 
-        # 5. Convert to BattleOrder
-        return self._action_to_order(action, battle)
-
-    # ------------------------------------------------------------------
-    # Action -> BattleOrder conversion
-    # ------------------------------------------------------------------
-
-    def _action_to_order(self, action: int, battle: AbstractBattle):
-        active = battle.active_pokemon
-
-        # Move actions (compressed 0-3)
-        if action in COMPRESSED_MOVE_ACTIONS:
-            if active and active.moves:
-                known_moves = list(active.moves.values())
-                slot = action  # 0, 1, 2, or 3
-                if slot < len(known_moves):
-                    return self.create_order(known_moves[slot])
-
-        # Gimmick actions (compressed 4-7) - treat as regular move
-        elif 4 <= action < 8:
-            if active and active.moves:
-                known_moves = list(active.moves.values())
-                slot = action - 4
-                if slot < len(known_moves):
-                    return self.create_order(known_moves[slot])
-
-        # Switch actions (compressed 8-13)
-        elif action in COMPRESSED_SWITCH_ACTIONS:
-            switch_idx = action - COMPRESSED_SWITCH_ACTIONS.start
-            team_list = list(battle.team.values())
-            bench = [mon for mon in team_list if mon is not active]
-            if switch_idx < len(bench):
-                return self.create_order(bench[switch_idx])
-
-        # Fallback
-        self._diag["action_mapping_fallback_count"] += 1
-        return RandomPlayer.choose_random_singles_move(battle)
+        # 5. Convert to BattleOrder using native poke-env conversion
+        try:
+            return SinglesEnv.action_to_order(action, battle, fake=False, strict=False)
+        except Exception:
+            self._diag["action_mapping_fallback_count"] += 1
+            return RandomPlayer.choose_random_singles_move(battle)
 
     # ------------------------------------------------------------------
     # Diagnostics

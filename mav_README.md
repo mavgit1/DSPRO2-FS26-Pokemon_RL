@@ -41,12 +41,12 @@ SAVE_LEAGUE_HISTORY=1 uv run --active train_battler.py --preset pure_league_play
   sleep 60
   done
 
-for f in train_battler.py src/config/TM_optimal_config.py src/training/historical_self_player.py src/training/self_play_player.py src/training/callbacks.py src/training/curriculum.py src/training/trainer.py src/envs/battle_env.py ; do
+for f in train_battler.py src/config/TM_optimal_config.py src/training/historical_self_player.py src/training/self_play_player.py src/action_space.py src/data/trainer_dataset_utils.py src/training/env_bridge.py src/training/callbacks.py src/training/curriculum.py src/training/trainer.py src/envs/battle_env.py ; do
   echo "--- $f ---"
   cat "$f"
   echo ""
 done
 
-tree src/ scripts/ data/
+tree src/ scripts/ data/ examples/ 
 
 git diff HEAD..marv-dev > all_differences.txt

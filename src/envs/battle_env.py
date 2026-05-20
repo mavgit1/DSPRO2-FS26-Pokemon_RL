@@ -12,13 +12,7 @@ from poke_env.player import RandomPlayer, SimpleHeuristicsPlayer
 from poke_env.environment.single_agent_wrapper import SingleAgentWrapper
 from poke_env.ps_client.account_configuration import AccountConfiguration
 
-from src.action_space import (
-    COMPRESSED_ACTION_SPACE_N,
-    NATIVE_ACTION_SPACE_N,
-    compressed_to_native_action,
-    find_safe_native_action,
-    is_compressed_switch_action,
-)
+from src.action_space import NATIVE_ACTION_SPACE_N, is_native_switch_action
 from src.models.embedding import (
     embed_battle,
     NUM_TOKENS,
@@ -66,7 +60,7 @@ def get_observation_space() -> gym.spaces.Dict:
             "action_mask": gym.spaces.Box(
                 low=0,
                 high=1,
-                shape=(COMPRESSED_ACTION_SPACE_N,),
+                shape=(NATIVE_ACTION_SPACE_N,),
                 dtype=np.float32,
             ),
         }
@@ -364,45 +358,23 @@ class PokemonBattleEnv(SinglesEnv):
             "action_mask_valid_count_mean": float(mask_valid_mean),
         }
 
-    def order_to_action(self, order, battle, fake: bool = False, strict: bool = True):
-        """
-        Convert a BattleOrder to action index with bounded fallbacks.
-
-        poke-env's default strict=False path can recurse indefinitely if random
-        fallback orders keep failing conversion. We cap retries and then choose a
-        guaranteed legal action id by probing action_to_order.
-        """
+def order_to_action(self, order, battle, fake: bool = False, strict: bool = True):
+        """Convert a BattleOrder to action index natively."""
         try:
+            # pylint: disable=no-member
             return SinglesEnv.order_to_action(order, battle, fake=fake, strict=True)
         except ValueError:
             if strict:
                 raise
 
-        # Retry with random legal-looking orders a fixed number of times.
-        max_retries = 3
-        for _ in range(max_retries):
-            random_order = RandomPlayer.choose_random_singles_move(battle)
-            try:
-                self._fallback_events_current_episode += 1
-                return SinglesEnv.order_to_action(
-                    random_order, battle, fake=fake, strict=True
-                )
-            except ValueError:
-                continue
-
-        # Hard fallback: pick the first action that converts legally.
-        for action in range(NATIVE_ACTION_SPACE_N):
-            try:
-                self._fallback_events_current_episode += 1
-                SinglesEnv.action_to_order(
-                    np.int64(action), battle, fake=fake, strict=True
-                )
-                return np.int64(action)
-            except ValueError:
-                continue
-
-        # If no legal action could be verified, return default action.
         self._fallback_events_current_episode += 1
+        
+        # Hard fallback: pick a random valid action from the mask
+        # pylint: disable=no-member
+        mask = SinglesEnv.get_action_mask(battle)
+        valid_actions = [i for i, is_valid in enumerate(mask) if is_valid]
+        if valid_actions:
+            return np.int64(random.choice(valid_actions))
         return np.int64(-2)
 
 
@@ -564,29 +536,14 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
     def step(self, action):
         if action is not None:
             action_int = int(action)
-            self.env._last_compressed_action = action_int
+            self._last_action = action_int
             self._episode_total_actions += 1
-            if is_compressed_switch_action(action_int):
+            if is_native_switch_action(action_int):
                 self._episode_switch_actions += 1
             else:
                 self._episode_attack_actions += 1
-            try:
-                native_action = compressed_to_native_action(
-                    action_int, self.env.battle1
-                )
-            except (ValueError, IndexError):
-                native_action = find_safe_native_action(self.env.battle1)
-            else:
-                try:
-                    SinglesEnv.action_to_order(
-                        native_action, self.env.battle1, fake=False, strict=True
-                    )
-                except Exception:
-                    native_action = find_safe_native_action(self.env.battle1)
-        else:
-            native_action = action
 
-        result = super().step(native_action)
+        result = super().step(action)
         terminated = False
         truncated = False
         if isinstance(result, tuple):

@@ -1,7 +1,6 @@
 import numpy as np
 from typing import Dict, List, Optional, Any
 
-# Poke-env imports (only for type hints and enums)
 from poke_env.battle.abstract_battle import AbstractBattle
 from poke_env.battle.pokemon import Pokemon
 from poke_env.battle.weather import Weather
@@ -11,12 +10,9 @@ from poke_env.battle.status import Status
 from poke_env.battle.pokemon_type import PokemonType
 from poke_env.battle.move_category import MoveCategory
 from poke_env.battle.effect import Effect
+from poke_env.environment.singles_env import SinglesEnv
 
-from src.action_space import (
-    COMPRESSED_ACTION_SPACE_N,
-    NATIVE_SWITCH_ACTIONS,
-    get_compressed_action_mask,
-)
+from src.action_space import NATIVE_ACTION_SPACE_N, is_native_switch_action
 from src.models.vocab import get_embedding_vocab, vocab_sizes
 
 
@@ -51,7 +47,7 @@ _VOCAB_SIZES = vocab_sizes()
 SPECIES_VOCAB_SIZE = _VOCAB_SIZES["species_vocab_size"]
 ITEM_VOCAB_SIZE = _VOCAB_SIZES["item_vocab_size"]
 ABILITY_VOCAB_SIZE = _VOCAB_SIZES["ability_vocab_size"]
-ACTION_SPACE_N = COMPRESSED_ACTION_SPACE_N
+ACTION_SPACE_N = NATIVE_ACTION_SPACE_N
 GLOBAL_EXTRA_FEATURE_NAMES = [
     "opponent_random",
     "opponent_heuristic",
@@ -452,31 +448,22 @@ def _canonical_opponent_type(value: Optional[str]) -> Optional[str]:
 # =============================================================================
 
 def get_action_mask(battle: AbstractBattle) -> np.ndarray:
-    """
-    Generate action mask for valid actions.
+    """Generate action mask for valid actions using poke-env natively."""
+    # pylint: disable=no-member
+    native_mask = SinglesEnv.get_action_mask(battle)
+    mask = np.array(native_mask, dtype=np.float32)
     
-    Action space layout (compressed gen8 singles actions):
-        - 0-3: regular moves
-        - 4-7: legal gimmick variant for each move slot
-        - 8-13: legal switch slots
+    # Ensure it matches our tensor shapes
+    if len(mask) >= ACTION_SPACE_N:
+        return mask[:ACTION_SPACE_N]
     
-    Args:
-        battle: AbstractBattle object
-    
-    Returns:
-        np.ndarray of shape (18,) with 1.0 for valid actions, 0.0 for invalid
-    """
-    return get_compressed_action_mask(battle)
-
+    padded = np.zeros(ACTION_SPACE_N, dtype=np.float32)
+    padded[:len(mask)] = mask
+    return padded
 
 def get_valid_action_indices(battle: AbstractBattle) -> List[int]:
     """Get list of valid action indices."""
-    return [i for i, valid in enumerate(get_action_mask(battle)) if valid]
-
-
-def is_native_switch_action(action: int) -> bool:
-    """Return whether a native gen8 singles poke-env action is a switch."""
-    return int(action) in NATIVE_SWITCH_ACTIONS
+    return [i for i, valid in enumerate(get_action_mask(battle)) if valid > 0.5]
 
 
 # =============================================================================
