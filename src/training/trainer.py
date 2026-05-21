@@ -216,6 +216,8 @@ class PokemonTrainer:
                 if self.curriculum:
                     self._apply_curriculum_stage(self.curriculum.current_stage)
 
+                self._export_selfplay_weights()
+
                 prev_steps = self.total_steps
                 prev_wall_time = time.time()
 

@@ -548,6 +548,9 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             self._opponent_pool[opponent_key] = self._build_opponent(opponent_key)
         self.opponent = self._opponent_pool[opponent_key]
         self._current_opponent_key = opponent_key
+        begin_episode = getattr(self.opponent, "begin_episode", None)
+        if callable(begin_episode):
+            begin_episode()
         if hasattr(self.env, "set_opponent_context"):
             self.env.set_opponent_context(opponent_key)
         self._episode_total_actions = 0
@@ -588,15 +591,26 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             fallback_events = 0
             if hasattr(self.env, "consume_fallback_events"):
                 fallback_events = int(self.env.consume_fallback_events())
-            self._recent_action_stats.append(
-                {
-                    "episode_total_actions": float(self._episode_total_actions),
-                    "episode_switch_actions": float(self._episode_switch_actions),
-                    "episode_attack_actions": float(self._episode_attack_actions),
-                    "episode_fallback_events": float(fallback_events),
-                    "opponent_type": self._current_opponent_key,
-                }
-            )
+            action_stats: Dict[str, float] = {
+                "episode_total_actions": float(self._episode_total_actions),
+                "episode_switch_actions": float(self._episode_switch_actions),
+                "episode_attack_actions": float(self._episode_attack_actions),
+                "episode_fallback_events": float(fallback_events),
+                "opponent_type": self._current_opponent_key,
+            }
+            if self._current_opponent_key == "self":
+                sp = self._opponent_pool.get("self")
+                pop_diag = getattr(sp, "pop_diagnostics", None)
+                if callable(pop_diag):
+                    diag = pop_diag()
+                    infer_fb = float(diag.get("fallback_count", 0))
+                    map_fb = float(diag.get("action_mapping_fallback_count", 0))
+                    action_stats["selfplay_inference_fallback_turns"] = infer_fb
+                    action_stats["selfplay_action_to_order_fallback_turns"] = map_fb
+                    action_stats["selfplay_had_fallback"] = float(
+                        infer_fb + map_fb > 0
+                    )
+            self._recent_action_stats.append(action_stats)
         obs = result[0] if isinstance(result, tuple) and len(result) > 0 else None
         self._record_observation_sample(obs)
         return result
@@ -837,17 +851,28 @@ def create_env_creator(
 
             opponent_class = RandomNoSwitchPlayer
             opponent_id = f"rndns_{uuid.uuid4().hex[:6]}"
+        elif difficulty == "self":
+            from src.training.self_play_player import SelfPlayPlayer
+
+            opponent_class = SelfPlayPlayer
+            opponent_id = f"self_{uuid.uuid4().hex[:6]}"
         else:
             opponent_class = RandomPlayer
         opponent_config = AccountConfiguration(opponent_id, None)
         env_opponent_id = f"{opponent_id}_e"
         env_opponent_config = AccountConfiguration(env_opponent_id, None)
-        opponent = opponent_class(
-            battle_format=fmt,
-            account_configuration=opponent_config,
-            server_configuration=server_config,
-            team=o_team,
-        )
+        opponent_kwargs: Dict[str, Any] = {
+            "battle_format": fmt,
+            "account_configuration": opponent_config,
+            "server_configuration": server_config,
+            "team": o_team,
+        }
+        sp_path = env_config.get("selfplay_weights_path", selfplay_weights_path)
+        m_cfg = env_config.get("model_config_dict", model_config_dict)
+        if difficulty == "self":
+            opponent_kwargs["model_config_dict"] = m_cfg or {}
+            opponent_kwargs["weights_path"] = sp_path
+        opponent = opponent_class(**opponent_kwargs)
 
         # Create the PettingZoo env
         player_id = f"RL_{uuid.uuid4().hex[:8]}"

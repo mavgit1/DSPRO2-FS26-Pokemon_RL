@@ -54,6 +54,26 @@ def aggregate_episode_metrics(
             metrics[f"outcome/wins_vs_{opp_type}"] = float(opp_wins)
             metrics[f"outcome/total_vs_{opp_type}"] = float(opp_total)
 
+    self_no_fallback: List[int] = []
+    for stat in episode_stats:
+        if _canonical_opponent_type(stat.get("opponent_type")) != "self":
+            continue
+        if float(stat.get("selfplay_had_fallback", 0.0)) > 0.0:
+            continue
+        outcome = stat.get("outcome")
+        if outcome is None:
+            continue
+        outcome_int = int(outcome)
+        if outcome_int in {0, 1}:
+            self_no_fallback.append(outcome_int)
+    if self_no_fallback:
+        clean_wins = sum(self_no_fallback)
+        clean_total = len(self_no_fallback)
+        metrics["outcome/win_rate_vs_self_no_fallback"] = float(
+            clean_wins / clean_total
+        )
+        metrics["outcome/total_vs_self_no_fallback"] = float(clean_total)
+
     reward_victory = [
         float(s["reward_victory_component"])
         for s in episode_stats

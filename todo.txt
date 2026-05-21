@@ -1,21 +1,27 @@
 IMPORTANT
 - fix broken debug scripts still using 14-action / COMPRESSED imports (validate_pipeline, inspect_attention, analyze_decision_diagnostics)
 - validate native switch indices 0-5 vs bench tokens in obs (not blocking train)
+- re-check benchmark/win_rate_vs_self after fair self-play run (~45-55% target); use outcome/win_rate_vs_self_no_fallback in MLflow
 
 DONE
 - poke-env 0.15 obs wrap: get_rllib_observation_space + model unwrap for observation/action_mask keys
 - cast step() actions to np.int64 in CurriculumSingleAgentWrapper.step
 - order_to_action indented on PokemonBattleEnv (was dead module-level code)
 - native 22-action space wired (embedding mask, RLlib Discrete(22), self-play)
-- training confirmed working (user run ~6M steps, mostly good)
+- training confirmed working (user run ~8.7M steps)
 - gitignore: system_log.csv, mysession.txt (local scratch / old logs)
 - validation: flatten poke-env 0.15 observation wrapper in validation/runner.py
-- metrics: split fallback naming (opponent order_to_action vs selfplay action_to_order; removed misleading illegal_action_fallback_rate)
+- metrics: split fallback naming (opponent order_to_action vs selfplay action_to_order)
+- self-play: frozen weights per episode, deterministic argmax, strict action_to_order, begin_episode load
+- benchmark protocol includes self opponent; export checkpoint weights for SelfPlayPlayer
+- MLflow: outcome/win_rate_vs_self_no_fallback (excludes self episodes with inference/mapping fallbacks)
 
 MEDIUM
 - rename _last_compressed_action leftovers in battle_env
+- curriculum: gate self mix % until benchmark self WR ~45-55%; fix stage-2 promotion (stuck in heuristic_tactics)
+- LSTM: align self-play state with RLlib or trial use_lstm=False for mirror eval
 - track RL agent action_to_order failures separately (if needed beyond masked policy)
-- confirm RLlib always passes numpy actions in practice
+- GPU NaN/inf gradients near long-run end (stability)
 
 MAYBE
 - update Doc/ LaTeX / debug README for 22-action native space

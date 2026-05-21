@@ -28,9 +28,16 @@ class SelfPlayPlayer(Player):
         self,
         model_config_dict: Dict[str, Any],
         weights_path: Optional[str] = None,
+        *,
+        deterministic: bool = True,
+        freeze_weights_per_episode: bool = True,
         **kwargs,
     ):
         super().__init__(**kwargs)
+
+        self._deterministic = deterministic
+        self._freeze_weights_per_episode = freeze_weights_per_episode
+        self._episode_weights_frozen = False
 
         # Ensure the config has the nested ``custom_model_config`` key that
         # ``PokemonTransformerModel.__init__`` expects.
@@ -73,7 +80,17 @@ class SelfPlayPlayer(Player):
     # Weight loading
     # ------------------------------------------------------------------
 
+    def begin_episode(self) -> None:
+        """Load weights once for the upcoming battle; keep them fixed until the next episode."""
+        self._episode_weights_frozen = self._freeze_weights_per_episode
+        self._load_weights(force=True)
+
     def _try_load_weights(self) -> None:
+        if self._episode_weights_frozen:
+            return
+        self._load_weights(force=False)
+
+    def _load_weights(self, *, force: bool) -> None:
         if not self._weights_path:
             return
         path = Path(self._weights_path)
@@ -81,7 +98,7 @@ class SelfPlayPlayer(Player):
             return
         try:
             mtime = path.stat().st_mtime
-            if mtime == self._last_mtime:
+            if not force and mtime == self._last_mtime:
                 return
             state_dict = torch.load(path, map_location="cpu", weights_only=True)
             self.model.load_state_dict(state_dict, strict=True)
@@ -97,7 +114,8 @@ class SelfPlayPlayer(Player):
     # ------------------------------------------------------------------
 
     def choose_move(self, battle: AbstractBattle):
-        self._try_load_weights()
+        if not self._episode_weights_frozen:
+            self._try_load_weights()
 
         # Prune LSTM cache for finished battles
         if battle.won or battle.lost:
@@ -157,16 +175,22 @@ class SelfPlayPlayer(Player):
 
             logits, _ = self.model.heads_from_features(features, mask)
 
-        # 4. Sample from softmax distribution (temperature < 1.0 = sharper)
-        temperature = 0.8
-        probs = torch.softmax(logits / temperature, dim=-1)
-        action = int(torch.multinomial(probs, 1).item())
+        # 4. Pick action (deterministic argmax matches validation / fair mirror play)
+        temperature = 1.0
+        masked_logits = logits.clone()
+        if mask is not None and mask.numel() == masked_logits.numel():
+            masked_logits = masked_logits.masked_fill(mask <= 0, -1e8)
+        if self._deterministic:
+            action = int(masked_logits.argmax(dim=-1).item())
+            probs = torch.softmax(masked_logits / temperature, dim=-1)
+        else:
+            probs = torch.softmax(masked_logits / temperature, dim=-1)
+            action = int(torch.multinomial(probs, 1).item())
 
         # Record diagnostics
         valid_count = int(action_mask.sum())
         top_prob = float(probs.max().item())
-        # Compute entropy over full distribution
-        log_probs = torch.log_softmax(logits / temperature, dim=-1)
+        log_probs = torch.log_softmax(masked_logits / temperature, dim=-1)
         entropy = float(-(probs * log_probs).sum().item())
 
         self._diag["top_prob_sum"] += top_prob
@@ -181,7 +205,7 @@ class SelfPlayPlayer(Player):
 
         # 5. Convert to BattleOrder using native poke-env conversion
         try:
-            return SinglesEnv.action_to_order(action, battle, fake=False, strict=False)
+            return SinglesEnv.action_to_order(action, battle, fake=False, strict=True)
         except Exception:
             self._diag["action_mapping_fallback_count"] += 1
             return RandomPlayer.choose_random_singles_move(battle)

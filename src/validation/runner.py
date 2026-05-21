@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import random
 import socket
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -124,6 +125,8 @@ def run_validation(
                 config.env.battle_format = config.env.battle_format.replace(
                     "randombattle", "customgame"
                 )
+            if "self" in protocol.opponents:
+                _export_selfplay_weights_from_algo(algo, config.selfplay_weights_path)
             results = _run_benchmark(
                 algo=algo,
                 config=config,
@@ -261,6 +264,14 @@ def _ensure_showdown_server(host: str, port: int) -> None:
         ) from exc
 
 
+def _export_selfplay_weights_from_algo(algo, weights_path: str) -> None:
+    """Write the restored policy weights for SelfPlayPlayer to load during benchmark."""
+    path = Path(os.path.abspath(weights_path))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    module = algo.get_module("default_policy")
+    torch.save(module.model.state_dict(), path)
+
+
 def _build_validation_env(
     config: TrainingConfig,
     opponent_type: str,
@@ -273,6 +284,11 @@ def _build_validation_env(
     """Create a validation env.  *port_override* pins this env to a single
     Showdown server port (used for parallel benchmark execution)."""
     port = port_override if port_override is not None else start_port
+    model_cfg = model_config_dict
+    selfplay_path: str | None = None
+    if opponent_type == "self":
+        model_cfg = model_cfg or config.model.to_dict()
+        selfplay_path = os.path.abspath(config.selfplay_weights_path)
     env_creator = create_env_creator(
         battle_format=config.env.battle_format,
         server_host=config.env.showdown_host,
@@ -282,19 +298,24 @@ def _build_validation_env(
         opponent_mix={opponent_type: 1.0},
         player_team=player_team,
         opponent_team=opponent_team,
+        model_config_dict=model_cfg,
+        selfplay_weights_path=selfplay_path,
     )
-    return env_creator(
-        {
-            "server_port": port,
-            "num_servers": 1,
-            "start_port": port,
-            "num_envs_per_worker": 1,
-            "opponent_difficulty": opponent_type,
-            "opponent_mix": {opponent_type: 1.0},
-            "player_team": player_team,
-            "opponent_team": opponent_team,
-        }
-    )
+    env_config: Dict[str, Any] = {
+        "server_port": port,
+        "num_servers": 1,
+        "start_port": port,
+        "num_envs_per_worker": 1,
+        "opponent_difficulty": opponent_type,
+        "opponent_mix": {opponent_type: 1.0},
+        "player_team": player_team,
+        "opponent_team": opponent_team,
+    }
+    if model_cfg is not None:
+        env_config["model_config_dict"] = model_cfg
+    if selfplay_path is not None:
+        env_config["selfplay_weights_path"] = selfplay_path
+    return env_creator(env_config)
 
 
 def _run_chunk_on_env(
@@ -727,6 +748,8 @@ def run_inprocess_validation(
         )
 
     if protocol.name == "benchmark":
+        if "self" in protocol.opponents:
+            _export_selfplay_weights_from_algo(algo, config.selfplay_weights_path)
         results = _run_benchmark(
             algo=algo,
             config=config,
