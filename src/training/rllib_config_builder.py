@@ -74,7 +74,7 @@ def build_ppo_config(
 ) -> PPOConfig:
     from src.models.battle_transformer import PokemonRLModule
 
-    return (
+    ppo_config = (
         PPOConfig()
         .environment(
             env=POKEMON_BATTLE_ENV_NAME,
@@ -125,3 +125,5 @@ def build_ppo_config(
         )
         .debugging(log_level="WARNING")
     )
+    ppo_config.torch_skip_nan_gradients = config.ppo.torch_skip_nan_gradients
+    return ppo_config

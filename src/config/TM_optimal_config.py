@@ -75,6 +75,9 @@ class PPOConfig:
     # Gradient clipping
     grad_clip: float = 5.0
 
+    # If True, skip optimizer steps when any gradient is nan/inf (RLlib default: zero them).
+    torch_skip_nan_gradients: bool = False
+
     # Batch sizes
     train_batch_size: int = 4096
     # TODO: test this with different values.
@@ -490,12 +493,13 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                 hidden_dim=256,
             ),
             ppo=PPOConfig(
-                lr=0.0003,
+                lr=0.00025,
                 gamma=0.99,
                 train_batch_size=8192,
                 sgd_minibatch_size=512,
                 clip_param=0.2,
-                entropy_coeff=0.012, 
+                entropy_coeff=0.01,
+                torch_skip_nan_gradients=True,
             ),
             curriculum=CurriculumConfig(
                 enabled=True,
