@@ -256,8 +256,8 @@ def collect_selfplay_diagnostics(algo: Any) -> Dict[str, Any]:
     valid_count = max(agg["valid_action_count_count"], 1.0)
 
     result["selfplay/weight_loads"] = agg["weight_load_count"]
-    result["selfplay/fallback_count"] = agg["fallback_count"]
-    result["selfplay/action_mapping_fallback_count"] = agg[
+    result["selfplay/inference_error_fallback_count"] = agg["fallback_count"]
+    result["selfplay/action_to_order_fallback_count"] = agg[
         "action_mapping_fallback_count"
     ]
     result["selfplay/avg_top_prob"] = agg["top_prob_sum"] / prob_count
@@ -267,8 +267,10 @@ def collect_selfplay_diagnostics(algo: Any) -> Dict[str, Any]:
     result["selfplay/n_workers"] = float(n_workers)
 
     total_decisions = max(total_turns, 1.0)
-    result["selfplay/fallback_rate"] = agg["fallback_count"] / total_decisions
-    result["selfplay/mapping_fallback_rate"] = (
+    result["selfplay/inference_error_fallback_rate"] = (
+        agg["fallback_count"] / total_decisions
+    )
+    result["selfplay/action_to_order_fallback_rate"] = (
         agg["action_mapping_fallback_count"] / total_decisions
     )
 

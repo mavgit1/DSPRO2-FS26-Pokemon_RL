@@ -1,5 +1,4 @@
 IMPORTANT
-- fix validation (did not work during ~6M step run — investigate later)
 - fix broken debug scripts still using 14-action / COMPRESSED imports (validate_pipeline, inspect_attention, analyze_decision_diagnostics)
 - validate native switch indices 0-5 vs bench tokens in obs (not blocking train)
 
@@ -10,10 +9,12 @@ DONE
 - native 22-action space wired (embedding mask, RLlib Discrete(22), self-play)
 - training confirmed working (user run ~6M steps, mostly good)
 - gitignore: system_log.csv, mysession.txt (local scratch / old logs)
+- validation: flatten poke-env 0.15 observation wrapper in validation/runner.py
+- metrics: split fallback naming (opponent order_to_action vs selfplay action_to_order; removed misleading illegal_action_fallback_rate)
 
 MEDIUM
 - rename _last_compressed_action leftovers in battle_env
-- terminal progress: ensure total_steps / reward print correctly (agent background run showed Steps: 0 — may be separate from your good run)
+- track RL agent action_to_order failures separately (if needed beyond masked policy)
 - confirm RLlib always passes numpy actions in practice
 
 MAYBE

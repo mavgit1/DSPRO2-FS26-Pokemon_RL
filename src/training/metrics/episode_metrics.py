@@ -160,12 +160,16 @@ def aggregate_episode_metrics(
         metrics["action/switch_action_ratio"] = float(
             sum(switch_actions) / total_action_sum
         )
-        # episode_fallback_events come from PokemonBattleEnv.order_to_action, which
-        # poke-env invokes for the *opponent* (battle2) when converting heuristic/random
-        # BattleOrders to native indices—not from RL compressed-action legality.
-        _order_conv_per_rl_step = float(sum(fallback_events) / total_action_sum)
-        metrics["action/order_to_action_fallback_per_rl_step"] = _order_conv_per_rl_step
-        metrics["action/illegal_action_fallback_rate"] = _order_conv_per_rl_step
+        # episode_fallback_events: PokemonBattleEnv.order_to_action retries when
+        # poke-env cannot map an opponent BattleOrder to a native index (heuristic/random).
+        # Not RL policy illegal moves — see selfplay/mapping_fallback_rate for self-play.
+        opponent_fallback_rate = float(sum(fallback_events) / total_action_sum)
+        metrics["action/opponent_order_to_action_fallback_per_rl_step"] = (
+            opponent_fallback_rate
+        )
+        metrics["action/opponent_order_to_action_fallback_total"] = float(
+            sum(fallback_events)
+        )
 
     return metrics
 

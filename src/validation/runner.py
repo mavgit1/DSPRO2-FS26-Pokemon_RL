@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from ray.rllib.core.columns import Columns
 
 from src.config.TM_optimal_config import TrainingConfig, get_config
-from src.envs.battle_env import create_env_creator
+from src.envs.battle_env import create_env_creator, flatten_agent_observation
 from src.training.resume import resolve_resume_checkpoint
 from src.training.rllib_config_builder import build_ppo_config, register_environments
 from src.validation.metrics import (
@@ -511,27 +511,36 @@ def _run_one_episode(
     )
 
 
+def _flat_validation_obs(obs: Dict[str, Any]) -> Dict[str, Any]:
+    """poke-env 0.15+ returns embed dict under ``observation``; training uses the same unwrap."""
+    flat = flatten_agent_observation(obs)
+    return flat if flat is not None else obs
+
+
 def _compute_action(
     algo,
     obs: Dict[str, Any],
     recurrent_state: Dict[str, torch.Tensor] | None = None,
     explore: bool = False,
 ) -> tuple[np.int64, Dict[str, torch.Tensor] | None]:
+    flat_obs = _flat_validation_obs(obs)
     module = _get_module(algo)
     if _module_is_stateful(module):
-        return _compute_recurrent_action(module, obs, recurrent_state, explore=explore)
+        return _compute_recurrent_action(
+            module, flat_obs, recurrent_state, explore=explore
+        )
 
     compute_single_action = getattr(algo, "compute_single_action", None)
     if callable(compute_single_action):
         try:
-            action = compute_single_action(obs, explore=explore)
+            action = compute_single_action(flat_obs, explore=explore)
             if isinstance(action, tuple):
                 action = action[0]
             return np.int64(action), None
         except Exception:
             pass
 
-    batch = {Columns.OBS: _to_batched_tensors(obs)}
+    batch = {Columns.OBS: _to_batched_tensors(flat_obs)}
     with torch.no_grad():
         forward = getattr(module, "forward_inference", None)
         if callable(forward):
@@ -541,7 +550,7 @@ def _compute_action(
     logits = output[Columns.ACTION_DIST_INPUTS]
 
     if explore:
-        action_mask = obs.get("action_mask")
+        action_mask = flat_obs.get("action_mask")
         mask_tensor = (
             torch.as_tensor(action_mask, dtype=torch.float32).unsqueeze(0)
             if action_mask is not None
@@ -598,6 +607,7 @@ def _compute_recurrent_action(
         key: value.detach() for key, value in output[Columns.STATE_OUT].items()
     }
     return action, next_state
+
 
 
 def _sample_masked_action(
