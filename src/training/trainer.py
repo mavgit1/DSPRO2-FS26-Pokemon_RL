@@ -223,7 +223,9 @@ class PokemonTrainer:
 
                 while self.total_steps < self.config.total_timesteps:
                     iter_start = time.time()
-                    # Train
+                    # Snapshot policy for self-play *before* this iteration's rollouts.
+                    # The learner updates during train_step(); opponents stay on this snapshot.
+                    self._export_selfplay_weights()
                     result = self.train_step()
 
                     env_stats = result.get("env_runners", {})
@@ -249,11 +251,6 @@ class PokemonTrainer:
                     outcomes = collect_recent_outcomes(self.algo)
                     episode_stats = collect_recent_episode_stats(self.algo)
                     metrics.update(aggregate_episode_metrics(outcomes, episode_stats))
-
-                    # Export self-play weights every iteration so the opponent
-                    # stays fresh (instead of only every 150k checkpoint).
-                    # TODO: this is not how it should be done. So make proper self-play later.
-                    self._export_selfplay_weights()
 
                     # Collect and log self-play diagnostics.
                     sp_metrics = self._collect_and_log_selfplay_diagnostics()
