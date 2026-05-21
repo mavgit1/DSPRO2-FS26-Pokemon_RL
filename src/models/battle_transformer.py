@@ -13,6 +13,21 @@ from src.models.vocab import vocab_sizes
 _VOCAB_SIZES = vocab_sizes()
 
 
+def _obs_batch_for_module(obs_batch: Dict[str, Any]) -> Dict[str, Any]:
+    """Unwrap poke-env 0.15 ``{observation: embed_dict, action_mask}`` for the model."""
+    if not isinstance(obs_batch, dict):
+        return obs_batch
+    if "obs" in obs_batch:
+        return obs_batch
+    inner = obs_batch.get("observation")
+    if not isinstance(inner, dict) or "obs" not in inner:
+        return obs_batch
+    out = dict(inner)
+    if "action_mask" in obs_batch:
+        out["action_mask"] = obs_batch["action_mask"]
+    return out
+
+
 # =============================================================================
 # MODEL CONFIG, doesnt actually matter since overwritten by the config file
 # =============================================================================
@@ -578,7 +593,7 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
         return self.model.get_initial_state()
 
     def _forward(self, batch: Dict[str, Any], **kwargs) -> Dict[str, Any]:
-        obs_dict = batch[Columns.OBS]
+        obs_dict = _obs_batch_for_module(batch[Columns.OBS])
         state = batch.get(Columns.STATE_IN, None)
         features, new_state, action_mask = self.model.compute_features(obs_dict, state)
         logits, _values = self.model.heads_from_features(features, action_mask)
@@ -593,7 +608,7 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
         return output
 
     def _forward_train(self, batch: Dict[str, Any], **kwargs) -> Dict[str, Any]:
-        obs_dict = batch[Columns.OBS]
+        obs_dict = _obs_batch_for_module(batch[Columns.OBS])
         state = batch.get(Columns.STATE_IN, None)
         features, new_state, action_mask = self.model.compute_features(obs_dict, state)
         logits, values = self.model.heads_from_features(features, action_mask)
@@ -635,7 +650,7 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
             Non-stateful: [B].
         """
         if embeddings is None:
-            obs_dict = batch[Columns.OBS]
+            obs_dict = _obs_batch_for_module(batch[Columns.OBS])
             state = batch.get(Columns.STATE_IN, None)
             embeddings, _, _ = self.model.compute_features(obs_dict, state)
         values = self.model.value_head(embeddings).squeeze(-1)

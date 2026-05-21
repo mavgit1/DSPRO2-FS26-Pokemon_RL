@@ -67,6 +67,36 @@ def get_observation_space() -> gym.spaces.Dict:
     )
 
 
+def get_rllib_observation_space() -> gym.spaces.Dict:
+    """Observation space as returned by poke-env 0.15+ (embed dict nested under ``observation``)."""
+    return gym.spaces.Dict(
+        {
+            "observation": get_observation_space(),
+            "action_mask": gym.spaces.Box(
+                low=0,
+                high=1,
+                shape=(NATIVE_ACTION_SPACE_N,),
+                dtype=np.float32,
+            ),
+        }
+    )
+
+
+def flatten_agent_observation(obs: Any) -> Optional[Dict[str, np.ndarray]]:
+    """Unwrap poke-env's ``{observation: {...}, action_mask}`` layout for the model."""
+    if not isinstance(obs, dict):
+        return None
+    if "obs" in obs:
+        return obs
+    inner = obs.get("observation")
+    if not isinstance(inner, dict) or "obs" not in inner:
+        return None
+    flat = dict(inner)
+    if "action_mask" in obs:
+        flat["action_mask"] = obs["action_mask"]
+    return flat
+
+
 # =============================================================================
 # BASE ENVIRONMENT
 # =============================================================================
@@ -358,7 +388,7 @@ class PokemonBattleEnv(SinglesEnv):
             "action_mask_valid_count_mean": float(mask_valid_mean),
         }
 
-def order_to_action(self, order, battle, fake: bool = False, strict: bool = True):
+    def order_to_action(self, order, battle, fake: bool = False, strict: bool = True):
         """Convert a BattleOrder to action index natively."""
         try:
             # pylint: disable=no-member
@@ -368,7 +398,7 @@ def order_to_action(self, order, battle, fake: bool = False, strict: bool = True
                 raise
 
         self._fallback_events_current_episode += 1
-        
+
         # Hard fallback: pick a random valid action from the mask
         # pylint: disable=no-member
         mask = SinglesEnv.get_action_mask(battle)
@@ -543,7 +573,8 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             else:
                 self._episode_attack_actions += 1
 
-        result = super().step(action)
+        step_action = np.int64(action) if action is not None else action
+        result = super().step(step_action)
         terminated = False
         truncated = False
         if isinstance(result, tuple):
@@ -571,18 +602,19 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         return result
 
     def _record_observation_sample(self, obs: Any) -> None:
-        if not isinstance(obs, dict):
+        flat = flatten_agent_observation(obs)
+        if flat is None:
             return
         required = {"obs", "species", "items", "abilities", "action_mask"}
-        if not required.issubset(set(obs.keys())):
+        if not required.issubset(set(flat.keys())):
             return
         try:
             sample = {
-                "obs": np.asarray(obs["obs"]).astype(np.float32, copy=False),
-                "species": np.asarray(obs["species"]).astype(np.int64, copy=False),
-                "items": np.asarray(obs["items"]).astype(np.int64, copy=False),
-                "abilities": np.asarray(obs["abilities"]).astype(np.int64, copy=False),
-                "action_mask": np.asarray(obs["action_mask"]).astype(
+                "obs": np.asarray(flat["obs"]).astype(np.float32, copy=False),
+                "species": np.asarray(flat["species"]).astype(np.int64, copy=False),
+                "items": np.asarray(flat["items"]).astype(np.int64, copy=False),
+                "abilities": np.asarray(flat["abilities"]).astype(np.int64, copy=False),
+                "action_mask": np.asarray(flat["action_mask"]).astype(
                     np.float32, copy=False
                 ),
             }

@@ -1,0 +1,21 @@
+IMPORTANT
+- fix validation (did not work during ~6M step run — investigate later)
+- fix broken debug scripts still using 14-action / COMPRESSED imports (validate_pipeline, inspect_attention, analyze_decision_diagnostics)
+- validate native switch indices 0-5 vs bench tokens in obs (not blocking train)
+
+DONE
+- poke-env 0.15 obs wrap: get_rllib_observation_space + model unwrap for observation/action_mask keys
+- cast step() actions to np.int64 in CurriculumSingleAgentWrapper.step
+- order_to_action indented on PokemonBattleEnv (was dead module-level code)
+- native 22-action space wired (embedding mask, RLlib Discrete(22), self-play)
+- training confirmed working (user run ~6M steps, mostly good)
+- gitignore: system_log.csv, mysession.txt (local scratch / old logs)
+
+MEDIUM
+- rename _last_compressed_action leftovers in battle_env
+- terminal progress: ensure total_steps / reward print correctly (agent background run showed Steps: 0 — may be separate from your good run)
+- confirm RLlib always passes numpy actions in practice
+
+MAYBE
+- update Doc/ LaTeX / debug README for 22-action native space
+- poke-env reference: read .venv site-packages (0.15.0), no clone

@@ -11,6 +11,8 @@ temp/*
 checkpoints/
 logs/
 *.log
+system_log.csv
+mysession.txt
 .ray_tmp/
 mlflow.db
 mlruns/

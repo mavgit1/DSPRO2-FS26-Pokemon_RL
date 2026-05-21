@@ -9,7 +9,7 @@ from ray.tune.registry import register_env
 
 from src.config.TM_optimal_config import CurriculumStageConfig, TrainingConfig
 from src.action_space import NATIVE_ACTION_SPACE_N
-from src.envs.battle_env import create_env_creator, get_observation_space
+from src.envs.battle_env import create_env_creator, get_rllib_observation_space
 
 POKEMON_BATTLE_ENV_NAME = "pokemon_battle"
 
@@ -105,7 +105,7 @@ def build_ppo_config(
         .rl_module(
             rl_module_spec=RLModuleSpec(
                 module_class=PokemonRLModule,
-                observation_space=get_observation_space(),
+                observation_space=get_rllib_observation_space(),
                 action_space=gym.spaces.Discrete(NATIVE_ACTION_SPACE_N),
                 model_config={
                     **config.model.to_dict(),
