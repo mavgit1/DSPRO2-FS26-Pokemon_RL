@@ -13,6 +13,8 @@ logs/
 *.log
 system_log.csv
 mysession.txt
+.cursor/local/
+showdown_server_*.log
 .ray_tmp/
 mlflow.db
 mlruns/
