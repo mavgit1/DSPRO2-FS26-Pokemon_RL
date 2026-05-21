@@ -524,16 +524,21 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                     ),
                     CurriculumStageConfig(
                         name="heuristic_tactics",
-                        promote_at_win_rate=0.6, 
+                        promote_at_win_rate=0.45,
                         min_samples_for_promotion=400,
-                        opponent_mix={"random": 0.1, "random_no_switch": 0.2, "heuristic": 0.5, "self": 0.2},
+                        opponent_mix={
+                            "random": 0.05,
+                            "random_no_switch": 0.15,
+                            "heuristic": 0.7,
+                            "self": 0.1,
+                        },
                         reward_config=RewardConfig(
-                            victory_reward=20.0,
+                            victory_reward=30.0,
                             defeat_penalty=-20.0,
-                            hp_value_weight=2.0,    
+                            hp_value_weight=2.0,
                             fainted_value=3.0,
                             fainted_penalty=-3.0,
-                            action_quality_weight=0.0, 
+                            action_quality_weight=0.15,
                             matchup_reward_weight=0.0,
                             reward_scale=0.1,
                         )

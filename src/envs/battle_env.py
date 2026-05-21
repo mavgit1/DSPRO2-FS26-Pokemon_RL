@@ -13,6 +13,43 @@ from poke_env.environment.single_agent_wrapper import SingleAgentWrapper
 from poke_env.ps_client.account_configuration import AccountConfiguration
 
 from src.action_space import NATIVE_ACTION_SPACE_N, is_native_switch_action
+
+
+def _native_move_slot(action: int) -> Optional[int]:
+    """Move index 0-3 for native attack actions (6-21), else None."""
+    action = int(action)
+    if 6 <= action <= 21:
+        return (action - 6) % 4
+    return None
+
+
+def _move_type_effectiveness(move: Any, target_types: tuple) -> float:
+    move_type = getattr(move, "type", None)
+    if move_type is None:
+        return 1.0
+    try:
+        return float(move_type.damage_multiplier(*target_types))
+    except Exception:
+        return 1.0
+
+
+def _is_damaging_move(move: Any) -> bool:
+    category = getattr(move, "category", None)
+    if category is None:
+        return True
+    return getattr(category, "name", "") != "STATUS"
+
+
+def _best_damaging_effectiveness(moves: Any, target_types: tuple) -> float:
+    best = 0.0
+    found = False
+    for move in moves.values() if hasattr(moves, "values") else moves:
+        if not _is_damaging_move(move):
+            continue
+        eff = _move_type_effectiveness(move, target_types)
+        best = max(best, eff)
+        found = True
+    return best if found else 0.0
 from src.models.embedding import (
     embed_battle,
     NUM_TOKENS,
@@ -126,7 +163,7 @@ class PokemonBattleEnv(SinglesEnv):
                       server_configuration, strict, etc.)
         """
         self.reward_config = reward_config or RewardConfig()
-        self._last_compressed_action: int = -1
+        self._last_native_action: int = -1
         self._recent_outcomes: List[int] = []
         self._recent_episode_stats: List[Dict[str, float]] = []
         self._battle_step_stats: Dict[str, Dict[str, float]] = {}
@@ -280,10 +317,48 @@ class PokemonBattleEnv(SinglesEnv):
 
     def _compute_action_quality(self, battle: AbstractBattle) -> float:
         """
-        Stripped down to prevent the agent from finding pacifist exploits.
-        Let the HP delta and Win/Loss rewards do the teaching.
+        Asymmetric move-quality shaping (see action_quality_weight in config).
+
+        Offense: small reward only when the last action was a best-type damaging move.
+        No penalty for suboptimal attacks (HP delta still punishes whiffs).
+
+        Defense: small penalty when our active is weak to the opponent's best known
+        damaging move. No reward for resisting (avoids pacifist stall exploits).
         """
-        return 0.0
+        our = battle.active_pokemon
+        opp = battle.opponent_active_pokemon
+        if our is None or opp is None:
+            return 0.0
+
+        score = 0.0
+        opp_types = tuple(opp.types or ())
+        our_types = tuple(our.types or ())
+
+        # --- Offensive: reward good attack only ---
+        move_slot = _native_move_slot(self._last_native_action)
+        if move_slot is not None and opp_types:
+            known_moves = list(our.moves.values())
+            if move_slot < len(known_moves):
+                chosen_move = known_moves[move_slot]
+                if _is_damaging_move(chosen_move):
+                    chosen_eff = _move_type_effectiveness(chosen_move, opp_types)
+                    best_eff = _best_damaging_effectiveness(our.moves, opp_types)
+                    if best_eff > 0 and chosen_eff >= best_eff - 1e-6:
+                        if chosen_eff >= 2.0:
+                            score += 0.35
+                        elif chosen_eff >= 1.0:
+                            score += 0.15
+
+        # --- Defensive: penalty for bad matchup only ---
+        opp_moves = getattr(opp, "moves", None)
+        if opp_moves and our_types:
+            best_opp_eff = _best_damaging_effectiveness(opp_moves, our_types)
+            if best_opp_eff >= 2.0:
+                score -= 0.4
+            elif best_opp_eff > 1.0:
+                score -= 0.15
+
+        return score
     
     def set_reward_config(self, reward_config: RewardConfig) -> None:
         """Update reward configuration at runtime."""
@@ -556,7 +631,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         self._episode_total_actions = 0
         self._episode_switch_actions = 0
         self._episode_attack_actions = 0
-        self.env._last_compressed_action = -1
+        self.env._last_native_action = -1
         if hasattr(self.env, "reset_tracking_state"):
             self.env.reset_tracking_state()
         if hasattr(self.env, "consume_fallback_events"):
@@ -570,6 +645,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         if action is not None:
             action_int = int(action)
             self._last_action = action_int
+            self.env._last_native_action = action_int
             self._episode_total_actions += 1
             if is_native_switch_action(action_int):
                 self._episode_switch_actions += 1
