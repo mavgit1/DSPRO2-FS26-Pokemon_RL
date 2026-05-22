@@ -166,9 +166,11 @@ class CurriculumStageConfig:
     min_samples_for_promotion: int = 50
     opponent_mix: Dict[str, float] = field(default_factory=lambda: {"random": 1.0})
     reward_config: RewardConfig = field(default_factory=RewardConfig)
+    # If set, overrides ``TrainingConfig.ppo.entropy_coeff`` while this stage is active.
+    entropy_coeff: Optional[float] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        payload = {
             "name": self.name,
             "promote_at_win_rate": self.promote_at_win_rate,
             "min_samples_for_promotion": self.min_samples_for_promotion,
@@ -185,6 +187,9 @@ class CurriculumStageConfig:
                 "reward_scale": self.reward_config.reward_scale,
             },
         }
+        if self.entropy_coeff is not None:
+            payload["entropy_coeff"] = float(self.entropy_coeff)
+        return payload
 
 
 @dataclass
@@ -498,7 +503,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                 train_batch_size=8192,
                 sgd_minibatch_size=512,
                 clip_param=0.2,
-                entropy_coeff=0.01,
+                entropy_coeff=0.011,
                 torch_skip_nan_gradients=True,
             ),
             curriculum=CurriculumConfig(
@@ -510,6 +515,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                         name="warmup",
                         promote_at_win_rate=0.55,
                         min_samples_for_promotion=400,
+                        entropy_coeff=0.02,
                         opponent_mix={"random": 0.55, "random_no_switch": 0.35, "heuristic": 0.1},
                         reward_config=RewardConfig(
                             victory_reward=20.0,
@@ -526,6 +532,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                         name="heuristic_tactics",
                         promote_at_win_rate=0.45,
                         min_samples_for_promotion=400,
+                        entropy_coeff=0.011,
                         opponent_mix={
                             "random": 0.05,
                             "random_no_switch": 0.15,
@@ -547,6 +554,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                         name="league_training",
                         promote_at_win_rate=2.0,    
                         min_samples_for_promotion=999999,
+                        entropy_coeff=0.011,
                         opponent_mix={
                             "heuristic": 0.3, 
                             "historical": 0.17, 

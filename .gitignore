@@ -9,6 +9,9 @@ temp/*
 
 # Project specific
 checkpoints/
+checkpoints_archive*/
+checkpoints_archive_pre_*/
+*.pt
 logs/
 *.log
 system_log.csv

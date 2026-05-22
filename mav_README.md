@@ -9,7 +9,8 @@ rm -rf logs/*
 
 
 
-SAVE_LEAGUE_HISTORY=1 uv run --active train_battler.py \
+set -a && [ -f .env ] && . ./.env && set +a
+PYTHONUNBUFFERED=1 SAVE_LEAGUE_HISTORY=1 uv run --active train_battler.py \
   --preset pure_league_play \
   --num-servers 8 \
   --resume-checkpoint /home/sudome/DSPRO2-FS26-Pokemon_RL/checkpoints/final \
@@ -21,6 +22,7 @@ rm -rf logs/*
 rm train.log 
 SAVE_LEAGUE_HISTORY=1 nohup uv run --active train_battler.py --preset pure_league_play --num-servers 8 >> train.log 2>&1 &
 
+set -a && [ -f .env ] && . ./.env && set +a
 SAVE_LEAGUE_HISTORY=1 uv run --active train_battler.py --preset pure_league_play --num-servers 8
 
 

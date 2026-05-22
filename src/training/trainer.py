@@ -20,8 +20,10 @@ from src.config.TM_optimal_config import (
 from src.training.checkpointing import CheckpointManager
 from src.training.curriculum import CurriculumManager
 from src.training.env_bridge import (
+    apply_curriculum_entropy,
     apply_curriculum_stage,
     collect_env_memory_sentinels,
+    resolve_stage_entropy_coeff,
     collect_recent_observation_samples,
     collect_recent_episode_stats,
     collect_recent_outcomes,
@@ -172,6 +174,8 @@ class PokemonTrainer:
                 print(
                     "Resuming from checkpoint (step count will refresh after next iteration)."
                 )
+            self._reset_optimizers_after_resume()
+            self._sync_curriculum_after_resume()
 
         print("=" * 60)
         print("Starting Training")
@@ -352,17 +356,35 @@ class PokemonTrainer:
 
             except KeyboardInterrupt:
                 print("Training interrupted by user")
+            except Exception as exc:
+                print(
+                    f"[ERROR] Training failed at step {self.total_steps:,}: {exc!r}"
+                )
+                try:
+                    if (
+                        self.algo is not None
+                        and self.total_steps > self._last_checkpoint_step
+                    ):
+                        self._save_checkpoint()
+                        print("[INFO] Emergency checkpoint saved after failure.")
+                except Exception as save_exc:
+                    print(f"[WARN] Emergency checkpoint failed: {save_exc!r}")
 
             finally:
                 # Final checkpoint
                 final_path = None
                 if self.algo is not None:
-                    save_dir = os.path.abspath(f"{self.config.checkpoint_dir}/final")
-                    save_result = self.algo.save(save_dir)
-                    final_path = save_result.checkpoint.path
-                    mlflow.log_artifacts(
-                        local_dir=final_path, artifact_path="final_model"
-                    )
+                    try:
+                        save_dir = os.path.abspath(
+                            f"{self.config.checkpoint_dir}/final"
+                        )
+                        save_result = self.algo.save(save_dir)
+                        final_path = save_result.checkpoint.path
+                        mlflow.log_artifacts(
+                            local_dir=final_path, artifact_path="final_model"
+                        )
+                    except Exception as save_exc:
+                        print(f"[WARN] Final checkpoint save failed: {save_exc!r}")
 
                 elapsed = time.time() - start_time
                 print("=" * 60)
@@ -411,14 +433,75 @@ class PokemonTrainer:
                     f"opponent_mix must contain at least one positive weight for stage '{stage.name}'"
                 )
 
+    def _reset_optimizers_after_resume(self) -> None:
+        """Recreate Adam optimizers after checkpoint restore.
+
+        PyTorch 2.10 + RLlib restored optimizer state can trigger:
+        ``beta1 as a Tensor is not supported for capturable=False and foreach=True``.
+        We keep model weights from the checkpoint but reset optimizer momentum.
+        """
+        if self.algo is None:
+            return
+        learner_group = getattr(self.algo, "learner_group", None)
+        if learner_group is None:
+            return
+
+        def _reset(learner: Any, _: Any = None) -> None:
+            for module_id in list(learner.module.keys()):
+                config = learner.config.get_config_for_module(module_id)
+                for name in list(learner._module_optimizers.get(module_id, [])):
+                    opt = learner._named_optimizers.pop(name, None)
+                    if opt is not None:
+                        learner._optimizer_parameters.pop(opt, None)
+                        learner._optimizer_lr_schedules.pop(opt, None)
+                    learner._optimizer_name_to_module.pop(name, None)
+                learner._module_optimizers[module_id] = []
+
+                module = learner._module[module_id]
+                params = learner.get_parameters(module)
+                optimizer = torch.optim.Adam(params, foreach=False)
+                learner.register_optimizer(
+                    module_id=module_id,
+                    optimizer=optimizer,
+                    params=params,
+                    lr_or_lr_schedule=config.lr,
+                )
+            return None
+
+        learner_group.foreach_learner(func=_reset, timeout_seconds=None)
+        print("Reset learner optimizers after resume (foreach=False, fresh momentum).")
+
+    def _sync_curriculum_after_resume(self) -> None:
+        """Align curriculum stage with resumed step count (state is not in checkpoints)."""
+        if not self.curriculum or self.total_steps <= 0:
+            return
+        # Observed promotion in production runs: warmup -> heuristic ~80k steps.
+        if self.total_steps >= 82_000:
+            target_idx = min(1, len(self.curriculum.stages) - 1)
+        else:
+            target_idx = 0
+        if self.curriculum.current_stage_idx != target_idx:
+            old = self.curriculum.current_stage.name
+            self.curriculum.current_stage_idx = target_idx
+            self.curriculum.episodes_in_stage = 0
+            self.curriculum.outcome_window.clear()
+            print(
+                f"Curriculum synced after resume: {old} -> "
+                f"{self.curriculum.current_stage.name} (steps={self.total_steps:,})"
+            )
+
     def _apply_curriculum_stage(self, stage: CurriculumStageConfig) -> None:
         """Push stage payload to all running env wrappers."""
         if self.algo is None:
             return
+        entropy_coeff = resolve_stage_entropy_coeff(
+            stage, self.config.ppo.entropy_coeff
+        )
+        apply_curriculum_entropy(self.algo, entropy_coeff)
         apply_curriculum_stage(self.algo, stage)
         print(
             f"Applied stage '{stage.name}' | threshold={stage.promote_at_win_rate:.2f} "
-            f"| mix={stage.opponent_mix}"
+            f"| entropy_coeff={entropy_coeff:.4f} | mix={stage.opponent_mix}"
         )
 
     def _register_environments(self) -> None:
@@ -536,13 +619,16 @@ class PokemonTrainer:
                 diag = analyze_fn(self._to_batched_obs(sample), top_k=3)
             except Exception:
                 continue
-            new_records.append(
-                {
-                    "iteration": self.iteration,
-                    "total_steps": self.total_steps,
-                    "diagnostics": diag,
-                }
-            )
+            record: Dict[str, Any] = {
+                "iteration": self.iteration,
+                "total_steps": self.total_steps,
+                "diagnostics": diag,
+            }
+            if sample.get("opponent_type") is not None:
+                record["opponent_type"] = sample["opponent_type"]
+            if sample.get("training_stage_index") is not None:
+                record["training_stage_index"] = sample["training_stage_index"]
+            new_records.append(record)
 
         if not new_records:
             return metrics

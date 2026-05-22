@@ -707,6 +707,8 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
                 "action_mask": np.asarray(flat["action_mask"]).astype(
                     np.float32, copy=False
                 ),
+                "opponent_type": self._current_opponent_key,
+                "training_stage_index": self._stage_counter,
             }
         except Exception:
             return

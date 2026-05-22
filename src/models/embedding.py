@@ -48,9 +48,15 @@ SPECIES_VOCAB_SIZE = _VOCAB_SIZES["species_vocab_size"]
 ITEM_VOCAB_SIZE = _VOCAB_SIZES["item_vocab_size"]
 ABILITY_VOCAB_SIZE = _VOCAB_SIZES["ability_vocab_size"]
 ACTION_SPACE_N = NATIVE_ACTION_SPACE_N
+GLOBAL_EXTRA_START_IDX = (
+    len(WEATHER_LIST) + len(FIELD_LIST) + 2 * len(SIDE_CONDITION_LIST)
+)
 GLOBAL_EXTRA_FEATURE_NAMES = [
     "opponent_random",
+    "opponent_random_no_switch",
     "opponent_heuristic",
+    "opponent_self",
+    "opponent_historical",
     "opponent_other",
     "training_stage_index",
     "battle_turn_norm",
@@ -396,24 +402,30 @@ def _global_extra_features(
     
     if opponent_key == "random":
         features[0] = 1.0
-    elif opponent_key == "heuristic":
+    elif opponent_key == "random_no_switch":
         features[1] = 1.0
-    elif opponent_key:
+    elif opponent_key == "heuristic":
         features[2] = 1.0
+    elif opponent_key == "self":
+        features[3] = 1.0
+    elif opponent_key == "historical":
+        features[4] = 1.0
+    elif opponent_key:
+        features[5] = 1.0
 
-    features[3] = float(max(0, int(training_stage_index or 0)))
-    features[4] = min(float(max(0, int(getattr(battle, "turn", 0)))) / 100.0, 1.0)
-    features[5] = 1.0 if bool(getattr(battle, "force_switch", False)) else 0.0
+    features[6] = float(max(0, int(training_stage_index or 0)))
+    features[7] = min(float(max(0, int(getattr(battle, "turn", 0)))) / 100.0, 1.0)
+    features[8] = 1.0 if bool(getattr(battle, "force_switch", False)) else 0.0
 
     active = getattr(battle, "active_pokemon", None)
     opp_active = getattr(battle, "opponent_active_pokemon", None)
-    
-    features[6] = 1.0 if active is not None and bool(getattr(active, "trapped", False)) else 0.0
-    features[7] = min(float(len(getattr(battle, "available_moves", []) or [])) / 4.0, 1.0)
-    features[8] = min(float(len(getattr(battle, "available_switches", []) or [])) / 6.0, 1.0)
-    features[9] = 1.0 if bool(getattr(battle, "can_dynamax", False)) else 0.0
-    features[10] = 1.0 if bool(getattr(battle, "can_mega_evolve", False)) else 0.0
-    features[11] = 1.0 if bool(getattr(battle, "can_z_move", False)) else 0.0
+
+    features[9] = 1.0 if active is not None and bool(getattr(active, "trapped", False)) else 0.0
+    features[10] = min(float(len(getattr(battle, "available_moves", []) or [])) / 4.0, 1.0)
+    features[11] = min(float(len(getattr(battle, "available_switches", []) or [])) / 6.0, 1.0)
+    features[12] = 1.0 if bool(getattr(battle, "can_dynamax", False)) else 0.0
+    features[13] = 1.0 if bool(getattr(battle, "can_mega_evolve", False)) else 0.0
+    features[14] = 1.0 if bool(getattr(battle, "can_z_move", False)) else 0.0
 
     # DAMAGE MULTIPLIER CHEAT SHEET
     if active and opp_active and active.moves:
@@ -423,9 +435,9 @@ def _global_extra_features(
                 try:
                     mult = opp_active.damage_multiplier(moves[i])
 
-                    features[12 + i] = min(float(mult) / 4.0, 1.0)
+                    features[15 + i] = min(float(mult) / 4.0, 1.0)
                 except Exception:
-                    features[12 + i] = 0.25
+                    features[15 + i] = 0.25
                     
     return features
 
@@ -438,8 +450,6 @@ def _canonical_opponent_type(value: Optional[str]) -> Optional[str]:
         return None
     if key == "heuristics":
         return "heuristic"
-    if key == "random_no_switch":
-        return "random"
     return key
 
 

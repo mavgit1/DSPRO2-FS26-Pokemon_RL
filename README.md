@@ -80,14 +80,26 @@ Sets up no-gimmick battle formats (no Dynamax, no Terastallize, no Sleep Clause)
 ### Training
 
 ```bash
-uv run train_battler.py --preset quick          # quick test run
-uv run train_battler.py --preset standard        # default
-uv run train_battler.py --preset optimal         # RTX 5090
-uv run train_battler.py --preset memory_safe     # reduced RAM
-uv run train_battler.py --preset large           # max resources
+uv run train_battler.py --preset quick              # quick test run
+uv run train_battler.py --preset standard             # default
+uv run train_battler.py --preset optimal              # RTX 5090
+uv run train_battler.py --preset memory_safe          # reduced RAM
+uv run train_battler.py --preset large                # max resources
+uv run train_battler.py --preset pure_league_play     # curriculum + league mix (recommended)
 ```
 
-Presets are defined in `src/config/TM_optimal_config.py`.
+Presets are defined in `src/config/TM_optimal_config.py`. See `mav_README.md` for the full `pure_league_play` curriculum, reward, and diagnostics workflow.
+
+**Recommended production-style run (1.5M steps):**
+
+```bash
+./scripts/setup_training.sh 8
+set -a && [ -f .env ] && . ./.env && set +a
+PYTHONUNBUFFERED=1 SAVE_LEAGUE_HISTORY=1 uv run --active train_battler.py \
+  --preset pure_league_play --num-servers 8 --timesteps 1500000
+```
+
+The policy uses poke-env's **native 22-action** space (switches 0–5, moves 6–9, gimmicks 10–21). Training writes decision diagnostics to `logs/validation/decision_diagnostics_samples.json` for post-hoc analysis.
 
 ### Resume Training
 
@@ -99,10 +111,20 @@ uv run train_battler.py --preset optimal \
   --mlflow-run-id <RUN_ID>
 ```
 
-- `--resume-checkpoint latest` picks the newest checkpoint under `checkpoints/`
+- `--resume-checkpoint latest` picks the newest `checkpoints/step_<n>/` directory
 - Pass a specific path instead of `latest` to resume from a particular checkpoint
 - `--resume-checkpoint` alone resumes model state but creates a new MLflow run
 - `--mlflow-run-id` alone continues logging but starts from a fresh model
+
+### Post-training forensics
+
+After a run, analyze what the policy attended to and how confident it became:
+
+```bash
+uv run python scripts/analyze_model_diagnostics.py
+```
+
+This reads `logs/validation/decision_diagnostics_samples.json` (collected during training) and writes plots under `logs/validation/diagnostics_plots/` plus `diagnostics_report.json` and `diagnostics_report.md`. For win rates against fixed opponents, use validation below.
 
 ### Validation
 
@@ -183,6 +205,9 @@ src/
   data/                   Dataset utilities
   validation/             Checkpoint evaluation and benchmarking
 scripts/                  Server management, diagnostics, sweeps
+  analyze_model_diagnostics.py   Plots + AI-readable reports from training samples
+  visualize_decision_diagnostics.py   Plot-only wrapper
+src/analysis/             Shared decision diagnostics logic
 data/                     BDSP trainer CSVs, team manifests, gauntlet order
 examples/                 Sandbox scripts, notebooks, reference players
 ```
