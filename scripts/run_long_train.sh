@@ -13,7 +13,7 @@ MLFLOW_RUN_ID="${MLFLOW_RUN_ID:-}"
 
 mkdir -p logs checkpoints
 
-log() { echo "[$(date -Iseconds)] $*" | tee -a "$MONITOR_LOG"; }
+log() { echo "[$(date -Iseconds)] $*" | tee -a "$MONITOR_LOG" >&2; }
 
 purge() {
   pkill -f "train_battler.py" 2>/dev/null || true
@@ -72,7 +72,7 @@ run_once() {
 
 monitor_pid() {
   local pid=$1
-  local last_steps=-1 last_ckpt_step=-1 stall_since
+  local steps=0 last_steps=-1 last_ckpt_step=-1 stall_since
   stall_since=$(date +%s)
   while kill -0 "$pid" 2>/dev/null; do
     sleep 45
@@ -111,8 +111,10 @@ monitor_pid() {
       return 0
     fi
   done
-  wait "$pid" || true
-  [[ -n "$steps" && "$steps" -ge "$TOTAL" ]] && return 0
+  steps=$(current_steps)
+  wait "$pid" 2>/dev/null || true
+  steps=$(current_steps)
+  [[ "$steps" =~ ^[0-9]+$ && "$steps" -ge "$TOTAL" ]] && return 0
   train_failed && return 1
   return 1
 }
