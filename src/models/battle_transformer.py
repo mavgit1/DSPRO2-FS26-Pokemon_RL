@@ -319,6 +319,7 @@ class PokemonTransformerModel(nn.Module):
         self,
         obs_dict: Dict[str, TensorType],
         top_k: int = 3,
+        compute_saliency: bool = True,
     ) -> Dict[str, Any]:
         action_mask = obs_dict.get("action_mask")
         parts = self._embed_obs_parts(obs_dict)
@@ -333,7 +334,8 @@ class PokemonTransformerModel(nn.Module):
         )
         x = self.input_norm(self.input_proj(x))
         x = self._add_token_structure_embeddings(x)
-        x.retain_grad()
+        if compute_saliency:
+            x.retain_grad()
 
         encoded = self._transformer_forward(x)
         cls_token = self._get_cls_token(encoded)
@@ -365,9 +367,11 @@ class PokemonTransformerModel(nn.Module):
         selected_idx = top_idxs[:, 0]
         selected_logit = logits.gather(1, selected_idx.unsqueeze(1)).mean()
 
-        self.zero_grad(set_to_none=True)
-        selected_logit.backward()
-        token_saliency = x.grad.norm(dim=-1)
+        token_saliency = None
+        if compute_saliency:
+            self.zero_grad(set_to_none=True)
+            selected_logit.backward()
+            token_saliency = x.grad.norm(dim=-1)
 
         weight = self.input_proj.weight
         base_w = weight[:, : self.token_dim]
@@ -405,7 +409,11 @@ class PokemonTransformerModel(nn.Module):
                 "entropy_mean": float(entropy.mean().detach().cpu()),
                 "top_actions_batch0": top_actions,
             },
-            "token_importance": token_saliency.detach().cpu().tolist(),
+            "token_importance": (
+                token_saliency.detach().cpu().tolist()
+                if token_saliency is not None
+                else []
+            ),
             "component_importance": component_scores,
         }
 
@@ -658,5 +666,7 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
 
     # ---- Diagnostics ----------------------------------------------------
 
-    def analyze_observation(self, obs_dict, top_k: int = 3):
-        return self.model.analyze_observation(obs_dict=obs_dict, top_k=top_k)
+    def analyze_observation(self, obs_dict, top_k: int = 3, compute_saliency: bool = True):
+        return self.model.analyze_observation(
+            obs_dict=obs_dict, top_k=top_k, compute_saliency=compute_saliency
+        )

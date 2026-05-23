@@ -111,6 +111,9 @@ class PokemonTrainer:
         self.iteration = 0
         self.best_reward = float("-inf")
         self.system_metrics = SystemMetricsCollector()
+        self._disable_decision_diagnostics = os.environ.get(
+            "DISABLE_DECISION_DIAGNOSTICS", ""
+        ).lower() in ("1", "true", "yes")
         self.diag_samples_per_iteration = int(
             os.environ.get("DIAG_SAMPLES_PER_ITER", "3")
         )
@@ -571,11 +574,23 @@ class PokemonTrainer:
     # Converts obs to expected tensor shapes for the model.
     @staticmethod
     def _to_batched_obs(obs_sample: Dict[str, Any]) -> Dict[str, torch.Tensor]:
-        obs = torch.as_tensor(obs_sample["obs"], dtype=torch.float32)
-        species = torch.as_tensor(obs_sample["species"], dtype=torch.long)
-        items = torch.as_tensor(obs_sample["items"], dtype=torch.long)
-        abilities = torch.as_tensor(obs_sample["abilities"], dtype=torch.long)
-        action_mask = torch.as_tensor(obs_sample["action_mask"], dtype=torch.float32)
+        def _f32(key: str) -> torch.Tensor:
+            arr = np.asarray(obs_sample[key], dtype=np.float32)
+            if not arr.flags.writeable:
+                arr = arr.copy()
+            return torch.from_numpy(arr)
+
+        def _i64(key: str) -> torch.Tensor:
+            arr = np.asarray(obs_sample[key], dtype=np.int64)
+            if not arr.flags.writeable:
+                arr = arr.copy()
+            return torch.from_numpy(arr)
+
+        obs = _f32("obs")
+        species = _i64("species")
+        items = _i64("items")
+        abilities = _i64("abilities")
+        action_mask = _f32("action_mask")
 
         if obs.dim() == 2:
             obs = obs.unsqueeze(0)
@@ -602,6 +617,8 @@ class PokemonTrainer:
             "diag/samples_saved_total": float(self._diag_samples_saved),
             "diag/samples_pruned_total": float(self._diag_pruned_total),
         }
+        if self._disable_decision_diagnostics:
+            return metrics
         analyze_fn = self._get_diagnostic_analyzer()
         if analyze_fn is None:
             return metrics
@@ -614,9 +631,20 @@ class PokemonTrainer:
 
         selected = raw_samples[: self.diag_samples_per_iteration]
         new_records: list[Dict[str, Any]] = []
+        device = None
+        try:
+            module = self.algo.get_module()
+            device = next(module.parameters()).device
+        except Exception:
+            pass
+
         for sample in selected:
             try:
-                diag = analyze_fn(self._to_batched_obs(sample), top_k=3)
+                batched = self._to_batched_obs(sample)
+                if device is not None:
+                    batched = {k: v.to(device) for k, v in batched.items()}
+                # Saliency backward on the live learner GPU corrupts PPO; inference-only here.
+                diag = analyze_fn(batched, top_k=3, compute_saliency=False)
             except Exception:
                 continue
             record: Dict[str, Any] = {
@@ -769,6 +797,7 @@ class PokemonTrainer:
                         episodes=validation.benchmark_episodes_per_opponent,
                     )
 
+                team_manifest = self._manifest_for_validation_protocol(protocol_name)
                 report = run_inprocess_validation(
                     algo=self.algo,
                     config=self.config,
@@ -777,6 +806,7 @@ class PokemonTrainer:
                     max_steps_per_battle=validation.max_steps_per_battle,
                     seed=validation.seed,
                     player_team=player_team,
+                    team_manifest=team_manifest,
                     num_servers=self.num_servers,
                 )
             except Exception as exc:

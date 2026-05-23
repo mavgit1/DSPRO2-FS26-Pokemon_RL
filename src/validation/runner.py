@@ -732,6 +732,7 @@ def run_inprocess_validation(
     max_steps_per_battle: int,
     seed: int = 42,
     player_team: str | None = None,
+    team_manifest: str | None = None,
     explore: bool = False,
     num_servers: int = 1,
 ) -> Dict[str, Any]:
@@ -759,6 +760,39 @@ def run_inprocess_validation(
             max_steps_per_battle=max_steps_per_battle,
             num_servers=num_servers,
             player_team=player_team_resolved,
+            explore=explore,
+        )
+    elif protocol.name in {"fixed_paired", "mirror"}:
+        if protocol.name == "mirror" and player_team_resolved:
+            from src.validation.teams import fixed_team_mirror_specs
+
+            config.env.battle_format = config.env.battle_format.replace(
+                "randombattle", "customgame"
+            )
+            battle_specs = fixed_team_mirror_specs(player_team_resolved)
+        else:
+            if not team_manifest:
+                raise ValueError(
+                    f"team_manifest is required for validation protocol '{protocol.name}'."
+                )
+            manifest = load_team_manifest(team_manifest)
+            execution_format = manifest.get("metadata", {}).get("execution_format")
+            if isinstance(execution_format, str) and execution_format:
+                config.env.battle_format = execution_format
+            if protocol.name == "fixed_paired":
+                battle_specs = fixed_pair_battle_specs(manifest)
+                if player_team_resolved:
+                    for spec in battle_specs:
+                        spec["rl_team"] = player_team_resolved
+                        spec["rl_team_id"] = "player_team"
+            else:
+                battle_specs = mirror_battle_specs(manifest)
+        results = _run_battle_specs(
+            algo=algo,
+            config=config,
+            battle_specs=battle_specs,
+            start_port=start_port,
+            max_steps_per_battle=max_steps_per_battle,
             explore=explore,
         )
     else:
@@ -789,7 +823,7 @@ def run_inprocess_validation(
             "checkpoint": "inprocess",
             "preset": "live",
             "opponent": protocol.opponent,
-            "team_manifest": None,
+            "team_manifest": team_manifest,
             "battle_format": config.env.battle_format,
             "seed": seed,
             "max_steps_per_battle": max_steps_per_battle,
