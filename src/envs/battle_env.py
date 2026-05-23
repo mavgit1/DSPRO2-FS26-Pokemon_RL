@@ -59,6 +59,7 @@ from src.models.embedding import (
     ABILITY_VOCAB_SIZE,
 )
 from src.config.TM_optimal_config import RewardConfig
+from src.teams.team_pool import TeamPool
 
 
 # =============================================================================
@@ -494,6 +495,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         server_configuration: ServerConfiguration,
         opponent_mix: Optional[Dict[str, float]] = None,
         opponent_team: Optional[str] = None,
+        team_pool: Optional[TeamPool] = None,
         model_config_dict: Optional[Dict] = None,
         selfplay_weights_path: Optional[str] = None,
     ):
@@ -501,6 +503,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         self._battle_format = battle_format
         self._server_configuration = server_configuration
         self._opponent_team = opponent_team
+        self._team_pool = team_pool
         self._model_config_dict = model_config_dict
         self._selfplay_weights_path = selfplay_weights_path
         self._opponent_mix = self._normalize_opponent_mix(opponent_mix)
@@ -617,6 +620,9 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
                 pass
 
     def reset(self, *args, **kwargs):
+        if self._team_pool is not None:
+            self.env.agent1.update_team(self._team_pool.sample())
+
         # Sample an opponent per episode according to configured mix.
         opponent_key = self._choose_opponent_class()
         if opponent_key not in self._opponent_pool:
@@ -862,6 +868,7 @@ def create_env_creator(
     opponent_mix: Optional[Dict[str, float]] = None,
     player_team: Optional[str] = None,
     opponent_team: Optional[str] = None,
+    team_pool_manifest: Optional[str] = None,
     model_config_dict: Optional[Dict] = None,
     selfplay_weights_path: Optional[str] = None,
 ):
@@ -878,10 +885,15 @@ def create_env_creator(
             {"random": 0.7, "heuristic": 0.3} or {"random_no_switch": 1.0}
         player_team: Optional fixed Showdown team text for the learning agent
         opponent_team: Optional fixed Showdown team text for the opponent
+        team_pool_manifest: Optional path to a team manifest for per-episode sampling
 
     Returns:
         Callable that creates environments
     """
+
+    team_pool: Optional[TeamPool] = None
+    if team_pool_manifest:
+        team_pool = TeamPool(team_pool_manifest)
 
     def env_creator(env_config: Optional[Dict] = None):
         env_config = env_config or {}
@@ -896,6 +908,8 @@ def create_env_creator(
             mix = {difficulty: 1.0}
         p_team = env_config.get("player_team", player_team)
         o_team = env_config.get("opponent_team", opponent_team)
+        if p_team is None and team_pool is not None:
+            p_team = team_pool.sample()
 
         if env_config.get("server_port") is not None:
             port = int(env_config["server_port"])
@@ -972,6 +986,7 @@ def create_env_creator(
             server_configuration=server_config,
             opponent_mix=mix,
             opponent_team=o_team,
+            team_pool=team_pool,
             model_config_dict=model_config_dict,
             selfplay_weights_path=selfplay_weights_path,
         )

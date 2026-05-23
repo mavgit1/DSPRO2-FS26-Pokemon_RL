@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import List, Dict, Any, Optional
 
 from src.models.vocab import vocab_sizes
@@ -99,6 +99,9 @@ class EnvironmentConfig:
     # you can use data/teams/player_team_2.txt as an example.
     # or for no team, set to None.
     player_team_path: Optional[str] = None
+
+    # Manifest path for per-episode player team sampling (20-team pool).
+    team_pool_manifest: Optional[str] = None
 
     # MLflow experiment name when player_team_path is set (fixed-team training).
     mlflow_experiment_fixed_team: str = "Pokemon_RL_Marvin_Fixed"
@@ -378,6 +381,7 @@ class TrainingConfig:
             "env": {
                 "battle_format": self.env.battle_format,
                 "player_team_path": self.env.player_team_path,
+                "team_pool_manifest": self.env.team_pool_manifest,
                 "mlflow_experiment_fixed_team": self.env.mlflow_experiment_fixed_team,
                 "num_workers": self.env.num_workers,
                 "num_envs_per_worker": self.env.num_envs_per_worker,
@@ -585,7 +589,16 @@ def get_config(preset: str = "standard") -> TrainingConfig:
         ),
     }
 
-
+    pure_league = presets["pure_league_play"]
+    presets["pure_league_pool"] = replace(
+        pure_league,
+        env=replace(
+            pure_league.env,
+            player_team_path=None,
+            team_pool_manifest="data/validation/gen8_random_battle_team_pairs.json",
+        ),
+        validation=replace(pure_league.validation, enabled=False),
+    )
 
     if preset not in presets:
         raise ValueError(f"Unknown preset: {preset}. Available: {list(presets.keys())}")

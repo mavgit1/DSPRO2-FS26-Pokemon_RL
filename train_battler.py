@@ -33,7 +33,16 @@ def main():
         "--preset",
         type=str,
         default="standard", 
-        choices=["quick", "standard", "memory_safe", "optimal", "large", "mav", "pure_league_play"],
+        choices=[
+            "quick",
+            "standard",
+            "memory_safe",
+            "optimal",
+            "large",
+            "mav",
+            "pure_league_play",
+            "pure_league_pool",
+        ],
         help="Configuration preset (default: standard)",
     )
     

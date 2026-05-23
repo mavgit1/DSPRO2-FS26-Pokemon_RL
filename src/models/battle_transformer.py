@@ -1,6 +1,9 @@
+import math
+
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from typing import Any, Dict, Optional, Tuple
 
 from ray.rllib.core.rl_module.torch import TorchRLModule
@@ -11,6 +14,82 @@ from ray.rllib.utils.typing import ModelConfigDict, TensorType
 from src.models.vocab import vocab_sizes
 
 _VOCAB_SIZES = vocab_sizes()
+
+
+def configure_safe_sdp_backends() -> None:
+    """Use math SDPA only; flash/mem-efficient kernels can illegal-memory-access.
+
+    Our transformer passes a learnable float ``attn_mask`` into
+    ``nn.MultiheadAttention``. With PyTorch 2.x, the mem-efficient CUDA
+    implementation (_scaled_dot_product_efficient_attention) has been observed
+    to raise ``cudaErrorIllegalAddress`` (see train logs with
+    ``CUDA_LAUNCH_BLOCKING=1`` — stack points at attention.cu, not diagnostics).
+
+    Called at import and model init so Ray driver, learners, and env runners
+  all see the same backend flags (process-local).
+    """
+    if not torch.cuda.is_available():
+        return
+    torch.backends.cuda.enable_flash_sdp(False)
+    torch.backends.cuda.enable_mem_efficient_sdp(False)
+    torch.backends.cuda.enable_math_sdp(True)
+
+
+# Apply as early as possible in every worker process that imports this module.
+configure_safe_sdp_backends()
+
+
+def apply_action_mask_to_logits(
+    logits: TensorType, action_mask: Optional[TensorType]
+) -> TensorType:
+    """Mask invalid actions and guarantee finite logits for Categorical sampling."""
+    logits = torch.nan_to_num(logits, nan=0.0, posinf=1e4, neginf=-1e4)
+    if action_mask is None:
+        return logits
+    mask = action_mask > 0
+    masked = logits.masked_fill(~mask, -1e9)
+    valid_count = mask.sum(dim=-1, keepdim=True)
+    no_valid = valid_count <= 0
+    if no_valid.any():
+        fallback = torch.full_like(logits, -1e9)
+        fallback[..., 0] = 0.0
+        masked = torch.where(no_valid, fallback, masked)
+    return masked
+
+
+def _self_attn_with_learned_bias(
+    mha: nn.MultiheadAttention,
+    x: TensorType,
+    attn_bias: TensorType,
+    *,
+    training: bool,
+) -> TensorType:
+    """Explicit attention matmul + additive bias (no fused SDPA CUDA kernels).
+
+    PyTorch's fused SDPA path for ``MultiheadAttention`` + float ``attn_mask``
+    can trigger ``cudaErrorIllegalAddress`` on some driver/GPU builds. This path
+    matches ``nn.MultiheadAttention`` numerically (see module tests) but avoids
+    ``_scaled_dot_product_efficient_attention``.
+    """
+    B, T, embed_dim = x.shape
+    num_heads = mha.num_heads
+    head_dim = embed_dim // num_heads
+
+    qkv = F.linear(x, mha.in_proj_weight, mha.in_proj_bias)
+    qkv = qkv.view(B, T, 3, num_heads, head_dim).permute(2, 0, 3, 1, 4)
+    q, k, v = qkv[0], qkv[1], qkv[2]
+
+    scale = 1.0 / math.sqrt(head_dim)
+    scores = torch.matmul(q, k.transpose(-2, -1)) * scale
+    scores = scores + attn_bias.view(1, 1, T, T)
+
+    attn_weights = torch.softmax(scores, dim=-1)
+    attn_weights = F.dropout(
+        attn_weights, p=mha.dropout, training=training and mha.training
+    )
+    context = torch.matmul(attn_weights, v)
+    context = context.transpose(1, 2).reshape(B, T, embed_dim)
+    return mha.out_proj(context)
 
 
 def _obs_batch_for_module(obs_batch: Dict[str, Any]) -> Dict[str, Any]:
@@ -197,6 +276,8 @@ class PokemonTransformerModel(nn.Module):
             nn.Linear(256, 1),
         )
 
+        configure_safe_sdp_backends()
+
     # ---------------------------------------------------------------------
     # Stateful API
     # ---------------------------------------------------------------------
@@ -296,8 +377,11 @@ class PokemonTransformerModel(nn.Module):
             bias = self.attn_bias[i, :T, :T]  # [T, T]
             # norm-first: x = x + SA(norm1(x)); x = x + FF(norm2(x))
             x_norm = layer.norm1(x)
-            sa_out, _ = layer.self_attn(
-                x_norm, x_norm, x_norm, attn_mask=bias, need_weights=False
+            sa_out = _self_attn_with_learned_bias(
+                layer.self_attn,
+                x_norm,
+                bias,
+                training=self.training,
             )
             x = x + layer.dropout1(sa_out)
             x_norm2 = layer.norm2(x)
@@ -319,7 +403,7 @@ class PokemonTransformerModel(nn.Module):
         self,
         obs_dict: Dict[str, TensorType],
         top_k: int = 3,
-        compute_saliency: bool = True,
+        compute_saliency: bool = False,
     ) -> Dict[str, Any]:
         action_mask = obs_dict.get("action_mask")
         parts = self._embed_obs_parts(obs_dict)
@@ -491,9 +575,7 @@ class PokemonTransformerModel(nn.Module):
         """
         logits = self.policy_head(features)
         values = self.value_head(features).squeeze(-1)
-        if action_mask is not None:
-            mask = action_mask.clamp(min=1e-8)
-            logits = logits - (1.0 - mask) * 1e8
+        logits = apply_action_mask_to_logits(logits, action_mask)
         return logits, values
 
     def _extract_state(
@@ -606,10 +688,6 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
         features, new_state, action_mask = self.model.compute_features(obs_dict, state)
         logits, _values = self.model.heads_from_features(features, action_mask)
 
-        if action_mask is not None:
-            inf_mask = torch.clamp(torch.log(action_mask), min=-1e9)
-            logits = logits + inf_mask
-
         output: Dict[str, Any] = {Columns.ACTION_DIST_INPUTS: logits}
         if self.model.use_lstm:
             output[Columns.STATE_OUT] = new_state
@@ -620,10 +698,6 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
         state = batch.get(Columns.STATE_IN, None)
         features, new_state, action_mask = self.model.compute_features(obs_dict, state)
         logits, values = self.model.heads_from_features(features, action_mask)
-
-        if action_mask is not None:
-            logits = torch.where(action_mask <= 0, logits - 1e9, logits)
-  
 
         output: Dict[str, Any] = {
             Columns.ACTION_DIST_INPUTS: logits,
@@ -666,7 +740,7 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
 
     # ---- Diagnostics ----------------------------------------------------
 
-    def analyze_observation(self, obs_dict, top_k: int = 3, compute_saliency: bool = True):
+    def analyze_observation(self, obs_dict, top_k: int = 3, compute_saliency: bool = False):
         return self.model.analyze_observation(
             obs_dict=obs_dict, top_k=top_k, compute_saliency=compute_saliency
         )

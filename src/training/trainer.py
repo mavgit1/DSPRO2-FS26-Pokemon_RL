@@ -17,6 +17,7 @@ from src.config.TM_optimal_config import (
     get_config,
     resolve_mlflow_experiment_for_training,
 )
+from src.models.battle_transformer import configure_safe_sdp_backends
 from src.training.checkpointing import CheckpointManager
 from src.training.curriculum import CurriculumManager
 from src.training.env_bridge import (
@@ -112,8 +113,8 @@ class PokemonTrainer:
         self.best_reward = float("-inf")
         self.system_metrics = SystemMetricsCollector()
         self._disable_decision_diagnostics = os.environ.get(
-            "DISABLE_DECISION_DIAGNOSTICS", ""
-        ).lower() in ("1", "true", "yes")
+            "ENABLE_DECISION_DIAGNOSTICS", ""
+        ).lower() not in ("1", "true", "yes")
         self.diag_samples_per_iteration = int(
             os.environ.get("DIAG_SAMPLES_PER_ITER", "3")
         )
@@ -138,6 +139,7 @@ class PokemonTrainer:
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
+            configure_safe_sdp_backends()
 
         ray_tmp = os.environ.get("RAY_TMPDIR", "").strip()
         ray_kwargs: Dict[str, Any] = {
@@ -643,8 +645,9 @@ class PokemonTrainer:
                 batched = self._to_batched_obs(sample)
                 if device is not None:
                     batched = {k: v.to(device) for k, v in batched.items()}
-                # Saliency backward on the live learner GPU corrupts PPO; inference-only here.
-                diag = analyze_fn(batched, top_k=3, compute_saliency=False)
+                # Never build autograd graphs on the live learner module (corrupts PPO).
+                with torch.inference_mode():
+                    diag = analyze_fn(batched, top_k=3, compute_saliency=False)
             except Exception:
                 continue
             record: Dict[str, Any] = {
@@ -718,9 +721,15 @@ class PokemonTrainer:
         """Export raw model state dict for self-play opponents to load."""
         try:
             module = self.algo.get_module("default_policy")
-            state_dict = module.model.state_dict()
             path = Path(os.path.abspath(self.config.selfplay_weights_path))
             path.parent.mkdir(parents=True, exist_ok=True)
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+            with torch.inference_mode():
+                state_dict = {
+                    key: tensor.detach().cpu()
+                    for key, tensor in module.model.state_dict().items()
+                }
             torch.save(state_dict, path)
         except Exception as exc:
             print(f"[WARN] Failed to export self-play weights: {exc}")

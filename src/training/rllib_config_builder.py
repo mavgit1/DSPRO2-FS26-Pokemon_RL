@@ -1,4 +1,5 @@
 import gymnasium as gym
+import json
 import torch
 import os
 from pathlib import Path
@@ -45,12 +46,21 @@ def register_environments(
     start_port: int,
     initial_stage: Optional[CurriculumStageConfig],
 ) -> None:
-    # Load fixed player team if configured.
+    # Load fixed player team or team-pool customgame format if configured.
     player_team: Optional[str] = None
+    team_pool_manifest: Optional[str] = None
     battle_format = config.env.battle_format
     if config.env.player_team_path:
         player_team = _load_player_team(config.env.player_team_path)
         battle_format = _custom_game_format(battle_format)
+    elif config.env.team_pool_manifest:
+        team_pool_manifest = config.env.team_pool_manifest
+        manifest_path = Path(team_pool_manifest).expanduser().resolve()
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        meta = manifest.get("metadata") if isinstance(manifest.get("metadata"), dict) else {}
+        battle_format = meta.get("execution_format") or _custom_game_format(
+            battle_format
+        )
 
     # Resolve selfplay weights path to absolute — Ray workers run from a temp
     # directory and can't find relative paths like "checkpoints/selfplay_latest.pt".
@@ -65,6 +75,7 @@ def register_environments(
         model_config_dict=config.model.to_dict(),
         selfplay_weights_path=selfplay_abs,
         player_team=player_team,
+        team_pool_manifest=team_pool_manifest,
     )
     register_env(POKEMON_BATTLE_ENV_NAME, env_creator)
 
