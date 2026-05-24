@@ -595,9 +595,9 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                         min_samples_for_promotion=999999,
                         entropy_coeff=0.011,
                         opponent_mix={
-                            "heuristic": 0.45,
+                            "heuristic": 0.55,
                             "historical": 0.15,
-                            "self": 0.25,
+                            "self": 0.15,
                             "random": 0.08,
                             "random_no_switch": 0.07,
                         }, 
