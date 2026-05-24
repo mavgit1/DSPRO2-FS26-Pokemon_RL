@@ -623,7 +623,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
         env=replace(
             pure_league.env,
             player_team_path=None,
-            team_pool_manifest="data/validation/gen8_team_pool_5.json",
+            team_pool_manifest="data/validation/gen8_random_battle_team_pairs.json",
         ),
         validation=replace(pure_league.validation, enabled=False),
     )
