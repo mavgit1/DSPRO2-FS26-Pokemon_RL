@@ -116,7 +116,7 @@ run_train() {
   log "Starting train: ${extra_args[*]}"
   env PYTHONUNBUFFERED=1 DISABLE_DECISION_DIAGNOSTICS=1 SAVE_LEAGUE_HISTORY=1 \
     uv run --active train_battler.py \
-      --preset pure_league_pool \
+      --preset pure_league_play \
       --timesteps "$TOTAL_STEPS" \
       --disable-scheduled-validation \
       "${extra_args[@]}" >>"$LOG" 2>&1 &

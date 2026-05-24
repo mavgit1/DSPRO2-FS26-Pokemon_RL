@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Resume pure_league_pool toward 25M with updated league mix + validation.
+# Resume pure_league_play toward 25M (pool curriculum + league mix + validation).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
@@ -29,7 +29,7 @@ echo "[$(date -Iseconds)] Resume ckpt=$CKPT total=$TOTAL mlflow=${MLFLOW_RUN_ID:
 
 env PYTHONUNBUFFERED=1 SAVE_LEAGUE_HISTORY=1 \
   uv run --active train_battler.py \
-    --preset pure_league_pool \
+    --preset pure_league_play \
     --timesteps "$TOTAL" \
     --resume-checkpoint "$CKPT" \
     "${extra[@]}" \

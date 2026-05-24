@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-PRESET="${1:-pure_league_pool}"
+PRESET="${1:-pure_league_play}"
 STEPS="${2:-200000}"
 LOG="logs/smoke_${PRESET}_${STEPS}_$(date +%Y%m%dT%H%M%S).log"
 mkdir -p logs

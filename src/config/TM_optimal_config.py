@@ -174,6 +174,8 @@ class CurriculumStageConfig:
     reward_config: RewardConfig = field(default_factory=RewardConfig)
     # If set, overrides ``TrainingConfig.ppo.entropy_coeff`` while this stage is active.
     entropy_coeff: Optional[float] = None
+    # If set, player team pool is rebuilt from this manifest when the stage is applied.
+    team_pool_manifest: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         payload = {
@@ -197,6 +199,8 @@ class CurriculumStageConfig:
             payload["entropy_coeff"] = float(self.entropy_coeff)
         if self.min_episodes_in_stage is not None:
             payload["min_episodes_in_stage"] = int(self.min_episodes_in_stage)
+        if self.team_pool_manifest is not None:
+            payload["team_pool_manifest"] = self.team_pool_manifest
         return payload
 
 
@@ -362,6 +366,10 @@ class TrainingConfig:
     # Self-play
     selfplay_weights_path: str = "checkpoints/selfplay_latest.pt"
 
+    # Optional one-shot export when curriculum enters ``reference_checkpoint_on_stage``.
+    reference_checkpoint_dir: Optional[str] = None
+    reference_checkpoint_on_stage: Optional[str] = None
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "total_timesteps": self.total_timesteps,
@@ -438,6 +446,144 @@ def resolve_mlflow_experiment_for_training(
 # =============================================================================
 
 
+def _build_pure_league_play_config() -> TrainingConfig:
+    """League training with team-pool curriculum (3→5→10→20) on gen8 custom game."""
+    pool_dir = "data/teams/pool_curriculum"
+    pool_3 = f"{pool_dir}/gen8_pool_3.json"
+    league_reward = RewardConfig(
+        victory_reward=35.0,
+        defeat_penalty=-35.0,
+        hp_value_weight=3.0,
+        fainted_value=3.0,
+        fainted_penalty=-3.0,
+        action_quality_weight=0.15,
+        matchup_reward_weight=0.0,
+        reward_scale=0.1,
+    )
+    heuristic_tactics_mix = {
+        "random": 0.05,
+        "random_no_switch": 0.05,
+        "heuristic": 0.65,
+        "self": 0.25,
+    }
+
+    def pool_tactics_stage(team_count: int) -> CurriculumStageConfig:
+        return CurriculumStageConfig(
+            name=f"pool_{team_count}_tactics",
+            promote_at_win_rate=0.65,
+            min_samples_for_promotion=400,
+            entropy_coeff=0.011,
+            opponent_mix=dict(heuristic_tactics_mix),
+            team_pool_manifest=f"{pool_dir}/gen8_pool_{team_count}.json",
+            reward_config=league_reward,
+        )
+
+    return TrainingConfig(
+        total_timesteps=25_000_000,
+        reference_checkpoint_dir="saved_models/pool_curriculum_reference",
+        reference_checkpoint_on_stage="league_training",
+        env=EnvironmentConfig(
+            player_team_path=None,
+            team_pool_manifest=pool_3,
+            num_workers=6,
+            num_envs_per_worker=6,
+            num_servers=6,
+            start_port=8000,
+        ),
+        validation=ValidationScheduleConfig(
+            enabled=True,
+            freq_steps=200_000,
+            protocols=["benchmark"],
+            num_servers=6,
+        ),
+        model=ModelConfig(
+            num_transformer_layers=3,
+            hidden_dim=256,
+            use_lstm=False,
+        ),
+        ppo=PPOConfig(
+            lr=0.00025,
+            gamma=0.99,
+            train_batch_size=8192,
+            sgd_minibatch_size=512,
+            clip_param=0.2,
+            entropy_coeff=0.011,
+            torch_skip_nan_gradients=True,
+        ),
+        curriculum=CurriculumConfig(
+            enabled=True,
+            rolling_window_episodes=400,
+            min_episodes_before_promotion=6500,
+            stages=[
+                CurriculumStageConfig(
+                    name="warmup",
+                    promote_at_win_rate=0.60,
+                    min_samples_for_promotion=400,
+                    entropy_coeff=0.02,
+                    team_pool_manifest=pool_3,
+                    opponent_mix={
+                        "random": 0.60,
+                        "random_no_switch": 0.25,
+                        "heuristic": 0.15,
+                    },
+                    reward_config=RewardConfig(
+                        victory_reward=35.0,
+                        defeat_penalty=-35.0,
+                        hp_value_weight=3.0,
+                        fainted_value=3.0,
+                        fainted_penalty=-3.0,
+                        action_quality_weight=0.0,
+                        matchup_reward_weight=0.0,
+                        reward_scale=0.1,
+                    ),
+                ),
+                CurriculumStageConfig(
+                    name="heuristic_bridge",
+                    promote_at_win_rate=0.0,
+                    min_samples_for_promotion=100,
+                    min_episodes_in_stage=8000,
+                    entropy_coeff=0.015,
+                    team_pool_manifest=pool_3,
+                    opponent_mix={
+                        "random": 0.45,
+                        "random_no_switch": 0.05,
+                        "heuristic": 0.50,
+                    },
+                    reward_config=RewardConfig(
+                        victory_reward=35.0,
+                        defeat_penalty=-35.0,
+                        hp_value_weight=3.0,
+                        fainted_value=3.0,
+                        fainted_penalty=-3.0,
+                        action_quality_weight=0.10,
+                        matchup_reward_weight=0.0,
+                        reward_scale=0.1,
+                    ),
+                ),
+                pool_tactics_stage(3),
+                pool_tactics_stage(5),
+                pool_tactics_stage(10),
+                pool_tactics_stage(20),
+                CurriculumStageConfig(
+                    name="league_training",
+                    promote_at_win_rate=2.0,
+                    min_samples_for_promotion=999999,
+                    entropy_coeff=0.011,
+                    team_pool_manifest=f"{pool_dir}/gen8_pool_20.json",
+                    opponent_mix={
+                        "heuristic": 0.55,
+                        "historical": 0.15,
+                        "self": 0.15,
+                        "random": 0.08,
+                        "random_no_switch": 0.07,
+                    },
+                    reward_config=league_reward,
+                ),
+            ],
+        ),
+    )
+
+
 def get_config(preset: str = "standard") -> TrainingConfig:
     """Get a configuration preset."""
 
@@ -493,147 +639,10 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                 sgd_minibatch_size=512,
             ),
         ),
-        "pure_league_play": TrainingConfig(
-            total_timesteps=100_000_000,
-            env=EnvironmentConfig(
-                player_team_path="data/teams/player_team.txt",
-                num_workers=6,
-                num_envs_per_worker=6,
-                num_servers=6,
-                start_port=8000,
-            ),
-            validation=ValidationScheduleConfig(
-                enabled=True,
-                freq_steps=200_000,
-                protocols=["benchmark", "fixed_paired"],
-                num_servers=6,
-            ),
-            model=ModelConfig(
-                num_transformer_layers=3,
-                hidden_dim=256,
-                use_lstm=False,
-            ),
-            ppo=PPOConfig(
-                lr=0.00025,
-                gamma=0.99,
-                train_batch_size=8192,
-                sgd_minibatch_size=512,
-                clip_param=0.2,
-                entropy_coeff=0.011,
-                torch_skip_nan_gradients=True,
-            ),
-            curriculum=CurriculumConfig(
-                enabled=True,
-                rolling_window_episodes=400,
-                # ~9.5k episodes ≈ earliest promotion near 300k steps (prior run: ~2.5k eps @ ~82k).
-                min_episodes_before_promotion=9500,
-                stages=[
-                    CurriculumStageConfig(
-                        name="warmup",
-                        promote_at_win_rate=0.60,
-                        min_samples_for_promotion=400,
-                        entropy_coeff=0.02,
-                        opponent_mix={"random": 0.60, "random_no_switch": 0.25, "heuristic": 0.15},
-                        reward_config=RewardConfig(
-                            victory_reward=35.0,
-                            defeat_penalty=-35.0,
-                            hp_value_weight=3.0,
-                            fainted_value=3.0,
-                            fainted_penalty=-3.0,
-                            action_quality_weight=0.0,
-                            matchup_reward_weight=0.0,
-                            reward_scale=0.1,
-                        )
-                    ),
-                    CurriculumStageConfig(
-                        name="heuristic_bridge",
-                        promote_at_win_rate=0.0,
-                        min_samples_for_promotion=100,
-                        min_episodes_in_stage=8000,
-                        entropy_coeff=0.015,
-                        opponent_mix={
-                            "random": 0.45,
-                            "random_no_switch": 0.05,
-                            "heuristic": 0.50,
-                        },
-                        reward_config=RewardConfig(
-                            victory_reward=35.0,
-                            defeat_penalty=-35.0,
-                            hp_value_weight=3.0,
-                            fainted_value=3.0,
-                            fainted_penalty=-3.0,
-                            action_quality_weight=0.10,
-                            matchup_reward_weight=0.0,
-                            reward_scale=0.1,
-                        )
-                    ),
-                    CurriculumStageConfig(
-                        name="heuristic_tactics",
-                        promote_at_win_rate=0.45,
-                        min_samples_for_promotion=400,
-                        entropy_coeff=0.011,
-                        opponent_mix={
-                            "random": 0.05,
-                            "random_no_switch": 0.05,
-                            "heuristic": 0.65,
-                            "self": 0.25,
-                        },
-                        reward_config=RewardConfig(
-                            victory_reward=35.0,
-                            defeat_penalty=-35.0,
-                            hp_value_weight=3.0,
-                            fainted_value=3.0,
-                            fainted_penalty=-3.0,
-                            action_quality_weight=0.15,
-                            matchup_reward_weight=0.0,
-                            reward_scale=0.1,
-                        )
-                    ),
-                    CurriculumStageConfig(
-                        name="league_training",
-                        promote_at_win_rate=2.0,    
-                        min_samples_for_promotion=999999,
-                        entropy_coeff=0.011,
-                        opponent_mix={
-                            "heuristic": 0.55,
-                            "historical": 0.15,
-                            "self": 0.15,
-                            "random": 0.08,
-                            "random_no_switch": 0.07,
-                        }, 
-                        reward_config=RewardConfig(
-                            victory_reward=35.0,
-                            defeat_penalty=-35.0,
-                            hp_value_weight=3.0,
-                            fainted_value=3.0,
-                            fainted_penalty=-3.0,
-                            action_quality_weight=0.15,
-                            matchup_reward_weight=0.0,
-                            reward_scale=0.1,
-                        )
-                    )
-                ]
-            )
-        ),
+        "pure_league_play": _build_pure_league_play_config(),
     }
 
-    pure_league = presets["pure_league_play"]
-    presets["pure_league_pool"] = replace(
-        pure_league,
-        env=replace(
-            pure_league.env,
-            player_team_path=None,
-            team_pool_manifest="data/validation/gen8_random_battle_team_pairs.json",
-        ),
-        total_timesteps=25_000_000,
-        validation=replace(
-            pure_league.validation,
-            enabled=True,
-            freq_steps=200_000,
-            protocols=["benchmark"],
-            num_servers=6,
-        ),
-    )
+    presets["pure_league_pool"] = presets["pure_league_play"]
 
     if preset not in presets:
         raise ValueError(f"Unknown preset: {preset}. Available: {list(presets.keys())}")

@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-PRESET="${PRESET:-pure_league_pool}"
+PRESET="${PRESET:-pure_league_play}"
 TOTAL="${TOTAL_STEPS:-5000000}"
 LOG="${LOG:-train.log}"
 MONITOR_LOG="${MONITOR_LOG:-logs/long_train_monitor.log}"

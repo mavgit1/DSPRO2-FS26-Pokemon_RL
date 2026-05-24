@@ -762,11 +762,19 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         if hasattr(self.env, "set_reward_config"):
             self.env.set_reward_config(reward_config)
 
+    def set_team_pool_manifest(self, manifest_path: str) -> None:
+        self._team_pool = TeamPool(manifest_path)
+        print(
+            f"Team pool updated: {manifest_path} ({len(self._team_pool)} teams)"
+        )
+
     def apply_curriculum_stage(self, stage_payload: Dict[str, Any]) -> None:
         if "opponent_mix" in stage_payload:
             self.set_opponent_mix(stage_payload["opponent_mix"])
         if "reward_config" in stage_payload:
             self.set_reward_config(RewardConfig(**stage_payload["reward_config"]))
+        if stage_payload.get("team_pool_manifest"):
+            self.set_team_pool_manifest(stage_payload["team_pool_manifest"])
         self._stage_counter += 1
         if hasattr(self.env, "set_training_stage_context"):
             self.env.set_training_stage_context(self._stage_counter)

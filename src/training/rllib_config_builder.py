@@ -53,6 +53,8 @@ def register_environments(
     if config.env.player_team_path:
         player_team = _load_player_team(config.env.player_team_path)
         battle_format = _custom_game_format(battle_format)
+    elif initial_stage and initial_stage.team_pool_manifest:
+        team_pool_manifest = initial_stage.team_pool_manifest
     elif config.env.team_pool_manifest:
         team_pool_manifest = config.env.team_pool_manifest
         manifest_path = Path(team_pool_manifest).expanduser().resolve()

@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import shutil
 import time
 from collections import deque
 from pathlib import Path
@@ -295,6 +296,9 @@ class PokemonTrainer:
 
                         if stage_changed:
                             self._apply_curriculum_stage(self.curriculum.current_stage)
+                            self._maybe_save_reference_checkpoint(
+                                self.curriculum.current_stage
+                            )
                             mlflow.set_tag(
                                 "last_curriculum_transition",
                                 f"iter_{self.iteration}_{self.curriculum.current_stage.name}",
@@ -476,9 +480,22 @@ class PokemonTrainer:
         learner_group.foreach_learner(func=_reset, timeout_seconds=None)
         print("Reset learner optimizers after resume (foreach=False, fresh momentum).")
 
+    def _uses_pool_curriculum_stages(self) -> bool:
+        if not self.curriculum:
+            return False
+        return any(
+            stage.team_pool_manifest for stage in self.curriculum.stages
+        )
+
     def _sync_curriculum_after_resume(self) -> None:
         """Align curriculum stage with resumed step count (state is not in checkpoints)."""
         if not self.curriculum or self.total_steps <= 0:
+            return
+        if self._uses_pool_curriculum_stages():
+            print(
+                "Pool-curriculum preset: skipping step-based curriculum sync "
+                "(stage advances by rolling win rate only)."
+            )
             return
         target_idx = self._curriculum_stage_idx_for_steps(self.total_steps)
         target_idx = min(target_idx, len(self.curriculum.stages) - 1)
@@ -512,10 +529,43 @@ class PokemonTrainer:
         )
         apply_curriculum_entropy(self.algo, entropy_coeff)
         apply_curriculum_stage(self.algo, stage)
+        pool_note = (
+            f" | team_pool={stage.team_pool_manifest}"
+            if stage.team_pool_manifest
+            else ""
+        )
         print(
             f"Applied stage '{stage.name}' | threshold={stage.promote_at_win_rate:.2f} "
-            f"| entropy_coeff={entropy_coeff:.4f} | mix={stage.opponent_mix}"
+            f"| entropy_coeff={entropy_coeff:.4f} | mix={stage.opponent_mix}{pool_note}"
         )
+
+    def _maybe_save_reference_checkpoint(
+        self, stage: CurriculumStageConfig
+    ) -> None:
+        ref_dir = self.config.reference_checkpoint_dir
+        ref_stage = self.config.reference_checkpoint_on_stage
+        if not ref_dir or not ref_stage or stage.name != ref_stage:
+            return
+        dest = Path(ref_dir).resolve()
+        dest.mkdir(parents=True, exist_ok=True)
+        ckpt_path = self.checkpoint_mgr.save_checkpoint(self.algo, self.total_steps)
+        self._export_selfplay_weights()
+        reference_ckpt = dest / "reference_checkpoint"
+        if reference_ckpt.exists():
+            shutil.rmtree(reference_ckpt, ignore_errors=True)
+        shutil.copytree(ckpt_path, reference_ckpt)
+        sp_src = Path(self.config.selfplay_weights_path).resolve()
+        if sp_src.exists():
+            shutil.copy2(sp_src, dest / "selfplay_latest.pt")
+        meta = {
+            "step": self.total_steps,
+            "stage": stage.name,
+            "checkpoint": str(reference_ckpt),
+        }
+        (dest / "metadata.json").write_text(
+            json.dumps(meta, indent=2) + "\n", encoding="utf-8"
+        )
+        print(f"Reference checkpoint saved: {reference_ckpt}")
 
     def _register_environments(self) -> None:
         """Register environments with Ray."""
