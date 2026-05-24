@@ -10,7 +10,7 @@ set -a && [ -f .env ] && . ./.env && set +a
 TOTAL="${TOTAL_STEPS:-4000000}"
 PRESET="${PRESET:-pure_league_pool}"
 LOG_DIR="${LOG_DIR:-logs/experiments}"
-mkdir -p "$LOG_DIR" logs/validation
+mkdir -p "$LOG_DIR" logs/validation checkpoints
 
 log() { echo "[$(date -Iseconds)] $*" | tee -a "$LOG_DIR/experiment_loop.log"; }
 
