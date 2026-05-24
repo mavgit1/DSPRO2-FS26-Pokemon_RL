@@ -480,11 +480,8 @@ class PokemonTrainer:
         """Align curriculum stage with resumed step count (state is not in checkpoints)."""
         if not self.curriculum or self.total_steps <= 0:
             return
-        # Observed promotion in production runs: warmup -> heuristic ~80k steps.
-        if self.total_steps >= 82_000:
-            target_idx = min(1, len(self.curriculum.stages) - 1)
-        else:
-            target_idx = 0
+        target_idx = self._curriculum_stage_idx_for_steps(self.total_steps)
+        target_idx = min(target_idx, len(self.curriculum.stages) - 1)
         if self.curriculum.current_stage_idx != target_idx:
             old = self.curriculum.current_stage.name
             self.curriculum.current_stage_idx = target_idx
@@ -494,6 +491,17 @@ class PokemonTrainer:
                 f"Curriculum synced after resume: {old} -> "
                 f"{self.curriculum.current_stage.name} (steps={self.total_steps:,})"
             )
+
+    @staticmethod
+    def _curriculum_stage_idx_for_steps(total_steps: int) -> int:
+        """Map global step count to curriculum stage (matches recent production runs)."""
+        if total_steps >= 7_000_000:
+            return 3  # league_training
+        if total_steps >= 900_000:
+            return 2  # heuristic_tactics
+        if total_steps >= 280_000:
+            return 1  # heuristic_bridge
+        return 0  # warmup
 
     def _apply_curriculum_stage(self, stage: CurriculumStageConfig) -> None:
         """Push stage payload to all running env wrappers."""

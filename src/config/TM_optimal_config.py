@@ -595,11 +595,11 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                         min_samples_for_promotion=999999,
                         entropy_coeff=0.011,
                         opponent_mix={
-                            "heuristic": 0.3, 
-                            "historical": 0.17, 
-                            "self": 0.3,
-                            "random": 0.1,
-                            "random_no_switch": 0.13
+                            "heuristic": 0.45,
+                            "historical": 0.15,
+                            "self": 0.25,
+                            "random": 0.08,
+                            "random_no_switch": 0.07,
                         }, 
                         reward_config=RewardConfig(
                             victory_reward=35.0,
@@ -625,7 +625,14 @@ def get_config(preset: str = "standard") -> TrainingConfig:
             player_team_path=None,
             team_pool_manifest="data/validation/gen8_random_battle_team_pairs.json",
         ),
-        validation=replace(pure_league.validation, enabled=False),
+        total_timesteps=25_000_000,
+        validation=replace(
+            pure_league.validation,
+            enabled=True,
+            freq_steps=200_000,
+            protocols=["benchmark"],
+            num_servers=6,
+        ),
     )
 
     if preset not in presets:

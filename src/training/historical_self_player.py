@@ -16,10 +16,13 @@ class HistoricalSelfPlayer(SelfPlayPlayer):
     Self-play opponent that selects a historical checkpoint 
     and uses it for a batch of battles to simulate league play.
     """
+    max_history_snapshots: int = 5
+
     def __init__(
         self, 
         model_config_dict: Dict[str, Any], 
-        weights_path: Optional[str] = None, 
+        weights_path: Optional[str] = None,
+        max_history_snapshots: int = 5,
         **kwargs
     ):
         super().__init__(
@@ -27,6 +30,7 @@ class HistoricalSelfPlayer(SelfPlayPlayer):
             weights_path=weights_path, 
             **kwargs
         )
+        self.max_history_snapshots = max(1, int(max_history_snapshots))
         # MEMORY LEAK FIX 1: Force this specific opponent model strictly to the CPU.
         # This keeps the VRAM entirely free for the main RLlib trainer.
         self.model.to("cpu")
@@ -39,7 +43,7 @@ class HistoricalSelfPlayer(SelfPlayPlayer):
         pass
 
     def _load_random_historical_brain(self) -> None:
-        """Picks a random .pt file, strictly avoiding files currently being written."""
+        """Pick a random brain from the most recent N checkpoint snapshots."""
         if not self._weights_path:
             return
             
@@ -49,15 +53,34 @@ class HistoricalSelfPlayer(SelfPlayPlayer):
         pt_files = []
         current_time = time.time()
         
-        # ZIP ERROR FIX 1: Only look at files that are at least 10 seconds old.
-        # This makes it mathematically impossible to load a half-written file.
         if history_dir.exists() and history_dir.is_dir():
-            for f in history_dir.glob("*.pt"):
+            for f in history_dir.glob("selfplay_step_*.pt"):
                 try:
                     if current_time - f.stat().st_mtime > 10.0:
                         pt_files.append(f)
                 except OSError:
                     pass
+            # Fallback: any stale .pt in history/
+            if not pt_files:
+                for f in history_dir.glob("*.pt"):
+                    try:
+                        if current_time - f.stat().st_mtime > 10.0:
+                            pt_files.append(f)
+                    except OSError:
+                        pass
+
+        def _step_from_path(path: Path) -> int:
+            name = path.stem
+            if name.startswith("selfplay_step_"):
+                try:
+                    return int(name.split("_")[-1])
+                except ValueError:
+                    return 0
+            return int(path.stat().st_mtime)
+
+        if pt_files:
+            pt_files.sort(key=_step_from_path)
+            pt_files = pt_files[-self.max_history_snapshots :]
                     
         # Fallback to the active weights if history is empty
         if not pt_files:

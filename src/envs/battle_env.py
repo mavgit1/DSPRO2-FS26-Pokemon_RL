@@ -576,6 +576,20 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
                 server_configuration=self._server_configuration,
                 team=self._opponent_team,
             )
+        if opponent_key == "historical":
+            from src.training.historical_self_player import HistoricalSelfPlayer
+
+            opponent_id = f"hist_{uuid.uuid4().hex[:6]}"
+            opponent_config = AccountConfiguration(opponent_id, None)
+            return HistoricalSelfPlayer(
+                model_config_dict=self._model_config_dict or {},
+                weights_path=self._selfplay_weights_path,
+                battle_format=self._battle_format,
+                account_configuration=opponent_config,
+                server_configuration=self._server_configuration,
+                team=self._opponent_team,
+                max_history_snapshots=5,
+            )
         if opponent_key == "heuristic":
             opponent_class = SimpleHeuristicsPlayer
             opponent_id = f"hrs_{uuid.uuid4().hex[:6]}"
@@ -599,7 +613,10 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
     def _opponent_key_from_instance(opponent: Any) -> str:
         # Lazy import to avoid circular dependency at module load time.
         from src.training.self_play_player import SelfPlayPlayer
+        from src.training.historical_self_player import HistoricalSelfPlayer
 
+        if isinstance(opponent, HistoricalSelfPlayer):
+            return "historical"
         if isinstance(opponent, SelfPlayPlayer):
             return "self"
         if isinstance(opponent, SimpleHeuristicsPlayer):
