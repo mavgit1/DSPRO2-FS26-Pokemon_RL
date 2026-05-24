@@ -54,9 +54,11 @@ from src.models.embedding import (
     embed_battle,
     NUM_TOKENS,
     TOKEN_DIM,
+    MOVE_SLOTS,
     SPECIES_VOCAB_SIZE,
     ITEM_VOCAB_SIZE,
     ABILITY_VOCAB_SIZE,
+    MOVE_VOCAB_SIZE,
 )
 from src.config.TM_optimal_config import RewardConfig
 from src.teams.team_pool import TeamPool
@@ -92,6 +94,18 @@ def get_observation_space() -> gym.spaces.Dict:
             "abilities": gym.spaces.Box(
                 low=0,
                 high=ABILITY_VOCAB_SIZE - 1,
+                shape=(NUM_TOKENS,),
+                dtype=np.int32,
+            ),
+            "moves": gym.spaces.Box(
+                low=0,
+                high=MOVE_VOCAB_SIZE - 1,
+                shape=(NUM_TOKENS, MOVE_SLOTS),
+                dtype=np.int32,
+            ),
+            "last_move": gym.spaces.Box(
+                low=0,
+                high=MOVE_VOCAB_SIZE - 1,
                 shape=(NUM_TOKENS,),
                 dtype=np.int32,
             ),

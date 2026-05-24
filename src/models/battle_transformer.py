@@ -113,10 +113,11 @@ def _obs_batch_for_module(obs_batch: Dict[str, Any]) -> Dict[str, Any]:
 
 DEFAULT_MODEL_CONFIG = {
     "num_tokens": 13,
-    "token_dim": 164,
+    "token_dim": 168,
     "species_vocab_size": _VOCAB_SIZES["species_vocab_size"],
     "item_vocab_size": _VOCAB_SIZES["item_vocab_size"],
     "ability_vocab_size": _VOCAB_SIZES["ability_vocab_size"],
+    "move_vocab_size": _VOCAB_SIZES["move_vocab_size"],
     "embedding_dim": 16,
     "hidden_dim": 256,
     "num_heads": 4,
@@ -168,6 +169,7 @@ class PokemonTransformerModel(nn.Module):
         self.species_vocab_size = cfg["species_vocab_size"]
         self.item_vocab_size = cfg["item_vocab_size"]
         self.ability_vocab_size = cfg["ability_vocab_size"]
+        self.move_vocab_size = cfg["move_vocab_size"]
         self.embedding_dim = cfg["embedding_dim"]
         self.hidden_dim = cfg["hidden_dim"]
         self.num_heads = cfg["num_heads"]
@@ -178,7 +180,7 @@ class PokemonTransformerModel(nn.Module):
         self.use_lstm = cfg["use_lstm"]
         self.max_seq_len = cfg["max_seq_len"]
 
-        self.total_token_dim = self.token_dim + 3 * self.embedding_dim
+        self.total_token_dim = self.token_dim + 5 * self.embedding_dim
 
         # -----------------------------------------------------------------
         # Categorical Embeddings
@@ -191,6 +193,9 @@ class PokemonTransformerModel(nn.Module):
         )
         self.ability_embed = nn.Embedding(
             self.ability_vocab_size, self.embedding_dim, padding_idx=0
+        )
+        self.move_embed = nn.Embedding(
+            self.move_vocab_size, self.embedding_dim, padding_idx=0
         )
 
         # -----------------------------------------------------------------
@@ -300,23 +305,32 @@ class PokemonTransformerModel(nn.Module):
     # Embedding helpers
     # ---------------------------------------------------------------------
 
-    def _embed_obs(self, obs_dict: Dict[str, TensorType]) -> TensorType:
-        """Project a flat (B', tokens, ...) obs dict to token embeddings."""
-        base_obs = obs_dict["obs"].float()
-        
+    def _categorical_embs(self, obs_dict: Dict[str, TensorType]) -> TensorType:
         sp_max = self.species_embed.num_embeddings - 1
         it_max = self.item_embed.num_embeddings - 1
         ab_max = self.ability_embed.num_embeddings - 1
+        mv_max = self.move_embed.num_embeddings - 1
 
         species = torch.clamp(obs_dict["species"].long(), 0, sp_max)
         items = torch.clamp(obs_dict["items"].long(), 0, it_max)
         abilities = torch.clamp(obs_dict["abilities"].long(), 0, ab_max)
+        move_slots = torch.clamp(obs_dict["moves"].long(), 0, mv_max)
+        last_move = torch.clamp(obs_dict["last_move"].long(), 0, mv_max)
 
         species_emb = self.species_embed(species)
         items_emb = self.item_embed(items)
         abilities_emb = self.ability_embed(abilities)
+        move_pool_emb = self.move_embed(move_slots).mean(dim=-2)
+        last_move_emb = self.move_embed(last_move)
+        return torch.cat(
+            [species_emb, items_emb, abilities_emb, move_pool_emb, last_move_emb],
+            dim=-1,
+        )
 
-        x = torch.cat([base_obs, species_emb, items_emb, abilities_emb], dim=-1)
+    def _embed_obs(self, obs_dict: Dict[str, TensorType]) -> TensorType:
+        """Project a flat (B', tokens, ...) obs dict to token embeddings."""
+        base_obs = obs_dict["obs"].float()
+        x = torch.cat([base_obs, self._categorical_embs(obs_dict)], dim=-1)
         x = self.input_proj(x)
         x = self.input_norm(x)
         x = self._add_token_structure_embeddings(x)
@@ -349,20 +363,17 @@ class PokemonTransformerModel(nn.Module):
         self, obs_dict: Dict[str, TensorType]
     ) -> Dict[str, TensorType]:
         base_obs = obs_dict["obs"].float()
-        
-        sp_max = self.species_embed.num_embeddings - 1
-        it_max = self.item_embed.num_embeddings - 1
-        ab_max = self.ability_embed.num_embeddings - 1
-
-        species = torch.clamp(obs_dict["species"].long(), 0, sp_max)
-        items = torch.clamp(obs_dict["items"].long(), 0, it_max)
-        abilities = torch.clamp(obs_dict["abilities"].long(), 0, ab_max)
-
+        cat = self._categorical_embs(obs_dict)
+        species_emb, item_emb, ability_emb, move_pool_emb, last_move_emb = torch.split(
+            cat, self.embedding_dim, dim=-1
+        )
         return {
             "base_obs": base_obs,
-            "species_emb": self.species_embed(species),
-            "item_emb": self.item_embed(items),
-            "ability_emb": self.ability_embed(abilities),
+            "species_emb": species_emb,
+            "item_emb": item_emb,
+            "ability_emb": ability_emb,
+            "move_pool_emb": move_pool_emb,
+            "last_move_emb": last_move_emb,
         }
 
     def _transformer_forward(self, x: TensorType) -> TensorType:
@@ -413,6 +424,8 @@ class PokemonTransformerModel(nn.Module):
                 parts["species_emb"],
                 parts["item_emb"],
                 parts["ability_emb"],
+                parts["move_pool_emb"],
+                parts["last_move_emb"],
             ],
             dim=-1,
         )

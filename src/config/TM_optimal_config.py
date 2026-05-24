@@ -12,10 +12,11 @@ class ModelConfig:
 
     # Embedding dimensions
     num_tokens: int = 13
-    token_dim: int = 164
+    token_dim: int = 168
     species_vocab_size: int = _VOCAB_SIZES["species_vocab_size"]
     item_vocab_size: int = _VOCAB_SIZES["item_vocab_size"]
     ability_vocab_size: int = _VOCAB_SIZES["ability_vocab_size"]
+    move_vocab_size: int = _VOCAB_SIZES["move_vocab_size"]
     embedding_dim: int = 32
 
     # Transformer
@@ -38,6 +39,7 @@ class ModelConfig:
             "species_vocab_size": self.species_vocab_size,
             "item_vocab_size": self.item_vocab_size,
             "ability_vocab_size": self.ability_vocab_size,
+            "move_vocab_size": self.move_vocab_size,
             "embedding_dim": self.embedding_dim,
             "hidden_dim": self.hidden_dim,
             "num_heads": self.num_heads,
@@ -167,6 +169,7 @@ class CurriculumStageConfig:
     name: str
     promote_at_win_rate: float
     min_samples_for_promotion: int = 50
+    min_episodes_in_stage: Optional[int] = None
     opponent_mix: Dict[str, float] = field(default_factory=lambda: {"random": 1.0})
     reward_config: RewardConfig = field(default_factory=RewardConfig)
     # If set, overrides ``TrainingConfig.ppo.entropy_coeff`` while this stage is active.
@@ -192,6 +195,8 @@ class CurriculumStageConfig:
         }
         if self.entropy_coeff is not None:
             payload["entropy_coeff"] = float(self.entropy_coeff)
+        if self.min_episodes_in_stage is not None:
+            payload["min_episodes_in_stage"] = int(self.min_episodes_in_stage)
         return payload
 
 
@@ -506,6 +511,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
             model=ModelConfig(
                 num_transformer_layers=3,
                 hidden_dim=256,
+                use_lstm=False,
             ),
             ppo=PPOConfig(
                 lr=0.00025,
@@ -527,7 +533,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                         promote_at_win_rate=0.60,
                         min_samples_for_promotion=400,
                         entropy_coeff=0.02,
-                        opponent_mix={"random": 0.55, "random_no_switch": 0.35, "heuristic": 0.1},
+                        opponent_mix={"random": 0.60, "random_no_switch": 0.25, "heuristic": 0.15},
                         reward_config=RewardConfig(
                             victory_reward=35.0,
                             defeat_penalty=-35.0,
@@ -540,6 +546,28 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                         )
                     ),
                     CurriculumStageConfig(
+                        name="heuristic_bridge",
+                        promote_at_win_rate=0.0,
+                        min_samples_for_promotion=100,
+                        min_episodes_in_stage=8000,
+                        entropy_coeff=0.015,
+                        opponent_mix={
+                            "random": 0.45,
+                            "random_no_switch": 0.05,
+                            "heuristic": 0.50,
+                        },
+                        reward_config=RewardConfig(
+                            victory_reward=35.0,
+                            defeat_penalty=-35.0,
+                            hp_value_weight=3.0,
+                            fainted_value=3.0,
+                            fainted_penalty=-3.0,
+                            action_quality_weight=0.10,
+                            matchup_reward_weight=0.0,
+                            reward_scale=0.1,
+                        )
+                    ),
+                    CurriculumStageConfig(
                         name="heuristic_tactics",
                         promote_at_win_rate=0.45,
                         min_samples_for_promotion=400,
@@ -547,8 +575,8 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                         opponent_mix={
                             "random": 0.05,
                             "random_no_switch": 0.05,
-                            "heuristic": 0.75,
-                            "self": 0.15,
+                            "heuristic": 0.65,
+                            "self": 0.25,
                         },
                         reward_config=RewardConfig(
                             victory_reward=35.0,
@@ -595,7 +623,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
         env=replace(
             pure_league.env,
             player_team_path=None,
-            team_pool_manifest="data/validation/gen8_random_battle_team_pairs.json",
+            team_pool_manifest="data/validation/gen8_team_pool_5.json",
         ),
         validation=replace(pure_league.validation, enabled=False),
     )

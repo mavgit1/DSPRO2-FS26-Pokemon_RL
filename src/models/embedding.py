@@ -42,11 +42,13 @@ TRACKED_EFFECTS = [
 # =============================================================================
 
 NUM_TOKENS = 13          # 1 global + 6 our team + 6 opponent team
-TOKEN_DIM = 164
+TOKEN_DIM = 168          # 164 legacy + 4 visibility flags
+MOVE_SLOTS = 4
 _VOCAB_SIZES = vocab_sizes()
 SPECIES_VOCAB_SIZE = _VOCAB_SIZES["species_vocab_size"]
 ITEM_VOCAB_SIZE = _VOCAB_SIZES["item_vocab_size"]
 ABILITY_VOCAB_SIZE = _VOCAB_SIZES["ability_vocab_size"]
+MOVE_VOCAB_SIZE = _VOCAB_SIZES["move_vocab_size"]
 ACTION_SPACE_N = NATIVE_ACTION_SPACE_N
 GLOBAL_EXTRA_START_IDX = (
     len(WEATHER_LIST) + len(FIELD_LIST) + 2 * len(SIDE_CONDITION_LIST)
@@ -90,6 +92,35 @@ def _get_list_index(value: Any, lst: List) -> int:
 # POKEMON TOKEN EMBEDDING
 # =============================================================================
 
+def _infer_last_move_id(mon: Pokemon, vocab) -> int:
+    """Best-effort last-used move from PP deltas on the active Pokemon."""
+    if not mon or not mon.moves:
+        return 0
+    candidates = []
+    for move in mon.moves.values():
+        try:
+            if move.current_pp < move.max_pp:
+                candidates.append((move.current_pp / max(move.max_pp, 1), move))
+        except Exception:
+            continue
+    if not candidates:
+        return 0
+    candidates.sort(key=lambda pair: pair[0])
+    return vocab.move_id(candidates[0][1])
+
+
+def _species_is_revealed(mon: Pokemon, is_opponent: bool) -> bool:
+    if mon is None:
+        return False
+    if not is_opponent:
+        return True
+    species = getattr(mon, "species", None) or getattr(mon, "name", None)
+    if not species:
+        return False
+    normalized = str(species).strip().lower()
+    return normalized not in {"", "unknown", "unknown_pokemon", "?"}
+
+
 def embed_pokemon(
     mon: Optional[Pokemon], 
     is_active: bool = False,
@@ -115,14 +146,19 @@ def embed_pokemon(
     species_id = 0
     item_id = 0
     ability_id = 0
+    move_ids = np.zeros(MOVE_SLOTS, dtype=np.int32)
+    last_move_id = 0
     
     # Handle empty slot
     if mon is None:
+        obs[0] = 1.0  # is_empty_slot
         return {
             'obs': obs,
             'species': species_id,
             'items': item_id,
             'abilities': ability_id,
+            'moves': move_ids,
+            'last_move': last_move_id,
         }
     
     idx = 0
@@ -240,19 +276,39 @@ def embed_pokemon(
         
         idx += 26
     
-    # ---------------------------------------------------------------------
-    # 11. Categorical IDs
+  # ---------------------------------------------------------------------
+    # 11. Visibility / opponent-transparency flags (4 dims)
     # ---------------------------------------------------------------------
     vocab = get_embedding_vocab()
-    species_id = vocab.species_id(mon.species)
-    item_id = vocab.item_id(mon.item)
-    ability_id = vocab.ability_id(mon.ability)
+    species_revealed = _species_is_revealed(mon, is_opponent)
+    known_moves = list(mon.moves.values()) if mon.moves else []
+    obs[idx] = 0.0  # is_empty_slot
+    obs[idx + 1] = 1.0 if species_revealed else 0.0
+    obs[idx + 2] = min(len(known_moves) / float(MOVE_SLOTS), 1.0)
+    obs[idx + 3] = 1.0 if (is_opponent and not species_revealed) else 0.0
+    idx += 4
+
+    # ---------------------------------------------------------------------
+    # 12. Categorical IDs
+    # ---------------------------------------------------------------------
+    species_id = vocab.species_id(mon.species) if species_revealed else 0
+    item_id = vocab.item_id(mon.item) if species_revealed or not is_opponent else 0
+    ability_id = vocab.ability_id(mon.ability) if species_revealed or not is_opponent else 0
+
+    for m_i in range(MOVE_SLOTS):
+        if m_i < len(known_moves):
+            move_ids[m_i] = vocab.move_id(known_moves[m_i])
+
+    if is_active:
+        last_move_id = _infer_last_move_id(mon, vocab)
     
     return {
         'obs': obs,
         'species': species_id,
         'items': item_id,
         'abilities': ability_id,
+        'moves': move_ids,
+        'last_move': last_move_id,
     }
 
 
@@ -290,6 +346,8 @@ def embed_battle(
     species = np.zeros(NUM_TOKENS, dtype=np.int32)
     items = np.zeros(NUM_TOKENS, dtype=np.int32)
     abilities = np.zeros(NUM_TOKENS, dtype=np.int32)
+    moves = np.zeros((NUM_TOKENS, MOVE_SLOTS), dtype=np.int32)
+    last_move = np.zeros(NUM_TOKENS, dtype=np.int32)
     
     # -------------------------------------------------------------------------
     # Token 0: Global State
@@ -346,6 +404,8 @@ def embed_battle(
         species[1] = token_data['species']
         items[1] = token_data['items']
         abilities[1] = token_data['abilities']
+        moves[1] = token_data['moves']
+        last_move[1] = token_data['last_move']
     
     bench_idx = 2
     for mon in battle.team.values():
@@ -355,6 +415,8 @@ def embed_battle(
             species[bench_idx] = token_data['species']
             items[bench_idx] = token_data['items']
             abilities[bench_idx] = token_data['abilities']
+            moves[bench_idx] = token_data['moves']
+            last_move[bench_idx] = token_data['last_move']
             bench_idx += 1
     
     # -------------------------------------------------------------------------
@@ -367,6 +429,8 @@ def embed_battle(
         species[7] = token_data['species']
         items[7] = token_data['items']
         abilities[7] = token_data['abilities']
+        moves[7] = token_data['moves']
+        last_move[7] = token_data['last_move']
     
     opp_bench_idx = 8
     for mon in battle.opponent_team.values():
@@ -376,6 +440,8 @@ def embed_battle(
             species[opp_bench_idx] = token_data['species']
             items[opp_bench_idx] = token_data['items']
             abilities[opp_bench_idx] = token_data['abilities']
+            moves[opp_bench_idx] = token_data['moves']
+            last_move[opp_bench_idx] = token_data['last_move']
             opp_bench_idx += 1
     
     # -------------------------------------------------------------------------
@@ -388,6 +454,8 @@ def embed_battle(
         'species': species,
         'items': items,
         'abilities': abilities,
+        'moves': moves,
+        'last_move': last_move,
         'action_mask': action_mask,
     }
 
@@ -398,20 +466,8 @@ def _global_extra_features(
     training_stage_index: Optional[int] = None,
 ) -> np.ndarray:
     features = np.zeros(len(GLOBAL_EXTRA_FEATURE_NAMES), dtype=np.float32)
-    opponent_key = _canonical_opponent_type(opponent_type)
-    
-    if opponent_key == "random":
-        features[0] = 1.0
-    elif opponent_key == "random_no_switch":
-        features[1] = 1.0
-    elif opponent_key == "heuristic":
-        features[2] = 1.0
-    elif opponent_key == "self":
-        features[3] = 1.0
-    elif opponent_key == "historical":
-        features[4] = 1.0
-    elif opponent_key:
-        features[5] = 1.0
+    # Opponent-type oracle bits intentionally disabled (indices 0-5 stay zero).
+    # Real opponent identity must be inferred from revealed battle state only.
 
     features[6] = float(max(0, int(training_stage_index or 0)))
     features[7] = min(float(max(0, int(getattr(battle, "turn", 0)))) / 100.0, 1.0)

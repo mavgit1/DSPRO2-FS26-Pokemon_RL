@@ -154,6 +154,10 @@ class SelfPlayPlayer(Player):
             "abilities": torch.as_tensor(obs["abilities"], dtype=torch.long).unsqueeze(
                 0
             ),
+            "moves": torch.as_tensor(obs["moves"], dtype=torch.long).unsqueeze(0),
+            "last_move": torch.as_tensor(obs["last_move"], dtype=torch.long).unsqueeze(
+                0
+            ),
             "action_mask": torch.as_tensor(action_mask, dtype=torch.float32).unsqueeze(
                 0
             ),
