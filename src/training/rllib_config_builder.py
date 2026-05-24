@@ -40,6 +40,20 @@ def _custom_game_format(battle_format: str) -> str:
     return battle_format.replace("randombattle", "customgame")
 
 
+def _battle_format_for_team_pool(
+    manifest_path: str, default_format: str
+) -> str:
+    manifest = json.loads(
+        Path(manifest_path).expanduser().resolve().read_text(encoding="utf-8")
+    )
+    meta = (
+        manifest.get("metadata")
+        if isinstance(manifest.get("metadata"), dict)
+        else {}
+    )
+    return meta.get("execution_format") or _custom_game_format(default_format)
+
+
 def register_environments(
     config: TrainingConfig,
     num_servers: int,
@@ -57,11 +71,10 @@ def register_environments(
         team_pool_manifest = initial_stage.team_pool_manifest
     elif config.env.team_pool_manifest:
         team_pool_manifest = config.env.team_pool_manifest
-        manifest_path = Path(team_pool_manifest).expanduser().resolve()
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        meta = manifest.get("metadata") if isinstance(manifest.get("metadata"), dict) else {}
-        battle_format = meta.get("execution_format") or _custom_game_format(
-            battle_format
+
+    if team_pool_manifest:
+        battle_format = _battle_format_for_team_pool(
+            team_pool_manifest, battle_format
         )
 
     # Resolve selfplay weights path to absolute — Ray workers run from a temp
