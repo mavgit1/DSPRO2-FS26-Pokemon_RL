@@ -25,12 +25,14 @@ if [[ -n "$MLFLOW_RUN_ID" ]]; then
   extra+=(--mlflow-run-id "$MLFLOW_RUN_ID")
 fi
 
-echo "[$(date -Iseconds)] Resume ckpt=$CKPT total=$TOTAL mlflow=${MLFLOW_RUN_ID:-new}" | tee "$MONITOR"
+echo "[$(date -Iseconds)] Resume ckpt=$CKPT total=$TOTAL mlflow=${MLFLOW_RUN_ID:-new} stage=${RESUME_CURRICULUM_STAGE:-}" | tee "$MONITOR"
 
 env PYTHONUNBUFFERED=1 SAVE_LEAGUE_HISTORY=1 \
+  RESUME_CURRICULUM_STAGE="${RESUME_CURRICULUM_STAGE:-league_training}" \
   uv run --active train_battler.py \
     --preset pure_league_play \
     --timesteps "$TOTAL" \
     --resume-checkpoint "$CKPT" \
+    --disable-scheduled-validation \
     "${extra[@]}" \
     2>&1 | tee "$LOG"

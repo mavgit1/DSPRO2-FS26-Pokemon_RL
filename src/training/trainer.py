@@ -492,6 +492,31 @@ class PokemonTrainer:
         if not self.curriculum or self.total_steps <= 0:
             return
         if self._uses_pool_curriculum_stages():
+            resume_stage = os.environ.get("RESUME_CURRICULUM_STAGE", "").strip()
+            if resume_stage:
+                stage_idx = next(
+                    (
+                        i
+                        for i, s in enumerate(self.curriculum.stages)
+                        if s.name == resume_stage
+                    ),
+                    None,
+                )
+                if stage_idx is None:
+                    raise ValueError(
+                        f"RESUME_CURRICULUM_STAGE={resume_stage!r} not in curriculum"
+                    )
+                if self.curriculum.current_stage_idx != stage_idx:
+                    old = self.curriculum.current_stage.name
+                    self.curriculum.current_stage_idx = stage_idx
+                    self.curriculum.episodes_in_stage = 0
+                    self.curriculum.outcome_window.clear()
+                    print(
+                        f"Pool curriculum resume: {old} -> "
+                        f"{self.curriculum.current_stage.name} "
+                        f"(steps={self.total_steps:,})"
+                    )
+                return
             print(
                 "Pool-curriculum preset: skipping step-based curriculum sync "
                 "(stage advances by rolling win rate only)."
