@@ -33,6 +33,5 @@ env PYTHONUNBUFFERED=1 SAVE_LEAGUE_HISTORY=1 \
     --preset pure_league_play \
     --timesteps "$TOTAL" \
     --resume-checkpoint "$CKPT" \
-    --disable-scheduled-validation \
     "${extra[@]}" \
     2>&1 | tee "$LOG"

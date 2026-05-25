@@ -571,10 +571,11 @@ def _build_pure_league_play_config() -> TrainingConfig:
                     entropy_coeff=0.011,
                     team_pool_manifest=f"{pool_dir}/gen8_pool_20.json",
                     opponent_mix={
-                        "heuristic": 0.73,
+                        "heuristic": 0.68,
                         "historical": 0.05,
                         "self": 0.10,
                         "random": 0.12,
+                        "random_no_switch": 0.05,
                     },
                     reward_config=league_reward,
                 ),
