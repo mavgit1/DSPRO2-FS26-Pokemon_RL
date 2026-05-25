@@ -45,7 +45,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--preset",
-        choices=["quick", "standard", "memory_safe", "optimal", "large"],
+        choices=["quick", "standard", "memory_safe", "optimal", "large", "pure_league_play"],
         default="quick",
         help="Training config preset used to rebuild the RLlib module.",
     )

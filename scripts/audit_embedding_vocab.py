@@ -20,12 +20,6 @@ def main() -> int:
         description="Audit species/item/ability coverage for embedding vocabularies."
     )
     parser.add_argument(
-        "--bdsp-dataset",
-        type=Path,
-        default=Path("data/bdsp_trainers.json"),
-        help="BDSP trainer dataset JSON to audit.",
-    )
-    parser.add_argument(
         "--validation-manifest",
         type=Path,
         default=Path("data/validation/gen8_random_battle_team_pairs.json"),
@@ -48,12 +42,6 @@ def main() -> int:
         },
         "sources": {},
     }
-
-    if args.bdsp_dataset.exists():
-        report["sources"]["bdsp_dataset"] = audit_pokemon_records(
-            _iter_bdsp_pokemon(args.bdsp_dataset),
-            source=str(args.bdsp_dataset),
-        )
 
     if args.validation_manifest.exists():
         report["sources"]["validation_manifest"] = audit_pokemon_records(
@@ -113,12 +101,6 @@ def audit_pokemon_records(
             "abilities": _counter_payload(unknown_abilities),
         },
     }
-
-
-def _iter_bdsp_pokemon(path: Path) -> Iterable[dict[str, Any]]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    for trainer in payload.get("trainers", []):
-        yield from trainer.get("party", [])
 
 
 def _iter_manifest_pokemon(path: Path) -> Iterable[dict[str, Any]]:
