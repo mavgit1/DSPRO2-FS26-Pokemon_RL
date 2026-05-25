@@ -1,9 +1,6 @@
-import math
-
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from typing import Any, Dict, Optional, Tuple
 
 from ray.rllib.core.rl_module.torch import TorchRLModule
@@ -16,108 +13,16 @@ from src.models.vocab import vocab_sizes
 _VOCAB_SIZES = vocab_sizes()
 
 
-def configure_safe_sdp_backends() -> None:
-    """Use math SDPA only; flash/mem-efficient kernels can illegal-memory-access.
-
-    Our transformer passes a learnable float ``attn_mask`` into
-    ``nn.MultiheadAttention``. With PyTorch 2.x, the mem-efficient CUDA
-    implementation (_scaled_dot_product_efficient_attention) has been observed
-    to raise ``cudaErrorIllegalAddress`` (see train logs with
-    ``CUDA_LAUNCH_BLOCKING=1`` — stack points at attention.cu, not diagnostics).
-
-    Called at import and model init so Ray driver, learners, and env runners
-  all see the same backend flags (process-local).
-    """
-    if not torch.cuda.is_available():
-        return
-    torch.backends.cuda.enable_flash_sdp(False)
-    torch.backends.cuda.enable_mem_efficient_sdp(False)
-    torch.backends.cuda.enable_math_sdp(True)
-
-
-# Apply as early as possible in every worker process that imports this module.
-configure_safe_sdp_backends()
-
-
-def apply_action_mask_to_logits(
-    logits: TensorType, action_mask: Optional[TensorType]
-) -> TensorType:
-    """Mask invalid actions and guarantee finite logits for Categorical sampling."""
-    logits = torch.nan_to_num(logits, nan=0.0, posinf=1e4, neginf=-1e4)
-    if action_mask is None:
-        return logits
-    mask = action_mask > 0
-    masked = logits.masked_fill(~mask, -1e9)
-    valid_count = mask.sum(dim=-1, keepdim=True)
-    no_valid = valid_count <= 0
-    if no_valid.any():
-        fallback = torch.full_like(logits, -1e9)
-        fallback[..., 0] = 0.0
-        masked = torch.where(no_valid, fallback, masked)
-    return masked
-
-
-def _self_attn_with_learned_bias(
-    mha: nn.MultiheadAttention,
-    x: TensorType,
-    attn_bias: TensorType,
-    *,
-    training: bool,
-) -> TensorType:
-    """Explicit attention matmul + additive bias (no fused SDPA CUDA kernels).
-
-    PyTorch's fused SDPA path for ``MultiheadAttention`` + float ``attn_mask``
-    can trigger ``cudaErrorIllegalAddress`` on some driver/GPU builds. This path
-    matches ``nn.MultiheadAttention`` numerically (see module tests) but avoids
-    ``_scaled_dot_product_efficient_attention``.
-    """
-    B, T, embed_dim = x.shape
-    num_heads = mha.num_heads
-    head_dim = embed_dim // num_heads
-
-    qkv = F.linear(x, mha.in_proj_weight, mha.in_proj_bias)
-    qkv = qkv.view(B, T, 3, num_heads, head_dim).permute(2, 0, 3, 1, 4)
-    q, k, v = qkv[0], qkv[1], qkv[2]
-
-    scale = 1.0 / math.sqrt(head_dim)
-    scores = torch.matmul(q, k.transpose(-2, -1)) * scale
-    scores = scores + attn_bias.view(1, 1, T, T)
-
-    attn_weights = torch.softmax(scores, dim=-1)
-    attn_weights = F.dropout(
-        attn_weights, p=mha.dropout, training=training and mha.training
-    )
-    context = torch.matmul(attn_weights, v)
-    context = context.transpose(1, 2).reshape(B, T, embed_dim)
-    return mha.out_proj(context)
-
-
-def _obs_batch_for_module(obs_batch: Dict[str, Any]) -> Dict[str, Any]:
-    """Unwrap poke-env 0.15 ``{observation: embed_dict, action_mask}`` for the model."""
-    if not isinstance(obs_batch, dict):
-        return obs_batch
-    if "obs" in obs_batch:
-        return obs_batch
-    inner = obs_batch.get("observation")
-    if not isinstance(inner, dict) or "obs" not in inner:
-        return obs_batch
-    out = dict(inner)
-    if "action_mask" in obs_batch:
-        out["action_mask"] = obs_batch["action_mask"]
-    return out
-
-
 # =============================================================================
 # MODEL CONFIG, doesnt actually matter since overwritten by the config file
 # =============================================================================
 
 DEFAULT_MODEL_CONFIG = {
     "num_tokens": 13,
-    "token_dim": 168,
+    "token_dim": 164,
     "species_vocab_size": _VOCAB_SIZES["species_vocab_size"],
     "item_vocab_size": _VOCAB_SIZES["item_vocab_size"],
     "ability_vocab_size": _VOCAB_SIZES["ability_vocab_size"],
-    "move_vocab_size": _VOCAB_SIZES["move_vocab_size"],
     "embedding_dim": 16,
     "hidden_dim": 256,
     "num_heads": 4,
@@ -169,7 +74,6 @@ class PokemonTransformerModel(nn.Module):
         self.species_vocab_size = cfg["species_vocab_size"]
         self.item_vocab_size = cfg["item_vocab_size"]
         self.ability_vocab_size = cfg["ability_vocab_size"]
-        self.move_vocab_size = cfg["move_vocab_size"]
         self.embedding_dim = cfg["embedding_dim"]
         self.hidden_dim = cfg["hidden_dim"]
         self.num_heads = cfg["num_heads"]
@@ -180,7 +84,7 @@ class PokemonTransformerModel(nn.Module):
         self.use_lstm = cfg["use_lstm"]
         self.max_seq_len = cfg["max_seq_len"]
 
-        self.total_token_dim = self.token_dim + 5 * self.embedding_dim
+        self.total_token_dim = self.token_dim + 3 * self.embedding_dim
 
         # -----------------------------------------------------------------
         # Categorical Embeddings
@@ -193,9 +97,6 @@ class PokemonTransformerModel(nn.Module):
         )
         self.ability_embed = nn.Embedding(
             self.ability_vocab_size, self.embedding_dim, padding_idx=0
-        )
-        self.move_embed = nn.Embedding(
-            self.move_vocab_size, self.embedding_dim, padding_idx=0
         )
 
         # -----------------------------------------------------------------
@@ -281,8 +182,6 @@ class PokemonTransformerModel(nn.Module):
             nn.Linear(256, 1),
         )
 
-        configure_safe_sdp_backends()
-
     # ---------------------------------------------------------------------
     # Stateful API
     # ---------------------------------------------------------------------
@@ -305,32 +204,18 @@ class PokemonTransformerModel(nn.Module):
     # Embedding helpers
     # ---------------------------------------------------------------------
 
-    def _categorical_embs(self, obs_dict: Dict[str, TensorType]) -> TensorType:
-        sp_max = self.species_embed.num_embeddings - 1
-        it_max = self.item_embed.num_embeddings - 1
-        ab_max = self.ability_embed.num_embeddings - 1
-        mv_max = self.move_embed.num_embeddings - 1
-
-        species = torch.clamp(obs_dict["species"].long(), 0, sp_max)
-        items = torch.clamp(obs_dict["items"].long(), 0, it_max)
-        abilities = torch.clamp(obs_dict["abilities"].long(), 0, ab_max)
-        move_slots = torch.clamp(obs_dict["moves"].long(), 0, mv_max)
-        last_move = torch.clamp(obs_dict["last_move"].long(), 0, mv_max)
+    def _embed_obs(self, obs_dict: Dict[str, TensorType]) -> TensorType:
+        """Project a flat (B', tokens, ...) obs dict to token embeddings."""
+        base_obs = obs_dict["obs"].float()
+        species = obs_dict["species"].long()
+        items = obs_dict["items"].long()
+        abilities = obs_dict["abilities"].long()
 
         species_emb = self.species_embed(species)
         items_emb = self.item_embed(items)
         abilities_emb = self.ability_embed(abilities)
-        move_pool_emb = self.move_embed(move_slots).mean(dim=-2)
-        last_move_emb = self.move_embed(last_move)
-        return torch.cat(
-            [species_emb, items_emb, abilities_emb, move_pool_emb, last_move_emb],
-            dim=-1,
-        )
 
-    def _embed_obs(self, obs_dict: Dict[str, TensorType]) -> TensorType:
-        """Project a flat (B', tokens, ...) obs dict to token embeddings."""
-        base_obs = obs_dict["obs"].float()
-        x = torch.cat([base_obs, self._categorical_embs(obs_dict)], dim=-1)
+        x = torch.cat([base_obs, species_emb, items_emb, abilities_emb], dim=-1)
         x = self.input_proj(x)
         x = self.input_norm(x)
         x = self._add_token_structure_embeddings(x)
@@ -363,17 +248,14 @@ class PokemonTransformerModel(nn.Module):
         self, obs_dict: Dict[str, TensorType]
     ) -> Dict[str, TensorType]:
         base_obs = obs_dict["obs"].float()
-        cat = self._categorical_embs(obs_dict)
-        species_emb, item_emb, ability_emb, move_pool_emb, last_move_emb = torch.split(
-            cat, self.embedding_dim, dim=-1
-        )
+        species = obs_dict["species"].long()
+        items = obs_dict["items"].long()
+        abilities = obs_dict["abilities"].long()
         return {
             "base_obs": base_obs,
-            "species_emb": species_emb,
-            "item_emb": item_emb,
-            "ability_emb": ability_emb,
-            "move_pool_emb": move_pool_emb,
-            "last_move_emb": last_move_emb,
+            "species_emb": self.species_embed(species),
+            "item_emb": self.item_embed(items),
+            "ability_emb": self.ability_embed(abilities),
         }
 
     def _transformer_forward(self, x: TensorType) -> TensorType:
@@ -388,11 +270,8 @@ class PokemonTransformerModel(nn.Module):
             bias = self.attn_bias[i, :T, :T]  # [T, T]
             # norm-first: x = x + SA(norm1(x)); x = x + FF(norm2(x))
             x_norm = layer.norm1(x)
-            sa_out = _self_attn_with_learned_bias(
-                layer.self_attn,
-                x_norm,
-                bias,
-                training=self.training,
+            sa_out, _ = layer.self_attn(
+                x_norm, x_norm, x_norm, attn_mask=bias, need_weights=False
             )
             x = x + layer.dropout1(sa_out)
             x_norm2 = layer.norm2(x)
@@ -414,7 +293,6 @@ class PokemonTransformerModel(nn.Module):
         self,
         obs_dict: Dict[str, TensorType],
         top_k: int = 3,
-        compute_saliency: bool = False,
     ) -> Dict[str, Any]:
         action_mask = obs_dict.get("action_mask")
         parts = self._embed_obs_parts(obs_dict)
@@ -424,15 +302,12 @@ class PokemonTransformerModel(nn.Module):
                 parts["species_emb"],
                 parts["item_emb"],
                 parts["ability_emb"],
-                parts["move_pool_emb"],
-                parts["last_move_emb"],
             ],
             dim=-1,
         )
         x = self.input_norm(self.input_proj(x))
         x = self._add_token_structure_embeddings(x)
-        if compute_saliency:
-            x.retain_grad()
+        x.retain_grad()
 
         encoded = self._transformer_forward(x)
         cls_token = self._get_cls_token(encoded)
@@ -464,11 +339,9 @@ class PokemonTransformerModel(nn.Module):
         selected_idx = top_idxs[:, 0]
         selected_logit = logits.gather(1, selected_idx.unsqueeze(1)).mean()
 
-        token_saliency = None
-        if compute_saliency:
-            self.zero_grad(set_to_none=True)
-            selected_logit.backward()
-            token_saliency = x.grad.norm(dim=-1)
+        self.zero_grad(set_to_none=True)
+        selected_logit.backward()
+        token_saliency = x.grad.norm(dim=-1)
 
         weight = self.input_proj.weight
         base_w = weight[:, : self.token_dim]
@@ -506,11 +379,7 @@ class PokemonTransformerModel(nn.Module):
                 "entropy_mean": float(entropy.mean().detach().cpu()),
                 "top_actions_batch0": top_actions,
             },
-            "token_importance": (
-                token_saliency.detach().cpu().tolist()
-                if token_saliency is not None
-                else []
-            ),
+            "token_importance": token_saliency.detach().cpu().tolist(),
             "component_importance": component_scores,
         }
 
@@ -588,7 +457,9 @@ class PokemonTransformerModel(nn.Module):
         """
         logits = self.policy_head(features)
         values = self.value_head(features).squeeze(-1)
-        logits = apply_action_mask_to_logits(logits, action_mask)
+        if action_mask is not None:
+            mask = action_mask.clamp(min=1e-8)
+            logits = logits - (1.0 - mask) * 1e8
         return logits, values
 
     def _extract_state(
@@ -695,28 +566,15 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
     def get_initial_state(self) -> Dict[str, Any]:
         return self.model.get_initial_state()
 
+    # ---- Forward passes -------------------------------------------------
+
     def _forward(self, batch: Dict[str, Any], **kwargs) -> Dict[str, Any]:
-        obs_dict = _obs_batch_for_module(batch[Columns.OBS])
+        obs_dict = batch[Columns.OBS]
         state = batch.get(Columns.STATE_IN, None)
         features, new_state, action_mask = self.model.compute_features(obs_dict, state)
         logits, _values = self.model.heads_from_features(features, action_mask)
 
         output: Dict[str, Any] = {Columns.ACTION_DIST_INPUTS: logits}
-        if self.model.use_lstm:
-            output[Columns.STATE_OUT] = new_state
-        return output
-
-    def _forward_train(self, batch: Dict[str, Any], **kwargs) -> Dict[str, Any]:
-        obs_dict = _obs_batch_for_module(batch[Columns.OBS])
-        state = batch.get(Columns.STATE_IN, None)
-        features, new_state, action_mask = self.model.compute_features(obs_dict, state)
-        logits, values = self.model.heads_from_features(features, action_mask)
-
-        output: Dict[str, Any] = {
-            Columns.ACTION_DIST_INPUTS: logits,
-            Columns.VF_PREDS: values,
-            Columns.EMBEDDINGS: features,
-        }
         if self.model.use_lstm:
             output[Columns.STATE_OUT] = new_state
         return output
@@ -729,7 +587,23 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
         with torch.no_grad():
             return self._forward(batch, **kwargs)
 
+    def _forward_train(self, batch: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+        obs_dict = batch[Columns.OBS]
+        state = batch.get(Columns.STATE_IN, None)
+        features, new_state, action_mask = self.model.compute_features(obs_dict, state)
+        logits, values = self.model.heads_from_features(features, action_mask)
 
+        output: Dict[str, Any] = {
+            Columns.ACTION_DIST_INPUTS: logits,
+            Columns.VF_PREDS: values,
+            # Stash the trunk output so PPO's loss can re-use it via
+            # ``compute_values(batch, embeddings=...)`` without rerunning the
+            # transformer + LSTM.
+            Columns.EMBEDDINGS: features,
+        }
+        if self.model.use_lstm:
+            output[Columns.STATE_OUT] = new_state
+        return output
 
     # ---- ValueFunctionAPI ----------------------------------------------
 
@@ -745,7 +619,7 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
             Non-stateful: [B].
         """
         if embeddings is None:
-            obs_dict = _obs_batch_for_module(batch[Columns.OBS])
+            obs_dict = batch[Columns.OBS]
             state = batch.get(Columns.STATE_IN, None)
             embeddings, _, _ = self.model.compute_features(obs_dict, state)
         values = self.model.value_head(embeddings).squeeze(-1)
@@ -753,7 +627,5 @@ class PokemonRLModule(TorchRLModule, ValueFunctionAPI):
 
     # ---- Diagnostics ----------------------------------------------------
 
-    def analyze_observation(self, obs_dict, top_k: int = 3, compute_saliency: bool = False):
-        return self.model.analyze_observation(
-            obs_dict=obs_dict, top_k=top_k, compute_saliency=compute_saliency
-        )
+    def analyze_observation(self, obs_dict, top_k: int = 3):
+        return self.model.analyze_observation(obs_dict=obs_dict, top_k=top_k)

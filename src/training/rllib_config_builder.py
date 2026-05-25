@@ -1,5 +1,4 @@
 import gymnasium as gym
-import json
 import torch
 import os
 from pathlib import Path
@@ -9,8 +8,8 @@ from ray.rllib.core.rl_module.rl_module import RLModuleSpec
 from ray.tune.registry import register_env
 
 from src.config.TM_optimal_config import CurriculumStageConfig, TrainingConfig
-from src.action_space import NATIVE_ACTION_SPACE_N
-from src.envs.battle_env import create_env_creator, get_rllib_observation_space
+from src.action_space import COMPRESSED_ACTION_SPACE_N
+from src.envs.battle_env import create_env_creator, get_observation_space
 
 POKEMON_BATTLE_ENV_NAME = "pokemon_battle"
 
@@ -40,42 +39,18 @@ def _custom_game_format(battle_format: str) -> str:
     return battle_format.replace("randombattle", "customgame")
 
 
-def _battle_format_for_team_pool(
-    manifest_path: str, default_format: str
-) -> str:
-    manifest = json.loads(
-        Path(manifest_path).expanduser().resolve().read_text(encoding="utf-8")
-    )
-    meta = (
-        manifest.get("metadata")
-        if isinstance(manifest.get("metadata"), dict)
-        else {}
-    )
-    return meta.get("execution_format") or _custom_game_format(default_format)
-
-
 def register_environments(
     config: TrainingConfig,
     num_servers: int,
     start_port: int,
     initial_stage: Optional[CurriculumStageConfig],
 ) -> None:
-    # Load fixed player team or team-pool customgame format if configured.
+    # Load fixed player team if configured.
     player_team: Optional[str] = None
-    team_pool_manifest: Optional[str] = None
     battle_format = config.env.battle_format
     if config.env.player_team_path:
         player_team = _load_player_team(config.env.player_team_path)
         battle_format = _custom_game_format(battle_format)
-    elif initial_stage and initial_stage.team_pool_manifest:
-        team_pool_manifest = initial_stage.team_pool_manifest
-    elif config.env.team_pool_manifest:
-        team_pool_manifest = config.env.team_pool_manifest
-
-    if team_pool_manifest:
-        battle_format = _battle_format_for_team_pool(
-            team_pool_manifest, battle_format
-        )
 
     # Resolve selfplay weights path to absolute — Ray workers run from a temp
     # directory and can't find relative paths like "checkpoints/selfplay_latest.pt".
@@ -90,7 +65,6 @@ def register_environments(
         model_config_dict=config.model.to_dict(),
         selfplay_weights_path=selfplay_abs,
         player_team=player_team,
-        team_pool_manifest=team_pool_manifest,
     )
     register_env(POKEMON_BATTLE_ENV_NAME, env_creator)
 
@@ -100,7 +74,7 @@ def build_ppo_config(
 ) -> PPOConfig:
     from src.models.battle_transformer import PokemonRLModule
 
-    ppo_config = (
+    return (
         PPOConfig()
         .environment(
             env=POKEMON_BATTLE_ENV_NAME,
@@ -131,8 +105,8 @@ def build_ppo_config(
         .rl_module(
             rl_module_spec=RLModuleSpec(
                 module_class=PokemonRLModule,
-                observation_space=get_rllib_observation_space(),
-                action_space=gym.spaces.Discrete(NATIVE_ACTION_SPACE_N),
+                observation_space=get_observation_space(),
+                action_space=gym.spaces.Discrete(COMPRESSED_ACTION_SPACE_N),
                 model_config={
                     **config.model.to_dict(),
                     "custom_model_config": config.model.to_dict(),
@@ -151,5 +125,3 @@ def build_ppo_config(
         )
         .debugging(log_level="WARNING")
     )
-    ppo_config.torch_skip_nan_gradients = config.ppo.torch_skip_nan_gradients
-    return ppo_config

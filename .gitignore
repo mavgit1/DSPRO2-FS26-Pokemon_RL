@@ -9,16 +9,8 @@ temp/*
 
 # Project specific
 checkpoints/
-checkpoints_archive*/
-checkpoints_archive_pre_*/
-*.pt
 logs/
 *.log
-system_log.csv
-mysession.txt
-connectionstring.txt
-.cursor/
-showdown_server_*.log
 .ray_tmp/
 mlflow.db
 mlruns/
