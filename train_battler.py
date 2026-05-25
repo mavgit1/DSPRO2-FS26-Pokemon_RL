@@ -18,7 +18,7 @@ Requirements:
 import argparse
 import mlflow
 from dotenv import load_dotenv, find_dotenv
-
+import os
 
 def main():
     load_dotenv(find_dotenv())
@@ -32,11 +32,20 @@ def main():
     parser.add_argument(
         "--preset",
         type=str,
-        default="standard",
-        choices=["quick", "standard", "memory_safe", "optimal", "large"],
+        default="standard", 
+        choices=[
+            "quick",
+            "standard",
+            "memory_safe",
+            "optimal",
+            "large",
+            "mav",
+            "pure_league_play",
+            "pure_league_pool",
+        ],
         help="Configuration preset (default: standard)",
     )
-
+    
     # Timesteps
     parser.add_argument(
         "--timesteps", type=int, default=None, help="Override total timesteps"
@@ -46,8 +55,11 @@ def main():
     parser.add_argument(
         "--num-servers",
         type=int,
-        default=8,
-        help="Number of Showdown servers (default: 8, must match running servers)",
+        default=None,
+        help=(
+            "Number of Showdown servers (default: preset env.num_servers, "
+            "must match running servers)"
+        ),
     )
 
     parser.add_argument(
@@ -127,11 +139,18 @@ def main():
 
     from src.training.trainer import PokemonTrainer
 
+    config = get_config(args.preset)
+    num_servers = (
+        args.num_servers
+        if args.num_servers is not None
+        else config.env.num_servers
+    )
+
     print("=" * 60)
     print("Pokemon RL Training")
     print("=" * 60)
     print(f"Preset: {args.preset}")
-    print(f"Num servers: {args.num_servers}")
+    print(f"Num servers: {num_servers}")
     print(f"Start port: {args.start_port}")
     if args.resume_checkpoint:
         print(f"Resume checkpoint: {args.resume_checkpoint}")
@@ -141,9 +160,13 @@ def main():
         print(f"Override timesteps: {args.timesteps:,}")
     print("=" * 60)
 
-    config = get_config(args.preset)
     if args.timesteps:
         config.total_timesteps = args.timesteps
+
+    if os.environ.get("TRAIN_NUM_WORKERS"):
+        config.env.num_workers = int(os.environ["TRAIN_NUM_WORKERS"])
+    if os.environ.get("TRAIN_NUM_ENVS_PER_WORKER"):
+        config.env.num_envs_per_worker = int(os.environ["TRAIN_NUM_ENVS_PER_WORKER"])
 
     if args.disable_scheduled_validation:
         config.validation.enabled = False
@@ -163,7 +186,7 @@ def main():
     trainer = PokemonTrainer(
         config=config,
         preset=args.preset,
-        num_servers=args.num_servers,
+        num_servers=num_servers,
         start_port=args.start_port,
         resume_checkpoint=args.resume_checkpoint,
         mlflow_run_id=args.mlflow_run_id,

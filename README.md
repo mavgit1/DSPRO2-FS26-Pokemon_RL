@@ -1,188 +1,137 @@
 # DSPRO2: Pokemon RL Battler
 
-Reinforcement learning project training PPO agents to play Pokemon battles (BDSP/Nuzlocke). Uses Ray RLlib for distributed training, PyTorch for neural networks, `poke-env` as the Gymnasium-compatible interface to local Pokemon Showdown servers, and MLflow for experiment tracking.
+Reinforcement learning project training PPO agents to play Pokemon battles. Uses Ray RLlib, PyTorch, `poke-env` against local Pokemon Showdown servers, and MLflow for experiment tracking.
 
 ## Setup
 
 ### Prerequisites
 
-- **Node.js** (for the Pokemon Showdown server) — managed via `nvm`
-- **Python 3.13** — managed via `uv`
+- **Node.js** (Showdown server) — via `nvm`
+- **Python 3.13** — via `uv`
 - **MLflow credentials** — ask a team member
 
-### 1. Install `nvm` and Node.js
+### 1. Node.js
 
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
-# Restart your terminal, then:
 nvm install 22.12.0
 nvm use 22.12.0
 ```
 
-### 2. Install `uv` and Python Dependencies
+### 2. Python
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
-This creates a local `.venv` and installs the exact versions from `uv.lock`.
-
-### 3. Environment Variables and MLflow
+### 3. Environment
 
 ```bash
 cp .env-example .env
+# Set MLFLOW_TRACKING_URI, MLFLOW_TRACKING_USERNAME, MLFLOW_TRACKING_PASSWORD
 ```
 
-Edit `.env` and fill in the MLflow credentials:
-
-```ini
-MLFLOW_TRACKING_URI="https://mlflow-server-url.com"
-MLFLOW_TRACKING_USERNAME="Username"
-MLFLOW_TRACKING_PASSWORD="Password"
-```
-
-### 4. Pokemon Showdown Server
+### 4. Pokemon Showdown
 
 ```bash
 git clone https://github.com/smogon/pokemon-showdown.git
-cd pokemon-showdown
-npm install
-cp config/config-example.js config/config.js
-cd ..
-```
-
-If you encounter server throttling during training, adjust rate limits in `pokemon-showdown/config/config.js`.
-
-### 5. Custom Showdown Formats
-
-Sets up no-gimmick battle formats (no Dynamax, no Terastallize, no Sleep Clause). Run once, then restart servers.
-
-```bash
+cd pokemon-showdown && npm install && cp config/config-example.js config/config.js && cd ..
 ./scripts/setup_custom_formats.sh
 ```
 
 ## Running
 
-### Start Servers
+### Showdown servers
 
 ```bash
-# First-time setup (also starts 8 servers on ports 8000-8007)
-./scripts/setup_training.sh
-
-# Start servers (after initial setup)
+./scripts/setup_training.sh          # first time (starts 8 servers on 8000–8007)
 ./scripts/spin_up_multiple_showdown.sh
-
-# Stop all servers
 ./scripts/kill_all_showdown.sh
 ```
 
-### Training
+### Training presets
+
+| Preset | Teams | Notes |
+|--------|--------|--------|
+| `quick`, `standard`, `optimal`, `memory_safe`, `large` | **No** — default `gen8randombattlenogimmicks`, Showdown random teams | General curriculum / resource profiles |
+| `pure_league_play` | **Yes** — 3→5→10→20 team pool, `gen8customgame` | Production curriculum + league mix (25M default) |
+| `pure_league_pool` | Same as `pure_league_play` | Alias only |
+
+Only **`pure_league_play`** uses `team_pool_manifest` and per-stage pool sizes. All other presets leave `player_team_path` and `team_pool_manifest` unset, so the agent plays **random battles** with random teams.
 
 ```bash
-uv run train_battler.py --preset quick          # quick test run
-uv run train_battler.py --preset standard        # default
-uv run train_battler.py --preset optimal         # RTX 5090
-uv run train_battler.py --preset memory_safe     # reduced RAM
-uv run train_battler.py --preset large           # max resources
+uv run train_battler.py --preset quick
+uv run train_battler.py --preset pure_league_play --num-servers 8 --timesteps 25000000
 ```
 
-Presets are defined in `src/config/TM_optimal_config.py`.
+Pool manifests live under `data/teams/pool_curriculum/` (regenerate with `python scripts/build_team_pool_manifest.py`).
 
-### Resume Training
-
-Resume from a checkpoint and continue logging into the same MLflow run:
+**Resume** (e.g. continue in `league_training` after a crash):
 
 ```bash
-uv run train_battler.py --preset optimal \
-  --resume-checkpoint latest \
-  --mlflow-run-id <RUN_ID>
+RESUME_CURRICULUM_STAGE=league_training MLFLOW_RUN_ID=<run_id> \
+  uv run train_battler.py --preset pure_league_play \
+  --resume-checkpoint checkpoints/step_XXXXXX --timesteps 25000000
 ```
-
-- `--resume-checkpoint latest` picks the newest checkpoint under `checkpoints/`
-- Pass a specific path instead of `latest` to resume from a particular checkpoint
-- `--resume-checkpoint` alone resumes model state but creates a new MLflow run
-- `--mlflow-run-id` alone continues logging but starts from a fresh model
 
 ### Validation
 
-Benchmark a checkpoint against 3 opponent tiers (random, random_no_switch, heuristic):
-
 ```bash
 uv run scripts/validate_checkpoint.py \
   --checkpoint checkpoints/step_XXXXXX \
   --protocol benchmark \
-  --preset standard
-
-# Stochastic policy (masked softmax sampling instead of argmax)
-uv run scripts/validate_checkpoint.py \
-  --checkpoint checkpoints/step_XXXXXX \
-  --protocol benchmark \
-  --preset standard \
-  --explore
-
-# Quick 3-episode smoke test
-uv run scripts/validate_checkpoint.py \
-  --checkpoint checkpoints/step_XXXXXX \
-  --protocol smoke \
-  --preset quick
+  --preset pure_league_play
 ```
 
-### Self-Play Diagnostics
+Scheduled training validation uses the **`benchmark`** protocol (random battle format, random agent teams). That measures out-of-distribution play vs the custom team-pool league setup. For in-distribution eval, use `fixed_paired` / `mirror` with the validation manifests or extend benchmark to pass the team pool.
 
-30% self-play run that never promotes from stage 0. Useful for diagnosing opponent quality.
+### Diagnostics
 
 ```bash
+uv run python scripts/analyze_model_diagnostics.py
 uv run scripts/diagnose_selfplay.py --preset standard --timesteps 500000
+uv run scripts/hparam_sweep.py --n-trials 3 --timesteps 100000
 ```
 
-### Hyperparameter Sweep
-
-Optuna TPE sweep, 500k steps per trial. Resumes from a SQLite database.
-
-```bash
-uv run scripts/hparam_sweep.py --n-trials 50                # full sweep (~14h)
-uv run scripts/hparam_sweep.py --n-trials 3 --timesteps 100000  # dry run
-```
-
-### Linting and Formatting
+### Lint
 
 ```bash
 uv run ruff check .
 uv run ruff format .
 ```
 
-### Dependency Management
+## Scripts
 
-```bash
-uv add <package>        # add a dependency
-uv remove <package>     # remove a dependency
-uv cache clean          # clean cache periodically
+**Core (keep):**
+
+| Script | Purpose |
+|--------|---------|
+| `setup_training.sh`, `spin_up_multiple_showdown.sh`, `kill_all_showdown.sh` | Showdown servers |
+| `setup_custom_formats.sh` | Custom battle formats |
+| `validate_checkpoint.py` | Checkpoint eval |
+| `build_team_pool_manifest.py` | Regenerate pool team JSONs |
+
+**Useful if you need them:**
+
+| Script | Purpose |
+|--------|---------|
+| `analyze_model_diagnostics.py`, `visualize_decision_diagnostics.py` | Training decision plots |
+| `collect_checkpoint_diagnostics.py` | Checkpoint analysis export |
+| `generate_embedding_vocab.py`, `audit_embedding_vocab.py` | Vocab rebuild / audit |
+| `hparam_sweep.py`, `diagnose_selfplay.py` | Sweeps / self-play debugging |
+| `generate_validation_team_manifest.py` | Build validation manifests |
+
+## Project structure
+
 ```
-
-Always commit `uv.lock` and `pyproject.toml` after dependency changes.
-
-## Project Structure
-
-```
-train_battler.py          Entry point for training
-src/
-  config/                 Training, hardware, and reward configurations
-  envs/                   Gymnasium environments wrapping Pokemon Showdown
-  models/                 Neural network architectures (battle_transformer.py)
-  teams/                  Pokemon team generation
-  training/               Training orchestration
-    trainer.py            PokemonTrainer — wires the full training lifecycle
-    rllib_config_builder.py   PPO config and environment registration
-    env_bridge.py         Worker-side bridge for curriculum and metrics
-    callbacks.py          Curriculum progression and checkpoint management
-    curriculum.py         Progressive difficulty scaling
-    resume.py             Checkpoint path resolution
-    metrics/              Metric extraction and aggregation
-    monitoring/           Runtime telemetry (CPU/RAM/GPU)
-  data/                   Dataset utilities
-  validation/             Checkpoint evaluation and benchmarking
-scripts/                  Server management, diagnostics, sweeps
-data/                     BDSP trainer CSVs, team manifests, gauntlet order
-examples/                 Sandbox scripts, notebooks, reference players
+train_battler.py              Training entry point
+src/config/TM_optimal_config.py   Presets and curriculum
+src/envs/                     Showdown gym env
+src/models/                   Policy (battle_transformer)
+src/training/                 Trainer, curriculum, self-play
+src/validation/               Benchmark and paired-team eval
+data/teams/pool_curriculum/   Staged team pools for pure_league_play
+saved_models/                 Committed reference checkpoints
+scripts/                      Ops and eval helpers
 ```

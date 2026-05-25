@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import random
 import socket
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -13,7 +14,7 @@ import torch.nn.functional as F
 from ray.rllib.core.columns import Columns
 
 from src.config.TM_optimal_config import TrainingConfig, get_config
-from src.envs.battle_env import create_env_creator
+from src.envs.battle_env import create_env_creator, flatten_agent_observation
 from src.training.resume import resolve_resume_checkpoint
 from src.training.rllib_config_builder import build_ppo_config, register_environments
 from src.validation.metrics import (
@@ -124,6 +125,8 @@ def run_validation(
                 config.env.battle_format = config.env.battle_format.replace(
                     "randombattle", "customgame"
                 )
+            if "self" in protocol.opponents:
+                _export_selfplay_weights_from_algo(algo, config.selfplay_weights_path)
             results = _run_benchmark(
                 algo=algo,
                 config=config,
@@ -261,6 +264,14 @@ def _ensure_showdown_server(host: str, port: int) -> None:
         ) from exc
 
 
+def _export_selfplay_weights_from_algo(algo, weights_path: str) -> None:
+    """Write the restored policy weights for SelfPlayPlayer to load during benchmark."""
+    path = Path(os.path.abspath(weights_path))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    module = algo.get_module("default_policy")
+    torch.save(module.model.state_dict(), path)
+
+
 def _build_validation_env(
     config: TrainingConfig,
     opponent_type: str,
@@ -273,6 +284,11 @@ def _build_validation_env(
     """Create a validation env.  *port_override* pins this env to a single
     Showdown server port (used for parallel benchmark execution)."""
     port = port_override if port_override is not None else start_port
+    model_cfg = model_config_dict
+    selfplay_path: str | None = None
+    if opponent_type == "self":
+        model_cfg = model_cfg or config.model.to_dict()
+        selfplay_path = os.path.abspath(config.selfplay_weights_path)
     env_creator = create_env_creator(
         battle_format=config.env.battle_format,
         server_host=config.env.showdown_host,
@@ -282,19 +298,24 @@ def _build_validation_env(
         opponent_mix={opponent_type: 1.0},
         player_team=player_team,
         opponent_team=opponent_team,
+        model_config_dict=model_cfg,
+        selfplay_weights_path=selfplay_path,
     )
-    return env_creator(
-        {
-            "server_port": port,
-            "num_servers": 1,
-            "start_port": port,
-            "num_envs_per_worker": 1,
-            "opponent_difficulty": opponent_type,
-            "opponent_mix": {opponent_type: 1.0},
-            "player_team": player_team,
-            "opponent_team": opponent_team,
-        }
-    )
+    env_config: Dict[str, Any] = {
+        "server_port": port,
+        "num_servers": 1,
+        "start_port": port,
+        "num_envs_per_worker": 1,
+        "opponent_difficulty": opponent_type,
+        "opponent_mix": {opponent_type: 1.0},
+        "player_team": player_team,
+        "opponent_team": opponent_team,
+    }
+    if model_cfg is not None:
+        env_config["model_config_dict"] = model_cfg
+    if selfplay_path is not None:
+        env_config["selfplay_weights_path"] = selfplay_path
+    return env_creator(env_config)
 
 
 def _run_chunk_on_env(
@@ -511,27 +532,36 @@ def _run_one_episode(
     )
 
 
+def _flat_validation_obs(obs: Dict[str, Any]) -> Dict[str, Any]:
+    """poke-env 0.15+ returns embed dict under ``observation``; training uses the same unwrap."""
+    flat = flatten_agent_observation(obs)
+    return flat if flat is not None else obs
+
+
 def _compute_action(
     algo,
     obs: Dict[str, Any],
     recurrent_state: Dict[str, torch.Tensor] | None = None,
     explore: bool = False,
 ) -> tuple[np.int64, Dict[str, torch.Tensor] | None]:
+    flat_obs = _flat_validation_obs(obs)
     module = _get_module(algo)
     if _module_is_stateful(module):
-        return _compute_recurrent_action(module, obs, recurrent_state, explore=explore)
+        return _compute_recurrent_action(
+            module, flat_obs, recurrent_state, explore=explore
+        )
 
     compute_single_action = getattr(algo, "compute_single_action", None)
     if callable(compute_single_action):
         try:
-            action = compute_single_action(obs, explore=explore)
+            action = compute_single_action(flat_obs, explore=explore)
             if isinstance(action, tuple):
                 action = action[0]
             return np.int64(action), None
         except Exception:
             pass
 
-    batch = {Columns.OBS: _to_batched_tensors(obs)}
+    batch = {Columns.OBS: _to_batched_tensors(flat_obs)}
     with torch.no_grad():
         forward = getattr(module, "forward_inference", None)
         if callable(forward):
@@ -541,7 +571,7 @@ def _compute_action(
     logits = output[Columns.ACTION_DIST_INPUTS]
 
     if explore:
-        action_mask = obs.get("action_mask")
+        action_mask = flat_obs.get("action_mask")
         mask_tensor = (
             torch.as_tensor(action_mask, dtype=torch.float32).unsqueeze(0)
             if action_mask is not None
@@ -598,6 +628,7 @@ def _compute_recurrent_action(
         key: value.detach() for key, value in output[Columns.STATE_OUT].items()
     }
     return action, next_state
+
 
 
 def _sample_masked_action(
@@ -701,6 +732,7 @@ def run_inprocess_validation(
     max_steps_per_battle: int,
     seed: int = 42,
     player_team: str | None = None,
+    team_manifest: str | None = None,
     explore: bool = False,
     num_servers: int = 1,
 ) -> Dict[str, Any]:
@@ -717,6 +749,8 @@ def run_inprocess_validation(
         )
 
     if protocol.name == "benchmark":
+        if "self" in protocol.opponents:
+            _export_selfplay_weights_from_algo(algo, config.selfplay_weights_path)
         results = _run_benchmark(
             algo=algo,
             config=config,
@@ -726,6 +760,39 @@ def run_inprocess_validation(
             max_steps_per_battle=max_steps_per_battle,
             num_servers=num_servers,
             player_team=player_team_resolved,
+            explore=explore,
+        )
+    elif protocol.name in {"fixed_paired", "mirror"}:
+        if protocol.name == "mirror" and player_team_resolved:
+            from src.validation.teams import fixed_team_mirror_specs
+
+            config.env.battle_format = config.env.battle_format.replace(
+                "randombattle", "customgame"
+            )
+            battle_specs = fixed_team_mirror_specs(player_team_resolved)
+        else:
+            if not team_manifest:
+                raise ValueError(
+                    f"team_manifest is required for validation protocol '{protocol.name}'."
+                )
+            manifest = load_team_manifest(team_manifest)
+            execution_format = manifest.get("metadata", {}).get("execution_format")
+            if isinstance(execution_format, str) and execution_format:
+                config.env.battle_format = execution_format
+            if protocol.name == "fixed_paired":
+                battle_specs = fixed_pair_battle_specs(manifest)
+                if player_team_resolved:
+                    for spec in battle_specs:
+                        spec["rl_team"] = player_team_resolved
+                        spec["rl_team_id"] = "player_team"
+            else:
+                battle_specs = mirror_battle_specs(manifest)
+        results = _run_battle_specs(
+            algo=algo,
+            config=config,
+            battle_specs=battle_specs,
+            start_port=start_port,
+            max_steps_per_battle=max_steps_per_battle,
             explore=explore,
         )
     else:
@@ -756,7 +823,7 @@ def run_inprocess_validation(
             "checkpoint": "inprocess",
             "preset": "live",
             "opponent": protocol.opponent,
-            "team_manifest": None,
+            "team_manifest": team_manifest,
             "battle_format": config.env.battle_format,
             "seed": seed,
             "max_steps_per_battle": max_steps_per_battle,
