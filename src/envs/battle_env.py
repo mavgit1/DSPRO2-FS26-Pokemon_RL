@@ -12,56 +12,22 @@ from poke_env.player import RandomPlayer, SimpleHeuristicsPlayer
 from poke_env.environment.single_agent_wrapper import SingleAgentWrapper
 from poke_env.ps_client.account_configuration import AccountConfiguration
 
-from src.action_space import NATIVE_ACTION_SPACE_N, is_native_switch_action
-
-
-def _native_move_slot(action: int) -> Optional[int]:
-    """Move index 0-3 for native attack actions (6-21), else None."""
-    action = int(action)
-    if 6 <= action <= 21:
-        return (action - 6) % 4
-    return None
-
-
-def _move_type_effectiveness(move: Any, target_types: tuple) -> float:
-    move_type = getattr(move, "type", None)
-    if move_type is None:
-        return 1.0
-    try:
-        return float(move_type.damage_multiplier(*target_types))
-    except Exception:
-        return 1.0
-
-
-def _is_damaging_move(move: Any) -> bool:
-    category = getattr(move, "category", None)
-    if category is None:
-        return True
-    return getattr(category, "name", "") != "STATUS"
-
-
-def _best_damaging_effectiveness(moves: Any, target_types: tuple) -> float:
-    best = 0.0
-    found = False
-    for move in moves.values() if hasattr(moves, "values") else moves:
-        if not _is_damaging_move(move):
-            continue
-        eff = _move_type_effectiveness(move, target_types)
-        best = max(best, eff)
-        found = True
-    return best if found else 0.0
+from src.action_space import (
+    COMPRESSED_ACTION_SPACE_N,
+    NATIVE_ACTION_SPACE_N,
+    compressed_to_native_action,
+    find_safe_native_action,
+    is_compressed_switch_action,
+)
 from src.models.embedding import (
     embed_battle,
     NUM_TOKENS,
     TOKEN_DIM,
-    MOVE_SLOTS,
     SPECIES_VOCAB_SIZE,
     ITEM_VOCAB_SIZE,
     ABILITY_VOCAB_SIZE,
-    MOVE_VOCAB_SIZE,
 )
 from src.config.TM_optimal_config import RewardConfig
-from src.teams.team_pool import TeamPool
 
 
 # =============================================================================
@@ -97,56 +63,14 @@ def get_observation_space() -> gym.spaces.Dict:
                 shape=(NUM_TOKENS,),
                 dtype=np.int32,
             ),
-            "moves": gym.spaces.Box(
-                low=0,
-                high=MOVE_VOCAB_SIZE - 1,
-                shape=(NUM_TOKENS, MOVE_SLOTS),
-                dtype=np.int32,
-            ),
-            "last_move": gym.spaces.Box(
-                low=0,
-                high=MOVE_VOCAB_SIZE - 1,
-                shape=(NUM_TOKENS,),
-                dtype=np.int32,
-            ),
             "action_mask": gym.spaces.Box(
                 low=0,
                 high=1,
-                shape=(NATIVE_ACTION_SPACE_N,),
+                shape=(COMPRESSED_ACTION_SPACE_N,),
                 dtype=np.float32,
             ),
         }
     )
-
-
-def get_rllib_observation_space() -> gym.spaces.Dict:
-    """Observation space as returned by poke-env 0.15+ (embed dict nested under ``observation``)."""
-    return gym.spaces.Dict(
-        {
-            "observation": get_observation_space(),
-            "action_mask": gym.spaces.Box(
-                low=0,
-                high=1,
-                shape=(NATIVE_ACTION_SPACE_N,),
-                dtype=np.float32,
-            ),
-        }
-    )
-
-
-def flatten_agent_observation(obs: Any) -> Optional[Dict[str, np.ndarray]]:
-    """Unwrap poke-env's ``{observation: {...}, action_mask}`` layout for the model."""
-    if not isinstance(obs, dict):
-        return None
-    if "obs" in obs:
-        return obs
-    inner = obs.get("observation")
-    if not isinstance(inner, dict) or "obs" not in inner:
-        return None
-    flat = dict(inner)
-    if "action_mask" in obs:
-        flat["action_mask"] = obs["action_mask"]
-    return flat
 
 
 # =============================================================================
@@ -178,7 +102,7 @@ class PokemonBattleEnv(SinglesEnv):
                       server_configuration, strict, etc.)
         """
         self.reward_config = reward_config or RewardConfig()
-        self._last_native_action: int = -1
+        self._last_compressed_action: int = -1
         self._recent_outcomes: List[int] = []
         self._recent_episode_stats: List[Dict[str, float]] = []
         self._battle_step_stats: Dict[str, Dict[str, float]] = {}
@@ -262,83 +186,110 @@ class PokemonBattleEnv(SinglesEnv):
             # Refresh terminal marker while reward callbacks are still firing.
             self._completed_battle_steps[battle_key] = self._env_step_counter
 
-        reward = float(self._compute_configured_delta_reward(battle))
-        
-        if getattr(self, "_step_fallback_penalty", False):
-            reward -= 0.5
-            self._step_fallback_penalty = False
-            
-        return reward
+        return self._compute_configured_delta_reward(battle)
 
     def _compute_configured_delta_reward(self, battle: AbstractBattle) -> float:
         """Poke-env style delta reward with matchup shaping."""
         if battle not in self._reward_buffer:
             self._reward_buffer[battle] = 0.0
 
-        state_value = 0.0
+        current_value = 0.0
         hp_value = self.reward_config.hp_value_weight
         fainted_value = self.reward_config.fainted_value
-        fainted_penalty = self.reward_config.fainted_penalty
         number_of_pokemons = 6
 
-        # Calculate OUR Persistent State
-        our_hp = 0.0
         for mon in battle.team.values():
-            our_hp += mon.current_hp_fraction
+            current_value += mon.current_hp_fraction * hp_value
             if mon.fainted:
-                state_value += fainted_penalty
-        
-        # Unrevealed own Pokemon
-        our_hp += (number_of_pokemons - len(battle.team))
+                current_value += self.reward_config.fainted_penalty
 
-        # Calculate OPPONENT Persistent State
-        opp_hp = 0.0
+        current_value += (number_of_pokemons - len(battle.team)) * hp_value
+
         for mon in battle.opponent_team.values():
-            opp_hp += mon.current_hp_fraction
+            current_value -= mon.current_hp_fraction * hp_value
             if mon.fainted:
-                state_value += fainted_value
-                
-        # Unrevealed opponent Pokemon
-        opp_hp += (number_of_pokemons - len(battle.opponent_team))
+                current_value += fainted_value
 
-        # Apply HP weights
-        state_value += our_hp * hp_value
-        state_value -= opp_hp * hp_value
+        current_value -= (number_of_pokemons - len(battle.opponent_team)) * hp_value
 
-        # Calculate Delta
-        reward_delta = state_value - self._reward_buffer[battle]
-        self._reward_buffer[battle] = state_value
-
-        # Ephemeral Step Rewards
-        step_reward = 0.0
-        
+        # Type matchup shaping: reward favorable active matchups
         if self.reward_config.matchup_reward_weight > 0:
-            step_reward += self._compute_matchup_quality(battle) * self.reward_config.matchup_reward_weight
+            current_value += (
+                self._compute_matchup_quality(battle)
+                * self.reward_config.matchup_reward_weight
+            )
 
+        # Action quality: reward picking effective moves + defensive awareness
         if self.reward_config.action_quality_weight > 0:
-            step_reward += self._compute_action_quality(battle) * self.reward_config.action_quality_weight
+            current_value += (
+                self._compute_action_quality(battle)
+                * self.reward_config.action_quality_weight
+            )
 
         if battle.won:
-            step_reward += self.reward_config.victory_reward
+            current_value += self.reward_config.victory_reward
         elif battle.lost:
-            step_reward += self.reward_config.defeat_penalty
+            current_value += self.reward_config.defeat_penalty
 
-        return (reward_delta + step_reward) * self.reward_config.reward_scale
+        reward = current_value - self._reward_buffer[battle]
+        self._reward_buffer[battle] = current_value
+        return reward * self.reward_config.reward_scale
 
     @staticmethod
     def _compute_matchup_quality(battle: AbstractBattle) -> float:
-        """Stripped."""
-        return 0.0
+        """Score the type effectiveness of our active's best move vs opponent active.
+
+        Returns a value in [-1.0, 1.0]:
+          +1.0 = super-effective move available
+           0.0 = neutral or no data
+          -0.5 = only resisted moves
+          -1.0 = opponent immune to all our moves
+        """
+        our = battle.active_pokemon
+        opp = battle.opponent_active_pokemon
+        if our is None or opp is None:
+            return 0.0
+
+        opp_types = opp.types
+        if not opp_types:
+            return 0.0
+
+        best = 0.0
+        any_offensive = False
+        for move in our.moves.values():
+            move_type = getattr(move, "type", None)
+            if move_type is None:
+                continue
+            # Only consider damaging moves (physical/special)
+            category = getattr(move, "category", None)
+            if category is not None and getattr(category, "name", "") == "STATUS":
+                continue
+            try:
+                mult = move_type.damage_multiplier(*opp_types)
+            except Exception:
+                continue
+            any_offensive = True
+            best = max(best, mult)
+
+        if not any_offensive:
+            return 0.0
+
+        if best >= 2.0:
+            return 1.0
+        elif best >= 1.0:
+            return 0.0
+        elif best > 0.0:
+            return -0.5
+        else:
+            return -1.0
 
     def _compute_action_quality(self, battle: AbstractBattle) -> float:
-        """
-        Asymmetric move-quality shaping (see action_quality_weight in config).
+        """Score the quality of the last action taken.
 
-        Offense: small reward only when the last action was a best-type damaging move.
-        No penalty for suboptimal attacks (HP delta still punishes whiffs).
+        Offensive (action-level): penalizes picking a sub-optimal damaging move.
+        Defensive (state-level): rewards when our active resists opponent's best move.
 
-        Defense: small penalty when our active is weak to the opponent's best known
-        damaging move. No reward for resisting (avoids pacifist stall exploits).
+        Returns a value roughly in [-1.5, 1.0].
         """
         our = battle.active_pokemon
         opp = battle.opponent_active_pokemon
@@ -346,35 +297,85 @@ class PokemonBattleEnv(SinglesEnv):
             return 0.0
 
         score = 0.0
-        opp_types = tuple(opp.types or ())
-        our_types = tuple(our.types or ())
 
-        # --- Offensive: reward good attack only ---
-        move_slot = _native_move_slot(self._last_native_action)
-        if move_slot is not None and opp_types:
+        # --- Offensive component ---
+        action = self._last_compressed_action
+        is_move_action = 0 <= action <= 7  # moves (0-3) or gimmick moves (4-7)
+        if is_move_action:
+            move_slot = action if action < 4 else action - 4
             known_moves = list(our.moves.values())
-            if move_slot < len(known_moves):
-                chosen_move = known_moves[move_slot]
-                if _is_damaging_move(chosen_move):
-                    chosen_eff = _move_type_effectiveness(chosen_move, opp_types)
-                    best_eff = _best_damaging_effectiveness(our.moves, opp_types)
-                    if best_eff > 0 and chosen_eff >= best_eff - 1e-6:
-                        if chosen_eff >= 2.0:
-                            score += 0.35
-                        elif chosen_eff >= 1.0:
-                            score += 0.15
 
-        # --- Defensive: penalty for bad matchup only ---
+            if move_slot < len(known_moves):
+                opp_types = opp.types
+                if opp_types:
+                    chosen_move = known_moves[move_slot]
+                    chosen_cat = getattr(chosen_move, "category", None)
+                    chosen_is_status = (
+                        chosen_cat is not None
+                        and getattr(chosen_cat, "name", "") == "STATUS"
+                    )
+
+                    if not chosen_is_status:
+                        # Compute effectiveness of chosen move
+                        chosen_type = getattr(chosen_move, "type", None)
+                        chosen_eff = 0.0
+                        if chosen_type is not None:
+                            try:
+                                chosen_eff = chosen_type.damage_multiplier(*opp_types)
+                            except Exception:
+                                chosen_eff = 1.0
+
+                        # Find best effectiveness among all damaging moves
+                        best_eff = 0.0
+                        for m in known_moves:
+                            m_type = getattr(m, "type", None)
+                            if m_type is None:
+                                continue
+                            m_cat = getattr(m, "category", None)
+                            if (
+                                m_cat is not None
+                                and getattr(m_cat, "name", "") == "STATUS"
+                            ):
+                                continue
+                            try:
+                                eff = m_type.damage_multiplier(*opp_types)
+                            except Exception:
+                                continue
+                            best_eff = max(best_eff, eff)
+
+                        # Penalty proportional to how far from best
+                        if best_eff > 0:
+                            score -= best_eff - chosen_eff
+                    # Status move: no penalty, no bonus (score += 0)
+
+        # --- Defensive component ---
         opp_moves = getattr(opp, "moves", None)
-        if opp_moves and our_types:
-            best_opp_eff = _best_damaging_effectiveness(opp_moves, our_types)
-            if best_opp_eff >= 2.0:
-                score -= 0.4
-            elif best_opp_eff > 1.0:
-                score -= 0.15
+        if opp_moves:
+            our_types = our.types
+            if our_types:
+                best_opp_eff = 0.0
+                for m in opp_moves.values():
+                    m_type = getattr(m, "type", None)
+                    if m_type is None:
+                        continue
+                    m_cat = getattr(m, "category", None)
+                    if m_cat is not None and getattr(m_cat, "name", "") == "STATUS":
+                        continue
+                    try:
+                        eff = m_type.damage_multiplier(*our_types)
+                    except Exception:
+                        continue
+                    best_opp_eff = max(best_opp_eff, eff)
+
+                if best_opp_eff == 0.0:
+                    # Immune to opponent's best damaging move
+                    score += 1.0
+                elif best_opp_eff <= 0.5:
+                    # Resists opponent's best move
+                    score += 0.5
 
         return score
-    
+
     def set_reward_config(self, reward_config: RewardConfig) -> None:
         """Update reward configuration at runtime."""
         self.reward_config = reward_config
@@ -479,22 +480,44 @@ class PokemonBattleEnv(SinglesEnv):
         }
 
     def order_to_action(self, order, battle, fake: bool = False, strict: bool = True):
-        """Convert a BattleOrder to action index natively."""
+        """
+        Convert a BattleOrder to action index with bounded fallbacks.
+
+        poke-env's default strict=False path can recurse indefinitely if random
+        fallback orders keep failing conversion. We cap retries and then choose a
+        guaranteed legal action id by probing action_to_order.
+        """
         try:
-            # pylint: disable=no-member
             return SinglesEnv.order_to_action(order, battle, fake=fake, strict=True)
         except ValueError:
             if strict:
                 raise
 
-        self._fallback_events_current_episode += 1
+        # Retry with random legal-looking orders a fixed number of times.
+        max_retries = 3
+        for _ in range(max_retries):
+            random_order = RandomPlayer.choose_random_singles_move(battle)
+            try:
+                self._fallback_events_current_episode += 1
+                return SinglesEnv.order_to_action(
+                    random_order, battle, fake=fake, strict=True
+                )
+            except ValueError:
+                continue
 
-        # Hard fallback: pick a random valid action from the mask
-        # pylint: disable=no-member
-        mask = SinglesEnv.get_action_mask(battle)
-        valid_actions = [i for i, is_valid in enumerate(mask) if is_valid]
-        if valid_actions:
-            return np.int64(random.choice(valid_actions))
+        # Hard fallback: pick the first action that converts legally.
+        for action in range(NATIVE_ACTION_SPACE_N):
+            try:
+                self._fallback_events_current_episode += 1
+                SinglesEnv.action_to_order(
+                    np.int64(action), battle, fake=fake, strict=True
+                )
+                return np.int64(action)
+            except ValueError:
+                continue
+
+        # If no legal action could be verified, return default action.
+        self._fallback_events_current_episode += 1
         return np.int64(-2)
 
 
@@ -509,7 +532,6 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         server_configuration: ServerConfiguration,
         opponent_mix: Optional[Dict[str, float]] = None,
         opponent_team: Optional[str] = None,
-        team_pool: Optional[TeamPool] = None,
         model_config_dict: Optional[Dict] = None,
         selfplay_weights_path: Optional[str] = None,
     ):
@@ -517,7 +539,6 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         self._battle_format = battle_format
         self._server_configuration = server_configuration
         self._opponent_team = opponent_team
-        self._team_pool = team_pool
         self._model_config_dict = model_config_dict
         self._selfplay_weights_path = selfplay_weights_path
         self._opponent_mix = self._normalize_opponent_mix(opponent_mix)
@@ -576,20 +597,6 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
                 server_configuration=self._server_configuration,
                 team=self._opponent_team,
             )
-        if opponent_key == "historical":
-            from src.training.historical_self_player import HistoricalSelfPlayer
-
-            opponent_id = f"hist_{uuid.uuid4().hex[:6]}"
-            opponent_config = AccountConfiguration(opponent_id, None)
-            return HistoricalSelfPlayer(
-                model_config_dict=self._model_config_dict or {},
-                weights_path=self._selfplay_weights_path,
-                battle_format=self._battle_format,
-                account_configuration=opponent_config,
-                server_configuration=self._server_configuration,
-                team=self._opponent_team,
-                max_history_snapshots=5,
-            )
         if opponent_key == "heuristic":
             opponent_class = SimpleHeuristicsPlayer
             opponent_id = f"hrs_{uuid.uuid4().hex[:6]}"
@@ -613,10 +620,7 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
     def _opponent_key_from_instance(opponent: Any) -> str:
         # Lazy import to avoid circular dependency at module load time.
         from src.training.self_play_player import SelfPlayPlayer
-        from src.training.historical_self_player import HistoricalSelfPlayer
 
-        if isinstance(opponent, HistoricalSelfPlayer):
-            return "historical"
         if isinstance(opponent, SelfPlayPlayer):
             return "self"
         if isinstance(opponent, SimpleHeuristicsPlayer):
@@ -651,24 +655,18 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
                 pass
 
     def reset(self, *args, **kwargs):
-        if self._team_pool is not None:
-            self.env.agent1.update_team(self._team_pool.sample())
-
         # Sample an opponent per episode according to configured mix.
         opponent_key = self._choose_opponent_class()
         if opponent_key not in self._opponent_pool:
             self._opponent_pool[opponent_key] = self._build_opponent(opponent_key)
         self.opponent = self._opponent_pool[opponent_key]
         self._current_opponent_key = opponent_key
-        begin_episode = getattr(self.opponent, "begin_episode", None)
-        if callable(begin_episode):
-            begin_episode()
         if hasattr(self.env, "set_opponent_context"):
             self.env.set_opponent_context(opponent_key)
         self._episode_total_actions = 0
         self._episode_switch_actions = 0
         self._episode_attack_actions = 0
-        self.env._last_native_action = -1
+        self.env._last_compressed_action = -1
         if hasattr(self.env, "reset_tracking_state"):
             self.env.reset_tracking_state()
         if hasattr(self.env, "consume_fallback_events"):
@@ -681,16 +679,29 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
     def step(self, action):
         if action is not None:
             action_int = int(action)
-            self._last_action = action_int
-            self.env._last_native_action = action_int
+            self.env._last_compressed_action = action_int
             self._episode_total_actions += 1
-            if is_native_switch_action(action_int):
+            if is_compressed_switch_action(action_int):
                 self._episode_switch_actions += 1
             else:
                 self._episode_attack_actions += 1
+            try:
+                native_action = compressed_to_native_action(
+                    action_int, self.env.battle1
+                )
+            except (ValueError, IndexError):
+                native_action = find_safe_native_action(self.env.battle1)
+            else:
+                try:
+                    SinglesEnv.action_to_order(
+                        native_action, self.env.battle1, fake=False, strict=True
+                    )
+                except Exception:
+                    native_action = find_safe_native_action(self.env.battle1)
+        else:
+            native_action = action
 
-        step_action = np.int64(action) if action is not None else action
-        result = super().step(step_action)
+        result = super().step(native_action)
         terminated = False
         truncated = False
         if isinstance(result, tuple):
@@ -704,48 +715,34 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
             fallback_events = 0
             if hasattr(self.env, "consume_fallback_events"):
                 fallback_events = int(self.env.consume_fallback_events())
-            action_stats: Dict[str, float] = {
-                "episode_total_actions": float(self._episode_total_actions),
-                "episode_switch_actions": float(self._episode_switch_actions),
-                "episode_attack_actions": float(self._episode_attack_actions),
-                "episode_fallback_events": float(fallback_events),
-                "opponent_type": self._current_opponent_key,
-            }
-            if self._current_opponent_key == "self":
-                sp = self._opponent_pool.get("self")
-                pop_diag = getattr(sp, "pop_diagnostics", None)
-                if callable(pop_diag):
-                    diag = pop_diag()
-                    infer_fb = float(diag.get("fallback_count", 0))
-                    map_fb = float(diag.get("action_mapping_fallback_count", 0))
-                    action_stats["selfplay_inference_fallback_turns"] = infer_fb
-                    action_stats["selfplay_action_to_order_fallback_turns"] = map_fb
-                    action_stats["selfplay_had_fallback"] = float(
-                        infer_fb + map_fb > 0
-                    )
-            self._recent_action_stats.append(action_stats)
+            self._recent_action_stats.append(
+                {
+                    "episode_total_actions": float(self._episode_total_actions),
+                    "episode_switch_actions": float(self._episode_switch_actions),
+                    "episode_attack_actions": float(self._episode_attack_actions),
+                    "episode_fallback_events": float(fallback_events),
+                    "opponent_type": self._current_opponent_key,
+                }
+            )
         obs = result[0] if isinstance(result, tuple) and len(result) > 0 else None
         self._record_observation_sample(obs)
         return result
 
     def _record_observation_sample(self, obs: Any) -> None:
-        flat = flatten_agent_observation(obs)
-        if flat is None:
+        if not isinstance(obs, dict):
             return
         required = {"obs", "species", "items", "abilities", "action_mask"}
-        if not required.issubset(set(flat.keys())):
+        if not required.issubset(set(obs.keys())):
             return
         try:
             sample = {
-                "obs": np.asarray(flat["obs"]).astype(np.float32, copy=False),
-                "species": np.asarray(flat["species"]).astype(np.int64, copy=False),
-                "items": np.asarray(flat["items"]).astype(np.int64, copy=False),
-                "abilities": np.asarray(flat["abilities"]).astype(np.int64, copy=False),
-                "action_mask": np.asarray(flat["action_mask"]).astype(
+                "obs": np.asarray(obs["obs"]).astype(np.float32, copy=False),
+                "species": np.asarray(obs["species"]).astype(np.int64, copy=False),
+                "items": np.asarray(obs["items"]).astype(np.int64, copy=False),
+                "abilities": np.asarray(obs["abilities"]).astype(np.int64, copy=False),
+                "action_mask": np.asarray(obs["action_mask"]).astype(
                     np.float32, copy=False
                 ),
-                "opponent_type": self._current_opponent_key,
-                "training_stage_index": self._stage_counter,
             }
         except Exception:
             return
@@ -762,19 +759,11 @@ class CurriculumSingleAgentWrapper(SingleAgentWrapper):
         if hasattr(self.env, "set_reward_config"):
             self.env.set_reward_config(reward_config)
 
-    def set_team_pool_manifest(self, manifest_path: str) -> None:
-        self._team_pool = TeamPool(manifest_path)
-        print(
-            f"Team pool updated: {manifest_path} ({len(self._team_pool)} teams)"
-        )
-
     def apply_curriculum_stage(self, stage_payload: Dict[str, Any]) -> None:
         if "opponent_mix" in stage_payload:
             self.set_opponent_mix(stage_payload["opponent_mix"])
         if "reward_config" in stage_payload:
             self.set_reward_config(RewardConfig(**stage_payload["reward_config"]))
-        if stage_payload.get("team_pool_manifest"):
-            self.set_team_pool_manifest(stage_payload["team_pool_manifest"])
         self._stage_counter += 1
         if hasattr(self.env, "set_training_stage_context"):
             self.env.set_training_stage_context(self._stage_counter)
@@ -907,7 +896,6 @@ def create_env_creator(
     opponent_mix: Optional[Dict[str, float]] = None,
     player_team: Optional[str] = None,
     opponent_team: Optional[str] = None,
-    team_pool_manifest: Optional[str] = None,
     model_config_dict: Optional[Dict] = None,
     selfplay_weights_path: Optional[str] = None,
 ):
@@ -924,15 +912,10 @@ def create_env_creator(
             {"random": 0.7, "heuristic": 0.3} or {"random_no_switch": 1.0}
         player_team: Optional fixed Showdown team text for the learning agent
         opponent_team: Optional fixed Showdown team text for the opponent
-        team_pool_manifest: Optional path to a team manifest for per-episode sampling
 
     Returns:
         Callable that creates environments
     """
-
-    team_pool: Optional[TeamPool] = None
-    if team_pool_manifest:
-        team_pool = TeamPool(team_pool_manifest)
 
     def env_creator(env_config: Optional[Dict] = None):
         env_config = env_config or {}
@@ -947,8 +930,6 @@ def create_env_creator(
             mix = {difficulty: 1.0}
         p_team = env_config.get("player_team", player_team)
         o_team = env_config.get("opponent_team", opponent_team)
-        if p_team is None and team_pool is not None:
-            p_team = team_pool.sample()
 
         if env_config.get("server_port") is not None:
             port = int(env_config["server_port"])
@@ -982,28 +963,17 @@ def create_env_creator(
 
             opponent_class = RandomNoSwitchPlayer
             opponent_id = f"rndns_{uuid.uuid4().hex[:6]}"
-        elif difficulty == "self":
-            from src.training.self_play_player import SelfPlayPlayer
-
-            opponent_class = SelfPlayPlayer
-            opponent_id = f"self_{uuid.uuid4().hex[:6]}"
         else:
             opponent_class = RandomPlayer
         opponent_config = AccountConfiguration(opponent_id, None)
         env_opponent_id = f"{opponent_id}_e"
         env_opponent_config = AccountConfiguration(env_opponent_id, None)
-        opponent_kwargs: Dict[str, Any] = {
-            "battle_format": fmt,
-            "account_configuration": opponent_config,
-            "server_configuration": server_config,
-            "team": o_team,
-        }
-        sp_path = env_config.get("selfplay_weights_path", selfplay_weights_path)
-        m_cfg = env_config.get("model_config_dict", model_config_dict)
-        if difficulty == "self":
-            opponent_kwargs["model_config_dict"] = m_cfg or {}
-            opponent_kwargs["weights_path"] = sp_path
-        opponent = opponent_class(**opponent_kwargs)
+        opponent = opponent_class(
+            battle_format=fmt,
+            account_configuration=opponent_config,
+            server_configuration=server_config,
+            team=o_team,
+        )
 
         # Create the PettingZoo env
         player_id = f"RL_{uuid.uuid4().hex[:8]}"
@@ -1025,7 +995,6 @@ def create_env_creator(
             server_configuration=server_config,
             opponent_mix=mix,
             opponent_team=o_team,
-            team_pool=team_pool,
             model_config_dict=model_config_dict,
             selfplay_weights_path=selfplay_weights_path,
         )

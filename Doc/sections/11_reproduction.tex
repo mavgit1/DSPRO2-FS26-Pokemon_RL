@@ -87,6 +87,9 @@ python scripts/validate_checkpoint.py \
   --checkpoint-path checkpoints/step_XXXX \
   --protocol fixed_paired
 
+# Validate against BDSP trainers
+python scripts/validate_bdsp_trainers.py \
+  --checkpoint-path checkpoints/step_XXXX
 \end{lstlisting}
 
 Validation results are logged to MLflow with per-opponent-type breakdowns.
@@ -109,7 +112,7 @@ uv run ruff format .
   \texttt{checkpoints/}     & Saved model checkpoints and self-play weights
                               (\texttt{selfplay\_latest.pt}).  Gitignored. \\
   \texttt{mlruns/}          & MLflow experiment artifacts and metrics. \\
-  \texttt{data/}            & Team manifests, pool curriculum, vocabularies,
+  \texttt{data/}            & BDSP trainer data, gauntlet order, vocabularies,
                               validation team manifests. \\
   \texttt{data/validation/} & Frozen team JSON files for reproducible
                               evaluation. \\

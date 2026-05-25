@@ -54,26 +54,6 @@ def aggregate_episode_metrics(
             metrics[f"outcome/wins_vs_{opp_type}"] = float(opp_wins)
             metrics[f"outcome/total_vs_{opp_type}"] = float(opp_total)
 
-    self_no_fallback: List[int] = []
-    for stat in episode_stats:
-        if _canonical_opponent_type(stat.get("opponent_type")) != "self":
-            continue
-        if float(stat.get("selfplay_had_fallback", 0.0)) > 0.0:
-            continue
-        outcome = stat.get("outcome")
-        if outcome is None:
-            continue
-        outcome_int = int(outcome)
-        if outcome_int in {0, 1}:
-            self_no_fallback.append(outcome_int)
-    if self_no_fallback:
-        clean_wins = sum(self_no_fallback)
-        clean_total = len(self_no_fallback)
-        metrics["outcome/win_rate_vs_self_no_fallback"] = float(
-            clean_wins / clean_total
-        )
-        metrics["outcome/total_vs_self_no_fallback"] = float(clean_total)
-
     reward_victory = [
         float(s["reward_victory_component"])
         for s in episode_stats
@@ -180,16 +160,12 @@ def aggregate_episode_metrics(
         metrics["action/switch_action_ratio"] = float(
             sum(switch_actions) / total_action_sum
         )
-        # episode_fallback_events: PokemonBattleEnv.order_to_action retries when
-        # poke-env cannot map an opponent BattleOrder to a native index (heuristic/random).
-        # Not RL policy illegal moves — see selfplay/mapping_fallback_rate for self-play.
-        opponent_fallback_rate = float(sum(fallback_events) / total_action_sum)
-        metrics["action/opponent_order_to_action_fallback_per_rl_step"] = (
-            opponent_fallback_rate
-        )
-        metrics["action/opponent_order_to_action_fallback_total"] = float(
-            sum(fallback_events)
-        )
+        # episode_fallback_events come from PokemonBattleEnv.order_to_action, which
+        # poke-env invokes for the *opponent* (battle2) when converting heuristic/random
+        # BattleOrders to native indices—not from RL compressed-action legality.
+        _order_conv_per_rl_step = float(sum(fallback_events) / total_action_sum)
+        metrics["action/order_to_action_fallback_per_rl_step"] = _order_conv_per_rl_step
+        metrics["action/illegal_action_fallback_rate"] = _order_conv_per_rl_step
 
     return metrics
 

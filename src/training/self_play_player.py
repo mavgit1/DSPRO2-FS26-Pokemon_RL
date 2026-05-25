@@ -1,59 +1,48 @@
-"""Self-play opponent using poke-env action/mask APIs and a frozen policy snapshot per battle."""
+"""Self-play opponent that uses a local copy of the training model for inference."""
 
 from __future__ import annotations
 
-import copy
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-import numpy as np
 import torch
 
 from poke_env.battle.abstract_battle import AbstractBattle
-from poke_env.environment.singles_env import SinglesEnv
-from poke_env.player import Player
+from poke_env.player import Player, RandomPlayer
 
-from src.action_space import NATIVE_ACTION_SPACE_N
+from src.action_space import (
+    COMPRESSED_ACTION_SPACE_N,
+    COMPRESSED_MOVE_ACTIONS,
+    COMPRESSED_SWITCH_ACTIONS,
+    get_compressed_action_mask,
+)
 from src.models.battle_transformer import PokemonTransformerModel
-from src.models.embedding import embed_battle, get_action_mask
+from src.models.embedding import embed_battle
 
 
 class SelfPlayPlayer(Player):
-    """poke-env ``Player`` that mirrors the training policy for self-play.
+    """poke-env Player whose ``choose_move()`` runs the training model locally.
 
-    Weight sync:
-        The trainer exports ``checkpoints/selfplay_latest.pt`` *before* each
-        PPO iteration. ``begin_episode()`` loads that snapshot once and keeps
-        it fixed for the whole battle so the live learner can be slightly newer.
-
-    poke-env usage:
-        - ``SinglesEnv.get_action_mask`` (via ``get_action_mask``)
-        - ``SinglesEnv.action_to_order`` for move conversion
-        - ``RandomPlayer`` is not used on mapping failures; poke-env handles that
-          when ``strict=False``.
+    At each checkpoint the trainer exports the raw model state dict to
+    ``checkpoints/selfplay_latest.pt``.  This player loads it on first use and
+    re-checks the file each turn so it picks up new weights automatically.
     """
 
     def __init__(
         self,
         model_config_dict: Dict[str, Any],
         weights_path: Optional[str] = None,
-        *,
-        deterministic: bool = True,
-        freeze_weights_per_episode: bool = True,
         **kwargs,
     ):
         super().__init__(**kwargs)
 
-        self._deterministic = deterministic
-        self._freeze_weights_per_episode = freeze_weights_per_episode
-        self._episode_weights_frozen = False
-        self._frozen_state_dict: Optional[Dict[str, torch.Tensor]] = None
-
+        # Ensure the config has the nested ``custom_model_config`` key that
+        # ``PokemonTransformerModel.__init__`` expects.
         if "custom_model_config" not in model_config_dict:
             model_config_dict = {"custom_model_config": model_config_dict}
 
         self.model = PokemonTransformerModel(
-            num_outputs=NATIVE_ACTION_SPACE_N,
+            num_outputs=COMPRESSED_ACTION_SPACE_N,
             model_config=model_config_dict,
             name="self_play",
         )
@@ -63,8 +52,11 @@ class SelfPlayPlayer(Player):
         self._last_mtime: float = 0.0
         self._load_count = 0
 
+        # Per-battle LSTM state cache for cross-turn memory.
+        # Keyed by battle_tag; values are {"h": Tensor, "c": Tensor}.
         self._lstm_states: Dict[str, Dict[str, torch.Tensor]] = {}
 
+        # Per-turn diagnostics accumulator.
         self._diag: Dict[str, Any] = {
             "weight_load_count": 0,
             "fallback_count": 0,
@@ -76,77 +68,58 @@ class SelfPlayPlayer(Player):
             "entropy_count": 0,
             "valid_action_count_sum": 0,
             "valid_action_count_count": 0,
-            "missing_weights_episodes": 0,
         }
 
         if weights_path:
-            self._load_weights(force=True)
+            self._try_load_weights()
 
-    def begin_episode(self) -> None:
-        """Load the rollout snapshot once; opponent policy stays fixed for this battle."""
-        self._episode_weights_frozen = self._freeze_weights_per_episode
-        self._lstm_states.clear()
-        if not self._load_weights(force=True):
-            self._diag["missing_weights_episodes"] += 1
-            self._frozen_state_dict = None
-            return
-        if self._episode_weights_frozen:
-            self._frozen_state_dict = copy.deepcopy(self.model.state_dict())
-
-    def _restore_frozen_weights(self) -> None:
-        if self._frozen_state_dict is not None:
-            self.model.load_state_dict(self._frozen_state_dict, strict=True)
+    # ------------------------------------------------------------------
+    # Weight loading
+    # ------------------------------------------------------------------
 
     def _try_load_weights(self) -> None:
-        if self._episode_weights_frozen:
-            return
-        self._load_weights(force=False)
-
-    def _load_weights(self, *, force: bool) -> bool:
         if not self._weights_path:
-            return False
+            return
         path = Path(self._weights_path)
         if not path.exists():
-            return False
+            return
         try:
             mtime = path.stat().st_mtime
-            if not force and mtime == self._last_mtime:
-                return True
+            if mtime == self._last_mtime:
+                return
             state_dict = torch.load(path, map_location="cpu", weights_only=True)
             self.model.load_state_dict(state_dict, strict=True)
             self._last_mtime = mtime
+            self._lstm_states.clear()  # stale state incompatible with new weights
             self._load_count += 1
             self._diag["weight_load_count"] += 1
-            return True
         except Exception as exc:
             print(f"[SelfPlayPlayer] FAILED to load weights from {path}: {exc!r}")
-            return False
+
+    # ------------------------------------------------------------------
+    # Inference
+    # ------------------------------------------------------------------
 
     def choose_move(self, battle: AbstractBattle):
-        if self._episode_weights_frozen:
-            self._restore_frozen_weights()
-        else:
-            self._try_load_weights()
+        self._try_load_weights()
 
+        # Prune LSTM cache for finished battles
         if battle.won or battle.lost:
             self._lstm_states.pop(battle.battle_tag, None)
 
-        if self._frozen_state_dict is None and self._episode_weights_frozen:
-            self._diag["fallback_count"] += 1
-            return self.choose_random_move(battle)
-
         try:
             return self._inference_move(battle)
-        except Exception as exc:
+        except Exception:
             self._diag["fallback_count"] += 1
-            print(f"[SelfPlayPlayer] inference failed: {exc!r}")
-            return self.choose_random_move(battle)
+            return RandomPlayer.choose_random_singles_move(battle)
 
     def _inference_move(self, battle: AbstractBattle):
+        # 1. Embed battle -> obs dict
         obs = embed_battle(battle, opponent_type="self")
-        action_mask = get_action_mask(battle)
+        action_mask = get_compressed_action_mask(battle)
         obs["action_mask"] = action_mask
 
+        # 2. Convert to tensors with batch dim [1, ...]
         obs_tensors = {
             "obs": torch.as_tensor(obs["obs"], dtype=torch.float32).unsqueeze(0),
             "species": torch.as_tensor(obs["species"], dtype=torch.long).unsqueeze(0),
@@ -154,26 +127,25 @@ class SelfPlayPlayer(Player):
             "abilities": torch.as_tensor(obs["abilities"], dtype=torch.long).unsqueeze(
                 0
             ),
-            "moves": torch.as_tensor(obs["moves"], dtype=torch.long).unsqueeze(0),
-            "last_move": torch.as_tensor(obs["last_move"], dtype=torch.long).unsqueeze(
-                0
-            ),
             "action_mask": torch.as_tensor(action_mask, dtype=torch.float32).unsqueeze(
                 0
             ),
         }
 
+        # 3. Forward pass through the model trunk + heads
         with torch.no_grad():
             if self.model.use_lstm:
+                # Add time dim T=1 for LSTM path
                 lstm_obs: Dict[str, Any] = {}
-                for key, value in obs_tensors.items():
-                    if key == "action_mask":
-                        lstm_obs[key] = value
+                for k, v in obs_tensors.items():
+                    if k == "action_mask":
+                        lstm_obs[k] = v
                     else:
-                        lstm_obs[key] = value.unsqueeze(1)
+                        lstm_obs[k] = v.unsqueeze(1)
 
+                # Look up cached LSTM state for this battle, or use zeros
                 tag = battle.battle_tag
-                state = self._lstm_states.get(tag)
+                state = self._lstm_states.get(tag, None)
                 if state is None:
                     state = {
                         "h": torch.zeros(1, self.model.lstm_hidden),
@@ -181,6 +153,7 @@ class SelfPlayPlayer(Player):
                     }
 
                 features, new_state, mask = self.model.compute_features(lstm_obs, state)
+                # Cache updated state for next turn
                 self._lstm_states[tag] = new_state
                 features = features.squeeze(1)
             else:
@@ -188,13 +161,16 @@ class SelfPlayPlayer(Player):
 
             logits, _ = self.model.heads_from_features(features, mask)
 
-        mask_np = np.asarray(action_mask, dtype=np.float32)
-        action = self._pick_action(logits.squeeze(0), mask_np)
+        # 4. Sample from softmax distribution (temperature < 1.0 = sharper)
+        temperature = 0.8
+        probs = torch.softmax(logits / temperature, dim=-1)
+        action = int(torch.multinomial(probs, 1).item())
 
-        valid_count = int(mask_np.sum())
-        probs = torch.softmax(logits.squeeze(0), dim=-1)
+        # Record diagnostics
+        valid_count = int(action_mask.sum())
         top_prob = float(probs.max().item())
-        log_probs = torch.log_softmax(logits.squeeze(0), dim=-1)
+        # Compute entropy over full distribution
+        log_probs = torch.log_softmax(logits / temperature, dim=-1)
         entropy = float(-(probs * log_probs).sum().item())
 
         self._diag["top_prob_sum"] += top_prob
@@ -207,26 +183,54 @@ class SelfPlayPlayer(Player):
             self._diag["action_histogram"].get(action, 0) + 1
         )
 
-        order = SinglesEnv.action_to_order(
-            np.int64(action), battle, fake=False, strict=False
-        )
-        if str(order) not in [str(o) for o in battle.valid_orders]:
-            self._diag["action_mapping_fallback_count"] += 1
-        return order
+        # 5. Convert to BattleOrder
+        return self._action_to_order(action, battle)
 
-    def _pick_action(self, logits: torch.Tensor, action_mask: np.ndarray) -> int:
-        n = min(logits.shape[-1], len(action_mask), NATIVE_ACTION_SPACE_N)
-        masked_logits = logits[:n].clone()
-        mask_t = torch.as_tensor(action_mask[:n], dtype=torch.float32)
-        masked_logits = masked_logits.masked_fill(mask_t <= 0, -1e8)
-        if self._deterministic:
-            return int(masked_logits.argmax(dim=-1).item())
-        probs = torch.softmax(masked_logits, dim=-1)
-        return int(torch.multinomial(probs, 1).item())
+    # ------------------------------------------------------------------
+    # Action -> BattleOrder conversion
+    # ------------------------------------------------------------------
+
+    def _action_to_order(self, action: int, battle: AbstractBattle):
+        active = battle.active_pokemon
+
+        # Move actions (compressed 0-3)
+        if action in COMPRESSED_MOVE_ACTIONS:
+            if active and active.moves:
+                known_moves = list(active.moves.values())
+                slot = action  # 0, 1, 2, or 3
+                if slot < len(known_moves):
+                    return self.create_order(known_moves[slot])
+
+        # Gimmick actions (compressed 4-7) - treat as regular move
+        elif 4 <= action < 8:
+            if active and active.moves:
+                known_moves = list(active.moves.values())
+                slot = action - 4
+                if slot < len(known_moves):
+                    return self.create_order(known_moves[slot])
+
+        # Switch actions (compressed 8-13)
+        elif action in COMPRESSED_SWITCH_ACTIONS:
+            switch_idx = action - COMPRESSED_SWITCH_ACTIONS.start
+            team_list = list(battle.team.values())
+            bench = [mon for mon in team_list if mon is not active]
+            if switch_idx < len(bench):
+                return self.create_order(bench[switch_idx])
+
+        # Fallback
+        self._diag["action_mapping_fallback_count"] += 1
+        return RandomPlayer.choose_random_singles_move(battle)
+
+    # ------------------------------------------------------------------
+    # Diagnostics
+    # ------------------------------------------------------------------
 
     def pop_diagnostics(self) -> Dict[str, Any]:
+        """Return and clear accumulated per-turn diagnostics."""
         diag = dict(self._diag)
+        # Deep-copy the histogram so the reset doesn't affect the returned dict.
         diag["action_histogram"] = dict(self._diag["action_histogram"])
+        # Reset accumulator.
         self._diag.update(
             {
                 "weight_load_count": 0,
@@ -239,7 +243,6 @@ class SelfPlayPlayer(Player):
                 "entropy_count": 0,
                 "valid_action_count_sum": 0,
                 "valid_action_count_count": 0,
-                "missing_weights_episodes": 0,
             }
         )
         return diag

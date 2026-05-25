@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
 
 from src.models.vocab import vocab_sizes
@@ -12,11 +12,10 @@ class ModelConfig:
 
     # Embedding dimensions
     num_tokens: int = 13
-    token_dim: int = 168
+    token_dim: int = 164
     species_vocab_size: int = _VOCAB_SIZES["species_vocab_size"]
     item_vocab_size: int = _VOCAB_SIZES["item_vocab_size"]
     ability_vocab_size: int = _VOCAB_SIZES["ability_vocab_size"]
-    move_vocab_size: int = _VOCAB_SIZES["move_vocab_size"]
     embedding_dim: int = 32
 
     # Transformer
@@ -39,7 +38,6 @@ class ModelConfig:
             "species_vocab_size": self.species_vocab_size,
             "item_vocab_size": self.item_vocab_size,
             "ability_vocab_size": self.ability_vocab_size,
-            "move_vocab_size": self.move_vocab_size,
             "embedding_dim": self.embedding_dim,
             "hidden_dim": self.hidden_dim,
             "num_heads": self.num_heads,
@@ -61,14 +59,14 @@ class PPOConfig:
     lr: float = 0.0002
 
     # Discount and GAE
-    gamma: float = 0.99
+    gamma: float = 0.97
     lambda_: float = 0.87
 
     # PPO clipping
-    clip_param: float = 0.2
+    clip_param: float = 0.08
 
     # Entropy bonus (exploration)
-    entropy_coeff: float = 0.005
+    entropy_coeff: float = 0.013
 
     # Value function
     vf_loss_coeff: float = 0.5
@@ -77,14 +75,11 @@ class PPOConfig:
     # Gradient clipping
     grad_clip: float = 5.0
 
-    # If True, skip optimizer steps when any gradient is nan/inf (RLlib default: zero them).
-    torch_skip_nan_gradients: bool = False
-
     # Batch sizes
     train_batch_size: int = 4096
     # TODO: test this with different values.
     sgd_minibatch_size: int = 512
-    num_sgd_iter: int = 5
+    num_sgd_iter: int = 8
 
 
 @dataclass
@@ -100,13 +95,10 @@ class EnvironmentConfig:
     # corresponding custom-game variant (e.g. gen5randombattle → gen5customgame).
     # you can use data/teams/player_team_2.txt as an example.
     # or for no team, set to None.
-    player_team_path: Optional[str] = None
-
-    # Manifest path for per-episode player team sampling (20-team pool).
-    team_pool_manifest: Optional[str] = None
+    player_team_path: Optional[str] = "data/teams/player_team_2.txt"
 
     # MLflow experiment name when player_team_path is set (fixed-team training).
-    mlflow_experiment_fixed_team: str = "Pokemon_RL_Marvin_Fixed"
+    mlflow_experiment_fixed_team: str = "Pokemon_RL_Battler_FixedTeam"
 
     # Server settings
     showdown_host: str = "localhost"
@@ -153,7 +145,7 @@ class RewardConfig:
 
     # Global reward scale: multiplies all rewards before returning to the agent.
     # Scales returns from ~[-15, +15] to ~[-1.5, +1.5], making value regression easier.
-    reward_scale: float = 0.1
+    reward_scale: float = 0.05
 
 
 @dataclass
@@ -169,16 +161,11 @@ class CurriculumStageConfig:
     name: str
     promote_at_win_rate: float
     min_samples_for_promotion: int = 50
-    min_episodes_in_stage: Optional[int] = None
     opponent_mix: Dict[str, float] = field(default_factory=lambda: {"random": 1.0})
     reward_config: RewardConfig = field(default_factory=RewardConfig)
-    # If set, overrides ``TrainingConfig.ppo.entropy_coeff`` while this stage is active.
-    entropy_coeff: Optional[float] = None
-    # If set, player team pool is rebuilt from this manifest when the stage is applied.
-    team_pool_manifest: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        payload = {
+        return {
             "name": self.name,
             "promote_at_win_rate": self.promote_at_win_rate,
             "min_samples_for_promotion": self.min_samples_for_promotion,
@@ -195,13 +182,6 @@ class CurriculumStageConfig:
                 "reward_scale": self.reward_config.reward_scale,
             },
         }
-        if self.entropy_coeff is not None:
-            payload["entropy_coeff"] = float(self.entropy_coeff)
-        if self.min_episodes_in_stage is not None:
-            payload["min_episodes_in_stage"] = int(self.min_episodes_in_stage)
-        if self.team_pool_manifest is not None:
-            payload["team_pool_manifest"] = self.team_pool_manifest
-        return payload
 
 
 @dataclass
@@ -332,7 +312,7 @@ class TrainingConfig:
     """Main training configuration."""
 
     # Duration
-    total_timesteps: int = 100_000_000
+    total_timesteps: int = 10_000_000
 
     # Checkpointing
     checkpoint_dir: str = "checkpoints"
@@ -366,10 +346,6 @@ class TrainingConfig:
     # Self-play
     selfplay_weights_path: str = "checkpoints/selfplay_latest.pt"
 
-    # Optional one-shot export when curriculum enters ``reference_checkpoint_on_stage``.
-    reference_checkpoint_dir: Optional[str] = None
-    reference_checkpoint_on_stage: Optional[str] = None
-
     def to_dict(self) -> Dict[str, Any]:
         return {
             "total_timesteps": self.total_timesteps,
@@ -394,7 +370,6 @@ class TrainingConfig:
             "env": {
                 "battle_format": self.env.battle_format,
                 "player_team_path": self.env.player_team_path,
-                "team_pool_manifest": self.env.team_pool_manifest,
                 "mlflow_experiment_fixed_team": self.env.mlflow_experiment_fixed_team,
                 "num_workers": self.env.num_workers,
                 "num_envs_per_worker": self.env.num_envs_per_worker,
@@ -413,7 +388,7 @@ class TrainingConfig:
         }
 
 
-DEFAULT_MLFLOW_EXPERIMENT = "Pokemon_RL_Marvin_Random"
+DEFAULT_MLFLOW_EXPERIMENT = "Pokemon_RL_Battler"
 
 
 def resolve_mlflow_experiment_name(config: TrainingConfig) -> str:
@@ -444,144 +419,6 @@ def resolve_mlflow_experiment_for_training(
 # =============================================================================
 # PRESETS
 # =============================================================================
-
-
-def _build_pure_league_play_config() -> TrainingConfig:
-    """League training with team-pool curriculum (3→5→10→20) on gen8 custom game."""
-    pool_dir = "data/teams/pool_curriculum"
-    pool_3 = f"{pool_dir}/gen8_pool_3.json"
-    league_reward = RewardConfig(
-        victory_reward=35.0,
-        defeat_penalty=-35.0,
-        hp_value_weight=3.0,
-        fainted_value=3.0,
-        fainted_penalty=-3.0,
-        action_quality_weight=0.15,
-        matchup_reward_weight=0.0,
-        reward_scale=0.1,
-    )
-    heuristic_tactics_mix = {
-        "random": 0.05,
-        "random_no_switch": 0.05,
-        "heuristic": 0.65,
-        "self": 0.25,
-    }
-
-    def pool_tactics_stage(team_count: int) -> CurriculumStageConfig:
-        return CurriculumStageConfig(
-            name=f"pool_{team_count}_tactics",
-            promote_at_win_rate=0.65,
-            min_samples_for_promotion=400,
-            entropy_coeff=0.011,
-            opponent_mix=dict(heuristic_tactics_mix),
-            team_pool_manifest=f"{pool_dir}/gen8_pool_{team_count}.json",
-            reward_config=league_reward,
-        )
-
-    return TrainingConfig(
-        total_timesteps=25_000_000,
-        reference_checkpoint_dir="saved_models/pool_curriculum_reference",
-        reference_checkpoint_on_stage="league_training",
-        env=EnvironmentConfig(
-            player_team_path=None,
-            team_pool_manifest=pool_3,
-            num_workers=6,
-            num_envs_per_worker=6,
-            num_servers=6,
-            start_port=8000,
-        ),
-        validation=ValidationScheduleConfig(
-            enabled=True,
-            freq_steps=200_000,
-            protocols=["benchmark"],
-            num_servers=6,
-        ),
-        model=ModelConfig(
-            num_transformer_layers=3,
-            hidden_dim=256,
-            use_lstm=False,
-        ),
-        ppo=PPOConfig(
-            lr=0.00025,
-            gamma=0.99,
-            train_batch_size=8192,
-            sgd_minibatch_size=512,
-            clip_param=0.2,
-            entropy_coeff=0.011,
-            torch_skip_nan_gradients=True,
-        ),
-        curriculum=CurriculumConfig(
-            enabled=True,
-            rolling_window_episodes=400,
-            min_episodes_before_promotion=6500,
-            stages=[
-                CurriculumStageConfig(
-                    name="warmup",
-                    promote_at_win_rate=0.60,
-                    min_samples_for_promotion=400,
-                    entropy_coeff=0.02,
-                    team_pool_manifest=pool_3,
-                    opponent_mix={
-                        "random": 0.60,
-                        "random_no_switch": 0.25,
-                        "heuristic": 0.15,
-                    },
-                    reward_config=RewardConfig(
-                        victory_reward=35.0,
-                        defeat_penalty=-35.0,
-                        hp_value_weight=3.0,
-                        fainted_value=3.0,
-                        fainted_penalty=-3.0,
-                        action_quality_weight=0.0,
-                        matchup_reward_weight=0.0,
-                        reward_scale=0.1,
-                    ),
-                ),
-                CurriculumStageConfig(
-                    name="heuristic_bridge",
-                    promote_at_win_rate=0.0,
-                    min_samples_for_promotion=100,
-                    min_episodes_in_stage=8000,
-                    entropy_coeff=0.015,
-                    team_pool_manifest=pool_3,
-                    opponent_mix={
-                        "random": 0.45,
-                        "random_no_switch": 0.05,
-                        "heuristic": 0.50,
-                    },
-                    reward_config=RewardConfig(
-                        victory_reward=35.0,
-                        defeat_penalty=-35.0,
-                        hp_value_weight=3.0,
-                        fainted_value=3.0,
-                        fainted_penalty=-3.0,
-                        action_quality_weight=0.10,
-                        matchup_reward_weight=0.0,
-                        reward_scale=0.1,
-                    ),
-                ),
-                pool_tactics_stage(3),
-                pool_tactics_stage(5),
-                pool_tactics_stage(10),
-                pool_tactics_stage(20),
-                CurriculumStageConfig(
-                    name="league_training",
-                    promote_at_win_rate=2.0,
-                    min_samples_for_promotion=999999,
-                    entropy_coeff=0.011,
-                    team_pool_manifest=f"{pool_dir}/gen8_pool_20.json",
-                    opponent_mix={
-                        "heuristic": 0.68,
-                        "historical": 0.05,
-                        "self": 0.10,
-                        "random": 0.12,
-                        "random_no_switch": 0.05,
-                    },
-                    reward_config=league_reward,
-                ),
-            ],
-        ),
-    )
 
 
 def get_config(preset: str = "standard") -> TrainingConfig:
@@ -639,10 +476,7 @@ def get_config(preset: str = "standard") -> TrainingConfig:
                 sgd_minibatch_size=512,
             ),
         ),
-        "pure_league_play": _build_pure_league_play_config(),
     }
-
-    presets["pure_league_pool"] = presets["pure_league_play"]
 
     if preset not in presets:
         raise ValueError(f"Unknown preset: {preset}. Available: {list(presets.keys())}")

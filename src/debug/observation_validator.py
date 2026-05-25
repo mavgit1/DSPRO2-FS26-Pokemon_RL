@@ -20,7 +20,11 @@ from src.models.embedding import (
     NUM_TOKENS,
     TOKEN_DIM,
 )
-from src.action_space import NATIVE_ACTION_SPACE_N
+from src.action_space import (
+    COMPRESSED_ACTION_SPACE_N,
+    COMPRESSED_SWITCH_ACTIONS,
+)
+
 
 # Index constants for token layout
 _GLOBAL_TOKEN = 0
@@ -55,6 +59,7 @@ def validate_observations(
         _check_active_tokens,
         _check_weather_populated,
         _check_action_mask_binary,
+        _check_switch_mask_consistency,
         _check_bench_fainted_flags,
         _check_species_nonzero,
     ]
@@ -88,7 +93,7 @@ def _check_shapes(samples: List[Dict[str, Any]]) -> Dict[str, float]:
         mask_arr = np.asarray(mask)
         if obs_arr.shape != (NUM_TOKENS, TOKEN_DIM):
             mismatches += 1
-        elif mask_arr.shape != (NATIVE_ACTION_SPACE_N,):
+        elif mask_arr.shape != (COMPRESSED_ACTION_SPACE_N,):
             mismatches += 1
     return {
         f"{key}_count": float(mismatches),
@@ -177,6 +182,42 @@ def _check_action_mask_binary(samples: List[Dict[str, Any]]) -> Dict[str, float]
         "obs_val/mask_no_valid_count": float(no_valid),
         "obs_val/mask_avg_valid_actions": avg_valid,
         "obs_val/mask_fail": float(non_binary > 0 or no_valid > 0),
+    }
+
+
+def _check_switch_mask_consistency(samples: List[Dict[str, Any]]) -> Dict[str, float]:
+    """Check that fainted bench pokemon have their switch actions masked out.
+
+    For each bench token that is present and fainted, the corresponding
+    compressed switch action should be masked (0.0).
+    """
+    inconsistencies = 0
+    checks_run = 0
+    for s in samples:
+        obs = np.asarray(s.get("obs"))
+        mask = np.asarray(s.get("action_mask"))
+        if obs.size == 0 or mask.size == 0:
+            continue
+        for k in range(5):  # 5 bench slots
+            bench_token = _FIRST_BENCH_TOKEN + k
+            compressed_switch = COMPRESSED_SWITCH_ACTIONS.start + k
+
+            if bench_token >= NUM_TOKENS or compressed_switch >= COMPRESSED_ACTION_SPACE_N:
+                break
+
+            is_present = obs[bench_token, _PRESENCE_OFFSET] > 0.5
+            is_fainted = obs[bench_token, _IS_FAINTED_OFFSET] > 0.5
+            is_masked = mask[compressed_switch] > 0.5
+
+            if is_present and is_fainted:
+                checks_run += 1
+                if is_masked:
+                    inconsistencies += 1
+
+    return {
+        "obs_val/switch_fainted_inconsistencies": float(inconsistencies),
+        "obs_val/switch_fainted_checks_run": float(checks_run),
+        "obs_val/switch_fainted_fail": float(inconsistencies > 0),
     }
 
 

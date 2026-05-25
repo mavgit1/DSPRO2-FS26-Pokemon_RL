@@ -39,11 +39,8 @@ class CurriculumManager:
             return False
 
         min_samples = max(1, current.min_samples_for_promotion)
-        min_episodes = current.min_episodes_in_stage
-        if min_episodes is None:
-            min_episodes = self.config.min_episodes_before_promotion
         return (
-            self.episodes_in_stage >= min_episodes
+            self.episodes_in_stage >= self.config.min_episodes_before_promotion
             and len(self.outcome_window) >= min_samples
             and rolling_win_rate >= current.promote_at_win_rate
         )
