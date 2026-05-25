@@ -205,6 +205,49 @@ def collect_env_memory_sentinels(algo: Any) -> Dict[str, float]:
     return metrics
 
 
+def resolve_stage_entropy_coeff(
+    stage: CurriculumStageConfig, default_entropy_coeff: float
+) -> float:
+    """Stage override when set, else global PPO default."""
+    if stage.entropy_coeff is not None:
+        return float(stage.entropy_coeff)
+    return float(default_entropy_coeff)
+
+
+def apply_curriculum_entropy(algo: Any, entropy_coeff: float) -> None:
+    """Update live learner entropy schedulers (AlgorithmConfig is frozen after build)."""
+    if algo is None:
+        return
+
+    coeff = float(entropy_coeff)
+    learner_group = getattr(algo, "learner_group", None)
+    if learner_group is None:
+        return
+
+    def _update_entropy(learner: Any, _: Any = None) -> None:
+        from ray.rllib.utils.schedules.scheduler import Scheduler
+
+        schedulers = getattr(learner, "entropy_coeff_schedulers_per_module", None)
+        if schedulers is None:
+            return None
+
+        module = getattr(learner, "module", None)
+        if module is not None:
+            module_ids = list(module.keys())
+        else:
+            module_ids = list(schedulers.keys())
+
+        for module_id in module_ids:
+            schedulers[module_id] = Scheduler(
+                fixed_value_or_schedule=coeff,
+                framework=learner.framework,
+                device=getattr(learner, "_device", None),
+            )
+        return None
+
+    learner_group.foreach_learner(func=_update_entropy, timeout_seconds=None)
+
+
 def apply_curriculum_stage(algo: Any, stage: CurriculumStageConfig) -> None:
     payload = stage.to_dict()
     _foreach_vector_env(
@@ -256,8 +299,8 @@ def collect_selfplay_diagnostics(algo: Any) -> Dict[str, Any]:
     valid_count = max(agg["valid_action_count_count"], 1.0)
 
     result["selfplay/weight_loads"] = agg["weight_load_count"]
-    result["selfplay/fallback_count"] = agg["fallback_count"]
-    result["selfplay/action_mapping_fallback_count"] = agg[
+    result["selfplay/inference_error_fallback_count"] = agg["fallback_count"]
+    result["selfplay/action_to_order_fallback_count"] = agg[
         "action_mapping_fallback_count"
     ]
     result["selfplay/avg_top_prob"] = agg["top_prob_sum"] / prob_count
@@ -267,8 +310,10 @@ def collect_selfplay_diagnostics(algo: Any) -> Dict[str, Any]:
     result["selfplay/n_workers"] = float(n_workers)
 
     total_decisions = max(total_turns, 1.0)
-    result["selfplay/fallback_rate"] = agg["fallback_count"] / total_decisions
-    result["selfplay/mapping_fallback_rate"] = (
+    result["selfplay/inference_error_fallback_rate"] = (
+        agg["fallback_count"] / total_decisions
+    )
+    result["selfplay/action_to_order_fallback_rate"] = (
         agg["action_mapping_fallback_count"] / total_decisions
     )
 

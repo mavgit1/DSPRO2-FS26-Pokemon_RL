@@ -3,7 +3,7 @@ from typing import List, Literal
 
 
 ProtocolName = Literal["smoke", "fixed_paired", "mirror", "benchmark"]
-OpponentName = Literal["random", "random_no_switch", "heuristic"]
+OpponentName = Literal["random", "random_no_switch", "heuristic", "self"]
 
 
 @dataclass(frozen=True)
@@ -45,7 +45,12 @@ def get_protocol(name: ProtocolName, episodes: int | None = None) -> ValidationP
         )
 
     if name == "benchmark":
-        opponents: List[OpponentName] = ["random", "random_no_switch", "heuristic"]
+        opponents: List[OpponentName] = [
+            "random",
+            "random_no_switch",
+            "heuristic",
+            "self",
+        ]
         eps_per = episodes or 50
         return ValidationProtocol(
             name=name,

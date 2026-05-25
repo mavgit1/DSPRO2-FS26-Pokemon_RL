@@ -54,7 +54,7 @@ echo "[3/4] Registering custom battle formats..."
 echo ""
 echo "[4/4] Starting Pokemon Showdown servers..."
 "$SCRIPT_DIR/kill_all_showdown.sh" 2>/dev/null || true
-"$SCRIPT_DIR/spin_up_multiple_showdown.sh"
+"$SCRIPT_DIR/spin_up_multiple_showdown.sh" "${1:-8}"
 
 # Wait for first server to respond
 echo ""

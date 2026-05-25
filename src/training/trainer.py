@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import shutil
 import time
 from collections import deque
 from pathlib import Path
@@ -17,11 +18,14 @@ from src.config.TM_optimal_config import (
     get_config,
     resolve_mlflow_experiment_for_training,
 )
+from src.models.battle_transformer import configure_safe_sdp_backends
 from src.training.checkpointing import CheckpointManager
 from src.training.curriculum import CurriculumManager
 from src.training.env_bridge import (
+    apply_curriculum_entropy,
     apply_curriculum_stage,
     collect_env_memory_sentinels,
+    resolve_stage_entropy_coeff,
     collect_recent_observation_samples,
     collect_recent_episode_stats,
     collect_recent_outcomes,
@@ -109,6 +113,9 @@ class PokemonTrainer:
         self.iteration = 0
         self.best_reward = float("-inf")
         self.system_metrics = SystemMetricsCollector()
+        self._disable_decision_diagnostics = os.environ.get(
+            "ENABLE_DECISION_DIAGNOSTICS", ""
+        ).lower() not in ("1", "true", "yes")
         self.diag_samples_per_iteration = int(
             os.environ.get("DIAG_SAMPLES_PER_ITER", "3")
         )
@@ -133,6 +140,7 @@ class PokemonTrainer:
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
+            configure_safe_sdp_backends()
 
         ray_tmp = os.environ.get("RAY_TMPDIR", "").strip()
         ray_kwargs: Dict[str, Any] = {
@@ -172,6 +180,8 @@ class PokemonTrainer:
                 print(
                     "Resuming from checkpoint (step count will refresh after next iteration)."
                 )
+            self._reset_optimizers_after_resume()
+            self._sync_curriculum_after_resume()
 
         print("=" * 60)
         print("Starting Training")
@@ -216,12 +226,16 @@ class PokemonTrainer:
                 if self.curriculum:
                     self._apply_curriculum_stage(self.curriculum.current_stage)
 
+                self._export_selfplay_weights()
+
                 prev_steps = self.total_steps
                 prev_wall_time = time.time()
 
                 while self.total_steps < self.config.total_timesteps:
                     iter_start = time.time()
-                    # Train
+                    # Snapshot policy for self-play *before* this iteration's rollouts.
+                    # The learner updates during train_step(); opponents stay on this snapshot.
+                    self._export_selfplay_weights()
                     result = self.train_step()
 
                     env_stats = result.get("env_runners", {})
@@ -247,11 +261,6 @@ class PokemonTrainer:
                     outcomes = collect_recent_outcomes(self.algo)
                     episode_stats = collect_recent_episode_stats(self.algo)
                     metrics.update(aggregate_episode_metrics(outcomes, episode_stats))
-
-                    # Export self-play weights every iteration so the opponent
-                    # stays fresh (instead of only every 150k checkpoint).
-                    # TODO: this is not how it should be done. So make proper self-play later.
-                    self._export_selfplay_weights()
 
                     # Collect and log self-play diagnostics.
                     sp_metrics = self._collect_and_log_selfplay_diagnostics()
@@ -287,6 +296,9 @@ class PokemonTrainer:
 
                         if stage_changed:
                             self._apply_curriculum_stage(self.curriculum.current_stage)
+                            self._maybe_save_reference_checkpoint(
+                                self.curriculum.current_stage
+                            )
                             mlflow.set_tag(
                                 "last_curriculum_transition",
                                 f"iter_{self.iteration}_{self.curriculum.current_stage.name}",
@@ -353,17 +365,35 @@ class PokemonTrainer:
 
             except KeyboardInterrupt:
                 print("Training interrupted by user")
+            except Exception as exc:
+                print(
+                    f"[ERROR] Training failed at step {self.total_steps:,}: {exc!r}"
+                )
+                try:
+                    if (
+                        self.algo is not None
+                        and self.total_steps > self._last_checkpoint_step
+                    ):
+                        self._save_checkpoint()
+                        print("[INFO] Emergency checkpoint saved after failure.")
+                except Exception as save_exc:
+                    print(f"[WARN] Emergency checkpoint failed: {save_exc!r}")
 
             finally:
                 # Final checkpoint
                 final_path = None
                 if self.algo is not None:
-                    save_dir = os.path.abspath(f"{self.config.checkpoint_dir}/final")
-                    save_result = self.algo.save(save_dir)
-                    final_path = save_result.checkpoint.path
-                    mlflow.log_artifacts(
-                        local_dir=final_path, artifact_path="final_model"
-                    )
+                    try:
+                        save_dir = os.path.abspath(
+                            f"{self.config.checkpoint_dir}/final"
+                        )
+                        save_result = self.algo.save(save_dir)
+                        final_path = save_result.checkpoint.path
+                        mlflow.log_artifacts(
+                            local_dir=final_path, artifact_path="final_model"
+                        )
+                    except Exception as save_exc:
+                        print(f"[WARN] Final checkpoint save failed: {save_exc!r}")
 
                 elapsed = time.time() - start_time
                 print("=" * 60)
@@ -412,15 +442,155 @@ class PokemonTrainer:
                     f"opponent_mix must contain at least one positive weight for stage '{stage.name}'"
                 )
 
+    def _reset_optimizers_after_resume(self) -> None:
+        """Recreate Adam optimizers after checkpoint restore.
+
+        PyTorch 2.10 + RLlib restored optimizer state can trigger:
+        ``beta1 as a Tensor is not supported for capturable=False and foreach=True``.
+        We keep model weights from the checkpoint but reset optimizer momentum.
+        """
+        if self.algo is None:
+            return
+        learner_group = getattr(self.algo, "learner_group", None)
+        if learner_group is None:
+            return
+
+        def _reset(learner: Any, _: Any = None) -> None:
+            for module_id in list(learner.module.keys()):
+                config = learner.config.get_config_for_module(module_id)
+                for name in list(learner._module_optimizers.get(module_id, [])):
+                    opt = learner._named_optimizers.pop(name, None)
+                    if opt is not None:
+                        learner._optimizer_parameters.pop(opt, None)
+                        learner._optimizer_lr_schedules.pop(opt, None)
+                    learner._optimizer_name_to_module.pop(name, None)
+                learner._module_optimizers[module_id] = []
+
+                module = learner._module[module_id]
+                params = learner.get_parameters(module)
+                optimizer = torch.optim.Adam(params, foreach=False)
+                learner.register_optimizer(
+                    module_id=module_id,
+                    optimizer=optimizer,
+                    params=params,
+                    lr_or_lr_schedule=config.lr,
+                )
+            return None
+
+        learner_group.foreach_learner(func=_reset, timeout_seconds=None)
+        print("Reset learner optimizers after resume (foreach=False, fresh momentum).")
+
+    def _uses_pool_curriculum_stages(self) -> bool:
+        if not self.curriculum:
+            return False
+        return any(
+            stage.team_pool_manifest for stage in self.curriculum.stages
+        )
+
+    def _sync_curriculum_after_resume(self) -> None:
+        """Align curriculum stage with resumed step count (state is not in checkpoints)."""
+        if not self.curriculum or self.total_steps <= 0:
+            return
+        if self._uses_pool_curriculum_stages():
+            resume_stage = os.environ.get("RESUME_CURRICULUM_STAGE", "").strip()
+            if resume_stage:
+                stage_idx = next(
+                    (
+                        i
+                        for i, s in enumerate(self.curriculum.stages)
+                        if s.name == resume_stage
+                    ),
+                    None,
+                )
+                if stage_idx is None:
+                    raise ValueError(
+                        f"RESUME_CURRICULUM_STAGE={resume_stage!r} not in curriculum"
+                    )
+                if self.curriculum.current_stage_idx != stage_idx:
+                    old = self.curriculum.current_stage.name
+                    self.curriculum.current_stage_idx = stage_idx
+                    self.curriculum.episodes_in_stage = 0
+                    self.curriculum.outcome_window.clear()
+                    print(
+                        f"Pool curriculum resume: {old} -> "
+                        f"{self.curriculum.current_stage.name} "
+                        f"(steps={self.total_steps:,})"
+                    )
+                return
+            print(
+                "Pool-curriculum preset: skipping step-based curriculum sync "
+                "(stage advances by rolling win rate only)."
+            )
+            return
+        target_idx = self._curriculum_stage_idx_for_steps(self.total_steps)
+        target_idx = min(target_idx, len(self.curriculum.stages) - 1)
+        if self.curriculum.current_stage_idx != target_idx:
+            old = self.curriculum.current_stage.name
+            self.curriculum.current_stage_idx = target_idx
+            self.curriculum.episodes_in_stage = 0
+            self.curriculum.outcome_window.clear()
+            print(
+                f"Curriculum synced after resume: {old} -> "
+                f"{self.curriculum.current_stage.name} (steps={self.total_steps:,})"
+            )
+
+    @staticmethod
+    def _curriculum_stage_idx_for_steps(total_steps: int) -> int:
+        """Map global step count to curriculum stage (matches recent production runs)."""
+        if total_steps >= 7_000_000:
+            return 3  # league_training
+        if total_steps >= 900_000:
+            return 2  # heuristic_tactics
+        if total_steps >= 280_000:
+            return 1  # heuristic_bridge
+        return 0  # warmup
+
     def _apply_curriculum_stage(self, stage: CurriculumStageConfig) -> None:
         """Push stage payload to all running env wrappers."""
         if self.algo is None:
             return
+        entropy_coeff = resolve_stage_entropy_coeff(
+            stage, self.config.ppo.entropy_coeff
+        )
+        apply_curriculum_entropy(self.algo, entropy_coeff)
         apply_curriculum_stage(self.algo, stage)
+        pool_note = (
+            f" | team_pool={stage.team_pool_manifest}"
+            if stage.team_pool_manifest
+            else ""
+        )
         print(
             f"Applied stage '{stage.name}' | threshold={stage.promote_at_win_rate:.2f} "
-            f"| mix={stage.opponent_mix}"
+            f"| entropy_coeff={entropy_coeff:.4f} | mix={stage.opponent_mix}{pool_note}"
         )
+
+    def _maybe_save_reference_checkpoint(
+        self, stage: CurriculumStageConfig
+    ) -> None:
+        ref_dir = self.config.reference_checkpoint_dir
+        ref_stage = self.config.reference_checkpoint_on_stage
+        if not ref_dir or not ref_stage or stage.name != ref_stage:
+            return
+        dest = Path(ref_dir).resolve()
+        dest.mkdir(parents=True, exist_ok=True)
+        ckpt_path = self.checkpoint_mgr.save_checkpoint(self.algo, self.total_steps)
+        self._export_selfplay_weights()
+        reference_ckpt = dest / "reference_checkpoint"
+        if reference_ckpt.exists():
+            shutil.rmtree(reference_ckpt, ignore_errors=True)
+        shutil.copytree(ckpt_path, reference_ckpt)
+        sp_src = Path(self.config.selfplay_weights_path).resolve()
+        if sp_src.exists():
+            shutil.copy2(sp_src, dest / "selfplay_latest.pt")
+        meta = {
+            "step": self.total_steps,
+            "stage": stage.name,
+            "checkpoint": str(reference_ckpt),
+        }
+        (dest / "metadata.json").write_text(
+            json.dumps(meta, indent=2) + "\n", encoding="utf-8"
+        )
+        print(f"Reference checkpoint saved: {reference_ckpt}")
 
     def _register_environments(self) -> None:
         """Register environments with Ray."""
@@ -489,11 +659,23 @@ class PokemonTrainer:
     # Converts obs to expected tensor shapes for the model.
     @staticmethod
     def _to_batched_obs(obs_sample: Dict[str, Any]) -> Dict[str, torch.Tensor]:
-        obs = torch.as_tensor(obs_sample["obs"], dtype=torch.float32)
-        species = torch.as_tensor(obs_sample["species"], dtype=torch.long)
-        items = torch.as_tensor(obs_sample["items"], dtype=torch.long)
-        abilities = torch.as_tensor(obs_sample["abilities"], dtype=torch.long)
-        action_mask = torch.as_tensor(obs_sample["action_mask"], dtype=torch.float32)
+        def _f32(key: str) -> torch.Tensor:
+            arr = np.asarray(obs_sample[key], dtype=np.float32)
+            if not arr.flags.writeable:
+                arr = arr.copy()
+            return torch.from_numpy(arr)
+
+        def _i64(key: str) -> torch.Tensor:
+            arr = np.asarray(obs_sample[key], dtype=np.int64)
+            if not arr.flags.writeable:
+                arr = arr.copy()
+            return torch.from_numpy(arr)
+
+        obs = _f32("obs")
+        species = _i64("species")
+        items = _i64("items")
+        abilities = _i64("abilities")
+        action_mask = _f32("action_mask")
 
         if obs.dim() == 2:
             obs = obs.unsqueeze(0)
@@ -520,6 +702,8 @@ class PokemonTrainer:
             "diag/samples_saved_total": float(self._diag_samples_saved),
             "diag/samples_pruned_total": float(self._diag_pruned_total),
         }
+        if self._disable_decision_diagnostics:
+            return metrics
         analyze_fn = self._get_diagnostic_analyzer()
         if analyze_fn is None:
             return metrics
@@ -532,18 +716,33 @@ class PokemonTrainer:
 
         selected = raw_samples[: self.diag_samples_per_iteration]
         new_records: list[Dict[str, Any]] = []
+        device = None
+        try:
+            module = self.algo.get_module()
+            device = next(module.parameters()).device
+        except Exception:
+            pass
+
         for sample in selected:
             try:
-                diag = analyze_fn(self._to_batched_obs(sample), top_k=3)
+                batched = self._to_batched_obs(sample)
+                if device is not None:
+                    batched = {k: v.to(device) for k, v in batched.items()}
+                # Never build autograd graphs on the live learner module (corrupts PPO).
+                with torch.inference_mode():
+                    diag = analyze_fn(batched, top_k=3, compute_saliency=False)
             except Exception:
                 continue
-            new_records.append(
-                {
-                    "iteration": self.iteration,
-                    "total_steps": self.total_steps,
-                    "diagnostics": diag,
-                }
-            )
+            record: Dict[str, Any] = {
+                "iteration": self.iteration,
+                "total_steps": self.total_steps,
+                "diagnostics": diag,
+            }
+            if sample.get("opponent_type") is not None:
+                record["opponent_type"] = sample["opponent_type"]
+            if sample.get("training_stage_index") is not None:
+                record["training_stage_index"] = sample["training_stage_index"]
+            new_records.append(record)
 
         if not new_records:
             return metrics
@@ -605,9 +804,15 @@ class PokemonTrainer:
         """Export raw model state dict for self-play opponents to load."""
         try:
             module = self.algo.get_module("default_policy")
-            state_dict = module.model.state_dict()
             path = Path(os.path.abspath(self.config.selfplay_weights_path))
             path.parent.mkdir(parents=True, exist_ok=True)
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+            with torch.inference_mode():
+                state_dict = {
+                    key: tensor.detach().cpu()
+                    for key, tensor in module.model.state_dict().items()
+                }
             torch.save(state_dict, path)
         except Exception as exc:
             print(f"[WARN] Failed to export self-play weights: {exc}")
@@ -684,6 +889,7 @@ class PokemonTrainer:
                         episodes=validation.benchmark_episodes_per_opponent,
                     )
 
+                team_manifest = self._manifest_for_validation_protocol(protocol_name)
                 report = run_inprocess_validation(
                     algo=self.algo,
                     config=self.config,
@@ -692,6 +898,7 @@ class PokemonTrainer:
                     max_steps_per_battle=validation.max_steps_per_battle,
                     seed=validation.seed,
                     player_team=player_team,
+                    team_manifest=team_manifest,
                     num_servers=self.num_servers,
                 )
             except Exception as exc:

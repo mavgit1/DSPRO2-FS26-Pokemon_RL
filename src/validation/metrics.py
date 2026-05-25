@@ -151,6 +151,7 @@ _SKILL_WEIGHTS: Dict[str, float] = {
     "random": 1.0,
     "random_no_switch": 1.5,
     "heuristic": 2.0,
+    "self": 2.5,
 }
 
 

@@ -36,10 +36,12 @@ class EmbeddingVocab:
         self.species_entries = list(payload["species"])
         self.item_entries = list(payload["items"])
         self.ability_entries = list(payload["abilities"])
+        self.move_entries = list(payload.get("moves", []))
 
         self.species_to_id = self._build_lookup(self.species_entries)
         self.item_to_id = self._build_lookup(self.item_entries)
         self.ability_to_id = self._build_lookup(self.ability_entries)
+        self.move_to_id = self._build_lookup(self.move_entries)
         self._add_aliases(self.species_to_id, SPECIES_ALIASES)
 
     @staticmethod
@@ -71,6 +73,10 @@ class EmbeddingVocab:
     def ability_vocab_size(self) -> int:
         return len(self.ability_entries) + 1
 
+    @property
+    def move_vocab_size(self) -> int:
+        return len(self.move_entries) + 1
+
     def species_id(self, value: Any) -> int:
         return self.species_to_id.get(normalize_dex_id(value), PADDING_ID)
 
@@ -79,6 +85,13 @@ class EmbeddingVocab:
 
     def ability_id(self, value: Any) -> int:
         return self.ability_to_id.get(normalize_dex_id(value), PADDING_ID)
+
+    def move_id(self, value: Any) -> int:
+        if value is None:
+            return PADDING_ID
+        if hasattr(value, "id"):
+            value = value.id
+        return self.move_to_id.get(normalize_dex_id(value), PADDING_ID)
 
 
 @lru_cache(maxsize=1)
@@ -93,4 +106,5 @@ def vocab_sizes() -> Dict[str, int]:
         "species_vocab_size": vocab.species_vocab_size,
         "item_vocab_size": vocab.item_vocab_size,
         "ability_vocab_size": vocab.ability_vocab_size,
+        "move_vocab_size": vocab.move_vocab_size,
     }
