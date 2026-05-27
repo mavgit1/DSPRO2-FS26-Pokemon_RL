@@ -39,9 +39,8 @@
 
 The critical path depends on resolving the medium-stage plateau.  If the
 reward signal redesign does not produce improvement within 2--3 experimental
-iterations, the timeline for Milestone~1 completion could extend by an
-additional 2--4~weeks.  This risk is accepted given the exploratory nature of
-the project.
+iterations, the timeline for Milestone~2 completion could extend by an
+additional 2--4~weeks. This means that there is high likely hood of not being able to beat Milestone 2.
 
 \section{Ethical Considerations}
 
@@ -100,12 +99,13 @@ human judgement:
   \item \textbf{Checkpoint selection:} A human reviews MLflow dashboards to
         select the best checkpoint for gauntlet evaluation, rather than
         automatically selecting by training win rate (which can be misleading).
-  \item \textbf{Curriculum stage overrides:} If a training run stagnates, a
+\item \textbf{New feature selection:} A human reviews the MLflow dashboards and other diagnostics to prioritize the next feature to implement.
+  \item \textbf{Curriculum stage definition:} If a training run stagnates, a
         human may manually adjust the curriculum stage, opponent mix, or
-        promotion thresholds.
+        promotion thresholds. There is no automated parameter tuning for this stage.
   \item \textbf{Hyperparameter tuning:} Learning rate, entropy coefficient,
         and reward weights are set based on human interpretation of training
-        curves---not automated tuning.
+        curves, not automated tuning.
   \item \textbf{Experiment design:} The sequence of architectural changes
         (positional encoding, embeddings, action compression) was guided by
         human analysis of failure modes, not random search.
@@ -119,12 +119,10 @@ generalise to the gauntlet.
 
 \begin{itemize}
   \item The agent has been tested only on Milestone~1 (fixed team vs.\ random
-        opponents).  Team builder integration (Milestone~3) and full gauntlet
+        opponents). And is currently failing on Milestone~2. Completing Milestone~2 and Team builder integration (Milestone~3) and full gauntlet
         completion (Milestone~4) remain future work.
-  \item Cross-turn memory via LSTM has been implemented but not yet validated
-        end-to-end in a full training run.
   \item The system operates in the Gen\,8 random-battle format.  Transfer to
-        other Pok\'{e}mon generations or formats would require observation-space
+        other Pok\'{e}mon formats would require observation-space
         adjustments.
   \item All training and evaluation use local hardware (no cloud deployment).
   \item The heuristic opponent (\texttt{SimpleHeuristicsPlayer}) is a

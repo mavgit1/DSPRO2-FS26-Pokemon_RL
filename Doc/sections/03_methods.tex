@@ -1,0 +1,1063 @@
+% ─── Chapter 3: Methods ────────────────────────────────────────────
+\chapter{Methods}
+\label{ch:methods}
+
+This chapter describes the reinforcement learning framework, model architecture,
+training infrastructure, and the iterative development methodology used to
+diagnose and fix issues in the training pipeline.
+
+\section{Reinforcement Learning Framework}
+
+\subsection{MDP Formulation}
+
+The Pok\'{e}mon battle environment is modelled as a Markov Decision Process
+(MDP) with the following components:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{Component} & \textbf{Definition} \\
+  \midrule
+  State ($s$)       & Dictionary observation: token matrix $(13 \times 164)$,
+                      species/item/ability ID vectors $(13,)$ each, action
+                      mask $(14,)$.  Full specification in
+                      Section~\ref{sec:architecture}. \\
+  Action ($a$)       & Discrete choice from 14 possible actions (4 moves,
+                      4 gimmick-enhanced moves, 6 switches), filtered by the
+                      action mask to only legal options. \\
+  Reward ($r$)       & Shaped reward computed each step from HP changes,
+                      fainting events, and a terminal outcome bonus/penalty.
+                      Detailed in Section~\ref{sec:reward_design}. \\
+  Transition         & Deterministic given both players' actions;
+                      stochasticity arises from the opponent's policy and
+                      damage variance in the simulator. \\
+  Discount ($\gamma$) & 0.97 based on a hyper parameter sweep. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+An episode corresponds to a single battle.  It terminates when one side has no
+remaining conscious Pok\'{e}mon (win or loss).  There is no explicit time limit
+or truncation.
+
+\subsection{PPO Algorithm}
+
+The agent is trained with \textbf{Proximal Policy Optimization} (PPO), an
+on-policy actor-critic algorithm that balances sample efficiency with training
+stability through a clipped surrogate objective.  PPO was chosen for the
+following reasons:
+
+\begin{itemize}
+  \item \textbf{Stability:} The clipped objective prevents destructively large
+        policy updates, which is critical when learning in a sparse-reward,
+        high-variance environment.
+  \item \textbf{Distributed rollouts:} PPO naturally integrates with Ray
+        RLlib's distributed rollout architecture, enabling many parallel
+        battles.
+  \item \textbf{Action masking:} PPO's categorical distribution can be
+        combined with action masking (setting invalid-action logits to a large
+        negative value) without modifying the algorithm itself.
+\end{itemize}
+
+The policy network (actor) outputs a categorical distribution over the 14
+actions, and the value network (critic) outputs a scalar state-value estimate
+$V(s)$.  Both share a common transformer trunk (see
+Section~\ref{sec:architecture}).
+
+\subsection{Reward Design}
+\label{sec:reward_design}
+
+The reward function combines several components to provide dense learning signal
+while preserving the primacy of winning.  All rewards are multiplied by a
+global \texttt{reward\_scale}$\,=0.1$ or 0.05 before being returned to the agent, which
+scales returns from approximately $[-15, +15]$ to $[-1.5, +1.5]$.  The
+rationale for this scaling is discussed in
+Section~\ref{sec:reward_scaling}.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l r X}
+  \toprule
+  \textbf{Component} & \textbf{Default} & \textbf{Description} \\
+  \midrule
+  Victory reward     & $+10.0$  & Agent wins the battle (terminal step). \\
+  Defeat penalty     & $-10.0$  & Agent loses the battle (terminal step). \\
+  HP differential    & $\times 2.0$ &
+    $(\text{our\_team\_HP} - \text{opp\_team\_HP}) \times w$ as a shaped
+    step reward.  Positive when the agent is ahead, negative when behind. \\
+  Opponent fainted   & $+5.0$   & Per opponent Pok\'{e}mon knocked out. \\
+  Own fainted        & $-5.0$   & Per agent Pok\'{e}mon that faints. \\
+  Step penalty       & $-0.005$ & Per step, encourages battle efficiency
+                                    (fewer turns). \\
+  Matchup quality    & $\times 0.2$ &
+    $+1.0$ if a super-effective move is available, $-0.5$ if only resisted
+    moves, $-1.0$ if immune.  Rewards good type-readiness. \\
+  Action quality     & $\times 0.3$ &
+    Penalty for clearly suboptimal moves; bonus for resisting the opponent's
+    best move. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The reward is computed each step by \texttt{poke-env}'s
+\texttt{reward\_computing\_helper}, parameterised by the active
+\texttt{RewardConfig}.  At the terminal step, explicit outcome rewards are
+applied on top.  Reward parameters are adjusted across curriculum stages (see
+below). These were gradually introduced during development in descending order.
+
+\subsection{Curriculum Learning}
+\label{sec:curriculum}
+
+Due to the complexity of the full challenge, training follows a \textbf{curriculum
+learning} approach where the agent is first exposed to easy opponents and
+gradually faces stronger ones.  The curriculum currently has four stages:
+
+\begin{enumerate}
+  \item \textbf{Moves \& Switches Warmup.}
+        Opponent mix: 40\,\% random, 30\,\% \texttt{random\_no\_switch},
+        30\,\% self-play.  Promotion threshold: 65\,\% win rate.
+        Asymmetric rewards (victory $+8$, defeat $-10$) encourage caution.
+        Higher HP weight (3.0) and faint values ($\pm 6.0$) provide strong
+        per-step signal for learning basic move selection.
+
+  \item \textbf{Random, More Moves.}
+        Opponent mix: 70\,\% self-play, 10\,\% random,
+        20\,\% \texttt{random\_no\_switch}.  Promotion threshold: 20\,\% win
+        rate (intentionally low: the goal is exposure to self-play, not
+        mastery).  Victory reward raised to $+10$.  Large minimum sample
+        requirement (5\,000 episodes) ensures sufficient exposure before
+        progressing.
+
+  \item \textbf{Self-Play.}
+        Opponent mix: 60\,\% \texttt{random\_no\_switch},
+        40\,\% random.  Promotion threshold: 70\,\% win rate.
+        After the self-play exposure stage, the agent trains against
+        non-switching random opponents to solidify move selection skills.
+        Action quality weight increased to 0.4 to refine move choice.
+
+  \item \textbf{Mixed Final.}
+        Opponent mix: 50\,\% heuristic, 30\,\% self-play,
+        20\,\% \texttt{random\_no\_switch}.  Terminal stage (promotion
+        threshold 101\,\%, i.e.\ never promotes).  The agent faces the
+        strongest opponent mix, including the heuristic AI which considers
+        type effectiveness and switches strategically.
+\end{enumerate}
+
+% TODO: If a fifth stage is added, update the list above.
+
+\subsubsection{Per-Stage Reward Variants}
+
+Reward parameters are adjusted across stages to reflect changing difficulty:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l c c c c}
+  \toprule
+  \textbf{Parameter} & \textbf{Stage 1} & \textbf{Stage 2} & \textbf{Stage 3} & \textbf{Stage 4} \\
+  \midrule
+  Victory / Defeat   & $+8$ / $-10$ & $\pm 10$ & $\pm 10$ & $\pm 10$ \\
+  HP weight          & 3.0   & 3.0   & 3.0   & 3.0   \\
+  Opp.\ fainted      & $+6.0$ & $+6.0$ & $+6.0$ & $+6.0$ \\
+  Own fainted        & $-6.0$ & $-6.0$ & $-6.0$ & $-6.0$ \\
+  Step penalty       & $-0.01$ & $-0.01$ & $-0.01$ & $-0.01$ \\
+  Matchup weight     & 0.1   & 0.1   & 0.1   & 0.1   \\
+  Action quality wt. & 0.3   & 0.3   & 0.4   & 0.4   \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Note that Stage~1 uses asymmetric rewards (victory $+8$ vs.\ defeat $-10$) to
+discourage early aggression, and a higher step penalty ($-0.01$) to encourage
+efficient play from the start.
+
+Promotion decisions use a rolling window of the last 300~episodes (minimum 50
+samples required before promotion is considered; minimum 300 episodes must
+elapse before any promotion). Total possible rewards is by design made in a way that can only increase with difficulty.
+
+\subsection{Self-Play Mechanism}
+\label{sec:self_play}
+
+Self-play is implemented through a \texttt{SelfPlayPlayer} class that:
+
+\begin{enumerate}
+  \item Loads the latest model weights from
+        \texttt{checkpoints/selfplay\_latest.pt} on first use.
+  \item Re-checks the weights file each turn, enabling automatic updates
+        when new checkpoints are saved.
+  \item Maintains per-battle LSTM state for temporal memory.
+  \item Converts the agent's compressed 14-action output to native
+        \texttt{poke-env} \texttt{BattleOrder} objects.
+  \item Falls back to \texttt{RandomPlayer} behaviour on inference errors.
+\end{enumerate}
+
+At each checkpoint, the training pipeline exports the current model weights to
+the self-play weights path, making them immediately available to all
+\texttt{SelfPlayPlayer} instances across workers.  This creates a natural
+curriculum where the agent continuously adapts to an opponent of increasing
+skill.
+
+% TODO: Add talking point about self-play training results once available.
+% Specifically: win rate curves for self-play stage, comparison with
+% non-self-play training, and any observed oscillation or instability.
+
+\subsection{Opponent Types}
+
+The environment supports four opponent categories:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l l X}
+  \toprule
+  \textbf{Key} & \textbf{Player Class} & \textbf{Behaviour} \\
+  \midrule
+  \texttt{random\_no\_switch} & \texttt{RandomNoSwitchPlayer} &
+    Uniform random among legal \emph{move} orders; switches only when forced
+    (no moves available or forced by simulator). \\
+  \texttt{random} & \texttt{RandomPlayer} &
+    Uniform random over all legal orders (moves \emph{and} switches). \\
+  \texttt{heuristic} & \texttt{SimpleHeuristicsPlayer} &
+    Rule-based AI: considers type effectiveness, switches when at a
+    disadvantage. \\
+  \texttt{self} & \texttt{SelfPlayPlayer} &
+    Uses the training model's weights for inference with hot-reload support. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+In the embedding layer, \texttt{random\_no\_switch} is mapped to the same
+bucket as \texttt{random} for the opponent-type feature, avoiding distribution
+shift at the observation level when mixing or swapping baselines. From best to worst in terms of performance: heuristic, random no switch and random.
+
+\section{Model Architecture}
+\label{sec:architecture}
+
+\subsection{Overview}
+
+The system consists of three major components: (1)~a \textbf{custom Gymnasium
+environment} wrapping \texttt{poke-env} and Pok\'{e}mon Showdown, (2)~a
+\textbf{transformer-based neural network} that processes battle observations
+and outputs action logits plus a state-value estimate, and (3)~a
+\textbf{distributed training pipeline} built on Ray RLlib.  This section
+details the first two; the training infrastructure is covered in
+Section~\ref{sec:infrastructure}.
+
+\subsection{Observation Space}
+
+The observation is a dictionary with five keys:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l l X}
+  \toprule
+  \textbf{Key} & \textbf{Shape / Dtype} & \textbf{Content} \\
+  \midrule
+  \texttt{obs}          & $(13,\,164)$ float32 &
+    Token matrix: 1~global token + 6~own-team tokens + 6~opponent-team
+    tokens.  Each token encodes presence flags, HP, base stats, types,
+    status, moves, and more (see Appendix~\ref{ch:appendix_obs}). \\
+  \texttt{species}      & $(13,)$ int32 &
+    Species ID per token (dictionary lookup, vocabulary size 1\,151). \\
+  \texttt{items}        & $(13,)$ int32 &
+    Held-item ID per token (vocabulary size 1\,110). \\
+  \texttt{abilities}    & $(13,)$ int32 &
+    Ability ID per token (vocabulary size 216). \\
+  \texttt{action\_mask} & $(14,)$ float32 &
+    Binary mask: 1.0 for valid actions, 0.0 for invalid. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsubsection{Token Layout}
+
+The 13 tokens are organised as follows:
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{c l l}
+  \toprule
+  \textbf{Index} & \textbf{Role} & \textbf{Content} \\
+  \midrule
+  0        & Global      & Weather, terrain, side conditions, battle extras \\
+  1        & Our active  & Active Pok\'{e}mon on the agent's side \\
+  2--6     & Our bench   & Remaining team Pok\'{e}mon \\
+  7        & Opp.\ active & Active opponent Pok\'{e}mon \\
+  8--12    & Opp.\ bench  & Remaining opponent team \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Each Pok\'{e}mon token is 164~dimensions.  The full per-token feature
+breakdown is provided in Appendix~\ref{ch:appendix_obs}.
+
+\subsection{Embedding Layers}
+
+High-cardinality categorical entities are mapped to learned embeddings:
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{l r r}
+  \toprule
+  \textbf{Entity} & \textbf{Vocabulary Size} & \textbf{Embedding Dim} \\
+  \midrule
+  Species   & 1\,151 & 32 \\
+  Items     & 1\,110 & 32 \\
+  Abilities & 216    & 32 \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Padding index~0 represents absent entities (e.g.\ a bench slot with no
+Pok\'{e}mon).  Each token's base 164-dim vector is concatenated with three
+32-dim embedding vectors ($3 \times 32 = 96$), yielding 260~dimensions total.
+A linear projection followed by LayerNorm maps this to the transformer's hidden
+dimension (512 by default).
+
+\subsubsection{From Hashes to Dictionaries}
+
+Earlier versions used Adler-32 hashing with modulo 20\,000 to compress entity
+strings into integer IDs.  This caused approximately 7.5\,\% collision rate
+among 1\,800 unique strings.  The current system uses stable dictionary
+lookups generated from Showdown's data files, eliminating collisions entirely
+and ensuring that each entity receives a unique embedding.
+
+\subsection{Position \& Role Embeddings}
+
+The transformer processes a set of 13 tokens.  Without positional information,
+self-attention is permutation-invariant, meaning the model cannot distinguish between
+active and bench Pok\'{e}mon.  Two sets of learnable embeddings address this:
+
+\begin{itemize}
+  \item \textbf{Position embeddings:} One learned vector per token position
+        (13~positions $\to$ hidden dim).  Added after input projection.
+  \item \textbf{Role embeddings:} Five coarse roles: CLS (global), our
+        active, our bench, opponent active, opponent bench.  Shared across
+        positions within the same role.
+\end{itemize}
+
+Both are added to the projected token vectors before the transformer encoder.
+
+\subsection{Transformer Encoder}
+
+The core of the policy network is a standard \texttt{nn.TransformerEncoder}
+with the following configuration:
+
+\begin{center}
+\small
+\begin{tabularx}{0.6\textwidth}{l r}
+  \toprule
+  \textbf{Parameter} & \textbf{Value} \\
+  \midrule
+  Hidden dimension     & 512 \\
+  Attention heads      & 8 \\
+  Transformer layers   & 1 \\
+  Feedforward expansion & $\times 4$ (2\,048) \\
+  Activation           & GELU \\
+  Dropout              & 0.1 \\
+  Normalisation        & Pre-norm (LayerNorm before attention/FFN) \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The decision to use a single transformer layer was driven by an attention
+collapse analysis (see Section~\ref{sec:dev_methodology}), which showed that deeper
+post-norm transformers suffered from gradient vanishing in layers 2--3,
+effectively reducing model depth to two functional layers.
+
+\subsubsection{Cross-Team Attention Bias}
+
+A learnable \textbf{attention bias} is added to the self-attention scores to
+encourage the model to attend to the opponent's active Pok\'{e}mon: a
+critical source of tactical information:
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{l l r}
+  \toprule
+  \textbf{From} & \textbf{To} & \textbf{Bias} \\
+  \midrule
+  CLS (0)         & Opp.\ active (7)  & $+2.0$ \\
+  Our active (1)  & Opp.\ active (7)  & $+2.0$ \\
+  Opp.\ active (7) & Our active (1)   & $+1.0$ \\
+  Opp.\ active (7) & Our bench (2--6) & $+0.5$ \\
+  CLS (0)         & Opp.\ bench (8--12) & $+0.5$ \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+This bias was introduced after analysis showed that the default transformer
+progressively lost opponent attention in deeper layers.  With a single layer
+and this bias, the model allocates 37--63\,\% of CLS attention to the
+opponent's active Pok\'{e}mon.
+
+% TODO: Insert MLflow screenshot or generated figure showing attention
+% heatmap for the 1-layer model with cross-team bias.  This should show
+% the attention distribution from CLS and our_active to all 13 tokens.
+
+\subsection{Action Space}
+\label{sec:action_space}
+
+The agent operates in a \textbf{compressed action space} of 14~discrete
+actions:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{c l l l}
+  \toprule
+  \textbf{Index} & \textbf{Category} & \textbf{Compressed} & \textbf{Native Mapping} \\
+  \midrule
+  0--3  & Regular moves & Use move 1--4    & Direct (or first legal variant) \\
+  4--7  & Gimmick moves & Gimmick + move 1--4 & Auto-selects: Mega $\to$ Z $\to$ Dynamax \\
+  8--13 & Switches      & Switch to slot 1--6 & Mapped to party slot index \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The native \texttt{poke-env} space has 22~actions (6~switches + 4~regular
+moves + 12~gimmick variants).  Compression to 14 actions was motivated by:
+
+\begin{itemize}
+  \item \textbf{Reduced branching factor:} 14 vs.\ 22 simplifies exploration.
+  \item \textbf{Logical grouping:} Moves first, then gimmicks, then switches
+        provides a consistent structure the model can learn.
+  \item \textbf{Gimmick auto-selection:} Rather than requiring the agent to
+        learn separate Mega/Z/Dynamax variants, the compressed space presents
+        a single ``gimmick'' action that resolves to whichever gimmick is
+        legally available.
+\end{itemize}
+
+\subsubsection{Action Masking}
+
+At each step, the environment provides an \texttt{action\_mask} of shape
+$(14,)$ indicating which actions are legal.  The model applies a mask by
+setting invalid-action logits to $-10^{8}$ before the softmax.
+
+This ensures the agent never selects an illegal action, regardless of its
+learned policy.  The mask accounts for fainted Pok\'{e}mon (cannot switch to
+them), unavailable moves (no PP, disabled), and the absence of gimmick
+conditions (e.g.\ Dynamax not available).
+
+\subsection{LSTM Memory}
+
+An optional \textbf{single-layer LSTM} (hidden size 512) can process the CLS
+token sequence across turns within a battle, providing cross-turn temporal
+memory:
+
+\begin{itemize}
+  \item \textbf{Input:} CLS token embedding from the transformer at each turn.
+  \item \textbf{State:} Hidden state $h_t$ and cell state $c_t$ are carried
+        across turns, reset at episode boundaries.
+  \item \textbf{Purpose:} Enable the agent to remember previous turns (e.g.\
+        which moves the opponent has used, whether Protect was used recently)
+        rather than treating each turn independently.
+\end{itemize}
+
+The LSTM is enabled in the model code and processes both single-step and
+sequence batches.  However, RLlib's connector path for recurrent state
+propagation required additional engineering (see
+Section~\ref{sec:lstm_memory_fix}).
+
+\subsection{Policy \& Value Heads}
+
+Both heads share the transformer trunk (and LSTM, if active).  The CLS token
+output serves as the shared representation:
+
+\begin{itemize}
+  \item \textbf{Policy head:} $\text{hidden} \to \text{Linear}(512, 256) \to
+        \text{GELU} \to \text{Linear}(256, 14)$.  Output is action logits,
+        masked before softmax.
+  \item \textbf{Value head:} $\text{hidden} \to \text{Linear}(512, 256) \to
+        \text{GELU} \to \text{Linear}(256, 1)$.  Outputs scalar state-value
+        estimate $V(s)$.
+\end{itemize}
+
+\subsection{Model Size}
+
+The default (\texttt{standard}) configuration produces approximately
+\textbf{10--15\,million parameters}.  Preset variations are detailed in
+Section~\ref{sec:infrastructure}.
+
+% TODO: Insert a figure showing the full model architecture as a block
+% diagram: Input (obs dict) -> Embeddings -> Projection + Pos/Role ->
+% Transformer (1L) -> [LSTM] -> Policy/Value heads.  Can be generated
+% with draw.io, TikZ, or similar.
+
+\section{Training Infrastructure}
+\label{sec:infrastructure}
+
+\subsection{Distributed Training Architecture}
+
+Training is orchestrated by Ray RLlib, which distributes rollout collection
+across multiple workers and performs SGD updates on a central learner:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{Component} & \textbf{Role} \\
+  \midrule
+  Main process   & Configures training, manages curriculum callbacks,
+                   drives the training loop. \\
+  GPU learner     & Performs PPO SGD updates on collected batches.
+                   Uses PyTorch backend. \\
+  Rollout workers & Each runs multiple environments, collects trajectories,
+                   and sends batches to the learner. \\
+  Showdown servers & 8 local Node.js instances on ports 8000--8007,
+                     each hosting parallel battles. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The default (\texttt{standard}) configuration uses 24~workers with 8
+environments per worker, yielding \textbf{192~parallel battles}.  Each Showdown
+server hosts approximately 24~concurrent battles.
+
+\subsection{Hardware}
+
+\begin{center}
+\small
+\begin{tabularx}{0.8\textwidth}{l l}
+  \toprule
+  \textbf{Resource} & \textbf{Specification} \\
+  \midrule
+  GPU         & NVIDIA RTX 5090 (\texttt{optimal} preset) \\
+  RAM         & $\sim$44\,GB peak with 48 environments \\
+  CPU         & Multi-core (workers run on CPU threads) \\
+  Storage     & Local SSD for checkpoints and MLflow artifacts \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Memory management is critical: the project previously observed RAM growth from
+8\,GB to 52\,GB over 5~hours due to stale entries in environment caches.  This
+was mitigated with periodic cleanup and memory-leak monitoring.
+
+\subsection{Configuration Presets}
+
+Five hardware presets control model size, parallelism, and training duration:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l c c c c}
+  \toprule
+  \textbf{Parameter} & \textbf{Quick} & \textbf{Standard} & \textbf{Memory Safe} & \textbf{Large} \\
+  \midrule
+  Hidden dim              & 128   & 512   & 256   & 768   \\
+  Attention heads         & 8     & 8     & 4     & 12    \\
+  Transformer layers      & 1     & 1     & 1     & 6     \\
+  Embedding dim           & 32    & 32    & 32    & 32    \\
+  LSTM hidden             & ---   & 512   & 256   & 768   \\
+  Use LSTM                & No    & Yes   & No    & Yes   \\
+  Train batch size        & 4\,096  & 6\,144  & 2\,048  & 16\,384 \\
+  SGD minibatch size      & 256   & 512   & 128   & 512   \\
+  Approx.\ params         & $\sim$1M & $\sim$10M & $\sim$4M & $\sim$42M \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+The \texttt{quick} preset is used for smoke tests and debugging.  The
+\texttt{standard} preset is the default for training runs.  The
+\texttt{optimal} preset (not shown) matches \texttt{standard} but targets the
+RTX~5090 specifically.
+
+\subsection{PPO Hyperparameters}
+
+Default hyperparameters across all presets (unless overridden):
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{l r}
+  \toprule
+  \textbf{Parameter} & \textbf{Value} \\
+  \midrule
+  Learning rate              & $2 \times 10^{-4}$ \\
+  Discount ($\gamma$)        & 0.97 \\
+  GAE lambda ($\lambda$)     & 0.87 \\
+  Clip range ($\epsilon$)    & 0.08 \\
+  Entropy coefficient        & 0.013 \\
+  Value-function loss coeff. & 0.5 \\
+  Value clip param           & 4.85 \\
+  Gradient clipping          & 5.0 \\
+  SGD iterations per batch   & 8 \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+These are based on the first breakthrough run.
+%https://mlflow-server.chozo.me/#/experiments/6/runs/84ec848a3d574816830d5367b4e360d6/model-metrics
+
+\subsection{MLflow Experiment Tracking}
+
+All training runs are logged to an \textbf{MLflow} tracking server under the
+experiment name \texttt{Pokemon\_RL\_Battler}.  The following categories of
+data are recorded:
+
+\begin{itemize}
+  \item \textbf{Configuration snapshot:} Full training config, model config,
+        curriculum config, and hardware preset, stored as MLflow parameters.
+  \item \textbf{Training metrics:} Policy loss, value loss, entropy,
+        KL divergence, win rate, episode length, per-stage statistics, logged
+        every training iteration.
+  \item \textbf{Validation metrics:} Win rates against fixed opponents
+        (random, heuristic), per-opponent-type breakdowns, fallback event
+        counts, logged at scheduled evaluation intervals.
+  \item \textbf{Diagnostic metrics:} Action-mask density, observation sample
+        recordings, HP remaining distributions, faint counts per episode.
+  \item \textbf{System metrics:} CPU/RAM/GPU utilisation, memory leak counters.
+\end{itemize}
+
+Metrics use nested keys (e.g.\
+\texttt{validation/fixed\_paired/win\_rate\_vs\_heuristic}) to support
+structured comparison in the MLflow UI.
+
+% TODO: Insert MLflow screenshot showing the experiment comparison view
+% with multiple runs.  Highlight win rate curves, loss curves, and
+% the ability to compare configuration differences between runs.
+
+\subsection{Checkpoint Management}
+
+\begin{itemize}
+  \item \textbf{Frequency:} Checkpoints saved every 200\,000 training steps.
+  \item \textbf{Retention:} Up to 5~checkpoints retained (oldest automatically
+        deleted).
+  \item \textbf{Self-play export:} At each checkpoint, model weights are also
+        exported to \texttt{checkpoints/selfplay\_latest.pt} for use by
+        \texttt{SelfPlayPlayer} instances.
+  \item \textbf{Resume:} Training can be resumed from the latest checkpoint
+        using \texttt{-{}-resume-checkpoint latest}, preserving MLflow run
+        continuity via \texttt{-{}-mlflow-run-id <RUN\_ID>}.
+\end{itemize}
+
+\subsection{Validation Pipeline}
+
+Scheduled evaluation runs against fixed opponent configurations:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{Protocol} & \textbf{Description} \\
+  \midrule
+  Smoke test     & Quick sanity check: 10 episodes against random opponent. \\
+  Fixed paired   & 20~frozen teams $\times$ 3~opponents (random + random no switch + heuristic) =
+                   60~battles per evaluation run.  Primary comparison metric. \\
+  Mirror         & Both sides use the same team; tests raw battling skill
+                   without team advantage. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Validation is triggered at regular intervals (every 100\,000 steps) during
+training and can also be run manually against any checkpoint via
+\texttt{scripts/validate\_checkpoint.py}.  Results are logged to MLflow with
+per-opponent-type breakdowns.
+
+\subsection{Training Throughput}
+% Look into this! I don't know if its accurate
+
+Observed throughput on the \texttt{standard} preset:
+$\sim$800~environment samples per second (target: 1\,000+).  The primary
+bottleneck is the cpu since all the servers are single core and run on cpu.
+
+\section{Iterative Development Methodology}
+\label{sec:dev_methodology}
+
+The training pipeline was developed iteratively, with each phase addressing a
+specific problem identified through diagnostic analysis.  The phases are
+presented in chronological order.  Note that the curriculum configuration used
+during early development phases (baseline through PPO pipeline fixes) differed
+from the current four-stage system described in
+Section~\ref{sec:curriculum}; the early curriculum used a simpler two-stage
+setup with ``easy'' (random opponents only) and ``medium'' (50/50 random and
+heuristic) stages.
+
+\subsection{Baseline Establishment}
+
+\textbf{Starting point.} The initial system used a 22-action native
+\texttt{poke-env} space, Adler-32 hash-based categorical embeddings (20\,000
+buckets), no positional encoding, a 4-layer post-norm transformer, and a
+disabled LSTM.
+
+\textbf{Approach.} The training pipeline was run end-to-end with the early
+two-stage curriculum (easy: random opponents; medium: 50/50 random and
+heuristic opponents) to identify baseline behaviour and failure modes.
+
+\subsection{Validation Infrastructure}
+
+\textbf{Problem.} Without a standardised evaluation protocol, checkpoint
+quality could only be assessed by inspecting training-time metrics, which are
+noisy and may not reflect true policy strength.
+
+\textbf{Solution.} Implemented a validation pipeline with multiple protocols:
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l X}
+  \toprule
+  \textbf{Protocol} & \textbf{Method} \\
+  \midrule
+  Smoke        & 10 episodes vs.\ random opponent (quick sanity check). \\
+  Fixed paired & 20 frozen teams $\times$ 2 opponents = 40 battles per run. \\
+  Mirror       & Both sides use identical team. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Additionally, 20~frozen Gen\,8 random-battle teams were generated and stored
+as JSON manifests (10~swapped pairs for fairness).
+
+\subsection{Vocabulary \& ID Migration}
+
+\textbf{Problem.} Adler-32 hashing with modulo 20\,000 produced an estimated
+7.5\,\% collision rate among $\sim$1\,800 unique entity strings.  Collisions
+mean different Pok\'{e}mon species (or items or abilities) share the same
+embedding, degrading the model's ability to distinguish between entities.
+
+\textbf{Solution.} Replaced hash-based IDs with stable dictionary lookups:
+
+\begin{itemize}
+  \item Generated explicit vocabularies from Showdown data files.
+  \item Mapped each entity to a unique integer index.
+  \item Added support for display-form aliases (e.g.\ ``Shellos (East Sea)''
+        $\to$ internal key).
+\end{itemize}
+
+Vocabulary sizes: 1\,516~species, 584~items, 315~abilities.
+Coverage audit confirmed \textbf{zero unknown entities} across the BDSP
+dataset and validation manifests.  This change intentionally broke
+compatibility with all previous checkpoints: new training runs are treated as
+a new experiment family.
+
+\subsection{Logging \& Metrics Standardisation}
+
+\textbf{Problem.} Metric flow from environment to MLflow had gaps:
+``unknown'' opponent metadata was not properly logged, and opponent-specific
+metrics were sometimes missing from training runs.
+
+\textbf{Solution.} Traced the full metric path from environment through
+\texttt{EnvBridge} to MLflow.  Fixed root causes:
+\begin{itemize}
+  \item ``Unknown'' opponent metadata now correctly logged as a missing count.
+  \item Opponent-specific keys (e.g.\
+        \texttt{training/win\_rate\_vs\_random},
+        \texttt{training/win\_rate\_vs\_heuristic}) now present in all runs.
+  \item Defined a standard contract for high-signal metrics.
+\end{itemize}
+
+\subsection{Embedding Audit \& Global Features}
+
+\textbf{Problem.} The observation tensor lacked high-value global context
+features that could help the model understand battle dynamics (e.g.\ which
+opponent type it was facing, whether it was forced to switch).
+
+\textbf{Solution.} Added to the global token (position~0) without changing
+the tensor dimensions:
+\begin{itemize}
+  \item Opponent label categories (\texttt{opponent\_random},
+        \texttt{opponent\_heuristic}, \texttt{opponent\_other}).
+  \item Normalised battle turn, force-switch flag, trapped flag.
+  \item Normalised available move and switch counts.
+  \item Dynamax, Mega Evolution, and Z-Move availability flags.
+\end{itemize}
+
+Also discovered and fixed \textbf{broken weather encoding}: the battle state
+passed weather as a Python dictionary rather than enum keys, so weather
+information was never actually encoded into the observation.
+
+\subsection{Position \& Role Embeddings}
+
+\textbf{Problem.} The transformer received 13~tokens with no positional
+information.  Self-attention is permutation-invariant, meaning the model
+could not structurally distinguish between the active Pok\'{e}mon and bench
+slots, or between own-team and opponent-team tokens.
+
+\textbf{Solution.} Added two sets of learnable embeddings after input
+projection:
+\begin{itemize}
+  \item \textbf{Position embeddings:} 13~vectors, one per token position.
+  \item \textbf{Role embeddings:} 5~coarse roles (CLS, our active, our bench,
+        opponent active, opponent bench), shared across positions within a role.
+\end{itemize}
+
+Old checkpoints are incompatible due to new embedding parameters, so a fresh
+training run was required.
+
+\subsection{Compressed Action Space}
+
+\textbf{Problem.} The native \texttt{poke-env} action space has 22~actions
+(6~switches + 4~regular moves + 12~gimmick variants).  This large branching
+factor slows exploration, and the 12~gimmick variants are rarely all available
+simultaneously.
+
+\textbf{Solution.} Introduced a compressed 14-action space:
+
+\begin{center}
+\small
+\begin{tabularx}{0.7\textwidth}{c l l}
+  \toprule
+  \textbf{Indices} & \textbf{Category} & \textbf{Mapping} \\
+  \midrule
+  0--3  & Regular moves & Move 1--4 \\
+  4--7  & Gimmick moves & Auto: Mega $\to$ Z $\to$ Dynamax \\
+  8--13 & Switches      & Party slot 1--6 \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Gimmick slots automatically resolve to the first legally available gimmick
+type, so the agent only needs to learn ``use gimmick'' rather than ``use
+specific gimmick variant.''  Action mask changed from $(22,)$ to $(14,)$.
+Incompatible with old checkpoints.
+
+\subsection{LSTM Memory Fix}
+\label{sec:lstm_memory_fix}
+
+\textbf{Problem.} The LSTM path existed in model code but was non-functional
+due to RLlib's connector path not supporting recurrent state propagation in
+the production setup.
+
+\textbf{Solution.} Rewrote the LSTM integration:
+\begin{itemize}
+  \item LSTM now runs even when no incoming recurrent state is provided
+        (creates zero initial state).
+  \item \texttt{compute\_values()} uses the same forward path as policy logit
+        computation, ensuring consistent state handling.
+  \item Single-step and sequence batches both pass through the recurrent path
+        correctly.
+  \item \texttt{get\_initial\_state()} returns unbatched state tensors of shape
+        $[H]$ for compatibility with RLlib.
+\end{itemize}
+
+End-to-end training validation with LSTM enabled remains a next step.
+
+\subsection{PPO Pipeline Corrections}
+
+\textbf{Problem.} After the architectural improvements, a comprehensive audit
+revealed that the PPO training pipeline itself had six issues preventing
+effective learning, independent of model architecture.
+
+\textbf{Six fixes applied:}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l r X}
+  \toprule
+  \textbf{Issue} & \textbf{Before $\to$ After} & \textbf{Impact} \\
+  \midrule
+  Gradient clipping starvation &
+    $\text{clip}=0.5 \to 5.0$ &
+    Total grad norm $\sim$65 was clipped to 0.77\,\%, effectively zeroing
+    all transformer/embedding gradients. \\
+  No per-step action signal &
+    $0.0 \to 0.2/0.3$ &
+    Matchup and action-quality weights restored, providing per-step credit
+    assignment (without them, gradients cancelled over episodes). \\
+  Entropy collapse &
+    $0.005 \to 0.2$ &
+    Entropy bonus was negligible ($\sim$0.02 vs.\ $\sim$5.0 total loss).
+    Agent stopped exploring. \\
+  Discount horizon too long &
+    $\gamma=0.99 \to 0.95$ &
+    100-step horizon for $\sim$25-turn battles was too long.  20-step
+    horizon better matches episode length. \\
+  Value function instability &
+    $\text{vf\_clip}=25.0 \to 10.0$ &
+    Allowed 3$\times$ the reward range per update, destabilising value
+    regression. \\
+  LSTM crash on missing state &
+    ValueError $\to$ zeros &
+    \texttt{\_extract\_state} crashed when state was absent instead of
+    returning a zero tensor. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{keyinsight}
+Before diagnosing model architecture, it is essential to verify that gradients
+are actually flowing.  In this case, an aggressive gradient clip was silently
+starving all learnable layers, and the problem was invisible in standard loss
+metrics.
+\end{keyinsight}
+
+\subsection{Reward Scaling Approach}
+\label{sec:reward_scaling}
+
+\textbf{Problem.} Across the entire project history, explained variance had
+been stuck at approximately~0.1 (and sometimes negative).  The value function
+was essentially predicting a constant, and value loss showed no downward trend.
+This was the single largest blocker to policy improvement.
+
+\textbf{Root cause.} Returns were in the range $[-15, +15]$ with no
+normalisation.  RLlib normalises advantages but \emph{not} returns, so the
+value function was chasing an unscaled, moving target.  With
+\texttt{vf\_clip\_param}$=$10.0, the value head could overshoot by 3$\times$
+the reward range per update, preventing convergence.
+
+\textbf{Changes applied:}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{l r r X}
+  \toprule
+  \textbf{Parameter} & \textbf{Before} & \textbf{After} & \textbf{Rationale} \\
+  \midrule
+  \texttt{reward\_scale} & --- & 0.1 &
+    Scales returns from $[-15,+15]$ to $[-1.5,+1.5]$.  Makes value
+    regression tractable. \\
+  \texttt{vf\_clip\_param} & 10.0 & 3.0 &
+    Tighter clipping prevents value head from overshooting. \\
+  $\lambda$ (GAE) & 0.92 & 0.88 &
+    Reduces GAE target variance. \\
+  \texttt{hidden\_dim} & 256 & 512 &
+    Wider model gives value head more capacity. \\
+  \texttt{num\_heads} & 4 & 8 &
+    More heads for finer-grained attention. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Fixed Team \& No-Gimmick Format}
+
+\textbf{Problem.} Random battles introduce high entropy in team composition,
+making it difficult to isolate whether the agent is learning battle strategy
+or merely memorising matchup patterns.  Additionally, Dynamax and Terastallize
+mechanics add complexity that distracts from core battle competency.
+
+\textbf{Solution.} Two changes:
+\begin{itemize}
+  \item \textbf{Fixed player team:} Added \texttt{player\_team\_path} config
+        option.  When set, the agent always uses a specific team (Showdown
+        \texttt{.txt} format).  The battle format automatically switches from
+        \texttt{gen8randombattle} to \texttt{gen8customgame}.
+  \item \textbf{No-gimmick formats:} Created custom Showdown formats
+        (\texttt{gen8customgamenogimmicks},
+        \texttt{gen8randombattlenogimmicks}) that disable Dynamax, and remove
+        Sleep Clause for more natural battle dynamics.
+\end{itemize}
+
+With a fixed team, the agent only needs to learn battle strategy, not team
+adaptation.  This simplified the learning problem and provided a controlled
+setting for validating the training pipeline.
+
+\subsection{Self-Play Infrastructure}
+
+\textbf{Problem.} Self-play opponents were not actually using the training
+model's weights, playing with random initialisation instead.
+
+\textbf{Root causes:}
+\begin{enumerate}
+  \item \textbf{Weights never loaded:} The
+        \texttt{selfplay\_weights\_path} was relative
+        (\texttt{checkpoints/selfplay\_latest.pt}).  Ray workers run from a
+        temporary directory and could not find the file.  The load failure was
+        silently swallowed by a bare \texttt{except Exception: pass}.
+  \item \textbf{Stale weights:} Weights were only exported every 150K steps.
+        The opponent played with outdated checkpoints.
+  \item \textbf{Deterministic opponent:} Argmax action selection allowed the
+        training agent to exploit deterministic patterns.
+\end{enumerate}
+
+\textbf{Fixes:}
+\begin{itemize}
+  \item Resolved \texttt{selfplay\_weights\_path} to absolute before passing
+        to Ray workers.
+  \item Replaced \texttt{except: pass} with explicit error logging.
+  \item Weight export now happens every training iteration (not just at
+        checkpoint saves).
+  \item Replaced argmax with temperature sampling ($\tau=0.8$).
+  \item Fixed \texttt{opponent\_type=None} to
+        \texttt{opponent\_type="self"}, ensuring correct embedding features.
+\end{itemize}
+
+After the fix, all workers successfully loaded weights (previously zero
+workers).
+
+\begin{keyinsight}
+Any file path passed to Ray workers must be resolved to an absolute path
+\emph{before} serialisation.  Ray workers execute from a temporary working
+directory and cannot find relative paths.  Silent exception handling can mask
+critical failures for thousands of training steps.
+\end{keyinsight}
+
+\subsection{NaN Bug Workaround}
+
+\textbf{Problem.} After fixing weight loading, the self-play opponent's
+fallback rate was 100\,\%, meaning it still played randomly.
+
+\textbf{Root cause.} PyTorch~2.10 has a bug in
+\texttt{TransformerEncoderLayer.forward()} when using a float-valued
+\texttt{src\_mask}.  The model's learnable attention bias (an
+\texttt{nn.Parameter}) triggered this code path, producing NaN logits every
+forward pass.  The \texttt{multinomial} sampler then failed, falling back to
+random action selection.
+
+\textbf{Fix.} Replaced \texttt{layer(x, src\_mask=bias)} with a manual
+norm-first decomposition: LayerNorm $\to$ self-attention $\to$ residual
+$\to$ LayerNorm $\to$ FFN $\to$ residual.  This bypasses PyTorch's fused path
+and produces correct values.
+
+\textbf{Diagnostic instrumentation added:}
+\begin{itemize}
+  \item \texttt{\_diag} accumulator in \texttt{SelfPlayPlayer}: weight load
+        count, fallback count, action histogram, top probability, entropy,
+        valid action count.
+  \item Threaded through wrapper $\to$ env bridge $\to$ trainer, logged to
+        \texttt{logs/selfplay\_diagnostics.log} and MLflow.
+\end{itemize}
+
+\begin{keyinsight}
+Do not trust framework-level operations without testing.  A PyTorch internal
+bug in the transformer layer was causing NaN outputs, and only explicit
+diagnostic logging revealed it. This was discovered because self-play win rate
+was basically the same as against random, while it should have been near 50\,\%.
+\end{keyinsight}
+
+\subsection{Expanded Validation System}
+
+\textbf{Problem.} The validation system had several limitations: subprocess
+per protocol, only argmax actions, missing
+\texttt{random\_no\_switch} opponent, no unified benchmark, and no console
+output during training.  This made systematic hyperparameter optimisation
+difficult.
+
+\textbf{Solution.} Major overhaul of the validation infrastructure:
+\begin{itemize}
+  \item \textbf{Benchmark protocol:} 3 opponents $\times$ 50 episodes
+        (150~total).  Reports per-opponent win rate with Wilson 95\,\%
+        confidence intervals, a weighted skill score (random$=$1.0,
+        \texttt{random\_no\_switch}$=$1.5, heuristic$=$2.0), and consistency
+        (fraction of tiers above 50\,\% win rate).
+  \item \textbf{In-process validation:} \texttt{run\_inprocess\_validation()}
+        runs against the live algorithm during training, with no subprocess,
+        Ray init, or checkpoint restore overhead.
+  \item \textbf{Parallel benchmark:} Episodes distributed across $N$~servers
+        via \texttt{ThreadPoolExecutor}.  Each environment gets a sequential
+        chunk, environments run in parallel.
+  \item \textbf{Stochastic evaluation:} \texttt{-{}-explore} flag samples
+        from a masked softmax instead of argmax, evaluating the stochastic
+        policy.
+  \item \textbf{Console output:} Per-opponent win rate bars with confidence
+        interval bounds printed at each validation interval.
+\end{itemize}
+
+\subsection{Hyperparameter Sweep Methodology}
+
+\textbf{Problem.} With fixed teams performing well, the remaining performance
+gap (particularly against heuristic opponents with random teams) required
+systematic hyperparameter optimisation rather than manual tuning.
+
+\textbf{Solution.} Implemented an Optuna-based sweep with TPE sampler:
+\begin{itemize}
+  \item \textbf{Objective:} Benchmark skill score (weighted win rate across
+        three opponent tiers).
+  \item \textbf{Fixed curriculum:} Single stage with 20\,\% random,
+        40\,\% \texttt{random\_no\_switch}, 40\,\% heuristic.  No stage
+        promotion, ensuring consistent evaluation across trials.
+  \item \textbf{Search space:} 10~parameters covering learning rate
+        (log-uniform), entropy coefficient (log-uniform), discount factor,
+        GAE $\lambda$, PPO clip, value-function clip, dropout, reward scale
+        (categorical), matchup weight, and action-quality weight.
+  \item \textbf{Resume mechanism:} SQLite persistence
+        (\texttt{logs/hparam\_study.db}) allows interrupting and resuming
+        sweeps.
+\end{itemize}

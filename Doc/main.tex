@@ -1,13 +1,3 @@
-% Build from Doc/ directory (two passes for TOC):
-%   pdflatex main.tex && pdflatex main.tex
-%
-% Or with latexmk:
-%   latexmk -pdf main.tex
-%
-% If pdflatex is not installed on the host (e.g. immutable OS):
-%   podman run --rm -v "$PWD":/work:Z -w /work docker.io/texlive/texlive:latest \
-%     sh -c 'pdflatex -interaction=nonstopmode main.tex && pdflatex -interaction=nonstopmode main.tex'
-
 \documentclass[11pt,a4paper]{report}
 
 % ── Encoding & Typography ──────────────────────────────────────────
@@ -16,6 +6,7 @@
 \usepackage[english]{babel}
 \usepackage{lmodern}
 \usepackage{microtype}
+\usepackage{amssymb}
 
 % ── Page Layout ────────────────────────────────────────────────────
 \usepackage[a4paper,margin=25mm]{geometry}
@@ -97,7 +88,7 @@
 % ── Metadata ───────────────────────────────────────────────────────
 \title{Reinforcement Learning for a Pok\'{e}mon Nuzlocke Challenge\\[0.3em]
 \large DSPRO2 Final Report}
-\author{Tristan Muri \and Marvin Hueber \and Viacheslav Godovskii \and Alex Liubov}
+\author{Tristan Muri \and Marvin Hueber }%\and Viacheslav Godovskii \and Alex Liubov}
 \date{Spring Semester 2026}
 
 % ═══════════════════════════════════════════════════════════════════
@@ -107,7 +98,7 @@
 
 \begin{abstract}
 This report documents the development of a reinforcement learning agent trained to complete a
-Pok\'{e}mon Nuzlocke challenge---a sequential battle gauntlet where fainted Pok\'{e}mon are
+Pok\'{e}mon Nuzlocke challenge: a sequential battle gauntlet where fainted Pok\'{e}mon are
 permanently lost and a single defeat ends the run.  The system uses PPO (Proximal Policy
 Optimization) with a transformer-based policy network, trained through curriculum learning against
 progressively stronger opponents.  We describe the full engineering lifecycle: environment
@@ -123,19 +114,15 @@ experiment tracking via MLflow, checkpoint management, and a validation suite.
 
 % ── Chapters ───────────────────────────────────────────────────────
 \input{sections/01_introduction}
-\input{sections/02_game_environment}
-\input{sections/03_challenge_data}
-\input{sections/04_rl_framework}
-\input{sections/05_architecture}
-\input{sections/06_infrastructure}
-\input{sections/07_experiments}
-\input{sections/08_results}
-\input{sections/09_risk_ethics}
-\input{sections/10_conclusions}
-\input{sections/11_reproduction}
+\input{sections/02_background}
+\input{sections/03_methods}
+\input{sections/04_results}
+\input{sections/05_risk_ethics}
+\input{sections/06_conclusions}
 
 % ── Appendix ───────────────────────────────────────────────────────
 \appendix
+\input{sections/appendix_reproduction}
 \input{sections/appendix_observation}
 
 \end{document}

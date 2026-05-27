@@ -6,7 +6,7 @@
 The goal of this project is to develop an AI agent capable of completing a
 \emph{Pok\'{e}mon Nuzlocke challenge} using deep reinforcement learning.
 The chosen game is \emph{Pok\'{e}mon Brilliant Diamond} (BDSP), and the agent
-must defeat all mandatory trainers without losing---subject to constraints that
+must defeat all mandatory trainers without losing, subject to constraints that
 transform standard battles into a complex sequential decision-making problem
 under uncertainty with irreversible consequences.
 
@@ -24,7 +24,7 @@ Pok\'{e}mon community.  Its core constraints are:
 
 These rules introduce permanent consequences and limited resources, turning a
 turn-based strategy game into a problem that requires long-horizon planning,
-risk assessment, and resource management---all qualities that make it a
+risk assessment, and resource management, all qualities that make it a
 compelling testbed for reinforcement learning.
 
 \section{Stakeholder Context}
@@ -53,7 +53,7 @@ The primary stakeholders are:
 \section{Objectives \& Success Metrics}
 
 The overarching objective is to train an AI agent that successfully completes a
-Nuzlocke gauntlet---a predefined sequence of battles against trainer teams from
+Nuzlocke gauntlet: a predefined sequence of battles against trainer teams from
 Pok\'{e}mon Brilliant Diamond.
 
 Success is measured by the following metrics:
@@ -79,8 +79,8 @@ Success is measured by the following metrics:
 \end{center}
 
 Near-term success is defined as achieving a stable win rate above 50\,\%
-against heuristic opponents in the medium curriculum stage (see
-Chapter~\ref{ch:rl_framework}).
+against heuristic opponents in the mixed-final curriculum stage (see
+Chapter~\ref{ch:methods}).
 
 \section{Project Scope}
 
@@ -96,24 +96,23 @@ The following are \textbf{explicitly excluded}:
 
 \begin{itemize}
   \item Game-world exploration and traversal.
-  \item Interaction with an actual game client---the system operates entirely
+  \item Interaction with an actual game client: the system operates entirely
         through the Pok\'{e}mon Showdown battle simulator.
   \item Multiplayer or competitive battling against human players.
 \end{itemize}
 
 \section{Document Structure}
 
-This report is organised as follows.  Chapter~\ref{ch:game_env} provides
-background on Pok\'{e}mon battle mechanics and the simulation environment.
-Chapter~\ref{ch:challenge} formalises the challenge model, data provenance,
-and milestone roadmap.  Chapter~\ref{ch:rl_framework} describes the
-reinforcement learning formulation, PPO algorithm, reward design, and
-curriculum learning setup.  Chapter~\ref{ch:architecture} details the system
-architecture---observation pipeline, model, action space, and self-play
-mechanism.  Chapter~\ref{ch:infrastructure} covers the distributed training
-infrastructure and experiment tracking.  Chapter~\ref{ch:experiments} presents
-the iterative development process through multiple experimental phases.
-Chapter~\ref{ch:results} analyses training results.  Chapter~\ref{ch:risk}
-discusses risk, ethical, and human-in-the-loop considerations.
-Chapter~\ref{ch:conclusions} concludes with lessons learned and next steps.
-Chapter~\ref{ch:reproduction} provides a complete reproduction guide.
+This report is organised as follows.  Chapter~\ref{ch:background} provides
+background on Pok\'{e}mon battle mechanics, the simulation environment, the
+challenge model, data provenance, and the milestone roadmap.
+Chapter~\ref{ch:methods} describes the complete methodology: the
+reinforcement learning formulation, model architecture, training
+infrastructure, and the iterative development process through which the
+pipeline was debugged and improved.
+Chapter~\ref{ch:results} presents training results for both fixed-team and
+random-team settings, including a chronological development progression and
+an honest assessment.  Chapter~\ref{ch:risk} discusses risk, ethical, and
+human-in-the-loop considerations.  Chapter~\ref{ch:conclusions} concludes
+with lessons learned and next steps.  Appendix~\ref{ch:reproduction} provides
+a complete reproduction guide.
