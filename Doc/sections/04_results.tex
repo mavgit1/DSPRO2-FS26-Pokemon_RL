@@ -262,13 +262,15 @@ This is expected given the high entropy in team composition.  However the perfor
 
 \subsection{Hyperparameter Sweep Status}
 
-The Optuna sweep is in progress with the following setup:
+The Optuna sweep was made with the following setup:
 \begin{itemize}
   \item 50~trials planned, 600K steps per trial.
   \item Single fixed curriculum stage (no promotion), ensuring comparable
         evaluation across trials.
   \item Objective: benchmark skill score.
 \end{itemize}
+
+Results were lackluster as there were no major brekthrough findings or large divergences in capability with random teams.
 
 % TODO: Insert Optuna visualisation once sweep completes:
 % - Parallel coordinate plot or importance plot showing which hyperparameters
@@ -322,7 +324,7 @@ At the time of writing, the project demonstrates:
   Value function learns after reward scaling (EV 0.72) &
     Benchmark score has high variance at 50 eps/tier \\
   Self-play infrastructure functional (0\,\% fallback) &
-    LSTM end-to-end validation still pending \\
+    LSTM end-to-end validation showed no improvement in performance \\
   Distributed training stable at 48 environments &
     Gauntlet validation pipeline not yet automated \\
   MLflow tracking produces complete, comparable metrics &

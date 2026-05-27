@@ -816,7 +816,7 @@ Incompatible with old checkpoints.
 due to RLlib's connector path not supporting recurrent state propagation in
 the production setup.
 
-\textbf{Solution.} Rewrote the LSTM integration:
+\textbf{Solution.} Workaround LSTM integration:
 \begin{itemize}
   \item LSTM now runs even when no incoming recurrent state is provided
         (creates zero initial state).
@@ -835,7 +835,7 @@ End-to-end training validation with LSTM enabled remains a next step.
 \textbf{Problem.} After the architectural improvements, a comprehensive audit
 revealed that the PPO training pipeline itself had six issues preventing
 effective learning, independent of model architecture.
-
+%To Do check all these values are 1 to with final best results
 \textbf{Six fixes applied:}
 
 \begin{center}

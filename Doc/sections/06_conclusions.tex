@@ -23,8 +23,7 @@ training system for Pok\'{e}mon battles:
         Self-play weight loading failure identified through diagnostic
         logging.
   \item \textbf{Reward scaling breakthrough:} The single most impactful change
-        in the project.  Normalising returns from $[-15,+15]$ to $[-1.5,+1.5]$
-        via \texttt{reward\_scale}$\,=0.1$ unlocked value-function learning
+        in the project.  Normalising returns \texttt{reward\_scale} unlocked value-function learning
         (explained variance ${\sim}0.1 \to 0.72$) and enabled strong
         performance against heuristic opponents.
   \item \textbf{Milestone~1 essentially solved:} With fixed teams, the agent
@@ -93,8 +92,7 @@ training system for Pok\'{e}mon battles:
         attention).  Effective depth: 2 out of 4 layers.
   \item \textbf{Hash-based embeddings:} 7.5\,\% collision rate degraded entity
         distinction.
-  \item \textbf{22-action native space:} Large branching factor slowed
-        exploration.  Compressed to 14 actions without loss of coverage.
+  \item \textbf{LSTM:} Was a lot of work but in no way could we make sure if it makes any difference. Random teams failed regardless and fixed temas won regardless of LSTM. As such it just took up training time.
   \item \textbf{Gradient clipping at 0.5:} Silently starved all transformer
         and embedding layers.  The problem was invisible in loss metrics.
   \item \textbf{Training without reward scaling:} The value function could not
@@ -105,6 +103,7 @@ training system for Pok\'{e}mon battles:
 \section{Actionable Next Steps}
 
 \begin{enumerate}
+  \item \textbf{Feature Engineering:} Think about new and good features to engineer to reduce the amount of learning an agent has to learn at a time. For example type match-ups or damage \% predictions based on previous turns.
   \item \textbf{Complete information random-teams hyperparameter sweep:} Implementing a random vs random team format in which the agent gets complete opponent team information.
   \item \textbf{Improve random-teams performance:} Sweep does not reach
         satisfactory performance, investigate auxiliary tasks (opponent-move
@@ -113,10 +112,6 @@ training system for Pok\'{e}mon battles:
 
   \item \textbf{Increase benchmark stability:} Raise episodes per opponent
         tier from 50 to 100+ to reduce variance in the skill score.
-
-  \item \textbf{Validate LSTM in full training:} Run a controlled experiment
-        comparing LSTM-enabled vs.\ LSTM-disabled training to quantify the
-        benefit of cross-turn memory.
 
   \item \textbf{Automate gauntlet validation:} Implement evaluation against
         the full BDSP gauntlet sequence with fixed seeds, deterministic
@@ -139,8 +134,7 @@ training system for Pok\'{e}mon battles:
     Benchmark skill score 0.9911, 98\,\% vs.\ heuristic.
     Formal gauntlet validation pending. \\
   M2: Random Teams & In progress &
-    Best skill score 0.3733.  Hyperparameter sweep running.
-    Target: competitive with heuristic opponents. \\
+    Best skill score 0.3733.  Target: competitive with heuristic opponents. \\
   M3: Team Building & Future &
     Requires team-composition model.  Largest technical risk.
     Depends on M2 competency. \\
@@ -152,8 +146,20 @@ training system for Pok\'{e}mon battles:
 
 \section{Additional Thoughts On The Project}
 
+\subsection{Tristan}
 Something that could probably solve many of the current pain points is a pretraining based on official showdown logs. And then using that pretrained model and finetuning it with RL instead of starting with RL directly. This is something that would have needed more time and was something I was not interested in trying for this project. The problem with pure RL seemed to be a lot more interesting, for us personally.
+\\ 
+\\
+Overall, looking back that a lot of time was invested in architecture and training set ups that overall did not actually improve anything that much. As such if I could redo the project I would focus more on feature engineering and expanding embedding than looking into LSTM etc. Additionally, while it made sense to me to just play against heuristics, as that would be the opponent in the gauntlet, I would change to just playing against heuristics on a small scale while focusing more on self play in general. Even though the agent wouldn't play against it self in the gauntlet, looking back it would probably stabilise the learning way more than a arbitrary curriculum ever could.
+\\
+\\
+On the topic of curriculum, while I liked working with it in this project it is clear to me now that the curriculum for this project going forward has to be in entropy. With that I mean: new teams for the agent to use, how much info the agent recieves in a given battle etc. instead of opponent AI. 
 
+\subsection{Marvin}
+% To Do
+
+\subsection{Team}
+All in all, we are very happy with our learnings, but a bit disappointed in the performance. 
 % TODO: Write final project conclusion summarising the overall experience,
 % what was learned, and the project's contribution as a reproducible ML
 % workflow demonstration for the DSPRO2 course.  This should be written
