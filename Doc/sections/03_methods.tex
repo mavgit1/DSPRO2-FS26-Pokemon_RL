@@ -146,6 +146,19 @@ gradually faces stronger ones.  The curriculum currently has four stages:
 
 % TODO: If a fifth stage is added, update the list above.
 
+\subsection{Team-Pool Curriculum (Later Experiments)}
+\label{sec:team_pool_curriculum}
+
+After the curriculum above was established, a separate training line was added
+for \textbf{fixed team pools} on \texttt{gen8customgame} (preset
+\texttt{pure\_league\_play}).  It does not replace the earlier four-stage setup;
+it extends the same PPO stack with staged opponent teams
+($3 \to 5 \to 10 \to 20$) and a final \texttt{league\_training} mix
+(roughly 68\,\% heuristic, 10\,\% self-play, 5\,\% historical snapshots,
+12\,\% random, 5\,\% \texttt{random\_no\_switch}).  Stages include
+\texttt{warmup}, \texttt{heuristic\_bridge}, pool tactics stages, then league.
+Manifests live under \texttt{data/teams/pool\_curriculum/}.
+
 \subsubsection{Per-Stage Reward Variants}
 
 Reward parameters are adjusted across stages to reflect changing difficulty:
@@ -195,7 +208,10 @@ At each checkpoint, the training pipeline exports the current model weights to
 the self-play weights path, making them immediately available to all
 \texttt{SelfPlayPlayer} instances across workers.  This creates a natural
 curriculum where the agent continuously adapts to an opponent of increasing
-skill.
+skill.  In later runs, weights are exported frequently (not only on checkpoint
+intervals), paths are resolved to absolute locations for Ray workers, and
+action selection uses temperature sampling ($\tau \approx 0.8$) instead of
+deterministic argmax.
 
 % TODO: Add talking point about self-play training results once available.
 % Specifically: win rate curves for self-play stage, comparison with
@@ -221,6 +237,8 @@ The environment supports four opponent categories:
     disadvantage. \\
   \texttt{self} & \texttt{SelfPlayPlayer} &
     Uses the training model's weights for inference with hot-reload support. \\
+  \texttt{historical} & Historical snapshot player &
+    Samples past checkpoints from a small ring buffer (league stage only). \\
   \bottomrule
 \end{tabularx}
 \end{center}
@@ -300,9 +318,9 @@ High-cardinality categorical entities are mapped to learned embeddings:
   \toprule
   \textbf{Entity} & \textbf{Vocabulary Size} & \textbf{Embedding Dim} \\
   \midrule
-  Species   & 1\,151 & 32 \\
-  Items     & 1\,110 & 32 \\
-  Abilities & 216    & 32 \\
+  Species   & 1\,515 & 32 \\
+  Items     & 583    & 32 \\
+  Abilities & 314    & 32 \\
   \bottomrule
 \end{tabularx}
 \end{center}
@@ -477,6 +495,11 @@ The default (\texttt{standard}) configuration produces approximately
 \textbf{10--15\,million parameters}.  Preset variations are detailed in
 Section~\ref{sec:infrastructure}.
 
+Later \texttt{pure\_league\_play} runs used a smaller trunk (hidden dim 256,
+three transformer layers, LSTM disabled) while troubleshooting plateauing win
+rates; we did not see reliable gains from LSTM after the vocabulary/embedding
+migration, so recurrent memory was deprioritised in favour of stability.
+
 % TODO: Insert a figure showing the full model architecture as a block
 % diagram: Input (obs dict) -> Embeddings -> Projection + Pos/Role ->
 % Transformer (1L) -> [LSTM] -> Policy/Value heads.  Can be generated
@@ -558,7 +581,9 @@ Five hardware presets control model size, parallelism, and training duration:
 The \texttt{quick} preset is used for smoke tests and debugging.  The
 \texttt{standard} preset is the default for training runs.  The
 \texttt{optimal} preset (not shown) matches \texttt{standard} but targets the
-RTX~5090 specifically.
+RTX~5090 specifically.  Production league runs use \texttt{pure\_league\_play}
+(Section~\ref{sec:team_pool_curriculum}) with different parallelism and PPO
+hyperparameters.
 
 \subsection{PPO Hyperparameters}
 
@@ -652,12 +677,17 @@ training and can also be run manually against any checkpoint via
 \texttt{scripts/validate\_checkpoint.py}.  Results are logged to MLflow with
 per-opponent-type breakdowns.
 
-\subsection{Training Throughput}
-% Look into this! I don't know if its accurate
+For \texttt{pure\_league\_play}, scheduled validation still uses the
+\texttt{benchmark} protocol (random-battle format) as a quick
+\textbf{out-of-distribution} generalisation check; future work is to add
+pool-matched evaluation aligned with training teams.
 
-Observed throughput on the \texttt{standard} preset:
-$\sim$800~environment samples per second (target: 1\,000+).  The primary
-bottleneck is the cpu since all the servers are single core and run on cpu.
+\subsection{Training Throughput}
+
+Observed throughput was on the order of $\sim$600~environment steps per second
+on league-style runs (RTX~3090 training machine; a colleague's RTX~5090 did not
+remove the bottleneck).  Showdown servers are CPU-bound (single-core Node.js
+instances), so GPU upgrades mainly help the learner, not battle simulation.
 
 \section{Iterative Development Methodology}
 \label{sec:dev_methodology}
@@ -722,7 +752,7 @@ embedding, degrading the model's ability to distinguish between entities.
         $\to$ internal key).
 \end{itemize}
 
-Vocabulary sizes: 1\,516~species, 584~items, 315~abilities.
+Vocabulary sizes: 1\,515~species, 583~items, 314~abilities.
 Coverage audit confirmed \textbf{zero unknown entities} across the BDSP
 dataset and validation manifests.  This change intentionally broke
 compatibility with all previous checkpoints: new training runs are treated as
@@ -1039,6 +1069,16 @@ difficult.
   \item \textbf{Console output:} Per-opponent win rate bars with confidence
         interval bounds printed at each validation interval.
 \end{itemize}
+
+\subsection{Remote Training and CUDA Stability}
+
+Long league runs initially hit recurring \texttt{CUDA illegal memory access}
+errors on a local workstation.  We tried driver reinstalls, memory tuning, and
+smaller batch sizes; the failures persisted and correlated with OS-level
+instability on that machine.  \textbf{Disclaimer:} AI-assisted debugging was
+used to narrow hypotheses, but the practical fix was moving training to a
+\textbf{vast.ai} cloud instance with a clean GPU stack, where the same code
+completed a full 25M-step run without those crashes.
 
 \subsection{Hyperparameter Sweep Methodology}
 

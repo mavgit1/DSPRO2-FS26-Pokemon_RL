@@ -229,6 +229,50 @@ point for the fixed-team setting:
 % - Entropy decrease as policy becomes confident
 % Mark curriculum stage transitions if applicable.
 
+\section{Team-Pool League Training (New)}
+\label{sec:league_results}
+
+A later training line (\texttt{pure\_league\_play}, 25M steps, team pools on
+\texttt{gen8customgame}) used the curriculum in
+Section~\ref{sec:team_pool_curriculum}.  \textbf{In-training} rolling win rates
+near the end of the run were approximately:
+
+\begin{center}
+\small
+\begin{tabularx}{0.75\textwidth}{l c}
+  \toprule
+  \textbf{Opponent type} & \textbf{Approx.\ win rate} \\
+  \midrule
+  Heuristic            & $\sim$80\,\% \\
+  \texttt{random\_no\_switch} & $\sim$95\,\% \\
+  Random               & $\sim$99\,\% \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+Scheduled \texttt{benchmark} validation (random-battle format, different from
+training) remained much lower against heuristics; we kept it as a coarse
+out-of-distribution probe.  A checkpoint export is in
+\texttt{saved\_models/pure\_league\_play\_25M/}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{diagnostics_plots/confidence_trends.png}
+  \caption{Policy confidence trends from decision diagnostics (league training run).}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{diagnostics_plots/component_importance_trends.png}
+  \caption{Component importance trends across training.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{diagnostics_plots/token_saliency_heatmap.png}
+  \caption{Token saliency heatmap (example diagnostic snapshot).}
+\end{figure}
+
 \section{Random Teams (Milestone~2)}
 
 With randomly generated teams for both sides (the standard
