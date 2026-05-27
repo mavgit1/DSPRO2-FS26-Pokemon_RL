@@ -234,43 +234,79 @@ point for the fixed-team setting:
 
 A later training line (\texttt{pure\_league\_play}, 25M steps, team pools on
 \texttt{gen8customgame}) used the curriculum in
-Section~\ref{sec:team_pool_curriculum}.  \textbf{In-training} rolling win rates
-near the end of the run were approximately:
+Section~\ref{sec:team_pool_curriculum}.  We compared two variants:
+(1)~a fixed 20-team pool from the start (13.7M steps), and
+(2)~a staged pool curriculum ($3 \to 5 \to 10 \to 20$ teams; 25M steps).
+Table~\ref{tab:pool_compare_snapshot} reports the final logged snapshot values
+for in-distribution win rates in the league environment (note: single snapshot,
+not a trailing-window average).
 
 \begin{center}
 \small
-\begin{tabularx}{0.75\textwidth}{l c}
+\begin{tabularx}{0.9\textwidth}{l c c}
   \toprule
-  \textbf{Opponent type} & \textbf{Approx.\ win rate} \\
+  \textbf{Metric (in-distribution)} & \textbf{20-team (13.7M)} & \textbf{3--5--10--20 (25M)} \\
   \midrule
-  Heuristic            & $\sim$80\,\% \\
-  \texttt{random\_no\_switch} & $\sim$95\,\% \\
-  Random               & $\sim$99\,\% \\
+  Win rate vs.\ heuristic & 28.7\,\% & 78.3\,\% \\
+  Win rate vs.\ \texttt{random\_no\_switch} & 88.9\,\% & 81.3\,\% \\
+  Win rate vs.\ random & 100\,\% & 100\,\% \\
   \bottomrule
 \end{tabularx}
+\captionof{table}{Snapshot comparison of league outcome win rates for a fixed 20-team pool vs.\ staged pool curriculum.}
+\label{tab:pool_compare_snapshot}
 \end{center}
 
-Scheduled \texttt{benchmark} validation (random-battle format, different from
-training) remained much lower against heuristics; we kept it as a coarse
-out-of-distribution probe.  A checkpoint export is in
-\texttt{saved\_models/pure\_league\_play\_25M/}.
+Scheduled \texttt{benchmark}
+validation (random-battle format, different from training) remained much lower
+against heuristics; we keep it as a coarse out-of-distribution probe and plan
+to add pool-matched evaluation in future iterations.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{diagnostics_plots/pool20_outcome_wr_vs_heuristic.png}
+  \caption{Fixed 20-team pool: outcome win rate vs.\ heuristic over training steps (plateau around 30\,\%).}
+  \label{fig:pool20_heuristic_wr}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{diagnostics_plots/pool_3_5_10_20_outcome_wr_vs_heuristic.png}
+  \caption{Staged pool curriculum ($3 \to 5 \to 10 \to 20$ teams): outcome win rate vs.\ heuristic over training steps (climbing to $\sim$80\,\%).}
+  \label{fig:pool_3_5_10_20_heuristic_wr}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{diagnostics_plots/pool20_explained_variance.png}
+  \caption{Fixed 20-team pool: PPO explained variance over training steps (exported from MLflow).}
+  \label{fig:pool20_explained_variance}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{diagnostics_plots/pool_3_5_10_20_explained_variance.png}
+  \caption{Staged pool curriculum ($3 \to 5 \to 10 \to 20$ teams): PPO explained variance over training steps (exported from MLflow).}
+  \label{fig:pool_3_5_10_20_explained_variance}
+\end{figure}
+
+A checkpoint export for the 25M run is in \texttt{saved\_models/pure\_league\_play\_25M/}.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.95\textwidth]{diagnostics_plots/confidence_trends.png}
-  \caption{Policy confidence trends from decision diagnostics (league training run).}
+  \caption{Decision-diagnostics confidence trends from the final checkpoint (sampled battles; not a training-time metric).}
 \end{figure}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.95\textwidth]{diagnostics_plots/component_importance_trends.png}
-  \caption{Component importance trends across training.}
+  \caption{Decision-diagnostics input component importance trends from the final checkpoint.}
 \end{figure}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.85\textwidth]{diagnostics_plots/token_saliency_heatmap.png}
-  \caption{Token saliency heatmap (example diagnostic snapshot).}
+  \caption{Decision-diagnostics token saliency heatmap (final checkpoint).}
 \end{figure}
 
 \section{Random Teams (Milestone~2)}

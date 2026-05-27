@@ -478,18 +478,33 @@ class PokemonTransformerModel(nn.Module):
             self.token_dim + self.embedding_dim : self.token_dim
             + 2 * self.embedding_dim,
         ]
-        ability_w = weight[:, self.token_dim + 2 * self.embedding_dim :]
+        off = self.token_dim
+        ability_w = weight[
+            :, off + 2 * self.embedding_dim : off + 3 * self.embedding_dim
+        ]
+        move_pool_w = weight[
+            :, off + 3 * self.embedding_dim : off + 4 * self.embedding_dim
+        ]
+        last_move_w = weight[:, off + 4 * self.embedding_dim :]
 
         base_proj = torch.einsum("btd,hd->bth", parts["base_obs"], base_w)
         species_proj = torch.einsum("btd,hd->bth", parts["species_emb"], species_w)
         item_proj = torch.einsum("btd,hd->bth", parts["item_emb"], item_w)
         ability_proj = torch.einsum("btd,hd->bth", parts["ability_emb"], ability_w)
+        move_pool_proj = torch.einsum(
+            "btd,hd->bth", parts["move_pool_emb"], move_pool_w
+        )
+        last_move_proj = torch.einsum(
+            "btd,hd->bth", parts["last_move_emb"], last_move_w
+        )
 
         component_scores = {
             "base_obs": float(base_proj.norm(dim=-1).mean().detach().cpu()),
             "species": float(species_proj.norm(dim=-1).mean().detach().cpu()),
             "item": float(item_proj.norm(dim=-1).mean().detach().cpu()),
             "ability": float(ability_proj.norm(dim=-1).mean().detach().cpu()),
+            "move_pool": float(move_pool_proj.norm(dim=-1).mean().detach().cpu()),
+            "last_move": float(last_move_proj.norm(dim=-1).mean().detach().cpu()),
         }
 
         top_actions = [
