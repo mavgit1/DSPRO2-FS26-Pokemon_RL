@@ -26,7 +26,7 @@ environment, running experiments, and evaluating checkpoints.
 
 \begin{lstlisting}[language=bash]
 # Clone the repository
-git clone https://github.com/mavgit1/DSPRO2-FS26-Pokemon_RL.git
+git clone https://github.com/TristanBMuri/DSPRO2-FS26-Pokemon_RL.git
 cd DSPRO2-FS26-Pokemon_RL
 
 # Install dependencies (uses uv, not pip)
@@ -54,6 +54,10 @@ uv run train_battler.py --preset quick
 
 # Standard training (48 envs, 10M steps)
 uv run train_battler.py --preset standard
+
+# Team-pool league curriculum (production preset, 25M steps typical)
+uv run train_battler.py --preset pure_league_play --timesteps 25000000
+
 
 # Full resources (RTX 5090)
 uv run train_battler.py --preset optimal
@@ -87,7 +91,7 @@ python scripts/validate_checkpoint.py \
   --checkpoint-path checkpoints/step_XXXX \
   --protocol fixed_paired
 
-# Validate against BDSP trainers
+# Validate against BDSP trainers (gauntlet data; automation still manual)
 python scripts/validate_bdsp_trainers.py \
   --checkpoint-path checkpoints/step_XXXX
 \end{lstlisting}
