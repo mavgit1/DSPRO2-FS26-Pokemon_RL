@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from src.config.TM_optimal_config import configure_mlflow_tracking  # noqa: E402
 from src.validation.protocols import get_protocol  # noqa: E402
 from src.validation.reporting import (  # noqa: E402
     format_validation_summary,
@@ -22,6 +23,7 @@ from src.validation.runner import run_validation  # noqa: E402
 
 def main() -> int:
     load_dotenv(find_dotenv())
+    configure_mlflow_tracking()
 
     parser = argparse.ArgumentParser(
         description="Validate a Pokemon RL checkpoint with a fixed protocol."

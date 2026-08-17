@@ -30,6 +30,7 @@ from dotenv import load_dotenv, find_dotenv  # noqa: E402
 
 from src.config.TM_optimal_config import (  # noqa: E402
     CurriculumStageConfig,
+    configure_mlflow_tracking,
     get_config,
 )
 from src.training.trainer import PokemonTrainer  # noqa: E402
@@ -83,6 +84,7 @@ def main():
             reward_config=config.curriculum.stages[0].reward_config,
         )
 
+    tracking_uri = configure_mlflow_tracking()
     mlflow.set_experiment("Pokemon_RL_Battler")
 
     print("=" * 60)
@@ -91,6 +93,7 @@ def main():
     print(f"Preset: {args.preset}")
     print(f"Total timesteps: {config.total_timesteps:,}")
     print(f"Opponent mix: {config.curriculum.stages[0].opponent_mix}")
+    print(f"MLflow tracking URI: {tracking_uri}")
     print("Diagnostics log: logs/selfplay_diagnostics.log")
     print("=" * 60)
 

@@ -15,6 +15,7 @@ import torch
 from src.config.TM_optimal_config import (
     CurriculumStageConfig,
     TrainingConfig,
+    configure_mlflow_tracking,
     get_config,
     resolve_mlflow_experiment_for_training,
 )
@@ -44,6 +45,7 @@ from src.training.resume import (
     resolve_resume_checkpoint,
 )
 from src.training.rllib_config_builder import build_ppo_config, register_environments
+from src.training.showdown_servers import ensure_showdown_servers
 
 
 class PokemonTrainer:
@@ -152,6 +154,12 @@ class PokemonTrainer:
             os.makedirs(ray_tmp_abs, exist_ok=True)
             ray_kwargs["_temp_dir"] = ray_tmp_abs
 
+        ensure_showdown_servers(
+            host=self.config.env.showdown_host,
+            start_port=self.start_port,
+            num_servers=self.num_servers,
+        )
+
         ray.init(**ray_kwargs)
 
         # Register environments
@@ -196,6 +204,8 @@ class PokemonTrainer:
         start_time = time.time()
 
         # Start MLflow run
+        tracking_uri = configure_mlflow_tracking()
+        print(f"MLflow tracking URI: {tracking_uri}")
         with mlflow.start_run(run_id=self.mlflow_run_id):
             current_run = mlflow.active_run()
             if current_run is not None:
@@ -226,7 +236,8 @@ class PokemonTrainer:
                 if self.curriculum:
                     self._apply_curriculum_stage(self.curriculum.current_stage)
 
-                self._export_selfplay_weights()
+                if self._selfplay_snapshot_needed():
+                    self._export_selfplay_weights()
 
                 prev_steps = self.total_steps
                 prev_wall_time = time.time()
@@ -235,7 +246,8 @@ class PokemonTrainer:
                     iter_start = time.time()
                     # Snapshot policy for self-play *before* this iteration's rollouts.
                     # The learner updates during train_step(); opponents stay on this snapshot.
-                    self._export_selfplay_weights()
+                    if self._selfplay_snapshot_needed():
+                        self._export_selfplay_weights()
                     result = self.train_step()
 
                     env_stats = result.get("env_runners", {})
@@ -296,6 +308,8 @@ class PokemonTrainer:
 
                         if stage_changed:
                             self._apply_curriculum_stage(self.curriculum.current_stage)
+                            if self._selfplay_snapshot_needed():
+                                self._export_selfplay_weights()
                             self._maybe_save_reference_checkpoint(
                                 self.curriculum.current_stage
                             )
@@ -574,7 +588,8 @@ class PokemonTrainer:
         dest = Path(ref_dir).resolve()
         dest.mkdir(parents=True, exist_ok=True)
         ckpt_path = self.checkpoint_mgr.save_checkpoint(self.algo, self.total_steps)
-        self._export_selfplay_weights()
+        if self._selfplay_snapshot_needed():
+            self._export_selfplay_weights()
         reference_ckpt = dest / "reference_checkpoint"
         if reference_ckpt.exists():
             shutil.rmtree(reference_ckpt, ignore_errors=True)
@@ -594,6 +609,11 @@ class PokemonTrainer:
 
     def _register_environments(self) -> None:
         """Register environments with Ray."""
+        ensure_showdown_servers(
+            host=self.config.env.showdown_host,
+            start_port=self.start_port,
+            num_servers=self.num_servers,
+        )
         initial_stage = None
         if self.curriculum:
             initial_stage = self.curriculum.current_stage
@@ -796,9 +816,19 @@ class PokemonTrainer:
     def _save_checkpoint(self) -> Path:
         ckpt_path = self.checkpoint_mgr.save_checkpoint(self.algo, self.total_steps)
         self._last_checkpoint_step = self.total_steps
-        self._export_selfplay_weights()
+        if self._selfplay_snapshot_needed():
+            self._export_selfplay_weights()
         print(f"Checkpoint saved: {ckpt_path}")
         return ckpt_path
+
+    def _selfplay_snapshot_needed(self) -> bool:
+        """True when the active opponent mix can sample ``self`` or ``historical``."""
+        mix = None
+        if self.curriculum:
+            mix = self.curriculum.current_stage.opponent_mix
+        if not mix:
+            return False
+        return any(float(mix.get(key, 0.0) or 0.0) > 0.0 for key in ("self", "historical"))
 
     def _export_selfplay_weights(self) -> None:
         """Export raw model state dict for self-play opponents to load."""
@@ -975,6 +1005,7 @@ def train(
     if total_timesteps:
         config.total_timesteps = total_timesteps
 
+    configure_mlflow_tracking()
     mlflow_experiment_name = resolve_mlflow_experiment_for_training(
         config, resume_run_id=mlflow_run_id
     )

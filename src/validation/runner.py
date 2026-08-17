@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import random
-import socket
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List
@@ -17,6 +16,7 @@ from src.config.TM_optimal_config import TrainingConfig, get_config
 from src.envs.battle_env import create_env_creator, flatten_agent_observation
 from src.training.resume import resolve_resume_checkpoint
 from src.training.rllib_config_builder import build_ppo_config, register_environments
+from src.training.showdown_servers import ensure_showdown_servers
 from src.validation.metrics import (
     BattleResult,
     aggregate_validation_metrics,
@@ -89,7 +89,11 @@ def run_validation(
             f"Checkpoint path does not exist: {checkpoint_path_obj}"
         )
     checkpoint_path = str(checkpoint_path_obj)
-    _ensure_showdown_server(config.env.showdown_host, start_port)
+    ensure_showdown_servers(
+        host=config.env.showdown_host,
+        start_port=start_port,
+        num_servers=num_servers,
+    )
 
     ray.init(ignore_reinit_error=True, num_gpus=0)
     algo = None
@@ -250,18 +254,6 @@ def _seed_everything(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
-
-
-def _ensure_showdown_server(host: str, port: int) -> None:
-    """Fail fast if the expected Pokemon Showdown server is unavailable."""
-    try:
-        with socket.create_connection((host, port), timeout=2.0):
-            return
-    except OSError as exc:
-        raise ConnectionError(
-            f"Pokemon Showdown server is not reachable at {host}:{port}. "
-            "Start the server before running validation."
-        ) from exc
 
 
 def _export_selfplay_weights_from_algo(algo, weights_path: str) -> None:

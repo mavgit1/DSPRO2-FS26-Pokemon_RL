@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field, replace
+import os
+from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
 
 from src.models.vocab import vocab_sizes
@@ -414,6 +415,21 @@ class TrainingConfig:
 
 
 DEFAULT_MLFLOW_EXPERIMENT = "Pokemon_RL_Marvin_Random"
+DEFAULT_LOCAL_MLFLOW_TRACKING_URI = "sqlite:///mlflow.db"
+
+
+def configure_mlflow_tracking() -> str:
+    """Use a local file store. HTTP tracking URIs are treated as stale remotes."""
+    import mlflow
+
+    uri = os.environ.get("MLFLOW_TRACKING_URI", "").strip()
+    if not uri or uri.startswith(("http://", "https://")):
+        uri = DEFAULT_LOCAL_MLFLOW_TRACKING_URI
+        os.environ["MLFLOW_TRACKING_URI"] = uri
+        os.environ.pop("MLFLOW_TRACKING_USERNAME", None)
+        os.environ.pop("MLFLOW_TRACKING_PASSWORD", None)
+    mlflow.set_tracking_uri(uri)
+    return uri
 
 
 def resolve_mlflow_experiment_name(config: TrainingConfig) -> str:

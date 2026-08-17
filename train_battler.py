@@ -133,6 +133,7 @@ def main():
 
     # Import and run. Change this to own config file if you want.
     from src.config.TM_optimal_config import (
+        configure_mlflow_tracking,
         get_config,
         resolve_mlflow_experiment_for_training,
     )
@@ -175,12 +176,14 @@ def main():
     if args.validation_max_steps_per_battle is not None:
         config.validation.max_steps_per_battle = args.validation_max_steps_per_battle
 
+    tracking_uri = configure_mlflow_tracking()
     mlflow_experiment_name = resolve_mlflow_experiment_for_training(
         config,
         resume_run_id=args.mlflow_run_id,
         cli_override=args.mlflow_experiment,
     )
     mlflow.set_experiment(mlflow_experiment_name)
+    print(f"MLflow tracking URI: {tracking_uri}")
     print(f"MLflow experiment: {mlflow_experiment_name}")
 
     trainer = PokemonTrainer(

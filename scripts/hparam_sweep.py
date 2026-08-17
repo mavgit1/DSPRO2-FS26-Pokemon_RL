@@ -27,14 +27,15 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.config.TM_optimal_config import (
+from src.config.TM_optimal_config import (  # noqa: E402
     CurriculumConfig,
     CurriculumStageConfig,
     RewardConfig,
     TrainingConfig,
+    configure_mlflow_tracking,
     get_config,
 )
-from src.training.trainer import PokemonTrainer
+from src.training.trainer import PokemonTrainer  # noqa: E402
 
 
 def create_trial_config(
@@ -179,6 +180,7 @@ def objective(
 
 def main() -> int:
     load_dotenv(find_dotenv())
+    configure_mlflow_tracking()
 
     parser = argparse.ArgumentParser(
         description="Optuna hyperparameter sweep for Pokemon RL PPO agent.",
