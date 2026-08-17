@@ -11,6 +11,7 @@ from ray.rllib.core.rl_module.apis.value_function_api import ValueFunctionAPI
 from ray.rllib.core.columns import Columns
 from ray.rllib.utils.typing import ModelConfigDict, TensorType
 
+from src.models.embedding import TOKEN_DIM as OBS_TOKEN_DIM
 from src.models.vocab import vocab_sizes
 
 _VOCAB_SIZES = vocab_sizes()
@@ -113,7 +114,7 @@ def _obs_batch_for_module(obs_batch: Dict[str, Any]) -> Dict[str, Any]:
 
 DEFAULT_MODEL_CONFIG = {
     "num_tokens": 13,
-    "token_dim": 168,
+    "token_dim": OBS_TOKEN_DIM,
     "species_vocab_size": _VOCAB_SIZES["species_vocab_size"],
     "item_vocab_size": _VOCAB_SIZES["item_vocab_size"],
     "ability_vocab_size": _VOCAB_SIZES["ability_vocab_size"],

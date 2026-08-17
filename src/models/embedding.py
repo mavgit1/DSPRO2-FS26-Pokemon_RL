@@ -12,7 +12,10 @@ from poke_env.battle.move_category import MoveCategory
 from poke_env.battle.effect import Effect
 from poke_env.environment.singles_env import SinglesEnv
 
-from src.action_space import NATIVE_ACTION_SPACE_N, is_native_switch_action
+from src.action_space import NATIVE_ACTION_SPACE_N
+from src.models.feature_tables import ITEM_CLASS_NAMES, item_class_vector
+from src.models.matchup import best_damage_frac, matchup_vector, speed_order, type_multiplier
+from src.models.role_scores import ROLE_SCORE_NAMES, compute_role_scores, estimate_stats
 from src.models.vocab import get_embedding_vocab, vocab_sizes
 
 
@@ -42,8 +45,43 @@ TRACKED_EFFECTS = [
 # =============================================================================
 
 NUM_TOKENS = 13          # 1 global + 6 our team + 6 opponent team
-TOKEN_DIM = 168          # 164 legacy + 4 visibility flags
 MOVE_SLOTS = 4
+PRESENCE_DIM = 3
+HP_DIM = 1
+BASE_STAT_DIM = 6
+TYPE_DIM = len(POKEMON_TYPE_LIST)
+STATUS_DIM = len(STATUS_LIST)
+VOLATILE_DIM = len(TRACKED_EFFECTS)
+BOOST_DIM = 7
+ITEM_ABILITY_FLAG_DIM = 2
+WEIGHT_DIM = 1
+MOVE_SLOT_DENSE_DIM = 3 + len(MOVE_CATEGORY_LIST) + TYPE_DIM  # present, bp, acc, category, type
+MOVE_DENSE_DIM = MOVE_SLOTS * MOVE_SLOT_DENSE_DIM
+VISIBILITY_DIM = 4
+LEGACY_POKEMON_DIM = (
+    PRESENCE_DIM
+    + HP_DIM
+    + BASE_STAT_DIM
+    + TYPE_DIM
+    + STATUS_DIM
+    + VOLATILE_DIM
+    + BOOST_DIM
+    + ITEM_ABILITY_FLAG_DIM
+    + WEIGHT_DIM
+    + MOVE_DENSE_DIM
+    + VISIBILITY_DIM
+)
+KINEMATIC_DIM = 23        # level + 6 stats + 4 moves × (priority, pp, stab, contact)
+ROLE_DIM = len(ROLE_SCORE_NAMES)
+ITEM_CLASS_DIM = len(ITEM_CLASS_NAMES)
+MATCHUP_DIM = 5           # speed_order, spe_ratio, off, def, tank_vs_active
+TOKEN_DIM = (
+    LEGACY_POKEMON_DIM + KINEMATIC_DIM + ROLE_DIM + ITEM_CLASS_DIM + MATCHUP_DIM
+)
+KINEMATIC_START = LEGACY_POKEMON_DIM
+ROLE_START = KINEMATIC_START + KINEMATIC_DIM
+ITEM_CLASS_START = ROLE_START + ROLE_DIM
+MATCHUP_START = ITEM_CLASS_START + ITEM_CLASS_DIM
 _VOCAB_SIZES = vocab_sizes()
 SPECIES_VOCAB_SIZE = _VOCAB_SIZES["species_vocab_size"]
 ITEM_VOCAB_SIZE = _VOCAB_SIZES["item_vocab_size"]
@@ -73,6 +111,15 @@ GLOBAL_EXTRA_FEATURE_NAMES = [
     "move_2_multiplier",
     "move_3_multiplier",
     "move_4_multiplier",
+    "opp_move_1_multiplier",
+    "opp_move_2_multiplier",
+    "opp_move_3_multiplier",
+    "opp_move_4_multiplier",
+    "we_outspeed",
+    "last_damage_dealt_frac",
+    "last_damage_taken_frac",
+    "ko_likely",
+    "two_hko_likely",
 ]
 
 
@@ -124,7 +171,8 @@ def _species_is_revealed(mon: Pokemon, is_opponent: bool) -> bool:
 def embed_pokemon(
     mon: Optional[Pokemon], 
     is_active: bool = False,
-    is_opponent: bool = False
+    is_opponent: bool = False,
+    vs_mon: Optional[Pokemon] = None,
 ) -> Dict[str, Any]:
     """
     Embed a single Pokemon into a token vector.
@@ -133,6 +181,7 @@ def embed_pokemon(
         mon: Pokemon object to embed (None for empty slot)
         is_active: Whether this is the active Pokemon
         is_opponent: Whether this is an opponent's Pokemon
+        vs_mon: Opposing active Pokemon for speed/matchup features
     
     Returns:
         Dict with:
@@ -269,14 +318,13 @@ def embed_pokemon(
             if cat_idx >= 0:
                 obs[idx + 3 + cat_idx] = 1.0
             
-            # Type (one-hot, 20 dims)
             type_idx = _get_list_index(move.type, POKEMON_TYPE_LIST)
             if type_idx >= 0:
                 obs[idx + 6 + type_idx] = 1.0
         
-        idx += 26
+        idx += MOVE_SLOT_DENSE_DIM
     
-  # ---------------------------------------------------------------------
+    # ---------------------------------------------------------------------
     # 11. Visibility / opponent-transparency flags (4 dims)
     # ---------------------------------------------------------------------
     vocab = get_embedding_vocab()
@@ -289,7 +337,66 @@ def embed_pokemon(
     idx += 4
 
     # ---------------------------------------------------------------------
-    # 12. Categorical IDs
+    # 12. Kinematics: level, estimated stats, per-move extras
+    # ---------------------------------------------------------------------
+    stats = estimate_stats(mon) if species_revealed else {}
+    level = int(getattr(mon, "level", 0) or 0) if species_revealed else 0
+    obs[idx] = min(max(level, 0) / 100.0, 1.0)
+    for offset, name in enumerate(BASE_STATS):
+        obs[idx + 1 + offset] = min(float(stats.get(name, 0.0)) / 400.0, 1.0)
+    idx += 7
+
+    our_types = tuple(t for t in (getattr(mon, "types", None) or ()) if t is not None)
+    if not our_types:
+        our_types = tuple(
+            t for t in (getattr(mon, "type_1", None), getattr(mon, "type_2", None)) if t is not None
+        )
+    for m_i in range(MOVE_SLOTS):
+        slot = idx + m_i * 4
+        if m_i < len(known_moves):
+            move = known_moves[m_i]
+            try:
+                priority = float(getattr(move, "priority", 0) or 0)
+            except (TypeError, ValueError):
+                priority = 0.0
+            obs[slot] = float(np.clip(priority / 7.0, -1.0, 1.0))
+            max_pp = float(getattr(move, "max_pp", 0) or 0)
+            current_pp = float(getattr(move, "current_pp", 0) or 0)
+            obs[slot + 1] = current_pp / max_pp if max_pp > 0 else 0.0
+            move_type = getattr(move, "type", None)
+            obs[slot + 2] = 1.0 if (move_type is not None and move_type in our_types) else 0.0
+            flags = getattr(move, "flags", None) or ()
+            flag_names = {str(f).lower() for f in flags}
+            obs[slot + 3] = 1.0 if "contact" in flag_names else 0.0
+    idx += 16
+
+    # ---------------------------------------------------------------------
+    # 13. Fractional roles + item class
+    # ---------------------------------------------------------------------
+    if species_revealed:
+        obs[idx : idx + ROLE_DIM] = compute_role_scores(
+            mon,
+            is_opponent=is_opponent,
+            revealed_move_frac=min(len(known_moves) / float(MOVE_SLOTS), 1.0),
+        )
+    idx += ROLE_DIM
+    if species_revealed or not is_opponent:
+        obs[idx : idx + ITEM_CLASS_DIM] = np.asarray(
+            item_class_vector(getattr(mon, "item", None)), dtype=np.float32
+        )
+    idx += ITEM_CLASS_DIM
+
+    # ---------------------------------------------------------------------
+    # 14. Matchup vs the opposing active
+    # ---------------------------------------------------------------------
+    if species_revealed and vs_mon is not None:
+        obs[idx : idx + MATCHUP_DIM] = matchup_vector(mon, vs_mon)
+    idx += MATCHUP_DIM
+    if idx != TOKEN_DIM:
+        raise RuntimeError(f"pokemon token packed {idx} dims, expected {TOKEN_DIM}")
+
+    # ---------------------------------------------------------------------
+    # 15. Categorical IDs
     # ---------------------------------------------------------------------
     species_id = vocab.species_id(mon.species) if species_revealed else 0
     item_id = vocab.item_id(mon.item) if species_revealed or not is_opponent else 0
@@ -320,6 +427,8 @@ def embed_battle(
     battle: AbstractBattle,
     opponent_type: Optional[str] = None,
     training_stage_index: Optional[int] = None,
+    last_damage_dealt: float = 0.0,
+    last_damage_taken: float = 0.0,
 ) -> Dict[str, np.ndarray]:
     """
     Convert full battle state to transformer-ready embedding.
@@ -388,6 +497,8 @@ def embed_battle(
         battle,
         opponent_type,
         training_stage_index=training_stage_index,
+        last_damage_dealt=last_damage_dealt,
+        last_damage_taken=last_damage_taken,
     )
     available = max(0, TOKEN_DIM - global_idx)
     if available > 0:
@@ -398,8 +509,11 @@ def embed_battle(
     # Tokens 1-6: Our Team
     # -------------------------------------------------------------------------
     our_active = battle.active_pokemon
+    opp_active = battle.opponent_active_pokemon
     if our_active:
-        token_data = embed_pokemon(our_active, is_active=True, is_opponent=False)
+        token_data = embed_pokemon(
+            our_active, is_active=True, is_opponent=False, vs_mon=opp_active
+        )
         obs[1] = token_data['obs']
         species[1] = token_data['species']
         items[1] = token_data['items']
@@ -410,7 +524,9 @@ def embed_battle(
     bench_idx = 2
     for mon in battle.team.values():
         if mon is not our_active and bench_idx <= 6:
-            token_data = embed_pokemon(mon, is_active=False, is_opponent=False)
+            token_data = embed_pokemon(
+                mon, is_active=False, is_opponent=False, vs_mon=opp_active
+            )
             obs[bench_idx] = token_data['obs']
             species[bench_idx] = token_data['species']
             items[bench_idx] = token_data['items']
@@ -422,9 +538,10 @@ def embed_battle(
     # -------------------------------------------------------------------------
     # Tokens 7-12: Opponent Team
     # -------------------------------------------------------------------------
-    opp_active = battle.opponent_active_pokemon
     if opp_active:
-        token_data = embed_pokemon(opp_active, is_active=True, is_opponent=True)
+        token_data = embed_pokemon(
+            opp_active, is_active=True, is_opponent=True, vs_mon=our_active
+        )
         obs[7] = token_data['obs']
         species[7] = token_data['species']
         items[7] = token_data['items']
@@ -435,7 +552,9 @@ def embed_battle(
     opp_bench_idx = 8
     for mon in battle.opponent_team.values():
         if mon is not opp_active and opp_bench_idx <= 12:
-            token_data = embed_pokemon(mon, is_active=False, is_opponent=True)
+            token_data = embed_pokemon(
+                mon, is_active=False, is_opponent=True, vs_mon=our_active
+            )
             obs[opp_bench_idx] = token_data['obs']
             species[opp_bench_idx] = token_data['species']
             items[opp_bench_idx] = token_data['items']
@@ -464,6 +583,8 @@ def _global_extra_features(
     battle: AbstractBattle,
     opponent_type: Optional[str],
     training_stage_index: Optional[int] = None,
+    last_damage_dealt: float = 0.0,
+    last_damage_taken: float = 0.0,
 ) -> np.ndarray:
     features = np.zeros(len(GLOBAL_EXTRA_FEATURE_NAMES), dtype=np.float32)
     # Opponent-type oracle bits intentionally disabled (indices 0-5 stay zero).
@@ -483,18 +604,35 @@ def _global_extra_features(
     features[13] = 1.0 if bool(getattr(battle, "can_mega_evolve", False)) else 0.0
     features[14] = 1.0 if bool(getattr(battle, "can_z_move", False)) else 0.0
 
-    # DAMAGE MULTIPLIER CHEAT SHEET
     if active and opp_active and active.moves:
         moves = list(active.moves.values())
         for i in range(4):
             if i < len(moves):
                 try:
                     mult = opp_active.damage_multiplier(moves[i])
-
                     features[15 + i] = min(float(mult) / 4.0, 1.0)
                 except Exception:
                     features[15 + i] = 0.25
-                    
+
+    if active and opp_active and getattr(opp_active, "moves", None):
+        opp_moves = list(opp_active.moves.values())
+        for i in range(4):
+            if i < len(opp_moves):
+                try:
+                    mult = type_multiplier(opp_moves[i], active)
+                    features[19 + i] = min(float(mult) / 4.0, 1.0)
+                except Exception:
+                    features[19 + i] = 0.25
+
+    if active is not None and opp_active is not None:
+        features[23] = 1.0 if speed_order(active, opp_active) > 0 else 0.0
+        dmg = best_damage_frac(active, opp_active)
+        features[26] = 1.0 if dmg >= 1.0 else 0.0
+        features[27] = 1.0 if dmg >= 0.5 else 0.0
+
+    features[24] = min(max(float(last_damage_dealt), 0.0), 1.0)
+    features[25] = min(max(float(last_damage_taken), 0.0), 1.0)
+
     return features
 
 

@@ -1,0 +1,1747 @@
+{
+  "gen": 8,
+  "n_moves": 529,
+  "skipped": 0,
+  "tag_names": [
+    "recovery",
+    "setup",
+    "pivot",
+    "hazard",
+    "hazard_control",
+    "priority",
+    "status",
+    "drain",
+    "recoil",
+    "screens",
+    "speed_control",
+    "protect",
+    "contact"
+  ],
+  "moves": {
+    "absorb": [
+      "drain"
+    ],
+    "accelerock": [
+      "contact",
+      "priority"
+    ],
+    "acidarmor": [
+      "setup",
+      "status"
+    ],
+    "acrobatics": [
+      "contact"
+    ],
+    "acupressure": [
+      "status"
+    ],
+    "aerialace": [
+      "contact"
+    ],
+    "afteryou": [
+      "status"
+    ],
+    "agility": [
+      "setup",
+      "status"
+    ],
+    "allyswitch": [
+      "status"
+    ],
+    "amnesia": [
+      "setup",
+      "status"
+    ],
+    "anchorshot": [
+      "contact"
+    ],
+    "aquajet": [
+      "contact",
+      "priority"
+    ],
+    "aquaring": [
+      "status"
+    ],
+    "aquatail": [
+      "contact"
+    ],
+    "armthrust": [
+      "contact"
+    ],
+    "aromatherapy": [
+      "status"
+    ],
+    "aromaticmist": [
+      "setup",
+      "status"
+    ],
+    "assist": [
+      "status"
+    ],
+    "assurance": [
+      "contact"
+    ],
+    "astonish": [
+      "contact"
+    ],
+    "attract": [
+      "status"
+    ],
+    "auroraveil": [
+      "screens",
+      "status"
+    ],
+    "autotomize": [
+      "setup",
+      "status"
+    ],
+    "avalanche": [
+      "contact"
+    ],
+    "babydolleyes": [
+      "setup",
+      "status"
+    ],
+    "banefulbunker": [
+      "protect",
+      "status"
+    ],
+    "barrier": [
+      "setup",
+      "status"
+    ],
+    "batonpass": [
+      "pivot",
+      "status"
+    ],
+    "behemothbash": [
+      "contact"
+    ],
+    "behemothblade": [
+      "contact"
+    ],
+    "bellydrum": [
+      "status"
+    ],
+    "bestow": [
+      "status"
+    ],
+    "bide": [
+      "contact",
+      "priority"
+    ],
+    "bind": [
+      "contact"
+    ],
+    "bite": [
+      "contact"
+    ],
+    "blazekick": [
+      "contact"
+    ],
+    "block": [
+      "status"
+    ],
+    "bodypress": [
+      "contact"
+    ],
+    "bodyslam": [
+      "contact"
+    ],
+    "boltbeak": [
+      "contact"
+    ],
+    "boltstrike": [
+      "contact"
+    ],
+    "bounce": [
+      "contact"
+    ],
+    "bouncybubble": [
+      "drain"
+    ],
+    "branchpoke": [
+      "contact"
+    ],
+    "bravebird": [
+      "contact",
+      "recoil"
+    ],
+    "breakingswipe": [
+      "contact"
+    ],
+    "brickbreak": [
+      "contact"
+    ],
+    "brutalswing": [
+      "contact"
+    ],
+    "bugbite": [
+      "contact"
+    ],
+    "bulkup": [
+      "setup",
+      "status"
+    ],
+    "bulldoze": [
+      "speed_control"
+    ],
+    "bulletpunch": [
+      "contact",
+      "priority"
+    ],
+    "calmmind": [
+      "setup",
+      "status"
+    ],
+    "camouflage": [
+      "status"
+    ],
+    "captivate": [
+      "setup",
+      "status"
+    ],
+    "catastropika": [
+      "contact"
+    ],
+    "ceaselessedge": [
+      "contact"
+    ],
+    "celebrate": [
+      "status"
+    ],
+    "charge": [
+      "setup",
+      "status"
+    ],
+    "charm": [
+      "setup",
+      "status"
+    ],
+    "chipaway": [
+      "contact"
+    ],
+    "circlethrow": [
+      "contact"
+    ],
+    "clamp": [
+      "contact"
+    ],
+    "clangoroussoul": [
+      "setup",
+      "status"
+    ],
+    "closecombat": [
+      "contact"
+    ],
+    "coaching": [
+      "setup",
+      "status"
+    ],
+    "coil": [
+      "setup",
+      "status"
+    ],
+    "cometpunch": [
+      "contact"
+    ],
+    "confide": [
+      "setup",
+      "status"
+    ],
+    "confuseray": [
+      "status"
+    ],
+    "constrict": [
+      "contact"
+    ],
+    "conversion": [
+      "status"
+    ],
+    "conversion2": [
+      "status"
+    ],
+    "copycat": [
+      "status"
+    ],
+    "corrosivegas": [
+      "status"
+    ],
+    "cosmicpower": [
+      "setup",
+      "status"
+    ],
+    "cottonguard": [
+      "setup",
+      "status"
+    ],
+    "cottonspore": [
+      "setup",
+      "status"
+    ],
+    "counter": [
+      "contact"
+    ],
+    "courtchange": [
+      "hazard_control",
+      "status"
+    ],
+    "covet": [
+      "contact"
+    ],
+    "crabhammer": [
+      "contact"
+    ],
+    "craftyshield": [
+      "status"
+    ],
+    "crosschop": [
+      "contact"
+    ],
+    "crosspoison": [
+      "contact"
+    ],
+    "crunch": [
+      "contact"
+    ],
+    "crushclaw": [
+      "contact"
+    ],
+    "crushgrip": [
+      "contact"
+    ],
+    "curse": [
+      "status"
+    ],
+    "cut": [
+      "contact"
+    ],
+    "darkestlariat": [
+      "contact"
+    ],
+    "darkvoid": [
+      "status"
+    ],
+    "decorate": [
+      "setup",
+      "status"
+    ],
+    "defendorder": [
+      "setup",
+      "status"
+    ],
+    "defensecurl": [
+      "setup",
+      "status"
+    ],
+    "defog": [
+      "hazard_control",
+      "status"
+    ],
+    "destinybond": [
+      "status"
+    ],
+    "detect": [
+      "protect",
+      "status"
+    ],
+    "dig": [
+      "contact"
+    ],
+    "direclaw": [
+      "contact"
+    ],
+    "disable": [
+      "status"
+    ],
+    "dive": [
+      "contact"
+    ],
+    "dizzypunch": [
+      "contact"
+    ],
+    "doubleedge": [
+      "contact",
+      "recoil"
+    ],
+    "doublehit": [
+      "contact"
+    ],
+    "doubleironbash": [
+      "contact"
+    ],
+    "doublekick": [
+      "contact"
+    ],
+    "doubleslap": [
+      "contact"
+    ],
+    "doubleteam": [
+      "setup",
+      "status"
+    ],
+    "dragonascent": [
+      "contact"
+    ],
+    "dragonclaw": [
+      "contact"
+    ],
+    "dragondance": [
+      "setup",
+      "status"
+    ],
+    "dragonhammer": [
+      "contact"
+    ],
+    "dragonrush": [
+      "contact"
+    ],
+    "dragontail": [
+      "contact"
+    ],
+    "drainingkiss": [
+      "contact",
+      "drain"
+    ],
+    "drainpunch": [
+      "contact",
+      "drain"
+    ],
+    "dreameater": [
+      "drain"
+    ],
+    "drillpeck": [
+      "contact"
+    ],
+    "drillrun": [
+      "contact"
+    ],
+    "dualchop": [
+      "contact"
+    ],
+    "dualwingbeat": [
+      "contact"
+    ],
+    "dynamicpunch": [
+      "contact"
+    ],
+    "eerieimpulse": [
+      "setup",
+      "status"
+    ],
+    "electricterrain": [
+      "status"
+    ],
+    "electrify": [
+      "status"
+    ],
+    "electroweb": [
+      "speed_control"
+    ],
+    "embargo": [
+      "status"
+    ],
+    "encore": [
+      "status"
+    ],
+    "endeavor": [
+      "contact"
+    ],
+    "endure": [
+      "protect",
+      "status"
+    ],
+    "entrainment": [
+      "status"
+    ],
+    "extremeevoboost": [
+      "setup",
+      "status"
+    ],
+    "extremespeed": [
+      "contact",
+      "priority"
+    ],
+    "facade": [
+      "contact"
+    ],
+    "fairylock": [
+      "status"
+    ],
+    "fakeout": [
+      "contact",
+      "priority"
+    ],
+    "faketears": [
+      "setup",
+      "status"
+    ],
+    "falsesurrender": [
+      "contact"
+    ],
+    "falseswipe": [
+      "contact"
+    ],
+    "featherdance": [
+      "setup",
+      "status"
+    ],
+    "feint": [
+      "priority"
+    ],
+    "feintattack": [
+      "contact"
+    ],
+    "fellstinger": [
+      "contact"
+    ],
+    "firefang": [
+      "contact"
+    ],
+    "firelash": [
+      "contact"
+    ],
+    "firepunch": [
+      "contact"
+    ],
+    "firstimpression": [
+      "contact",
+      "priority"
+    ],
+    "fishiousrend": [
+      "contact"
+    ],
+    "flail": [
+      "contact"
+    ],
+    "flamecharge": [
+      "contact"
+    ],
+    "flamewheel": [
+      "contact"
+    ],
+    "flareblitz": [
+      "contact",
+      "recoil"
+    ],
+    "flash": [
+      "setup",
+      "status"
+    ],
+    "flatter": [
+      "setup",
+      "status"
+    ],
+    "flipturn": [
+      "contact",
+      "pivot"
+    ],
+    "floatyfall": [
+      "contact"
+    ],
+    "floralhealing": [
+      "status"
+    ],
+    "flowershield": [
+      "status"
+    ],
+    "fly": [
+      "contact"
+    ],
+    "flyingpress": [
+      "contact"
+    ],
+    "focusenergy": [
+      "status"
+    ],
+    "focuspunch": [
+      "contact"
+    ],
+    "followme": [
+      "status"
+    ],
+    "forcepalm": [
+      "contact"
+    ],
+    "foresight": [
+      "status"
+    ],
+    "forestscurse": [
+      "status"
+    ],
+    "foulplay": [
+      "contact"
+    ],
+    "frustration": [
+      "contact"
+    ],
+    "furyattack": [
+      "contact"
+    ],
+    "furycutter": [
+      "contact"
+    ],
+    "furyswipes": [
+      "contact"
+    ],
+    "gastroacid": [
+      "status"
+    ],
+    "geargrind": [
+      "contact"
+    ],
+    "gearup": [
+      "status"
+    ],
+    "geomancy": [
+      "setup",
+      "status"
+    ],
+    "gigadrain": [
+      "drain"
+    ],
+    "gigaimpact": [
+      "contact"
+    ],
+    "glare": [
+      "speed_control",
+      "status"
+    ],
+    "grassknot": [
+      "contact"
+    ],
+    "grasswhistle": [
+      "status"
+    ],
+    "grassyglide": [
+      "contact"
+    ],
+    "grassyterrain": [
+      "status"
+    ],
+    "gravity": [
+      "status"
+    ],
+    "growl": [
+      "setup",
+      "status"
+    ],
+    "growth": [
+      "setup",
+      "status"
+    ],
+    "grudge": [
+      "status"
+    ],
+    "guardsplit": [
+      "status"
+    ],
+    "guardswap": [
+      "status"
+    ],
+    "guillotine": [
+      "contact"
+    ],
+    "gyroball": [
+      "contact"
+    ],
+    "hail": [
+      "status"
+    ],
+    "hammerarm": [
+      "contact"
+    ],
+    "happyhour": [
+      "status"
+    ],
+    "harden": [
+      "setup",
+      "status"
+    ],
+    "haze": [
+      "status"
+    ],
+    "headbutt": [
+      "contact"
+    ],
+    "headcharge": [
+      "contact",
+      "recoil"
+    ],
+    "headlongrush": [
+      "contact"
+    ],
+    "headsmash": [
+      "contact",
+      "recoil"
+    ],
+    "healbell": [
+      "status"
+    ],
+    "healblock": [
+      "status"
+    ],
+    "healingwish": [
+      "status"
+    ],
+    "healorder": [
+      "recovery",
+      "status"
+    ],
+    "healpulse": [
+      "status"
+    ],
+    "heartstamp": [
+      "contact"
+    ],
+    "heartswap": [
+      "status"
+    ],
+    "heatcrash": [
+      "contact"
+    ],
+    "heavyslam": [
+      "contact"
+    ],
+    "helpinghand": [
+      "status"
+    ],
+    "highhorsepower": [
+      "contact"
+    ],
+    "highjumpkick": [
+      "contact"
+    ],
+    "holdback": [
+      "contact"
+    ],
+    "holdhands": [
+      "status"
+    ],
+    "honeclaws": [
+      "setup",
+      "status"
+    ],
+    "hornattack": [
+      "contact"
+    ],
+    "horndrill": [
+      "contact"
+    ],
+    "hornleech": [
+      "contact",
+      "drain"
+    ],
+    "howl": [
+      "setup",
+      "status"
+    ],
+    "hyperfang": [
+      "contact"
+    ],
+    "hypnosis": [
+      "status"
+    ],
+    "iceball": [
+      "contact"
+    ],
+    "icefang": [
+      "contact"
+    ],
+    "icehammer": [
+      "contact"
+    ],
+    "icepunch": [
+      "contact"
+    ],
+    "iceshard": [
+      "priority"
+    ],
+    "icywind": [
+      "speed_control"
+    ],
+    "imprison": [
+      "status"
+    ],
+    "infestation": [
+      "contact"
+    ],
+    "ingrain": [
+      "status"
+    ],
+    "instruct": [
+      "status"
+    ],
+    "iondeluge": [
+      "status"
+    ],
+    "irondefense": [
+      "setup",
+      "status"
+    ],
+    "ironhead": [
+      "contact"
+    ],
+    "irontail": [
+      "contact"
+    ],
+    "jawlock": [
+      "contact"
+    ],
+    "jumpkick": [
+      "contact"
+    ],
+    "junglehealing": [
+      "status"
+    ],
+    "karatechop": [
+      "contact"
+    ],
+    "kinesis": [
+      "setup",
+      "status"
+    ],
+    "kingsshield": [
+      "protect",
+      "status"
+    ],
+    "knockoff": [
+      "contact"
+    ],
+    "laserfocus": [
+      "status"
+    ],
+    "lashout": [
+      "contact"
+    ],
+    "lastresort": [
+      "contact"
+    ],
+    "leafblade": [
+      "contact"
+    ],
+    "leechlife": [
+      "contact",
+      "drain"
+    ],
+    "leechseed": [
+      "status"
+    ],
+    "leer": [
+      "setup",
+      "status"
+    ],
+    "letssnuggleforever": [
+      "contact"
+    ],
+    "lick": [
+      "contact"
+    ],
+    "lifedew": [
+      "recovery",
+      "status"
+    ],
+    "lightofruin": [
+      "recoil"
+    ],
+    "lightscreen": [
+      "screens",
+      "status"
+    ],
+    "liquidation": [
+      "contact"
+    ],
+    "lockon": [
+      "status"
+    ],
+    "lovelykiss": [
+      "status"
+    ],
+    "lowkick": [
+      "contact"
+    ],
+    "lowsweep": [
+      "contact"
+    ],
+    "luckychant": [
+      "status"
+    ],
+    "lunarblessing": [
+      "status"
+    ],
+    "lunardance": [
+      "status"
+    ],
+    "lunge": [
+      "contact"
+    ],
+    "machpunch": [
+      "contact",
+      "priority"
+    ],
+    "magiccoat": [
+      "status"
+    ],
+    "magicpowder": [
+      "status"
+    ],
+    "magicroom": [
+      "status"
+    ],
+    "magneticflux": [
+      "status"
+    ],
+    "magnetrise": [
+      "status"
+    ],
+    "maliciousmoonsault": [
+      "contact"
+    ],
+    "matblock": [
+      "status"
+    ],
+    "maxguard": [
+      "protect",
+      "status"
+    ],
+    "meanlook": [
+      "status"
+    ],
+    "meditate": [
+      "setup",
+      "status"
+    ],
+    "mefirst": [
+      "status"
+    ],
+    "megadrain": [
+      "drain"
+    ],
+    "megahorn": [
+      "contact"
+    ],
+    "megakick": [
+      "contact"
+    ],
+    "megapunch": [
+      "contact"
+    ],
+    "memento": [
+      "setup",
+      "status"
+    ],
+    "metalclaw": [
+      "contact"
+    ],
+    "metalsound": [
+      "setup",
+      "status"
+    ],
+    "meteormash": [
+      "contact"
+    ],
+    "metronome": [
+      "status"
+    ],
+    "milkdrink": [
+      "recovery",
+      "status"
+    ],
+    "mimic": [
+      "status"
+    ],
+    "mindreader": [
+      "status"
+    ],
+    "minimize": [
+      "setup",
+      "status"
+    ],
+    "miracleeye": [
+      "status"
+    ],
+    "mirrormove": [
+      "status"
+    ],
+    "mist": [
+      "status"
+    ],
+    "mistyterrain": [
+      "status"
+    ],
+    "moonlight": [
+      "status"
+    ],
+    "morningsun": [
+      "status"
+    ],
+    "mudsport": [
+      "status"
+    ],
+    "multiattack": [
+      "contact"
+    ],
+    "nastyplot": [
+      "setup",
+      "status"
+    ],
+    "naturepower": [
+      "status"
+    ],
+    "needlearm": [
+      "contact"
+    ],
+    "nightmare": [
+      "status"
+    ],
+    "nightslash": [
+      "contact"
+    ],
+    "nobleroar": [
+      "setup",
+      "status"
+    ],
+    "noretreat": [
+      "setup",
+      "status"
+    ],
+    "nuzzle": [
+      "contact",
+      "speed_control"
+    ],
+    "oblivionwing": [
+      "drain"
+    ],
+    "obstruct": [
+      "protect",
+      "status"
+    ],
+    "octolock": [
+      "status"
+    ],
+    "odorsleuth": [
+      "status"
+    ],
+    "outrage": [
+      "contact"
+    ],
+    "painsplit": [
+      "recovery",
+      "status"
+    ],
+    "paraboliccharge": [
+      "drain"
+    ],
+    "partingshot": [
+      "pivot",
+      "status"
+    ],
+    "payback": [
+      "contact"
+    ],
+    "peck": [
+      "contact"
+    ],
+    "perishsong": [
+      "status"
+    ],
+    "petaldance": [
+      "contact"
+    ],
+    "phantomforce": [
+      "contact"
+    ],
+    "plasmafists": [
+      "contact"
+    ],
+    "playnice": [
+      "setup",
+      "status"
+    ],
+    "playrough": [
+      "contact"
+    ],
+    "pluck": [
+      "contact"
+    ],
+    "poisonfang": [
+      "contact"
+    ],
+    "poisongas": [
+      "status"
+    ],
+    "poisonjab": [
+      "contact"
+    ],
+    "poisonpowder": [
+      "status"
+    ],
+    "poisontail": [
+      "contact"
+    ],
+    "pound": [
+      "contact"
+    ],
+    "powder": [
+      "status"
+    ],
+    "powershift": [
+      "status"
+    ],
+    "powersplit": [
+      "status"
+    ],
+    "powerswap": [
+      "status"
+    ],
+    "powertrick": [
+      "status"
+    ],
+    "powertrip": [
+      "contact"
+    ],
+    "poweruppunch": [
+      "contact"
+    ],
+    "powerwhip": [
+      "contact"
+    ],
+    "protect": [
+      "protect",
+      "status"
+    ],
+    "psychicfangs": [
+      "contact"
+    ],
+    "psychicterrain": [
+      "status"
+    ],
+    "psychoshift": [
+      "status"
+    ],
+    "psychup": [
+      "status"
+    ],
+    "psyshieldbash": [
+      "contact"
+    ],
+    "pulverizingpancake": [
+      "contact"
+    ],
+    "punishment": [
+      "contact"
+    ],
+    "purify": [
+      "status"
+    ],
+    "pursuit": [
+      "contact"
+    ],
+    "quash": [
+      "status"
+    ],
+    "quickattack": [
+      "contact",
+      "priority"
+    ],
+    "quickguard": [
+      "status"
+    ],
+    "quiverdance": [
+      "setup",
+      "status"
+    ],
+    "rage": [
+      "contact"
+    ],
+    "ragepowder": [
+      "status"
+    ],
+    "raindance": [
+      "status"
+    ],
+    "rapidspin": [
+      "contact",
+      "hazard_control"
+    ],
+    "razorshell": [
+      "contact"
+    ],
+    "recover": [
+      "recovery",
+      "status"
+    ],
+    "recycle": [
+      "status"
+    ],
+    "reflect": [
+      "screens",
+      "status"
+    ],
+    "reflecttype": [
+      "status"
+    ],
+    "refresh": [
+      "status"
+    ],
+    "rest": [
+      "status"
+    ],
+    "retaliate": [
+      "contact"
+    ],
+    "return": [
+      "contact"
+    ],
+    "revenge": [
+      "contact"
+    ],
+    "reversal": [
+      "contact"
+    ],
+    "roar": [
+      "status"
+    ],
+    "rockclimb": [
+      "contact"
+    ],
+    "rockpolish": [
+      "setup",
+      "status"
+    ],
+    "rocksmash": [
+      "contact"
+    ],
+    "rocktomb": [
+      "speed_control"
+    ],
+    "roleplay": [
+      "status"
+    ],
+    "rollingkick": [
+      "contact"
+    ],
+    "rollout": [
+      "contact"
+    ],
+    "roost": [
+      "recovery",
+      "status"
+    ],
+    "rototiller": [
+      "status"
+    ],
+    "sacredsword": [
+      "contact"
+    ],
+    "safeguard": [
+      "status"
+    ],
+    "sandattack": [
+      "setup",
+      "status"
+    ],
+    "sandstorm": [
+      "status"
+    ],
+    "scaryface": [
+      "setup",
+      "status"
+    ],
+    "scratch": [
+      "contact"
+    ],
+    "screech": [
+      "setup",
+      "status"
+    ],
+    "searingsunrazesmash": [
+      "contact"
+    ],
+    "seismictoss": [
+      "contact"
+    ],
+    "shadowclaw": [
+      "contact"
+    ],
+    "shadowforce": [
+      "contact"
+    ],
+    "shadowpunch": [
+      "contact"
+    ],
+    "shadowsneak": [
+      "contact",
+      "priority"
+    ],
+    "shadowstrike": [
+      "contact"
+    ],
+    "sharpen": [
+      "setup",
+      "status"
+    ],
+    "shellsmash": [
+      "setup",
+      "status"
+    ],
+    "shelter": [
+      "setup",
+      "status"
+    ],
+    "shiftgear": [
+      "setup",
+      "status"
+    ],
+    "shoreup": [
+      "status"
+    ],
+    "simplebeam": [
+      "status"
+    ],
+    "sing": [
+      "status"
+    ],
+    "sizzlyslide": [
+      "contact"
+    ],
+    "sketch": [
+      "status"
+    ],
+    "skillswap": [
+      "status"
+    ],
+    "skittersmack": [
+      "contact"
+    ],
+    "skullbash": [
+      "contact"
+    ],
+    "skydrop": [
+      "contact"
+    ],
+    "skyuppercut": [
+      "contact"
+    ],
+    "slackoff": [
+      "recovery",
+      "status"
+    ],
+    "slam": [
+      "contact"
+    ],
+    "slash": [
+      "contact"
+    ],
+    "sleeppowder": [
+      "status"
+    ],
+    "sleeptalk": [
+      "status"
+    ],
+    "smartstrike": [
+      "contact"
+    ],
+    "smellingsalts": [
+      "contact"
+    ],
+    "smokescreen": [
+      "setup",
+      "status"
+    ],
+    "snaptrap": [
+      "contact"
+    ],
+    "snatch": [
+      "status"
+    ],
+    "soak": [
+      "status"
+    ],
+    "softboiled": [
+      "recovery",
+      "status"
+    ],
+    "solarblade": [
+      "contact"
+    ],
+    "soulstealing7starstrike": [
+      "contact"
+    ],
+    "spark": [
+      "contact"
+    ],
+    "spectralthief": [
+      "contact"
+    ],
+    "speedswap": [
+      "status"
+    ],
+    "spiderweb": [
+      "status"
+    ],
+    "spikes": [
+      "hazard",
+      "status"
+    ],
+    "spikyshield": [
+      "protect",
+      "status"
+    ],
+    "spiritbreak": [
+      "contact"
+    ],
+    "spite": [
+      "status"
+    ],
+    "splash": [
+      "status"
+    ],
+    "spore": [
+      "status"
+    ],
+    "spotlight": [
+      "status"
+    ],
+    "stealthrock": [
+      "hazard",
+      "status"
+    ],
+    "steamroller": [
+      "contact"
+    ],
+    "steelroller": [
+      "contact"
+    ],
+    "steelwing": [
+      "contact"
+    ],
+    "stickyweb": [
+      "hazard",
+      "status"
+    ],
+    "stockpile": [
+      "status"
+    ],
+    "stomp": [
+      "contact"
+    ],
+    "stompingtantrum": [
+      "contact"
+    ],
+    "stoneaxe": [
+      "contact"
+    ],
+    "stormthrow": [
+      "contact"
+    ],
+    "strength": [
+      "contact"
+    ],
+    "strengthsap": [
+      "recovery",
+      "status"
+    ],
+    "stringshot": [
+      "setup",
+      "speed_control",
+      "status"
+    ],
+    "struggle": [
+      "contact",
+      "recoil"
+    ],
+    "stuffcheeks": [
+      "status"
+    ],
+    "stunspore": [
+      "speed_control",
+      "status"
+    ],
+    "submission": [
+      "contact",
+      "recoil"
+    ],
+    "substitute": [
+      "status"
+    ],
+    "suckerpunch": [
+      "contact",
+      "priority"
+    ],
+    "sunnyday": [
+      "status"
+    ],
+    "sunsteelstrike": [
+      "contact"
+    ],
+    "superfang": [
+      "contact"
+    ],
+    "superpower": [
+      "contact"
+    ],
+    "supersonic": [
+      "status"
+    ],
+    "surgingstrikes": [
+      "contact"
+    ],
+    "swagger": [
+      "setup",
+      "status"
+    ],
+    "swallow": [
+      "status"
+    ],
+    "sweetkiss": [
+      "status"
+    ],
+    "sweetscent": [
+      "setup",
+      "status"
+    ],
+    "switcheroo": [
+      "status"
+    ],
+    "swordsdance": [
+      "setup",
+      "status"
+    ],
+    "synthesis": [
+      "status"
+    ],
+    "tackle": [
+      "contact"
+    ],
+    "tailglow": [
+      "setup",
+      "status"
+    ],
+    "tailslap": [
+      "contact"
+    ],
+    "tailwhip": [
+      "setup",
+      "status"
+    ],
+    "tailwind": [
+      "speed_control",
+      "status"
+    ],
+    "takedown": [
+      "contact",
+      "recoil"
+    ],
+    "takeheart": [
+      "status"
+    ],
+    "tarshot": [
+      "setup",
+      "status"
+    ],
+    "taunt": [
+      "status"
+    ],
+    "tearfullook": [
+      "setup",
+      "status"
+    ],
+    "teatime": [
+      "status"
+    ],
+    "teeterdance": [
+      "status"
+    ],
+    "telekinesis": [
+      "status"
+    ],
+    "teleport": [
+      "pivot",
+      "status"
+    ],
+    "thief": [
+      "contact"
+    ],
+    "thrash": [
+      "contact"
+    ],
+    "throatchop": [
+      "contact"
+    ],
+    "thunderfang": [
+      "contact"
+    ],
+    "thunderouskick": [
+      "contact"
+    ],
+    "thunderpunch": [
+      "contact"
+    ],
+    "thunderwave": [
+      "speed_control",
+      "status"
+    ],
+    "tickle": [
+      "setup",
+      "status"
+    ],
+    "topsyturvy": [
+      "status"
+    ],
+    "torment": [
+      "status"
+    ],
+    "toxic": [
+      "status"
+    ],
+    "toxicspikes": [
+      "hazard",
+      "status"
+    ],
+    "toxicthread": [
+      "setup",
+      "status"
+    ],
+    "transform": [
+      "status"
+    ],
+    "trick": [
+      "status"
+    ],
+    "trickortreat": [
+      "status"
+    ],
+    "trickroom": [
+      "speed_control",
+      "status"
+    ],
+    "tripleaxel": [
+      "contact"
+    ],
+    "triplekick": [
+      "contact"
+    ],
+    "tropkick": [
+      "contact"
+    ],
+    "trumpcard": [
+      "contact"
+    ],
+    "uturn": [
+      "contact",
+      "pivot"
+    ],
+    "vacuumwave": [
+      "priority"
+    ],
+    "vcreate": [
+      "contact"
+    ],
+    "veeveevolley": [
+      "contact"
+    ],
+    "venomdrench": [
+      "status"
+    ],
+    "victorydance": [
+      "setup",
+      "status"
+    ],
+    "vinewhip": [
+      "contact"
+    ],
+    "visegrip": [
+      "contact"
+    ],
+    "vitalthrow": [
+      "contact"
+    ],
+    "voltswitch": [
+      "pivot"
+    ],
+    "volttackle": [
+      "contact",
+      "recoil"
+    ],
+    "wakeupslap": [
+      "contact"
+    ],
+    "waterfall": [
+      "contact"
+    ],
+    "watershuriken": [
+      "priority"
+    ],
+    "watersport": [
+      "status"
+    ],
+    "wavecrash": [
+      "contact",
+      "recoil"
+    ],
+    "whirlwind": [
+      "status"
+    ],
+    "wickedblow": [
+      "contact"
+    ],
+    "wideguard": [
+      "status"
+    ],
+    "wildcharge": [
+      "contact",
+      "recoil"
+    ],
+    "willowisp": [
+      "status"
+    ],
+    "wingattack": [
+      "contact"
+    ],
+    "wish": [
+      "recovery",
+      "status"
+    ],
+    "withdraw": [
+      "setup",
+      "status"
+    ],
+    "wonderroom": [
+      "status"
+    ],
+    "woodhammer": [
+      "contact",
+      "recoil"
+    ],
+    "workup": [
+      "setup",
+      "status"
+    ],
+    "worryseed": [
+      "status"
+    ],
+    "wrap": [
+      "contact"
+    ],
+    "wringout": [
+      "contact"
+    ],
+    "xscissor": [
+      "contact"
+    ],
+    "yawn": [
+      "status"
+    ],
+    "zenheadbutt": [
+      "contact"
+    ],
+    "zingzap": [
+      "contact"
+    ],
+    "zippyzap": [
+      "contact",
+      "priority"
+    ]
+  }
+}

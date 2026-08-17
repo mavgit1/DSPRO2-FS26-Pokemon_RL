@@ -190,6 +190,8 @@ class PokemonBattleEnv(SinglesEnv):
         self._fallback_events_current_episode = 0
         self._opponent_context: Optional[str] = None
         self._training_stage_context: int = 0
+        self._hp_snapshot: Dict[str, tuple[float, float]] = {}
+        self._last_damage: Dict[str, tuple[float, float]] = {}
 
         super().__init__(**kwargs)
 
@@ -207,11 +209,15 @@ class PokemonBattleEnv(SinglesEnv):
         Returns:
             Dict with obs, species, items, abilities, action_mask
         """
-        # Not recursive, just calls the embed_battle function from the embedding.py file.
+        battle_tag = getattr(battle, "battle_tag", None)
+        battle_key = str(battle_tag) if battle_tag else f"battle_{id(battle)}"
+        last_dealt, last_taken = self._last_damage.get(battle_key, (0.0, 0.0))
         return embed_battle(
             battle,
             opponent_type=self._opponent_context,
             training_stage_index=self._training_stage_context,
+            last_damage_dealt=last_dealt,
+            last_damage_taken=last_taken,
         )
 
     def set_opponent_context(self, opponent_type: Optional[str]) -> None:
@@ -263,6 +269,7 @@ class PokemonBattleEnv(SinglesEnv):
             self._completed_battle_steps[battle_key] = self._env_step_counter
 
         reward = float(self._compute_configured_delta_reward(battle))
+        self._update_last_damage(battle, battle_key)
         
         if getattr(self, "_step_fallback_penalty", False):
             reward -= 0.5
@@ -407,6 +414,8 @@ class PokemonBattleEnv(SinglesEnv):
         ]
         for key in stale_active:
             self._battle_step_stats.pop(key, None)
+            self._hp_snapshot.pop(key, None)
+            self._last_damage.pop(key, None)
 
         completed_cutoff = self._env_step_counter - self._completed_battle_ttl
         stale_completed = [
@@ -416,11 +425,30 @@ class PokemonBattleEnv(SinglesEnv):
         ]
         for key in stale_completed:
             self._completed_battle_steps.pop(key, None)
+            self._hp_snapshot.pop(key, None)
+            self._last_damage.pop(key, None)
+
+    def _update_last_damage(self, battle: AbstractBattle, battle_key: str) -> None:
+        """Store HP delta from the previous observation for the next embed."""
+        our = getattr(battle, "active_pokemon", None)
+        opp = getattr(battle, "opponent_active_pokemon", None)
+        our_hp = float(getattr(our, "current_hp_fraction", 0.0) or 0.0) if our else 0.0
+        opp_hp = float(getattr(opp, "current_hp_fraction", 0.0) or 0.0) if opp else 0.0
+        prev = self._hp_snapshot.get(battle_key)
+        if prev is not None:
+            prev_our, prev_opp = prev
+            self._last_damage[battle_key] = (
+                max(0.0, prev_opp - opp_hp),
+                max(0.0, prev_our - our_hp),
+            )
+        self._hp_snapshot[battle_key] = (our_hp, opp_hp)
 
     def reset_tracking_state(self) -> None:
         """Clear episode/battle-local tracking to avoid cross-episode retention."""
         self._battle_step_stats.clear()
         self._completed_battle_steps.clear()
+        self._hp_snapshot.clear()
+        self._last_damage.clear()
 
     def get_memory_counters(self) -> Dict[str, float]:
         """Small diagnostics payload for leak monitoring."""

@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
 
 from src.models.vocab import vocab_sizes
+from src.models.embedding import TOKEN_DIM as OBS_TOKEN_DIM
 
 _VOCAB_SIZES = vocab_sizes()
 
@@ -13,7 +14,7 @@ class ModelConfig:
 
     # Embedding dimensions
     num_tokens: int = 13
-    token_dim: int = 168
+    token_dim: int = OBS_TOKEN_DIM
     species_vocab_size: int = _VOCAB_SIZES["species_vocab_size"]
     item_vocab_size: int = _VOCAB_SIZES["item_vocab_size"]
     ability_vocab_size: int = _VOCAB_SIZES["ability_vocab_size"]

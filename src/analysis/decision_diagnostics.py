@@ -12,9 +12,9 @@ import torch
 
 from src.action_space import NATIVE_ACTION_SPACE_N
 from src.models.embedding import (
-    GLOBAL_EXTRA_FEATURE_NAMES,
     GLOBAL_EXTRA_START_IDX,
     NUM_TOKENS,
+    TOKEN_DIM,
 )
 
 TOKEN_NAMES = [
@@ -557,7 +557,7 @@ def run_smoke(checkpoint: Optional[Path] = None) -> Dict[str, Any]:
 
     sizes = vocab_sizes()
     obs = {
-        "obs": torch.randn(1, NUM_TOKENS, 168),
+        "obs": torch.randn(1, NUM_TOKENS, TOKEN_DIM),
         "species": torch.randint(0, sizes["species_vocab_size"], (1, NUM_TOKENS)),
         "items": torch.randint(0, sizes["item_vocab_size"], (1, NUM_TOKENS)),
         "abilities": torch.randint(0, sizes["ability_vocab_size"], (1, NUM_TOKENS)),
@@ -575,7 +575,7 @@ def try_checkpoint_fallback_sample(checkpoint: Path) -> Optional[dict]:
         model = _load_checkpoint_model(checkpoint)
         sizes = vocab_sizes()
         obs = {
-            "obs": torch.randn(1, NUM_TOKENS, 168),
+            "obs": torch.randn(1, NUM_TOKENS, TOKEN_DIM),
             "species": torch.randint(0, sizes["species_vocab_size"], (1, NUM_TOKENS)),
             "items": torch.randint(0, sizes["item_vocab_size"], (1, NUM_TOKENS)),
             "abilities": torch.randint(
