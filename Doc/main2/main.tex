@@ -1,0 +1,128 @@
+\documentclass[11pt,a4paper]{report}
+
+% ── Encoding & Typography ──────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amssymb}
+
+% ── Page Layout ────────────────────────────────────────────────────
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{setspace}
+\setstretch{1.12}
+
+% ── Colors ─────────────────────────────────────────────────────────
+\usepackage{xcolor}
+\definecolor{primaryBlue}{RGB}{10,80,160}
+\definecolor{lightGray}{RGB}{245,245,245}
+\definecolor{darkGray}{RGB}{80,80,80}
+
+% ── Graphics & Floats ─────────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+
+% ── Tables ─────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{longtable}
+
+% ── Lists ──────────────────────────────────────────────────────────
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=*,noitemsep,topsep=4pt}
+\setlist[enumerate]{leftmargin=*,noitemsep,topsep=4pt}
+
+% ── Section Styling ────────────────────────────────────────────────
+\usepackage{titlesec}
+\titleformat{\chapter}
+  {\LARGE\bfseries\color{primaryBlue}}
+  {\thechapter.}{0.6em}{}
+\titleformat{\section}
+  {\large\bfseries\color{primaryBlue}}
+  {\thesection}{0.5em}{}
+\titleformat{\subsection}
+  {\normalsize\bfseries}
+  {\thesubsection}{0.5em}{}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+
+% ── Code Listings ──────────────────────────────────────────────────
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{lightGray},
+  rulecolor=\color{primaryBlue!30},
+  keywordstyle=\color{primaryBlue},
+  commentstyle=\color{darkGray},
+  showstringspaces=false,
+}
+
+% ── Boxes ──────────────────────────────────────────────────────────
+\usepackage[most]{tcolorbox}
+\newtcolorbox{infobox}{
+  colback=lightGray,
+  colframe=primaryBlue,
+  boxrule=0.5pt,
+  arc=4pt,
+  left=12pt, right=12pt, top=8pt, bottom=8pt,
+  fonttitle=\bfseries\color{primaryBlue},
+}
+\newtcolorbox{keyinsight}{
+  colback=primaryBlue!5,
+  colframe=primaryBlue!60,
+  boxrule=0.4pt,
+  arc=3pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries\color{primaryBlue},
+  title=Key Insight,
+}
+
+% ── Links ──────────────────────────────────────────────────────────
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+
+% ── Metadata ───────────────────────────────────────────────────────
+\title{Reinforcement Learning for a Pok\'{e}mon Nuzlocke Challenge\\[0.3em]
+\large DSPRO2 Final Report}
+\author{Tristan Muri \and Marvin Hueber \and Viacheslav Godovskii \and Alex Liubov}
+\date{Spring Semester 2026}
+
+% ═══════════════════════════════════════════════════════════════════
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report documents the development of a reinforcement learning agent trained to complete a
+Pok\'{e}mon Nuzlocke challenge: a sequential battle gauntlet where fainted Pok\'{e}mon are
+permanently lost and a single defeat ends the run.  The system uses PPO (Proximal Policy
+Optimization) with a transformer-based policy network, trained through curriculum learning against
+progressively stronger opponents.  We describe the full engineering lifecycle: environment
+integration with the Pok\'{e}mon Showdown battle simulator, observation pipeline design,
+model architecture, distributed training infrastructure, systematic debugging of the observation
+and reward pipeline, and an honest analysis of training results.  The report demonstrates an
+end-to-end, reproducible machine learning workflow aligned with MLOps best practices, including
+experiment tracking via MLflow, checkpoint management, and a validation suite.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ── Chapters ───────────────────────────────────────────────────────
+\input{sections/01_introduction}
+\input{sections/02_background}
+\input{sections/03_methods}
+\input{sections/04_results}
+\input{sections/05_risk_ethics}
+\input{sections/06_conclusions}
+
+% ── Appendix ───────────────────────────────────────────────────────
+\appendix
+\input{sections/appendix_reproduction}
+\input{sections/appendix_observation}
+
+\end{document}

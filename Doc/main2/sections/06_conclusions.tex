@@ -1,0 +1,160 @@
+% ─── Chapter 10: Conclusions & Next Steps ──────────────────────────
+\chapter{Conclusions \& Next Steps}
+\label{ch:conclusions}
+
+\section{Summary of Achievements}
+
+Over the course of this project, we have built a complete, reproducible RL
+training system for Pok\'{e}mon battles:
+
+\begin{itemize}
+  \item \textbf{End-to-end training pipeline:} From Showdown server management
+        through distributed PPO training to MLflow-tracked evaluation, the
+        system requires only a single command to start a training run.
+  \item \textbf{Distributed infrastructure:} 48~parallel environments across
+        8~Showdown servers, coordinated by Ray RLlib with custom environment
+        connectors.
+  \item \textbf{Transformer-based policy:} A 10M-parameter model with
+        vocabulary embeddings, positional and role encodings, cross-team
+        attention bias, and compressed 14-action space.
+  \item \textbf{Systematic debugging:} Three observation pipeline bugs found
+        and fixed (weather encoding, switch alignment, mask contamination).
+        Attention collapse in deep transformers diagnosed and resolved.
+        Self-play weight loading failure identified through diagnostic
+        logging.
+  \item \textbf{Reward scaling breakthrough:} The single most impactful change
+        in the project.  Normalising returns from $[-15,+15]$ to $[-1.5,+1.5]$
+        via \texttt{reward\_scale}$\,=0.1$ unlocked value-function learning
+        (explained variance ${\sim}0.1 \to 0.72$) and enabled strong
+        performance against heuristic opponents.
+  \item \textbf{Milestone~1 essentially solved:} With fixed teams, the agent
+        achieves a benchmark skill score of 0.9911 and 98\,\% win rate against
+        heuristic opponents.
+  \item \textbf{Validation suite:} Benchmark protocol with per-opponent win
+        rates, Wilson confidence intervals, skill score, and consistency
+        metrics.  In-process evaluation during training with zero overhead.
+  \item \textbf{Self-play infrastructure:} Hot-reloading opponent with
+        temperature sampling, NaN-safe transformer forward pass, and
+        comprehensive diagnostic logging.
+  \item \textbf{Hyperparameter sweep:} Optuna-based automated tuning with
+        SQLite persistence, currently running for the random-teams setting.
+\end{itemize}
+
+\section{Lessons Learned}
+
+\begin{enumerate}
+  \item \textbf{Normalise the return scale first.}  The value function must
+        be able to learn before the policy can improve.  In this project,
+        reward scaling ($\times 0.1$) was more impactful than any architectural
+        change.  Explained variance jumped from ${\sim}0.1$ to 0.72, and win
+        rate vs.\ heuristic went from ${\sim}5$\,\% to 98\,\% (fixed teams).
+
+  \item \textbf{Systematic debugging is essential.}  Three bugs in the
+        observation pipeline collectively affected 14\,\% of training steps.
+        A critical weight-loading bug in self-play was hidden by silent
+        exception handling.  Without diagnostic logging and pipeline
+        validators, these would have been nearly impossible to identify.
+
+  \item \textbf{Attention collapse is real.}  In 4-layer post-norm
+        transformers, deeper layers become dead weight.  Measuring attention
+        distributions, not just loss curves, is necessary to diagnose whether
+        the model is actually using its capacity.
+
+  \item \textbf{Reward design outweighs architecture tuning.}  The biggest
+        performance gains came from fixing observation bugs (win rate vs.\
+        random: 65\,\% $\to$ 85\,\%) and reward scaling (win rate vs.\
+        heuristic: 5\,\% $\to$ 98\,\%), not from architectural changes.  Once
+        the architecture was no longer the bottleneck, further architecture
+        changes produced no win-rate improvement.
+
+  \item \textbf{Curriculum learning provides structure but can mask problems.}
+        The easy stage was solved quickly, giving a false sense of progress.
+        The real challenge only appeared when facing heuristic opponents.
+
+  \item \textbf{Metrics must be tracked by opponent type.}  An aggregate
+        ``50\,\% win rate'' obscured the fact that the agent was winning all
+        random games and losing all heuristic games.
+
+  \item \textbf{File paths in distributed systems must be absolute.}  Ray
+        workers execute from a temporary directory and cannot resolve relative
+        paths.  This caused a critical self-play failure that was hidden by
+        exception swallowing.
+
+  \item \textbf{Framework bugs happen.}  A PyTorch~2.10 bug in transformer
+        attention with float masks caused NaN outputs.  Manual decomposition
+        was required.  Trusting framework internals without testing can waste
+        weeks of time.
+\end{enumerate}
+
+\section{What Did Not Work}
+
+\begin{itemize}
+  \item \textbf{4-layer post-norm transformer:} Layers 2--3 were dead (uniform
+        attention).  Effective depth: 2 out of 4 layers.
+  \item \textbf{Hash-based embeddings:} 7.5\,\% collision rate degraded entity
+        distinction.
+  \item \textbf{22-action native space:} Large branching factor slowed
+        exploration.  Compressed to 14 actions without loss of coverage.
+  \item \textbf{Gradient clipping at 0.5:} Silently starved all transformer
+        and embedding layers.  The problem was invisible in loss metrics.
+  \item \textbf{Training without reward scaling:} The value function could not
+        learn from unscaled returns in $[-15,+15]$, resulting in negative
+        explained variance for the entire project history up to the fix.
+\end{itemize}
+
+\section{Actionable Next Steps}
+
+\begin{enumerate}
+  \item \textbf{Complete information random-teams hyperparameter sweep:} Implementing a random vs random team format in which the agent gets complete opponent team information.
+  \item \textbf{Improve random-teams performance:} If the sweep does not reach
+        satisfactory performance, investigate auxiliary tasks (opponent-move
+        prediction, state-value prediction as a supervised objective) and
+        more granular shaped rewards.
+
+  \item \textbf{Increase benchmark stability:} Raise episodes per opponent
+        tier from 50 to 100+ to reduce variance in the skill score.
+
+  \item \textbf{Validate LSTM in full training:} Run a controlled experiment
+        comparing LSTM-enabled vs.\ LSTM-disabled training to quantify the
+        benefit of cross-turn memory.
+
+  \item \textbf{Automate gauntlet validation:} Implement evaluation against
+        the full BDSP gauntlet sequence with fixed seeds, deterministic
+        configuration, and standardised metric outputs.
+
+  \item \textbf{Begin Milestone~3 (team building):} Investigate approaches
+        for a team-composition agent, likely requiring a separate model or a
+        hierarchical policy structure.
+\end{enumerate}
+
+\section{Milestone Outlook}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{c l X}
+  \toprule
+  \textbf{Milestone} & \textbf{Status} & \textbf{Path Forward} \\
+  \midrule
+  M1: Fixed Teams & \textbf{Completed} &
+    Benchmark skill score 0.9911, 98\,\% vs.\ heuristic.
+    Formal gauntlet validation pending. \\
+  M2: Random Teams & In progress &
+    Best skill score 0.3733.  Hyperparameter sweep running.
+    Target: competitive with heuristic opponents. \\
+  M3: Team Building & Future &
+    Requires team-composition model.  Largest technical risk.
+    Depends on M2 competency. \\
+  M4: Gauntlet Master & Future &
+    Full Nuzlocke gauntlet.  Depends on M1--M3. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Additional Thoughts On The Project}
+
+Something that could probably solve many of the current pain points is a pretraining based on official showdown logs. And then using that pretrained model and finetuning it with RL instead of starting with RL directly. This is something that would have needed more time and was something I was not interested in trying for this project. The problem with pure RL seemed to be a lot more interesting, for us personally.
+
+% TODO: Write final project conclusion summarising the overall experience,
+% what was learned, and the project's contribution as a reproducible ML
+% workflow demonstration for the DSPRO2 course.  This should be written
+% after the hp sweep completes and final results are available.
