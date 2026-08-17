@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import copy
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -23,8 +22,9 @@ class SelfPlayPlayer(Player):
 
     Weight sync:
         The trainer exports ``checkpoints/selfplay_latest.pt`` *before* each
-        PPO iteration. ``begin_episode()`` loads that snapshot once and keeps
-        it fixed for the whole battle so the live learner can be slightly newer.
+        PPO iteration. ``begin_episode()`` loads that snapshot once; inference
+        is ``eval()`` + ``no_grad()``, so the CPU copy is not mutated and must
+        not be ``load_state_dict``'d again every turn.
 
     poke-env usage:
         - ``SinglesEnv.get_action_mask`` (via ``get_action_mask``)
@@ -47,7 +47,7 @@ class SelfPlayPlayer(Player):
         self._deterministic = deterministic
         self._freeze_weights_per_episode = freeze_weights_per_episode
         self._episode_weights_frozen = False
-        self._frozen_state_dict: Optional[Dict[str, torch.Tensor]] = None
+        self._weights_ready = False
 
         if "custom_model_config" not in model_config_dict:
             model_config_dict = {"custom_model_config": model_config_dict}
@@ -80,27 +80,20 @@ class SelfPlayPlayer(Player):
         }
 
         if weights_path:
-            self._load_weights(force=True)
+            self._weights_ready = self._load_weights(force=True)
 
     def begin_episode(self) -> None:
         """Load the rollout snapshot once; opponent policy stays fixed for this battle."""
         self._episode_weights_frozen = self._freeze_weights_per_episode
         self._lstm_states.clear()
-        if not self._load_weights(force=True):
+        self._weights_ready = self._load_weights(force=True)
+        if not self._weights_ready:
             self._diag["missing_weights_episodes"] += 1
-            self._frozen_state_dict = None
-            return
-        if self._episode_weights_frozen:
-            self._frozen_state_dict = copy.deepcopy(self.model.state_dict())
-
-    def _restore_frozen_weights(self) -> None:
-        if self._frozen_state_dict is not None:
-            self.model.load_state_dict(self._frozen_state_dict, strict=True)
 
     def _try_load_weights(self) -> None:
         if self._episode_weights_frozen:
             return
-        self._load_weights(force=False)
+        self._weights_ready = self._load_weights(force=False)
 
     def _load_weights(self, *, force: bool) -> bool:
         if not self._weights_path:
@@ -123,15 +116,13 @@ class SelfPlayPlayer(Player):
             return False
 
     def choose_move(self, battle: AbstractBattle):
-        if self._episode_weights_frozen:
-            self._restore_frozen_weights()
-        else:
+        if not self._episode_weights_frozen:
             self._try_load_weights()
 
         if battle.won or battle.lost:
             self._lstm_states.pop(battle.battle_tag, None)
 
-        if self._frozen_state_dict is None and self._episode_weights_frozen:
+        if not self._weights_ready:
             self._diag["fallback_count"] += 1
             return self.choose_random_move(battle)
 
